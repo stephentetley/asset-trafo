@@ -38,8 +38,14 @@ module Attributes =
                 |> Array.map (fun (n,v) -> (n, v.ToJsonValue() )) 
                 |> JsonValue.Record 
 
+        member x.Add(name: string, value: AttrValue) = 
+            x.Attrs 
+                |> Map.add name value
+                |> Attributes
+
         static member ReadJson () :  JsonReader<Attributes> = 
             readDictionary (AttrValue.ReadJson ()) |>> Attributes
 
 
             
+ 
