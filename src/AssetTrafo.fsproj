@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="AssetTrafo\Base\JsonReader.fs" />
+    <Compile Include="AssetTrafo\Base\JsonWriter.fs" />
+    <Compile Include="AssetTrafo\Base\Attributes.fs" />
+    <Compile Include="AssetTrafo\Aib\Unitype.fs" />
+    <Compile Include="AssetTrafo\Aib\Syntax.fs" />
+    <Compile Include="AssetTrafo\S4\S4Types.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Data" Version="3.1.1" />
+    <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190616" />
+  </ItemGroup>
+
+</Project>
