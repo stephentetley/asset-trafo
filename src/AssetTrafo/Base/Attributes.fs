@@ -12,14 +12,17 @@ module Attributes =
 
     type AttrValue = 
         | AttrBool of bool
+        | AttrInt of int
         | AttrString of string
         member x.ToJsonValue () : JsonValue = 
             match x with
-            | AttrBool bool -> JsonValue.Boolean bool
-            | AttrString str -> JsonValue.String str
+            | AttrBool ans -> JsonValue.Boolean ans
+            | AttrInt ans -> JsonValue.Number (decimal ans)
+            | AttrString ans -> JsonValue.String ans
             
         static member ReadJson () : JsonReader<AttrValue> = 
             choice [ readBoolean    |>> AttrBool
+                   ; readInt        |>> AttrInt
                    ; readString     |>> AttrString
                    ]
             
@@ -43,9 +46,13 @@ module Attributes =
                 |> Map.add name value
                 |> Attributes
 
+        static member Empty : Attributes = 
+            Attributes Map.empty
+
         static member ReadJson () :  JsonReader<Attributes> = 
             readDictionary (AttrValue.ReadJson ()) |>> Attributes
 
 
-            
+    let add (name: string) (value: AttrValue) (attrs : Attributes) : Attributes =
+        attrs.Add(name, value)
  

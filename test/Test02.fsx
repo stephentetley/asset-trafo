@@ -27,13 +27,14 @@ open FSharp.Data.JsonExtensions
 #load "..\src\AssetTrafo\Aib\Flat.fs"
 
 open AssetTrafo.Aib.Flat
-open AssetBase.S4Flat
 
 
+let localFile (pathSuffix : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, "..", pathSuffix)
 
 let demo01 () = 
-    aibXlsxToJson @"G:\work\Projects\asset_sync\samples\aib_ald_.xlsx"  
-                  @"G:\work\Projects\asset_sync\samples\aib_ald_.json" 
+    aibXlsxToJson (localFile @"data\aib_ald_.xlsx")
+                  (localFile @"data\output\aib_ald_.json")
 
 
 

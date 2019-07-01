@@ -12,6 +12,18 @@ module Flat =
 
     open AssetTrafo.Base.Attributes
 
+
+    /// Assets are built as a rose tree
+    type Node = 
+        { AssetReference : string       // aka SAI number
+          NodeName : string
+          NodeType : string
+          Attribs : Attributes
+          Kids : Node list
+        }
+
+
+
     type AibTable = 
         ExcelFile< @"..\data\aib_sample_site.xlsx"
                  , HasHeaders = true
@@ -29,14 +41,7 @@ module Flat =
 
 
 
-    /// Assets are built as a rose tree
-    type Node = 
-        { AssetReference : string       // aka SAI number
-          NodeName : string
-          NodeType : string
-          Attribs : Attributes
-          Kids : Node list
-        }
+
 
     let commonName1 (fullName: string) : string = 
         let arr = fullName.Split('/')
@@ -92,14 +97,14 @@ module Flat =
         let assetType = findType (commonName1 row.``Common Name``) row.``Hierarchy Key``
         let hkey = if assetType = "Equipment" then "" else row.``Hierarchy Key``
 
-        Map.empty 
-            |> addNotNull "gridRef"         (JsonValue.String row.``Loc.Ref.``)
-            |> addNotNull "installedFrom"   (JsonValue.String row.``Installed From``)
-            |> addNotNull "hkey"            (JsonValue.String hkey)
-            |> addNotNull "assetStatus"     (JsonValue.String row.AssetStatus)
-            |> addNotNull "inAide"          (JsonValue.Boolean <| readBool row.``Asset in AIDE ?``)
-            |> addNotNull "manufacturer"    (JsonValue.String row.Manufacturer)
-            |> addNotNull "model"           (JsonValue.String row.Model)
+        Attributes.Empty 
+            |> add "gridRef"         (AttrString row.``Loc.Ref.``)
+            |> add "installedFrom"   (AttrString row.``Installed From``)
+            |> add "hkey"            (AttrString hkey)
+            |> add "assetStatus"     (AttrString row.AssetStatus)
+            |> add "inAide"          (AttrBool <| readBool row.``Asset in AIDE ?``)
+            |> add "manufacturer"    (AttrString row.Manufacturer)
+            |> add "model"           (AttrString row.Model)
 
     let makeNode (row:AibRow) (kids:Node list) : Node = 
         let assetType = findType (commonName1 row.``Common Name``) row.``Hierarchy Key``
@@ -140,7 +145,7 @@ module Flat =
                     [| ("assetReference",   JsonValue.String asset.AssetReference)
                      ; ("name",             JsonValue.String asset.NodeName)
                      ; ("type",             JsonValue.String asset.NodeType)
-                     ; ("attributes",       toJsonRecord asset.Attribs)
+                     ; ("attributes",       asset.Attribs.ToJsonValue ())
                      ; ("kids",             jsArr)
                     |]))
         and workList xs cont =
