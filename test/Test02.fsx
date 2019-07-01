@@ -25,16 +25,22 @@ open FSharp.Data.JsonExtensions
 #load "..\src\AssetTrafo\Base\JsonReader.fs"
 #load "..\src\AssetTrafo\Base\Attributes.fs"
 #load "..\src\AssetTrafo\Aib\Flat.fs"
-
+open AssetTrafo.Base.Attributes
 open AssetTrafo.Aib.Flat
 
 
 let localFile (pathSuffix : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, "..", pathSuffix)
 
+//let demo01 () = 
+//    aibXlsxToJson (localFile @"data\aib_ald_.xlsx")
+//                  (localFile @"data\output\aib_ald_.json")
+
 let demo01 () = 
-    aibXlsxToJson (localFile @"data\aib_ald_.xlsx")
-                  (localFile @"data\output\aib_ald_.json")
+    let topNode = 
+        readTopLevelExport (localFile @"data\ald_toplevel.csv") 
+            |> Option.get
+            |> makeTopNode
 
-
-
+    readRelationshipsExport (localFile @"data\ald_structure_relationships.csv")
+        |> relationshipsToTree topNode
