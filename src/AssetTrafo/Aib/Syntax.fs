@@ -12,116 +12,133 @@ module Syntax =
     open AssetTrafo.Base.Attributes
     open AssetTrafo.Base.JsonReader
     
-
-    let private genericRecord (typeName: string) 
-                              (kidReader : JsonReader<'kid>)
-                              (constructor : string -> string -> Attributes -> 'kid list -> 'ans) : RecordReader<'ans> = 
+    let assertNodeTypeField  (typeName : string) : RecordReader<unit> = 
         jsonRecord { 
-            do! assertTypeField "type" typeName
-            let! uid = readField "assetReference" readString
-            let! name = readField "name" readString
-            let! attrs = readField "attributes" <| Attributes.ReadJson ()
-            let! kids = (Array.toList <<| (readField "kids" <| readArray kidReader)) <|> mreturn []
-            return (constructor uid name attrs kids)
+            let! ans = readField "nodeType" readString
+            if ans = typeName then
+                return ()
+            else
+                return! readError "type test failed"
         }
+
+    let readStringField  (fieldName : string) : RecordReader<string> = 
+        readField fieldName readString
+
+    let readKidsField  (kidReader : JsonReader<'kid>) : RecordReader<'kid list> = 
+        (Array.toList <<| (readField "kids" <| readArray kidReader)) 
+            <|> mreturn []
+
 
     
 
-    type AibUnknown =
-        { Uid : string
-          Name : string
-          Attributes : Attributes
-        }
-        static member ReadJson () : JsonReader<AibUnknown> = 
-            readRecord 
-                <| jsonRecord { 
-                        do! assertTypeField "type" "Unknown"
-                        let! uid = readField "assetReference" readString
-                        let! name = readField "name" readString
-                        let! attrs = readField "attributes" <| Attributes.ReadJson ()
-                        return { Uid = uid
-                                 Name = name
-                                 Attributes = attrs
-                                }
-                        }
+
 
     type AibEquipment =
-        { Uid : string
-          Name : string
+        { Reference : string
+          EquipmentType : string
+          Category : string
           Attributes : Attributes
         }
         static member ReadJson () : JsonReader<AibEquipment> = 
             readRecord 
-                <| genericRecord "Equipment" readNull 
-                        (fun uid name attrs _ -> 
-                            { Uid = uid
-                              Name = name
-                              Attributes = attrs })
+                <| jsonRecord { 
+                           do! assertNodeTypeField "Equipment"
+                           let! uid         = readStringField "assetReference"
+                           let! assetType   = readStringField "assetType"
+                           let! category    = readStringField "category"
+                           let! attrs = readField "attributes" <| Attributes.ReadJson ()
+                           return { Reference = uid
+                                    EquipmentType = assetType
+                                    Category = category
+                                    Attributes = attrs }
+                        }
 
 
     type AibPlantItem =
-        { Uid : string
-          Name : string
+        { Reference : string
+          PlantItemName : string
+          PlantItemType : string
           Attributes : Attributes
           Kids : AibEquipment list
         }
         static member ReadJson () : JsonReader<AibPlantItem> = 
             readRecord 
-                <| genericRecord "PlantItem" (AibEquipment.ReadJson()) 
-                        (fun uid name attrs kids -> 
-                            { Uid = uid
-                              Name = name
-                              Attributes = attrs 
-                              Kids = kids })
+                <| jsonRecord { 
+                           do! assertNodeTypeField "PlantItem"
+                           let! uid         = readStringField "assetReference"
+                           let! assetName   = readStringField "assetName"
+                           let! assetType   = readStringField "assetType"
+                           let! attrs       = readField "attributes" <| Attributes.ReadJson ()
+                           let! kids        = readKidsField (AibEquipment.ReadJson ())
+                           return { Reference = uid
+                                    PlantItemName = assetName
+                                    PlantItemType = assetType
+                                    Attributes = attrs
+                                    Kids = kids }
+                        }
 
-    type AibPlantAssemblyKid = 
-        | AibPlantAssemblyKidPlantItem of AibPlantItem
-        | AibPlantAssemblyKidEquipment of AibEquipment
-        | AibPlantAssemblyKidUnknown of AibUnknown
-        static member ReadJson () : JsonReader<AibPlantAssemblyKid> = 
-            choice [ AibPlantItem.ReadJson ()       |>> AibPlantAssemblyKidPlantItem
-                   ; AibEquipment.ReadJson ()       |>> AibPlantAssemblyKidEquipment
-                   ; AibUnknown.ReadJson ()         |>> AibPlantAssemblyKidUnknown
+    type AibPlantKid = 
+        | AibPlantKidPlantItem of AibPlantItem
+        | AibPlantKidEquipment of AibEquipment
+
+        static member ReadJson () : JsonReader<AibPlantKid> = 
+            choice [ AibPlantItem.ReadJson ()       |>> AibPlantKidPlantItem
+                   ; AibEquipment.ReadJson ()       |>> AibPlantKidEquipment
                    ]
 
-    type AibPlantAssembly = 
-        { Uid : string
-          Name : string
+
+    type AibPlant = 
+        { Reference : string
+          PlantName : string
+          PlantType : string
           Attributes : Attributes
-          Kids : AibPlantAssemblyKid list
+          Kids : AibPlantKid list
         }
-        static member ReadJson () : JsonReader<AibPlantAssembly> = 
+        static member ReadJson () : JsonReader<AibPlant> = 
             readRecord 
-                <| genericRecord "PlantAssembly" (AibPlantAssemblyKid.ReadJson()) 
-                        (fun uid name attrs kids -> 
-                            { Uid = uid
-                              Name = name
-                              Attributes = attrs 
-                              Kids = kids })
+                <| jsonRecord { 
+                           do! assertNodeTypeField "Plant"
+                           let! uid         = readStringField "assetReference"
+                           let! assetName   = readStringField "assetName"
+                           let! assetType   = readStringField "assetType"
+                           let! attrs       = readField "attributes" <| Attributes.ReadJson ()
+                           let! kids        = readKidsField (AibPlantKid.ReadJson ())
+                           return { Reference = uid
+                                    PlantName = assetName
+                                    PlantType = assetType
+                                    Attributes = attrs
+                                    Kids = kids }
+                        }
 
     
     type AibProcessKid =
-        | AibProcessKidPlantAssembly of AibPlantAssembly
+        | AibProcessKidPlant of AibPlant
         | AibProcessKidPlantItem of AibPlantItem
+
         static member ReadJson () : JsonReader<AibProcessKid> = 
-            choice [ AibPlantAssembly.ReadJson ()   |>> AibProcessKidPlantAssembly
+            choice [ AibPlant.ReadJson ()   |>> AibProcessKidPlant
                    ; AibPlantItem.ReadJson ()       |>> AibProcessKidPlantItem
                    ]
 
     type AibProcess =
-        { Uid : string
-          Name : string
+        { Reference : string
+          ProcessName : string
           Attributes : Attributes
           Kids : AibProcessKid list
         }
         static member ReadJson () : JsonReader<AibProcess> = 
             readRecord 
-                <| genericRecord "Process" (AibProcessKid.ReadJson()) 
-                        (fun uid name attrs kids -> 
-                            { Uid = uid
-                              Name = name
-                              Attributes = attrs 
-                              Kids = kids })
+                <| jsonRecord { 
+                           do! assertNodeTypeField "Process"
+                           let! uid         = readStringField "assetReference"
+                           let! assetName   = readStringField "assetName"
+                           let! attrs       = readField "attributes" <| Attributes.ReadJson ()
+                           let! kids        = readKidsField (AibProcessKid.ReadJson ())
+                           return { Reference = uid
+                                    ProcessName = assetName
+                                    Attributes = attrs
+                                    Kids = kids }
+                        }
 
     type AibProcessGroupKid =
         | AibProcessGroupKidProcess of AibProcess
@@ -131,19 +148,24 @@ module Syntax =
                    
 
     type AibProcessGroup = 
-        { Uid : string
-          Name : string
+        { Reference : string
+          ProcessGroupName : string
           Attributes : Attributes
           Kids : AibProcessGroupKid list
         }
         static member ReadJson () : JsonReader<AibProcessGroup> = 
             readRecord 
-                <| genericRecord "ProcessGroup" (AibProcessGroupKid.ReadJson()) 
-                        (fun uid name attrs kids -> 
-                            { Uid = uid
-                              Name = name
-                              Attributes = attrs 
-                              Kids = kids })
+                <| jsonRecord { 
+                           do! assertNodeTypeField "ProcessGroup"
+                           let! uid         = readStringField "assetReference"
+                           let! assetName   = readStringField "assetName"
+                           let! attrs       = readField "attributes" <| Attributes.ReadJson ()
+                           let! kids        = readKidsField (AibProcessGroupKid.ReadJson ())
+                           return { Reference = uid
+                                    ProcessGroupName = assetName
+                                    Attributes = attrs
+                                    Kids = kids }
+                        }
 
     type AibInstallationKid =
         | AibInstallationKidProcessGroup of AibProcessGroup  
@@ -152,20 +174,28 @@ module Syntax =
             choice [ AibProcessGroup.ReadJson ()    |>> AibInstallationKidProcessGroup
                    ; AibProcess.ReadJson ()         |>> AibInstallationKidProcess ]
 
+
     type AibInstallation = 
-        { Uid : string
-          Name : string
+        { Reference : string
+          InstallationName : string
           Attributes : Attributes
           Kids : AibInstallationKid list
         }
+        
         static member ReadJson () : JsonReader<AibInstallation> = 
             readRecord 
-                <| genericRecord "Installation" (AibInstallationKid.ReadJson()) 
-                        (fun uid name attrs kids -> 
-                            { Uid = uid
-                              Name = name
-                              Attributes = attrs 
-                              Kids = kids })
+                <| jsonRecord { 
+                           do! assertNodeTypeField "Installation"
+                           let! uid         = readStringField "assetReference"
+                           let! assetName   = readStringField "assetName"
+                           let! attrs       = readField "attributes" <| Attributes.ReadJson ()
+                           let! kids        = readKidsField (AibInstallationKid.ReadJson ())
+                           return { Reference = uid
+                                    InstallationName = assetName
+                                    Attributes = attrs
+                                    Kids = kids }
+                        }
+
 
     let readAibInstallationJson (inpath : string) : Result<AibInstallation, ErrMsg> = 
         try

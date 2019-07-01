@@ -11,15 +11,31 @@ module StructureRelationships =
 
     open AssetTrafo.Base.Attributes
 
+    let deriveNodeType (category : string) 
+                       (superCategory : string) : Result<string, string> = 
+        if superCategory = "EQPTCAT" then
+            Ok "Equipment"
+        else
+            match category with
+            | "INSTALLATION" -> Ok "Installation"
+            | "SITE" -> Ok "Site"
+            | "PROCESSGROUP" -> Ok "ProcessGroup"
+            | "PROCESS" -> Ok "Process"
+            | "PLANT" -> Ok "Plant"
+            | "PLANTITEM" -> Ok "PlantItem"
+            | _ -> Error <| sprintf "Unknown(%s)" category
+
+
     /// Assets are built as a rose tree
-    type Node = 
+    type AibGenericNode = 
         { AssetReference : string       // aka SAI number
+          NodeType : string
           AssetName : string
           AssetType : string
           Category : string
           SuperCategory : string
-          Attribs : Attributes
-          Kids : Node list
+          Attributes : Attributes
+          Kids : AibGenericNode list
         }
 
     type TopLevelExport = 
@@ -29,13 +45,19 @@ module StructureRelationships =
 
     type TopLevelRow = TopLevelExport.Row
 
-    let makeTopNode (row : TopLevelRow) : Node = 
+    let makeTopNode (row : TopLevelRow) : AibGenericNode = 
+        let nodeType = 
+            match deriveNodeType row.Category row.SuperCategory with
+            | Error msg -> sprintf "<<<%s>>>" msg
+            | Ok ans -> ans
+
         { AssetReference = row.AssetReference
+          NodeType = nodeType
           AssetName = row.AssetName
           AssetType = row.AssetType
           Category = row.Category
           SuperCategory = row.SuperCategory
-          Attribs = Attributes.Empty
+          Attributes = Attributes.Empty
           Kids = []
         }
 
@@ -53,13 +75,19 @@ module StructureRelationships =
     type RelationshipRow = RelationshipsExport.Row
 
     
-    let makeNode1 (row : RelationshipRow) (kids : Node list) : Node = 
+    let makeNode1 (row : RelationshipRow) 
+                  (kids : AibGenericNode list) : AibGenericNode =
+        let nodeType = 
+             match deriveNodeType row.ChildTypeCategory row.ChildTypeSuperCategory with
+             | Error msg -> sprintf "<<<%s>>>" msg
+             | Ok ans -> ans
         { AssetReference = row.ChildReference
+          NodeType = nodeType
           AssetName = row.ChildName
           AssetType = row.ChildTypeName
           Category = row.ChildTypeCategory
           SuperCategory = row.ChildTypeSuperCategory
-          Attribs = Attributes.Empty
+          Attributes = Attributes.Empty
           Kids = kids
         }
 
@@ -75,14 +103,14 @@ module StructureRelationships =
         rows |> List.filter (fun row -> reference = row.ParentReference)
 
 
-    let relationshipsToTree (topNode : Node) 
-                            (input : RelationshipRow list) : Node = 
+    let relationshipsToTree (topNode : AibGenericNode) 
+                            (input : RelationshipRow list) : AibGenericNode = 
         let rec work (reference : string) 
-                     (cont : Node list -> Node) = 
+                     (cont : AibGenericNode list -> AibGenericNode) = 
             let childRows = findChildRows reference input
             workList childRows cont
         and workList (kids : RelationshipRow list) 
-                     (cont : Node list -> Node) = 
+                     (cont : AibGenericNode list -> AibGenericNode) = 
             match kids with
             | [] -> cont []
             | row1 :: rest -> 
@@ -94,7 +122,7 @@ module StructureRelationships =
 
 
     let loadStructure (topLevelExportPath : string) 
-                      (structureRelationshipsExportPath : string) : Node option = 
+                      (structureRelationshipsExportPath : string) : AibGenericNode option = 
         match readTopLevelExport topLevelExportPath with
         | None -> None
         | Some topLevel -> 
@@ -104,30 +132,31 @@ module StructureRelationships =
                 
             
 
-    //let toJsonValue (input:Node) : JsonValue =
-    //    let rec work asset cont = 
-    //        workList asset.Kids (fun kids -> 
-    //        let jsArr = JsonValue.Array (List.toArray kids)
+    let toJsonValue (input : AibGenericNode) : JsonValue =
+        let rec work asset cont = 
+            workList asset.Kids (fun kids -> 
+            let jsArr = JsonValue.Array (List.toArray kids)
                
-    //        cont (JsonValue.Record 
-    //                [| ("assetReference",   JsonValue.String asset.AssetReference)
-    //                 ; ("name",             JsonValue.String asset.NodeName)
-    //                 ; ("type",             JsonValue.String asset.NodeType)
-    //                 ; ("attributes",       asset.Attribs.ToJsonValue ())
-    //                 ; ("kids",             jsArr)
-    //                |]))
-    //    and workList xs cont =
-    //        match xs with
-    //        | [] -> cont []
-    //        | kid1 :: kids -> 
-    //            work kid1 ( fun v1 -> 
-    //            workList kids ( fun vs -> 
-    //            cont (v1::vs)))               
-    //    work input id
+            cont (JsonValue.Record 
+                    [| ("assetReference",   JsonValue.String asset.AssetReference)
+                     ; ("nodeType",         JsonValue.String asset.NodeType)
+                     ; ("assetName",        JsonValue.String asset.AssetName)
+                     ; ("assetType",        JsonValue.String asset.AssetType)
+                     ; ("category",         JsonValue.String asset.Category)
+                     ; ("superCategory",    JsonValue.String asset.SuperCategory)
+                     ; ("attributes",       asset.Attributes.ToJsonValue ())
+                     ; ("kids",             jsArr)
+                    |]))
+        and workList xs cont =
+            match xs with
+            | [] -> cont []
+            | kid1 :: kids -> 
+                work kid1 ( fun v1 -> 
+                workList kids ( fun vs -> 
+                cont (v1::vs)))               
+        work input id
 
-    //let aibXlsxToJson (inputPath:string) (outputPath:string) : unit = 
-    //    match readAibFlat inputPath |> aibToNode |> Option.map toJsonValue with
-    //    | None -> printfn "Read error"
-    //    | Some json -> 
-    //        use sw = new StreamWriter (path = outputPath)
-    //        json.WriteTo(sw, JsonSaveOptions.None)
+    let aibGenericNodeToJson (node : AibGenericNode) (outputPath:string) : unit = 
+        let json = toJsonValue node
+        use sw = new StreamWriter (path = outputPath)
+        json.WriteTo(sw, JsonSaveOptions.None)

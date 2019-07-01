@@ -186,12 +186,5 @@ module JsonReader =
                 work (Array.toList elements) (fun msg -> Error msg) (fun acc -> Ok acc) 
             | _ -> Error "not an Array"
 
-    let assertTypeField (typeFieldName : string) (typeName : string) : RecordReader<unit> = 
-        jsonRecord { 
-            let! ans = readField typeFieldName readString
-            if ans = typeName then
-                return ()
-            else
-                return! readError "type test failed"
-        }
+
 
