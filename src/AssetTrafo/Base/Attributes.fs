@@ -7,7 +7,8 @@ namespace AssetTrafo.Base
 module Attributes =
     
     open FSharp.Data
-
+    
+    open AssetTrafo.Base.CompilerMonad
     open AssetTrafo.Base.JsonReader
 
     type AttrValue = 

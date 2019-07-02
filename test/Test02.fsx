@@ -22,6 +22,7 @@ open FSharp.Interop.Excel
 open FSharp.Data
 open FSharp.Data.JsonExtensions
 
+#load "..\src\AssetTrafo\Base\CompilerMonad.fs"
 #load "..\src\AssetTrafo\Base\JsonReader.fs"
 #load "..\src\AssetTrafo\Base\Attributes.fs"
 #load "..\src\AssetTrafo\Aib\StructureRelationships.fs"
