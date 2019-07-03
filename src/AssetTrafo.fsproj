@@ -11,6 +11,7 @@
     <Compile Include="AssetTrafo\Base\Attributes.fs" />
     <Compile Include="AssetTrafo\Aib\Syntax.fs" />
     <Compile Include="AssetTrafo\Aib\StructureRelationships.fs" />
+    <Compile Include="AssetTrafo\Aib\StructureRelationsSimple.fs" />
     <Compile Include="AssetTrafo\S4\S4Types.fs" />
   </ItemGroup>
 
