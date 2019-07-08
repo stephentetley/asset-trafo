@@ -8,6 +8,8 @@ module StructureRelationsSimple =
 
     open FSharp.Data
 
+    open SLFormat
+
     open AssetTrafo.Aib.TreeDiff
     
 
@@ -88,3 +90,21 @@ module StructureRelationsSimple =
     let loadStructureRelationships (path:string) : AibTree option = 
         readRelationshipsExport path 
             |> buildStructureTree
+
+    let drawAibTree (aibTree : AibTree) : string = 
+        let rec work aib cont = 
+            match aib with
+            | Node(a,[]) -> cont (RoseTree.RoseTree(a, []))
+            | Node(a, kids) -> 
+                workList kids ( fun xs -> 
+                cont (RoseTree.RoseTree(a,xs)))
+        and workList kids cont = 
+            match kids with 
+            | [] -> cont []
+            | x :: xs -> 
+                work x (fun v1 -> 
+                workList xs (fun vs -> 
+                cont (v1 :: vs)))
+        work aibTree (fun x -> x) |> RoseTree.drawTree
+
+        

@@ -10,6 +10,11 @@ open System.IO
 #r "FSharp.Data.dll"
 open FSharp.Data
 
+
+#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190616\lib\netstandard2.0"
+#r "SLFormat.dll"
+
+
 #load "..\src\AssetTrafo\Base\TreeDiff.fs"
 #load "..\src\AssetTrafo\Aib\StructureRelationsSimple.fs"
 open AssetTrafo.Aib.TreeDiff
@@ -33,10 +38,37 @@ let demo01 () =
     convertToJson (localFile @"data\aide_aldw_kids_relations.csv") 
                     (localFile @"data\output\aide_aldw_kids_relations.json") 
 
-let demo02 () = 
-    let source = loadStructureRelationships (localFile @"data\aldw_kids_relations.csv") 
-    let target = loadStructureRelationships (localFile @"data\aide_aldw_kids_relations.csv") 
+let diff (sourcePath : string) (targetPath : string) : Result<Diff<string> list, string> = 
+    let source = loadStructureRelationships sourcePath
+    let target = loadStructureRelationships targetPath
     match source, target with
-    | Some src, Some dest -> treeDiff src dest
-    | None, _ -> failwith "Could not read source"
-    | _, None -> failwith "Could not read target"
+    | Some src, Some dest -> treeDiff src dest |> Ok
+
+    | None, _ -> Error "Could not read source"
+    | _, None -> Error "Could not read target"
+
+let draw (sourcePath : string) : unit = 
+    match loadStructureRelationships sourcePath with
+    | None -> printfn "draw - Loading failed"
+    | Some ans -> printfn "%s" <| drawAibTree ans
+    
+
+let demo02 () = 
+    let source = localFile @"data\aldw_kids_relations.csv"
+    let target = localFile @"data\aide_aldw_kids_relations.csv"
+    diff source target
+
+
+let demo03 () = 
+    let source = localFile @"data\some_cso_kids_relations.csv"
+    let target = localFile @"data\aide_some_cso_kids_relations.csv"
+    draw source
+    let ans = diff source target 
+    match ans with 
+    | Ok ds -> 
+        printfn "%i edit steps" ds.Length
+        List.iter (printfn "%O") ds
+    | Error msg -> printfn "Fail: %s" msg
+    draw target
+    
+
