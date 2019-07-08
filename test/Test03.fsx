@@ -10,6 +10,7 @@ open System.IO
 #r "FSharp.Data.dll"
 open FSharp.Data
 
+#load "..\src\AssetTrafo\Base\TreeDiff.fs"
 #load "..\src\AssetTrafo\Aib\StructureRelationsSimple.fs"
 open AssetTrafo.Aib.StructureRelationsSimple
 
@@ -21,7 +22,7 @@ let convertToJson (sourcePath : string ) (outPath : string) : unit =
     | None -> failwith "read error"
     | Some tree -> 
         use sw = new StreamWriter(outPath)
-        let json = tree.WriteJson ()        
+        let json = aibTreeToJson tree     
         json.WriteTo(sw, JsonSaveOptions.None)
 
 let demo01 () = 
