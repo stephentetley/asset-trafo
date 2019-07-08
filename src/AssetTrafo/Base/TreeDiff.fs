@@ -11,7 +11,7 @@
 /// NOTE - this file is copied from SLAlignment.
 /// We need to use a package dependency on sl-alignment at some point.
 
-namespace SLAlignment
+namespace AssetTrafo.Aib
 
 
 module TreeDiff = 
@@ -82,7 +82,7 @@ module TreeDiff =
     let inline private choose (dx : Diff<'a> list) (dy : Diff<'a> list) : Diff<'a> list = 
         if cost dx <= cost dy then dx else dy
 
-    let diff (list1 : Tree<'a> list) (list2 : Tree<'a> list) : Diff<'a> list = 
+    let hedgeDiff (list1 : Tree<'a> list) (list2 : Tree<'a> list) : Diff<'a> list = 
         let rec work ks ls cont = 
             match ks,ls with
             | [], [] -> cont []
@@ -108,3 +108,6 @@ module TreeDiff =
             cont (choose (Cpy(x, xs.Length) :: acC) acB2)))
 
         work list1 list2 (fun xs -> xs)
+
+    let treeDiff (tree1 : Tree<'a>) (tree2 : Tree<'a>) : Diff<'a> list = 
+        hedgeDiff [tree1] [tree2]

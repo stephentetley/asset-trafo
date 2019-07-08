@@ -12,6 +12,7 @@ open FSharp.Data
 
 #load "..\src\AssetTrafo\Base\TreeDiff.fs"
 #load "..\src\AssetTrafo\Aib\StructureRelationsSimple.fs"
+open AssetTrafo.Aib.TreeDiff
 open AssetTrafo.Aib.StructureRelationsSimple
 
 let localFile (pathSuffix : string) = 
@@ -32,4 +33,10 @@ let demo01 () =
     convertToJson (localFile @"data\aide_aldw_kids_relations.csv") 
                     (localFile @"data\output\aide_aldw_kids_relations.json") 
 
-
+let demo02 () = 
+    let source = loadStructureRelationships (localFile @"data\aldw_kids_relations.csv") 
+    let target = loadStructureRelationships (localFile @"data\aide_aldw_kids_relations.csv") 
+    match source, target with
+    | Some src, Some dest -> treeDiff src dest
+    | None, _ -> failwith "Could not read source"
+    | _, None -> failwith "Could not read target"

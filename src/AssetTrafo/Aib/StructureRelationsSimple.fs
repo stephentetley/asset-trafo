@@ -8,7 +8,7 @@ module StructureRelationsSimple =
 
     open FSharp.Data
 
-    open SLAlignment.TreeDiff
+    open AssetTrafo.Aib.TreeDiff
     
 
     type StructureRelationship =
@@ -84,3 +84,7 @@ module StructureRelationsSimple =
         | None -> None 
         | Some label -> work label (fun a -> a) |> Some
         
+
+    let loadStructureRelationships (path:string) : AibTree option = 
+        readRelationshipsExport path 
+            |> buildStructureTree
