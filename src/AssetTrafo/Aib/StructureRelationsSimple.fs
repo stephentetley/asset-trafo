@@ -10,6 +10,10 @@ module StructureRelationsSimple =
 
     open SLFormat
 
+    open TikZDoc.Base
+    open TikZDoc.Base.Properties
+    open TikZDoc.Extensions.Forest
+
     open AssetTrafo.Aib.TreeDiff
     
 
@@ -108,3 +112,22 @@ module StructureRelationsSimple =
         work aibTree (fun x -> x) |> RoseTree.drawTree
 
         
+    let renderAibTreeTikZ (aibTree : AibTree) : LaTeX = 
+        let makeDoc body = 
+            forestDocument ["edges" ]
+                <| vcat [ forTree [growTick <| latexInt 0; folderProp; drawProp]
+                        ; body ]
+        let rec work aib cont = 
+            match aib with
+            | Node(a,[]) -> cont (forestNode (text a) [])
+            | Node(a, kids) -> 
+                workList kids ( fun xs -> 
+                cont (forestNode (text a) xs))
+        and workList kids cont = 
+            match kids with 
+            | [] -> cont []
+            | x :: xs -> 
+                work x (fun v1 -> 
+                workList xs (fun vs -> 
+                cont (v1 :: vs)))
+        work aibTree (fun x -> x) |> makeDoc 

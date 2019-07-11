@@ -15,13 +15,21 @@ open FSharp.Data
 #r "SLFormat.dll"
 
 
+#I @"C:\Users\stephen\.nuget\packages\tikzdoc\1.0.0-alpha-20190711\lib\netstandard2.0"
+#r "TikZDoc.dll"
+
+
 #load "..\src\AssetTrafo\Base\TreeDiff.fs"
 #load "..\src\AssetTrafo\Aib\StructureRelationsSimple.fs"
 open AssetTrafo.Aib.TreeDiff
 open AssetTrafo.Aib.StructureRelationsSimple
 
+let outputDirectory () = 
+    Path.Combine(__SOURCE_DIRECTORY__, "..", "data\output\latex")
+
 let localFile (pathSuffix : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, "..", pathSuffix)
+
 
 let convertToJson (sourcePath : string ) (outPath : string) : unit = 
     match readRelationshipsExport sourcePath |> buildStructureTree with
@@ -51,6 +59,15 @@ let draw (sourcePath : string) : unit =
     match loadStructureRelationships sourcePath with
     | None -> printfn "draw - Loading failed"
     | Some ans -> printfn "%s" <| drawAibTree ans
+
+
+let drawTikZ (sourcePath : string) (outputName : string) : unit = 
+    match loadStructureRelationships sourcePath with
+    | None -> printfn "draw - Loading failed"
+    | Some ans -> 
+        let outputPath =  outputDirectory ()
+        let doc = renderAibTreeTikZ ans
+        doc.SaveToPS(outputPath, System.IO.Path.ChangeExtension(outputName, "ps"))
     
 
 let demo02 () = 
@@ -71,4 +88,10 @@ let demo03 () =
     | Error msg -> printfn "Fail: %s" msg
     draw target
     
+
+
+let test04 () = 
+    let source = localFile @"data\some_cso_kids_relations.csv"
+    drawTikZ source "forest1-ps.ps"
+
 
