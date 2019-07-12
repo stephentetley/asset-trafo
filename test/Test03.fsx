@@ -11,11 +11,11 @@ open System.IO
 open FSharp.Data
 
 
-#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190616\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190712\lib\netstandard2.0"
 #r "SLFormat.dll"
 
 
-#I @"C:\Users\stephen\.nuget\packages\tikzdoc\1.0.0-alpha-20190711\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\tikzdoc\1.0.0-alpha-20190712\lib\netstandard2.0"
 #r "TikZDoc.dll"
 
 
@@ -65,9 +65,11 @@ let drawTikZ (sourcePath : string) (outputName : string) : unit =
     match loadStructureRelationships sourcePath with
     | None -> printfn "draw - Loading failed"
     | Some ans -> 
-        let outputPath =  outputDirectory ()
+        let outputPath =  System.IO.Path.Combine (outputDirectory (), "Forest1.tex")
         let doc = renderAibTreeTikZ ans
-        doc.SaveToPS(outputPath, System.IO.Path.ChangeExtension(outputName, "ps"))
+        doc.SaveAsTex(1000, outputPath)
+        
+        // doc.SaveToPS(outputPath, System.IO.Path.ChangeExtension(outputName, "ps"))
     
 
 let demo02 () = 
@@ -91,7 +93,7 @@ let demo03 () =
 
 
 let test04 () = 
-    let source = localFile @"data\some_cso_kids_relations.csv"
-    drawTikZ source "forest1-ps.ps"
+    let source = localFile @"data\aldwarke_kids_relations.csv"
+    drawTikZ source "forest2-ps.ps"
 
 

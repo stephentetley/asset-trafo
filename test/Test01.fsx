@@ -10,7 +10,7 @@ open System.IO
 #r "FSharp.Data.DesignTime.dll"
 open FSharp.Data
 
-#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190616\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190712\lib\netstandard2.0"
 #r "SLFormat.dll"
 
 #load "..\src\AssetTrafo\Base\CompilerMonad.fs"

@@ -19,8 +19,8 @@
   <ItemGroup>
     <PackageReference Include="ExcelProvider" Version="1.0.1" />
     <PackageReference Include="FSharp.Data" Version="3.1.1" />
-    <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190616" />
-    <PackageReference Include="TikZDoc" Version="1.0.0-alpha-20190711" />
+    <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190712" />
+    <PackageReference Include="TikZDoc" Version="1.0.0-alpha-20190712" />
   </ItemGroup>
 
 </Project>

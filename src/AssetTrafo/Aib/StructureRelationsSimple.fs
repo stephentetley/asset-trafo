@@ -25,8 +25,8 @@ module StructureRelationsSimple =
 
 
     type RelationshipsExport = 
-        CsvProvider< Schema = @"ParentRef(string),ChildRef(string),Level(int)"
-                   , Sample = "SAI010101010,SAI02020202,1"
+        CsvProvider< Schema = @"ParentRef(string),ChildRef(string),ChildName(string),Level(int)"
+                   , Sample = "SAI010101010,SAI02020202,some process,1"
                    , HasHeaders = true >
 
     type RelationshipRow = RelationshipsExport.Row
