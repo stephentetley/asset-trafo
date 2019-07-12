@@ -14,6 +14,10 @@ open FSharp.Data
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190712\lib\netstandard2.0"
 #r "SLFormat.dll"
 
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190712\lib\netstandard2.0"
+#r "MarkdownDoc.dll"
+
+open MarkdownDoc.Pandoc
 
 #I @"C:\Users\stephen\.nuget\packages\tikzdoc\1.0.0-alpha-20190712\lib\netstandard2.0"
 #r "TikZDoc.dll"
@@ -21,8 +25,10 @@ open FSharp.Data
 
 #load "..\src\AssetTrafo\Base\TreeDiff.fs"
 #load "..\src\AssetTrafo\Aib\StructureRelationsSimple.fs"
+#load "..\src\AssetTrafo\Aib\MarkdownOutput.fs"
 open AssetTrafo.Aib.TreeDiff
 open AssetTrafo.Aib.StructureRelationsSimple
+open AssetTrafo.Aib.MarkdownOutput
 
 let outputDirectory () = 
     Path.Combine(__SOURCE_DIRECTORY__, "..", "data\output\latex")
@@ -97,3 +103,18 @@ let test04 () =
     drawTikZ source "forest2-ps.ps"
 
 
+
+let drawHtml (sourcePath : string) () : unit = 
+    match loadStructureRelationships sourcePath with
+    | None -> printfn "draw - Loading failed"
+    | Some ans -> 
+        let outputDir = outputDirectory ()
+        let htmlOutputPath =  System.IO.Path.Combine (outputDir, "TreeB.html")
+        let mdOutputPath =  System.IO.Path.Combine (outputDir, "TreeB.md")
+        let md = renderAibTreeMarkdown ans
+        md.Save mdOutputPath
+        runPandocHtml outputDir mdOutputPath htmlOutputPath (Some "Tree Sample") pandocDefaults
+
+let test05 () = 
+    let source = localFile @"data\aldwarke_kids_relations.csv"
+    drawHtml source ()
