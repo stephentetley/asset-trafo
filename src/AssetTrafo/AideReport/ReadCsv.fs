@@ -35,3 +35,21 @@ module ReadCsv =
           AideValue = row.AIDEValue
           AideSource = getValueSource row.AIDEValueCode
         }
+
+    // ************************************************************************
+
+    type AssetChangeExport = 
+        CsvProvider< Schema = @"ChangeRequestId(int64),ChangeRequestType(string),ChangeRequestTime(date),ChangeRequestStatus(string),AssetReference(string),AssetName(string),AssetCommonName(string)"
+                   , Sample = "148052,Attribute,2019-05-28T09:22:23,Submitted,ABC00123,NAME_1,LONG_NAME"
+                   , HasHeaders = true >
+
+    type AssetChangeRow = AssetChangeExport.Row
+    
+    let readAssetChangeExport(path:string) : seq<AssetChangeRow> = 
+        let table = AssetChangeExport.Load(uri = path)
+        table.Rows 
+
+    let convertAssetChangeRow (row : AssetChangeRow) : AssetChange = 
+        { Reference = row.AssetReference
+          AssetName = row.AssetName
+        }

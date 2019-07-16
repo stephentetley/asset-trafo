@@ -18,12 +18,13 @@
     <Compile Include="AssetTrafo\S4\S4Types.fs" />
     <Compile Include="AssetTrafo\AideReport\Syntax.fs" />
     <Compile Include="AssetTrafo\AideReport\ReadCsv.fs" />
+    <Compile Include="AssetTrafo\AideReport\MarkdownReport.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ExcelProvider" Version="1.0.1" />
     <PackageReference Include="FSharp.Data" Version="3.1.1" />
-    <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20190716" />
+    <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20190716d" />
     <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190712" />
     <PackageReference Include="TikZDoc" Version="1.0.0-alpha-20190712" />
   </ItemGroup>
