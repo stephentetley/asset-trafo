@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="AssetTrafo\Base\Common.fs" />
     <Compile Include="AssetTrafo\Base\TreeDiff.fs" />
     <Compile Include="AssetTrafo\Base\CompilerMonad.fs" />
     <Compile Include="AssetTrafo\Base\JsonReader.fs" />
@@ -15,11 +16,14 @@
     <Compile Include="AssetTrafo\Aib\StructureRelationsSimple.fs" />
     <Compile Include="AssetTrafo\Aib\MarkdownOutput.fs" />
     <Compile Include="AssetTrafo\S4\S4Types.fs" />
+    <Compile Include="AssetTrafo\AideReport\Syntax.fs" />
+    <Compile Include="AssetTrafo\AideReport\ReadCsv.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ExcelProvider" Version="1.0.1" />
     <PackageReference Include="FSharp.Data" Version="3.1.1" />
+    <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20190712" />
     <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190712" />
     <PackageReference Include="TikZDoc" Version="1.0.0-alpha-20190712" />
   </ItemGroup>

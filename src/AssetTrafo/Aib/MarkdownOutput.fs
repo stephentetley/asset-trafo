@@ -7,7 +7,7 @@ namespace AssetTrafo.Aib
 module MarkdownOutput =
 
     
-    open MarkdownDoc
+    open MarkdownDoc.Markdown
     
     open AssetTrafo.Aib.TreeDiff
     open AssetTrafo.Aib.StructureRelationsSimple
