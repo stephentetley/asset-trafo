@@ -32,6 +32,6 @@ module ReadCsv =
         { AttributeName = row.AttributeName
           AiValue = row.AIValue
           AiSource = getValueSource row.AIValueCode
-          AideValue = row.AIValue
+          AideValue = row.AIDEValue
           AideSource = getValueSource row.AIDEValueCode
         }

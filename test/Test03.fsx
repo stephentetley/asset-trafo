@@ -31,7 +31,7 @@ open AssetTrafo.Aib.StructureRelationsSimple
 open AssetTrafo.Aib.MarkdownOutput
 
 let outputDirectory () = 
-    Path.Combine(__SOURCE_DIRECTORY__, "..", "data\output\latex")
+    Path.Combine(__SOURCE_DIRECTORY__, "..", "output\latex")
 
 let localFile (pathSuffix : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, "..", pathSuffix)

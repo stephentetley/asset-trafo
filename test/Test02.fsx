@@ -39,4 +39,4 @@ let demo01 () =
     match loadStructure (localFile @"data\ald_toplevel.csv") 
                         (localFile @"data\ald_structure_relationships.csv") with
     | None -> failwith "read error"
-    | Some top -> aibGenericNodeToJson top (localFile @"data\output\ald_new_structure.json") 
+    | Some top -> aibGenericNodeToJson top (localFile @"output\ald_new_structure.json") 

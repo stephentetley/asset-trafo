@@ -26,7 +26,7 @@ let localFile (pathSuffix : string) =
     Path.Combine(__SOURCE_DIRECTORY__, "..", pathSuffix)
 
 let demo01 () = 
-    readAibInstallationJson <| localFile @"data\output\ald_new_structure.json"
+    readAibInstallationJson <| localFile @"output\ald_new_structure.json"
 
 
 
