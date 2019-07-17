@@ -13,8 +13,8 @@ module ReadCsv =
 
 
     type AttributeChangeExport = 
-        CsvProvider< Schema = @"AttributeName(string),AIValue(string),AIValueLookup(string),AIValueCode(string),AIDEValue(string),AIDEValueLookup(string),AIDEValueCode(string),ChangeRequestTime(date)"
-                   , Sample = "attribute name 1,NULL,NULL,NULL,attribute value,NULL,NULL,2019-05-28T09:22:09"
+        CsvProvider< Schema = @"ChangeRequestId(int64),AttributeName(string),AIValue(string),AIValueLookup(string),AIValueCode(string),AIDEValue(string),AIDEValueLookup(string),AIDEValueCode(string),ChangeRequestTime(date)"
+                   , Sample = "10000,attribute name 1,NULL,NULL,NULL,attribute value,NULL,NULL,2019-05-28T09:22:09"
                    , HasHeaders = true >
 
     type AttributeChangeRow = AttributeChangeExport.Row
@@ -29,7 +29,8 @@ module ReadCsv =
         | _ -> Lookup
 
     let convertAttributeChangeRow (row : AttributeChangeRow) : AttributeChange = 
-        { AttributeName = row.AttributeName
+        { ChangeRequestId = row.ChangeRequestId
+          AttributeName = row.AttributeName
           AiValue = row.AIValue
           AiSource = getValueSource row.AIValueCode
           AideValue = row.AIDEValue
@@ -50,6 +51,7 @@ module ReadCsv =
         table.Rows 
 
     let convertAssetChangeRow (row : AssetChangeRow) : AssetChange = 
-        { Reference = row.AssetReference
+        { ChangeRequestId = row.ChangeRequestId
+          Reference = row.AssetReference
           AssetName = row.AssetName
         }

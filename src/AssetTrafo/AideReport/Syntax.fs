@@ -30,7 +30,8 @@ module Syntax =
         
 
     type AttributeChange = 
-        { AttributeName : string
+        { ChangeRequestId : int64
+          AttributeName : string
           AiValue : string
           AiSource : ValueSource
           AideValue : string
@@ -38,7 +39,8 @@ module Syntax =
         }
 
     type AssetChange = 
-        { Reference : string
+        { ChangeRequestId : int64
+          Reference : string
           AssetName : string
           // OldParentName
           // NewParentName

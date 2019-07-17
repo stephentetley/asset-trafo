@@ -64,7 +64,7 @@ let test01 () =
             |> Seq.toList
 
     let attrRows = 
-        readAttributeChangeExport @"G:\work\Projects\asset_sync\aide_report\attribute_changes1.csv"
+        readAttributeChangeExport @"G:\work\Projects\asset_sync\aide_report\aide_attribute_change_request1.csv"
             |> Seq.map convertAttributeChangeRow
             |> Seq.toList
 
