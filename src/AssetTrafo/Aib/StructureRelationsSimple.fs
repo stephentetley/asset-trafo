@@ -38,14 +38,19 @@ module StructureRelationsSimple =
 
 
     /// Represent the Structure as a RoseTree
-    type AibTree = Tree<string>
+    type NodeBody = 
+        { Reference : string 
+          Name : string }
+
+    type AibTree = Tree<NodeBody>
         
 
     let aibTreeToJson (tree: AibTree) : JsonValue = 
         let rec work (node : AibTree) 
                         (cont : JsonValue -> JsonValue) = 
             workList node.Kids (fun kids -> 
-            cont (JsonValue.Record [| ("ref",  JsonValue.String node.Label )
+            cont (JsonValue.Record [| ("ref",  JsonValue.String node.Label.Reference )
+                                    ; ("name",  JsonValue.String node.Label.Name )
                                     ; ("kids", JsonValue.Array (List.toArray kids)) 
                                     |] ))
         and workList (kids : AibTree list) 
@@ -59,26 +64,30 @@ module StructureRelationsSimple =
         work tree (fun x -> x)
 
 
-    let private findRoot (relations : RelationshipRow list) : string option = 
+    let private findRoot (relations : RelationshipRow list) : NodeBody option = 
         match relations with
         | [] -> None
-        | top :: _ -> Some top.ParentRef
+        | top :: _ -> Some { Reference = top.ParentRef
+                             Name = "TEMP" }
         
     let private findKids (parentId : string ) 
-                              (relations : RelationshipRow list) : string list = 
-        let chooseProc (rel : RelationshipRow) = 
-            if parentId = rel.ParentRef then Some rel.ChildRef else None
+                              (relations : RelationshipRow list) : NodeBody list = 
+        let chooseProc (rel : RelationshipRow) : NodeBody option= 
+            if parentId = rel.ParentRef then 
+                Some { Reference = rel.ChildRef 
+                       Name = rel.ChildName }
+            else None
         List.choose chooseProc relations
 
     let buildStructureTree (relations : RelationshipRow list) : AibTree option = 
-        let sorter (node : AibTree) : string = node.Label
-        let rec work parentId (cont : AibTree -> AibTree) = 
-            let kidRefs = findKids parentId relations
+        let sorter (node : AibTree) : string = node.Label.Reference
+        let rec work parentNode (cont : AibTree -> AibTree) = 
+            let kidRefs = findKids parentNode.Reference relations
             match kidRefs with
-            | [] -> cont <| Node(parentId, [])
+            | [] -> cont <| Node(parentNode, [])
             | _ -> workList kidRefs (fun kids -> 
                     let kids1 = List.sortBy sorter kids
-                    cont (Node(parentId, kids1)))
+                    cont (Node(parentNode, kids1)))
         and workList kids (cont : AibTree list -> AibTree) = 
             match kids with
             | [] -> cont []
@@ -88,7 +97,7 @@ module StructureRelationsSimple =
                 cont (a1 :: acc)))
         match findRoot relations with
         | None -> None 
-        | Some label -> work label (fun a -> a) |> Some
+        | Some node -> work node (fun a -> a) |> Some
         
 
     let loadStructureRelationships (path:string) : AibTree option = 
@@ -109,7 +118,9 @@ module StructureRelationsSimple =
                 work x (fun v1 -> 
                 workList xs (fun vs -> 
                 cont (v1 :: vs)))
-        work aibTree (fun x -> x) |> RoseTree.drawTree
+        work aibTree (fun x -> x) 
+            |> RoseTree.mapTree (fun body -> sprintf "%s %s" body.Reference body.Name)
+            |> RoseTree.drawTree
 
         
     let renderAibTreeTikZ (aibTree : AibTree) : LaTeX = 
@@ -117,12 +128,12 @@ module StructureRelationsSimple =
             forestDocument ["edges" ]
                 <| vcat [ forTree [growTick <| latexInt 0; folderProp; drawProp]
                         ; body ]
-        let rec work aib cont = 
+        let rec work (aib : AibTree) cont = 
             match aib with
-            | Node(a,[]) -> cont (forestNode (text a) [])
+            | Node(a,[]) -> cont (forestNode (text a.Reference) [])
             | Node(a, kids) -> 
                 workList kids ( fun xs -> 
-                cont (forestNode (text a) xs))
+                cont (forestNode (text a.Reference) xs))
         and workList kids cont = 
             match kids with 
             | [] -> cont []

@@ -13,25 +13,28 @@ module MarkdownOutput =
     open AssetTrafo.Aib.StructureRelationsSimple
 
 
-    let listNode (name : string) (kids : ParaElement list) : ParaElement = 
-        let makeLabel (name : string) : ParaElement = 
+    let mdListNode (body : NodeBody) 
+                   (kids : ParaElement list) : ParaElement = 
+        let makeLabel (nb : NodeBody) : ParaElement = 
             paraText 
-                <| rawtext "<a class=\"yellownode\">" ^^ text name ^^ rawtext"</a>"
+                <| rawtext "<a class=\"yellownode\">" 
+                        ^^ text nb.Reference ^+^ text nb.Name 
+                        ^^ rawtext"</a>"
 
         match kids with
-        | [] -> makeLabel name
-        | _ -> makeLabel name ^!^ unorderedList kids
+        | [] -> makeLabel body
+        | _ -> makeLabel body ^!^ unorderedList kids
         
 
     let renderAibTreeMarkdown (aibTree : AibTree) : Markdown = 
         let makeDoc (body : ParaElement) : Markdown = 
             h1 (text "Tree") ^!!^ markdown body
-        let rec work aib cont = 
+        let rec work (aib : AibTree) cont = 
             match aib with
-            | Node(a, []) -> cont (listNode a [])
+            | Node(a, []) -> cont (mdListNode a [])
             | Node(a, kids) -> 
                 workList kids ( fun xs -> 
-                cont (listNode a xs))
+                cont (mdListNode a xs))
         and workList kids cont = 
             match kids with 
             | [] -> cont []

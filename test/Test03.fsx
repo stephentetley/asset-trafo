@@ -13,10 +13,11 @@ open FSharp.Data
 
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190712\lib\netstandard2.0"
 #r "SLFormat.dll"
+open SLFormat.CommandOptions
 
-#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190716\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190716d\lib\netstandard2.0"
 #r "MarkdownDoc.dll"
-
+open MarkdownDoc.Markdown
 open MarkdownDoc.Pandoc
 
 #I @"C:\Users\stephen\.nuget\packages\tikzdoc\1.0.0-alpha-20190712\lib\netstandard2.0"
@@ -31,7 +32,7 @@ open AssetTrafo.Aib.StructureRelationsSimple
 open AssetTrafo.Aib.MarkdownOutput
 
 let outputDirectory () = 
-    Path.Combine(__SOURCE_DIRECTORY__, "..", "output\latex")
+    Path.Combine(__SOURCE_DIRECTORY__, "..", "output")
 
 let localFile (pathSuffix : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, "..", pathSuffix)
@@ -52,7 +53,7 @@ let demo01 () =
     convertToJson (localFile @"data\aide_aldw_kids_relations.csv") 
                     (localFile @"data\output\aide_aldw_kids_relations.json") 
 
-let diff (sourcePath : string) (targetPath : string) : Result<Diff<string> list, string> = 
+let diff (sourcePath : string) (targetPath : string) : Result<Diff<NodeBody> list, string> = 
     let source = loadStructureRelationships sourcePath
     let target = loadStructureRelationships targetPath
     match source, target with
@@ -103,17 +104,36 @@ let test04 () =
     drawTikZ source "forest2-ps.ps"
 
 
+let pandocHtmlOptions () : PandocOptions = 
+    let highlightStyle = argument "--highlight-style" &= argValue "tango"
+    let selfContained = argument "--self-contained"
+    /// Github style is nicer for tables than Tufte
+    let css = 
+        argument "--css" &= doubleQuote @"..\..\..\libs\markdown-css-master\github.css"
+    { Standalone = true
+      InputExtensions = []
+      OutputExtensions = []
+      OtherOptions = [ css; highlightStyle; selfContained ]  }
 
-let drawHtml (sourcePath : string) () : unit = 
+
+
+let drawHtml (sourcePath : string) () : Result<int, string> = 
     match loadStructureRelationships sourcePath with
-    | None -> printfn "draw - Loading failed"
+    | None -> Error "draw - Loading failed"
     | Some ans -> 
         let outputDir = outputDirectory ()
         let htmlOutputPath =  System.IO.Path.Combine (outputDir, "TreeB.html")
         let mdOutputPath =  System.IO.Path.Combine (outputDir, "TreeB.md")
         let md = renderAibTreeMarkdown ans
         md.Save mdOutputPath
-        runPandocHtml outputDir mdOutputPath htmlOutputPath (Some "Tree Sample") pandocDefaults
+        runPandocHtml5 true 
+                        outputDir 
+                        "TreeB.md" 
+                        "TreeB.html" 
+                        (Some "Tree Sample") 
+                        (pandocHtmlOptions ())
+
+
 
 let test05 () = 
     let source = localFile @"data\aldwarke_kids_relations.csv"
