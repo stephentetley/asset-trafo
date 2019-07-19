@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="FactExtract/AHR.fsx" />
+    <None Include="FactExtract/EquipmentLP.fsx" />
+    <None Include="FactExtract/AibRuleTable.fsx" />
+    <None Include="FactExtract\AssetTypes.fsx" />
     <None Include="Test01.fsx" />
     <None Include="Test02.fsx" />
     <None Include="Test03.fsx" />
@@ -12,8 +16,6 @@
     <None Include="GenProcessDescLookups.fsx" />
     <None Include="GenProcessMapping234.fsx" />
     <None Include="GenSiteMapping12.fsx" />
-    <None Include="AHR.fsx" />
-    <None Include="EquipmentLP.fsx" />
   </ItemGroup>
 
   <ItemGroup />

@@ -23,6 +23,8 @@ open FactX
 open FactX.Skeletons
 
 
+let localFile (relativePath : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, "..\..", relativePath)
 
 // ********** DATA SETUP **********
 
@@ -71,7 +73,7 @@ let codeMappingSkeleton (rows : MappingRow list) : ModuleSkeleton =
           Comment = "code_mapping(inst_type:atom, group:atom, process:atom, function_code:atom, group_code:atom, process_code:atom)."
           WriteFacts = FactWriter.mapMz (FactWriter.tellPredicate << codeMapping) rows
         }
-    { OutputPath = @"G:\work\Projects\asset_sync\output\code_mapping.pl"
+    { OutputPath = localFile @"output\code_mapping.pl"
       ModuleName = "code_mapping"
       PredicateSkeletons = [ codePredicate ]
     }
@@ -112,7 +114,7 @@ let processesSkeleton (rows : MappingRow list) : ModuleSkeleton =
           Comment = "allowed_process(name:atom)."
           WriteFacts = seqWriteFacts (Some << prc) elements
         }
-    { OutputPath = @"G:\work\Projects\asset_sync\output\process_rules.pl"
+    { OutputPath = localFile @"output\process_rules.pl"
       ModuleName = "process_rules"
       PredicateSkeletons = [ prcgSkeleton; prcSkeleton ]
     }
@@ -193,7 +195,7 @@ let level4DescrSkeleton (rows : MappingRow list) : PredicateSkeleton =
     }
 
 let descriptionLookupsSkeleton (rows : MappingRow list) = 
-    { OutputPath = @"G:\work\Projects\asset_sync\output\description_lookups.pl"
+    { OutputPath = localFile @"output\description_lookups.pl"
       ModuleName = "description_lookups"
       PredicateSkeletons = 
         [ level2DescrSkeleton rows

@@ -23,6 +23,10 @@ open FactX.Skeletons
 
 
 
+let localFile (relativePath : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, "..\..", relativePath)
+
+
 // ********** DATA SETUP **********
 
 
@@ -63,7 +67,7 @@ let docNames () : Equipment list =
         |> Seq.toList
 
 let main () = 
-    let outPath = @"G:\work\Projects\asset_sync\output\equipment.lp"
+    let outPath = localFile @"output\equipment.lp"
     let docs = docNames ()
     runFactWriter 160 outPath 
         <| mapMz (tellPredicate << equipmentFact) docs 

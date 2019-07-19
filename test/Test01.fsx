@@ -22,8 +22,8 @@ open FSharp.Data
 open AssetTrafo.Base
 open AssetTrafo.Aib.Syntax
 
-let localFile (pathSuffix : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, "..", pathSuffix)
+let localFile (relativePath : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, "..", relativePath)
 
 let demo01 () = 
     readAibInstallationJson <| localFile @"output\ald_new_structure.json"
