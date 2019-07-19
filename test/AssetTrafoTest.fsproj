@@ -13,6 +13,7 @@
     <None Include="GenProcessMapping234.fsx" />
     <None Include="GenSiteMapping12.fsx" />
     <None Include="AHR.fsx" />
+    <None Include="EquipmentLP.fsx" />
   </ItemGroup>
 
   <ItemGroup />
