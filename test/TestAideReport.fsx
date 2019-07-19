@@ -49,6 +49,7 @@ let pandocHtmlOptions () : PandocOptions =
     let highlightStyle = argument "--highlight-style" &= argValue "tango"
     let selfContained = argument "--self-contained"
     /// Github style is nicer for tables than Tufte
+    /// Note - body width has been changed on both stylesheets
     let css = 
         argument "--css" &= doubleQuote @"..\..\..\libs\markdown-css-master\github.css"
     { Standalone = true
@@ -75,7 +76,7 @@ let test01 () =
                         (outputDirectory ()) 
                         "changes_report.md"
                         "changes_report.html" 
-                        (Some "Changes makeReport")
+                        (Some "Changes Report")
                         (pandocHtmlOptions ()) 
             |> ignore
     | Error msg, _ -> printfn "Error: %s" msg

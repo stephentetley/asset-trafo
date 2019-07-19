@@ -61,6 +61,8 @@ module MarkDownReport =
 
     let makeReport (assetChanges : AssetChange list) 
                    (attrChanges : AttributeChange list) : Markdown = 
-        h1 (text "Changes") 
+        h1 (text "AIDE Changes") 
+            ^!!^ h2 (text "Asset Changes")
             ^!!^ gridTable (assetChangesMdTable assetChanges)
+            ^!!^ h2 (text "Attribute Changes")
             ^!!^ gridTable (attributeChangesMdTable attrChanges)

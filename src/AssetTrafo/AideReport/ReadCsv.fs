@@ -46,12 +46,19 @@ module ReadCsv =
         | None -> Freetext
         | _ -> Lookup
 
+    let getValue (value : string option) 
+                    (lookupCode : int64 option) 
+                    (lookupValue : string option) : string = 
+        match lookupCode with
+        | None -> Option.defaultValue "" value
+        | Some _ -> Option.defaultValue "" lookupValue
+
     let convertAttributeChangeRow (row : AttributeChangeRow) : AttributeChange = 
         { ChangeRequestId = row.ChangeRequestId
           AttributeName = row.AttributeName
-          AiValue = Option.defaultValue "" row.AI2Value
+          AiValue = getValue row.AI2Value row.AILookupCode row.AILookupValue
           AiSource = getValueSource row.AIDELookupCode
-          AideValue = Option.defaultValue "" row.AIDEValue
+          AideValue = getValue row.AIDEValue row.AIDELookupCode row.AIDELookupValue
           AideSource = getValueSource row.AILookupCode
         }
 
