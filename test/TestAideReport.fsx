@@ -58,24 +58,26 @@ let pandocHtmlOptions () : PandocOptions =
 
 
 let test01 () = 
-    let assetRows = 
-        readAssetChangeExport @"G:\work\Projects\asset_sync\aide_report\asset_change_request1.csv"
-            |> Seq.map convertAssetChangeRow
-            |> Seq.toList
+    let assetRows1 = 
+        readAssetChangeExport @"G:\work\Projects\asset_sync\aide_report\aide_asset_changes.csv"
+            |> Result.map (Seq.map convertAssetChangeRow >> Seq.toList)
 
-    let attrRows = 
-        readAttributeChangeExport @"G:\work\Projects\asset_sync\aide_report\aide_attribute_change_request1.csv"
-            |> Seq.map convertAttributeChangeRow
-            |> Seq.toList
+    let attrRows1 = 
+        readAttributeChangeExport @"G:\work\Projects\asset_sync\aide_report\aide_asset_attribute_changes.csv"
+            |> Result.map (Seq.map convertAttributeChangeRow >> Seq.toList)
 
-    let doc = makeReport assetRows attrRows
-    let mdPath = getOutputFile "changes_report.md"
-    doc.Save(columnWidth = 140, outputPath = mdPath)
-    runPandocHtml5 true 
-                    (outputDirectory ()) 
-                    "changes_report.md"
-                    "changes_report.html" 
-                    (Some "Changes makeReport")
-                    (pandocHtmlOptions ())
-
-
+    match assetRows1, attrRows1 with 
+    | Ok assetRows, Ok attrRows -> 
+        let doc = makeReport assetRows attrRows
+        let mdPath = getOutputFile "changes_report.md"
+        doc.Save(columnWidth = 140, outputPath = mdPath)
+        runPandocHtml5 true 
+                        (outputDirectory ()) 
+                        "changes_report.md"
+                        "changes_report.html" 
+                        (Some "Changes makeReport")
+                        (pandocHtmlOptions ()) 
+            |> ignore
+    | Error msg, _ -> printfn "Error: %s" msg
+    | _, Error msg -> printfn "Error: %s" msg
+    
