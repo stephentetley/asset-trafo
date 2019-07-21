@@ -11,16 +11,16 @@ open System.IO
 open FSharp.Data
 
 
-#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190712\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
 open SLFormat.CommandOptions
 
-#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190716d\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190721\lib\netstandard2.0"
 #r "MarkdownDoc.dll"
 open MarkdownDoc.Markdown
 open MarkdownDoc.Pandoc
 
-#I @"C:\Users\stephen\.nuget\packages\tikzdoc\1.0.0-alpha-20190712\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\tikzdoc\1.0.0-alpha-20190721\lib\netstandard2.0"
 #r "TikZDoc.dll"
 
 

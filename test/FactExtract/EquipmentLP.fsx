@@ -11,11 +11,11 @@ open System.IO
 open FSharp.Data
 
 
-#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190712\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat"
 
 
-#I @"C:\Users\stephen\.nuget\packages\factx\1.0.0-alpha-20190719a\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\factx\1.0.0-alpha-20190721\lib\netstandard2.0"
 #r "FactX"
 open FactX
 open FactX.FactWriter
