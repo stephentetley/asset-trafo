@@ -14,7 +14,7 @@ open System.IO
 #r "ExcelProvider.DesignTime.dll"
 open FSharp.Interop.Excel
 
-#I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\portable-net45+win8+wp8+wpa81"
+#I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\netstandard1.6"
 #r "FParsec"
 #r "FParsecCS"
 open FParsec

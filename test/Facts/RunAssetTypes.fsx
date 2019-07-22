@@ -9,7 +9,7 @@ open System.IO
 #r @"FSharp.Data.dll"
 open FSharp.Data
 
-#I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\portable-net45+win8+wp8+wpa81"
+#I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\netstandard1.6"
 #r "FParsec"
 #r "FParsecCS"
 open FParsec
@@ -23,7 +23,7 @@ open FactX
 open FactX.FactWriter
 open FactX.Skeletons
 
-#I @"C:\Users\stephen\.nuget\packages\slpotassco\1.0.0-alpha-20190721\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slpotassco\1.0.0-alpha-20190722b\lib\netstandard2.0"
 #r "SLPotassco"
 open SLPotassco.Potassco.Invoke
 
@@ -50,8 +50,8 @@ let query () =
     let workingDir = clingoDirectory ()
     printfn "Working Directory: %s" workingDir
     let files = 
-        [ "facts/funcloc.lp"
+        [ "facts/rule_table_funcloc.lp"
         ; "facts/base_asset_type.lp" 
         ; "queries/funcloc_query.lp"
         ]
-    clingo workingDir (Some 0) [] files
+    runClingo workingDir (Some 0) [] files
