@@ -31,6 +31,6 @@ let localFile (relativePath : string) =
 
 let main () = 
     let inputFile = @"G:\work\Projects\asset_sync\rules\ai_rule_table_simple.csv"
-    generateFunLocFacts inputFile (localFile @"clingo\facts\funcloc.lp") 
-    generateEquipmentFacts inputFile (localFile @"clingo\facts\eqpt.lp") 
+    generateFunLocFacts inputFile (localFile @"clingo\facts\rule_table_funcloc.lp") 
+    generateEquipmentFacts inputFile (localFile @"clingo\facts\rule_table_equipment.lp") 
          

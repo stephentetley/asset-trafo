@@ -15,6 +15,7 @@ module Common =
                             (source : 'row list) : FactWriter<unit> =
         List.choose makePred source
             |> List.distinct
+            |> List.sort
             |> mapMz tellPredicate
 
     let writeFactsWithHeaderComment (outputFile : string)
