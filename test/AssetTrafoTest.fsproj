@@ -5,11 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Facts/AHR.fsx" />
-    <None Include="Facts/EquipmentLP.fsx" />
-    <None Include="Facts/AibRuleTable.fsx" />
-    <None Include="Facts/RunAssetTypes.fsx" />
-    <None Include="Facts/TempPotassco.fsx" />
+    <None Include="Facts\AHR.fsx" />
+    <None Include="Facts\EquipmentLP.fsx" />
+    <None Include="Facts\RunAibRuleTable.fsx" />
+    <None Include="Facts\RunAssetTypes.fsx" />
+    <None Include="Facts\TempPotassco.fsx" />
     <None Include="Test01.fsx" />
     <None Include="Test02.fsx" />
     <None Include="Test03.fsx" />

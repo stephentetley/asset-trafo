@@ -9,7 +9,9 @@ module AssetTypes =
     open FSharp.Data
 
     open FactX
+    open FactX.FactWriter
 
+    open AssetTrafo.AspFacts.Common
 
     // ********** DATA SETUP **********
 
@@ -75,15 +77,24 @@ module AssetTypes =
         | _ -> None
 
 
-    // Don't make SubGroup - it is not telling us anything we don't know
-    let equipmentSubGroup (row : TypeCatRow) : Predicate option =
-        match row.SuperCategory, row.SubGroup with
-        | _, None | _, Some "NULL" -> None
-        | "EQUIPMENT CATEGORY", Some subgroup ->
-            predicate "equipment_subgroup" 
-                        [ stringTerm row.AssetType
-                        ; stringTerm subgroup
-                        ]
-                |> Some
-        | _ -> None
+
+        
+    let generateBaseAssetTypeFacts (assetTypesCsvSourceFile : string) 
+                                    (outputFile : string) : unit =  
+        let rows = getRows assetTypesCsvSourceFile
+            
+        generatePredicates baseAssetType rows
+            |> runFactWriter 160 outputFile
+
+
+    let generateCategoryAndGroupFacts (assetTypesCsvSourceFile : string) 
+                                        (outputFile : string) : unit =  
+        let rows = getRows assetTypesCsvSourceFile
+            
+        runFactWriter 160 outputFile 
+            <| factWriter { 
+                    do! generatePredicates equipmentCategory rows
+                    do! generatePredicates equipmentGroup rows
+                    return ()
+                }
 

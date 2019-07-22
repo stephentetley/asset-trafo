@@ -27,6 +27,7 @@ open FactX.Skeletons
 #r "SLPotassco"
 open SLPotassco.Potassco.Invoke
 
+#load "..\..\src\AssetTrafo\AspFacts\Common.fs"
 #load "..\..\src\AssetTrafo\AspFacts\AssetTypes.fs"
 open AssetTrafo.AspFacts.AssetTypes
 
@@ -39,20 +40,11 @@ let outputFile (relativePath : string) =
 
 
 let main () = 
-    let rows = getRows @"G:\work\Projects\asset_sync\rules\asset_types_groups_categories.csv"
-    
-    let genPredicates (makePred : TypeCatRow -> Predicate option) : FactWriter<unit> =
-        List.choose makePred rows
-            |> List.distinct
-            |> mapMz tellPredicate
-
-    runFactWriter 160 (outputFile @"base_asset_type.lp") 
-                        (genPredicates baseAssetType)
+    let source = @"G:\work\Projects\asset_sync\rules\asset_types_groups_categories.csv"
+    generateBaseAssetTypeFacts source (outputFile @"base_asset_type.lp") 
+    generateCategoryAndGroupFacts source (outputFile @"equipment_cats_groups.lp") 
 
 
-    runFactWriter 160 (outputFile @"equipment_cats_groups.lp") 
-                        (genPredicates equipmentCategory 
-                            >>. genPredicates equipmentGroup)
 
 let query () =  
     let workingDir = clingoDirectory ()
