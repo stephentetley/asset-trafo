@@ -6,6 +6,8 @@ namespace AssetTrafo.AspFacts
 
 module Common =
 
+    open System.IO
+
     open FactX
     open FactX.FactWriter
 
@@ -14,5 +16,18 @@ module Common =
         List.choose makePred source
             |> List.distinct
             |> mapMz tellPredicate
+
+    let writeFactsWithHeaderComment (outputFile : string)
+                                    (factOutput: FactWriter<unit>) : unit =
+        let shortName = Path.GetFileName outputFile
+        let audit = sprintf "Generated: %s" (System.DateTime.Now.ToString(format = "yyyy-MM-dd HH:mm:ss"))
+        runFactWriter 160 outputFile 
+            <| factWriter { 
+                    do! tellComment shortName
+                    do! tellComment audit
+                    do! factOutput
+                    return ()
+                }
+
 
 

@@ -62,11 +62,11 @@ module AibRuleTable =
                             (outputFile : string) : unit = 
         let rows = getRows ruleTableCsvSourceFile
         generatePredicates funcLocFact rows
-            |> runFactWriter 160 outputFile
+            |> writeFactsWithHeaderComment outputFile 
          
 
     let generateEquipmentFacts (ruleTableCsvSourceFile : string) 
                                 (outputFile : string) : unit = 
         let rows = getRows ruleTableCsvSourceFile
         generatePredicates eqptRelation rows 
-            |> runFactWriter 160 outputFile
+            |> writeFactsWithHeaderComment outputFile 

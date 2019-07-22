@@ -84,14 +84,14 @@ module AssetTypes =
         let rows = getRows assetTypesCsvSourceFile
             
         generatePredicates baseAssetType rows
-            |> runFactWriter 160 outputFile
+            |> writeFactsWithHeaderComment outputFile 
+
 
 
     let generateCategoryAndGroupFacts (assetTypesCsvSourceFile : string) 
                                         (outputFile : string) : unit =  
-        let rows = getRows assetTypesCsvSourceFile
-            
-        runFactWriter 160 outputFile 
+        let rows = getRows assetTypesCsvSourceFile            
+        writeFactsWithHeaderComment outputFile
             <| factWriter { 
                     do! generatePredicates equipmentCategory rows
                     do! generatePredicates equipmentGroup rows
