@@ -23,6 +23,7 @@
     <Compile Include="AssetTrafo\AspFacts\AibRuleTable.fs" />
     <Compile Include="AssetTrafo\AspFacts\AssetTypes.fs" />
     <Compile Include="AssetTrafo\AspFacts\HierarchyRules.fs" />
+    <Compile Include="AssetTrafo\AspFacts\Level12FlocMapping.fs" />
   </ItemGroup>
 
   <ItemGroup>

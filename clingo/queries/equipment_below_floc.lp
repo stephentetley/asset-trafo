@@ -19,11 +19,11 @@ equip_below(X, Ans) :-
     descendent_floc(X, Kid),
     eqpt(Kid, Ans).
 
-get_equip_below(Ans) :- equip_below("6XDWF OVERFLOW", Ans).
+get_equip_below(Ans) :- equip_below("VALVE", Ans).
 
-get_descendents(Ans, Typ) :- descendent_floc_with_type("6XDWF OVERFLOW", Ans, Typ).
+get_descendents(Cat, Ans) :- descendent_floc_with_type("VALVE", Ans, Cat).
 
-get_type(X) :- base_asset_type("6XDWF OVERFLOW", X).
+get_type(X) :- base_asset_type("VALVE", X).
 
 #show get_equip_below/1.
 
