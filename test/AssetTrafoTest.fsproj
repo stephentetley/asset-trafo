@@ -9,6 +9,7 @@
     <None Include="FactExtract/EquipmentLP.fsx" />
     <None Include="FactExtract/AibRuleTable.fsx" />
     <None Include="FactExtract\AssetTypes.fsx" />
+    <None Include="FactExtract\TempPotassco.fsx" />
     <None Include="Test01.fsx" />
     <None Include="Test02.fsx" />
     <None Include="Test03.fsx" />

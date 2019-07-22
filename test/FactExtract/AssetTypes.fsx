@@ -9,6 +9,10 @@ open System.IO
 #r @"FSharp.Data.dll"
 open FSharp.Data
 
+#I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\portable-net45+win8+wp8+wpa81"
+#r "FParsec"
+#r "FParsecCS"
+open FParsec
 
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat"
@@ -19,10 +23,16 @@ open FactX
 open FactX.FactWriter
 open FactX.Skeletons
 
+#I @"C:\Users\stephen\.nuget\packages\slpotassco\1.0.0-alpha-20190721\lib\netstandard2.0"
+#r "SLPotassco"
+open SLPotassco.Potassco.Invoke
+
+let outputDirectory () = 
+    System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\clingo")
 
 
-let localFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, "..\..", relativePath)
+let outputFile (relativePath : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\clingo", relativePath)
 
 
 // ********** DATA SETUP **********
@@ -109,11 +119,19 @@ let main () =
             |> List.distinct
             |> mapMz tellPredicate
 
-    runFactWriter 160 (localFile @"output\base_asset_type.lp") 
+    runFactWriter 160 (outputFile @"base_asset_type.lp") 
                         (genPredicates baseAssetType)
 
 
-    runFactWriter 160 (localFile @"output\equipment_cats_groups.lp") 
+    runFactWriter 160 (outputFile @"oequipment_cats_groups.lp") 
                         (genPredicates equipmentCategory 
                             >>. genPredicates equipmentGroup)
 
+let query () =  
+    let outputDir = outputDirectory ()
+    let files = 
+        [ "equipment_cats_groups.lp"
+        ; "base_asset_type.lp" 
+        ; "funcloc_query.lp"
+        ]
+    runClingo outputDir (Some 0) [] files
