@@ -24,7 +24,7 @@ open FactX.Skeletons
 
 
 let localFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, "..\..", relativePath)
+    Path.Combine(__SOURCE_DIRECTORY__, "..", relativePath)
 
 // ********** DATA SETUP **********
 

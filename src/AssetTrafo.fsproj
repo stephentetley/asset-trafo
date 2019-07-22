@@ -19,9 +19,10 @@
     <Compile Include="AssetTrafo\AideReport\Syntax.fs" />
     <Compile Include="AssetTrafo\AideReport\ReadCsv.fs" />
     <Compile Include="AssetTrafo\AideReport\MarkdownReport.fs" />
-     <Compile Include="AssetTrafo\AspFacts\Common.fs" />
+    <Compile Include="AssetTrafo\AspFacts\Common.fs" />
     <Compile Include="AssetTrafo\AspFacts\AibRuleTable.fs" />
     <Compile Include="AssetTrafo\AspFacts\AssetTypes.fs" />
+    <Compile Include="AssetTrafo\AspFacts\HierarchyRules.fs" />
   </ItemGroup>
 
   <ItemGroup>

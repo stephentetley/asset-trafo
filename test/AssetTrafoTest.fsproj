@@ -5,14 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Facts\AHR.fsx" />
     <None Include="Facts\EquipmentLP.fsx" />
     <None Include="Facts\RunAibRuleTable.fsx" />
     <None Include="Facts\RunAssetTypes.fsx" />
+    <None Include="Facts\RunHierarchyRules.fsx" />
     <None Include="Facts\TempPotassco.fsx" />
     <None Include="Test01.fsx" />
     <None Include="Test02.fsx" />
     <None Include="Test03.fsx" />
+    <None Include="AHRProlog.fsx" /> 
     <None Include="TestAideReport.fsx" />
     <None Include="GenProcessDescLookups.fsx" />
     <None Include="GenProcessMapping234.fsx" />
