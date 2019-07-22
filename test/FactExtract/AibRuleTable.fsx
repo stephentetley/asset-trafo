@@ -77,10 +77,10 @@ let main () =
     List.choose funcLocRelation rows
         |> List.distinct
         |> mapMz tellPredicate
-        |> runFactWriter 160 (localFile @"output\funcloc.lp") 
+        |> runFactWriter 160 (localFile @"clingo\facts\funcloc.lp") 
 
     List.choose eqptRelation rows
         |> List.distinct
         |> mapMz tellPredicate
-        |> runFactWriter 160 (localFile @"output\eqpt.lp") 
+        |> runFactWriter 160 (localFile @"clingo\facts\eqpt.lp") 
          

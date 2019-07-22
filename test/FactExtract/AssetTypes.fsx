@@ -27,12 +27,14 @@ open FactX.Skeletons
 #r "SLPotassco"
 open SLPotassco.Potassco.Invoke
 
-let outputDirectory () = 
-    System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\clingo")
+
+
+let clingoDirectory () = 
+    System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"..\..\clingo")
 
 
 let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\clingo", relativePath)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\clingo\facts", relativePath)
 
 
 // ********** DATA SETUP **********
@@ -123,15 +125,16 @@ let main () =
                         (genPredicates baseAssetType)
 
 
-    runFactWriter 160 (outputFile @"oequipment_cats_groups.lp") 
+    runFactWriter 160 (outputFile @"equipment_cats_groups.lp") 
                         (genPredicates equipmentCategory 
                             >>. genPredicates equipmentGroup)
 
 let query () =  
-    let outputDir = outputDirectory ()
+    let workingDir = clingoDirectory ()
+    printfn "Working Directory: %s" workingDir
     let files = 
-        [ "equipment_cats_groups.lp"
-        ; "base_asset_type.lp" 
-        ; "funcloc_query.lp"
+        [ @"facts/funcloc.lp"
+        ; @"facts/base_asset_type.lp" 
+        ; @"queries/funcloc_query.lp"
         ]
-    runClingo outputDir (Some 0) [] files
+    clingo workingDir (Some 0) [] files
