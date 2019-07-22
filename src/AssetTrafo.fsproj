@@ -19,6 +19,7 @@
     <Compile Include="AssetTrafo\AideReport\Syntax.fs" />
     <Compile Include="AssetTrafo\AideReport\ReadCsv.fs" />
     <Compile Include="AssetTrafo\AideReport\MarkdownReport.fs" />
+    <Compile Include="AssetTrafo\AspFacts\AssetTypes.fs" />
   </ItemGroup>
 
   <ItemGroup>
