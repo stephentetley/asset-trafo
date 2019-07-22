@@ -47,4 +47,5 @@ let main () =
     let rows = getSiteMappingRows source
     generateCommonNameFacts rows (outputFile "aib_common_names.lp") 
     generateLevel12Mappings rows (outputFile "floc_mapping_1_2.lp") 
+    generateAibInstallationType rows (outputFile "aib_installation_type.lp") 
 

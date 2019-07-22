@@ -9,7 +9,7 @@ map_installation_to_site(AibName, S4Name) :-
     aib_common_name(X, AibName),
     level1_mapping(X, _, S4Name).
 
-test_get_s4_site(Ans) :- map_installation_to_site("ARMLEY ROAD/CSO", Ans).
+test_get_s4_site(Ans) :- map_installation_to_site("ARKWRIGHT/CSO", Ans).
 
 test_get_aib_installation(Ans) :- map_installation_to_site(Ans, "Arkwright SPS").
 

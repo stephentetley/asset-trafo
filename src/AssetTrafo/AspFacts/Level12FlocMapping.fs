@@ -101,4 +101,24 @@ module Level12FlocMapping =
                     return ()
                 }
 
- 
+
+    // ************************************************************************
+    // Aib Common Name
+    
+    let private aibInstallationType (row : SiteMappingRow) : Predicate option = 
+        let make1 = 
+            fun code typ -> 
+                predicate "aib_installation_type" [ stringTerm code; stringTerm typ ]
+        match (checkInput row.AI2_InstallationReference, 
+                checkInput row.AI2_InstallationAssetType) with
+        | Some code, Some typ -> make1 code typ |> Some
+        | _, _ -> None
+
+
+    
+
+    let generateAibInstallationType (mappingRows : SiteMappingRow list)
+                            (outputFile : string) : unit =  
+        generatePredicates aibInstallationType mappingRows
+            |> writeFactsWithHeaderComment outputFile
+
