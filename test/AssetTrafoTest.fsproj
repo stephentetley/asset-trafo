@@ -10,7 +10,6 @@
     <None Include="Facts\RunAssetTypes.fsx" />
     <None Include="Facts\RunHierarchyRules.fsx" />
     <None Include="Facts\RunLevel12FlocMapping.fsx" />
-    <None Include="Facts\TempPotassco.fsx" />
     <None Include="Test01.fsx" />
     <None Include="Test02.fsx" />
     <None Include="Test03.fsx" />

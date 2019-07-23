@@ -16,6 +16,7 @@ open FParsec
 
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat"
+open SLFormat.CommandOptions
 
 #I @"C:\Users\stephen\.nuget\packages\factx\1.0.0-alpha-20190721\lib\netstandard2.0"
 #r "FactX"
@@ -23,7 +24,7 @@ open FactX
 open FactX.FactWriter
 open FactX.Skeletons
 
-#I @"C:\Users\stephen\.nuget\packages\slpotassco\1.0.0-alpha-20190722b\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slpotassco\1.0.0-alpha-20190723a\lib\netstandard2.0"
 #r "SLPotassco"
 open SLPotassco.Potassco.Invoke
 
@@ -46,12 +47,15 @@ let main () =
 
 
 
-let query () =  
+let query (item : string) =  
     let workingDir = clingoDirectory ()
+    let setqvar = sprintf "qvar_asset=\"\"\"%s\"\"\"" item
+    let setConst = argument "-c" &^^ setqvar
     printfn "Working Directory: %s" workingDir
     let files = 
         [ "facts/rule_table_funcloc.lp"
         ; "facts/base_asset_type.lp" 
-        ; "queries/funcloc_query.lp"
+        ; "facts/rule_table_equipment.lp"
+        ; "queries/equipment_below_floc.lp"
         ]
-    runClingo workingDir (Some 0) [] files
+    runClingo workingDir (Some 0) [setConst] files
