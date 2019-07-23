@@ -14,6 +14,7 @@
     <None Include="Test01.fsx" />
     <None Include="Test02.fsx" />
     <None Include="Test03.fsx" />
+    <None Include="ClingoFlocMapping.fsx" />
     <None Include="AHRProlog.fsx" /> 
     <None Include="TestAideReport.fsx" />
     <None Include="GenProcessDescLookups.fsx" />
