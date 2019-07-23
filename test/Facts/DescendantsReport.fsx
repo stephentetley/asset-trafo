@@ -17,11 +17,10 @@ open FSharp.Data
 #r "SLFormat"
 open SLFormat.CommandOptions
 
-#I @"C:\Users\stephen\.nuget\packages\factx\1.0.0-alpha-20190721\lib\netstandard2.0"
-#r "FactX"
-open FactX
-open FactX.FactWriter
-open FactX.Skeletons
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190721\lib\netstandard2.0"
+#r "MarkdownDoc.dll"
+open MarkdownDoc.Markdown
+open MarkdownDoc.Pandoc
 
 #I @"C:\Users\stephen\.nuget\packages\slpotassco\1.0.0-alpha-20190723a\lib\netstandard2.0"
 #r "SLPotassco"
@@ -33,12 +32,36 @@ open SLPotassco.Potassco.Invoke
 let clingoDirectory () = 
     System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"..\..\clingo")
 
+
+let outputDirectory () = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..", "output")
+
+let getOutputFile (relFileName : string) = 
+    let dir = outputDirectory () in Path.Combine(dir, relFileName)
+
+
+
 // For sl-potassco
 let clingoFailureDescription (clingoFailure : RunClingoFailure) : string = 
     match clingoFailure with
     | SysFail exc -> sprintf "*** SYSTEM: %s" exc.Message
     | ClingoFail x -> sprintf "%s\n%s" x.Error x.Info
     | OutputParseFail msg -> sprintf "*** Parsing failure: %s" msg
+
+
+let pandocHtmlOptions () : PandocOptions = 
+    let highlightStyle = argument "--highlight-style" &= argValue "tango"
+    let selfContained = argument "--self-contained"
+    /// Github style is nicer for tables than Tufte
+    /// Note - body width has been changed on both stylesheets
+    let css = 
+        // path relative to the "working directory" that pandoc is invoked from
+        argument "--css" &= doubleQuote @"..\..\..\libs\markdown-css-master\github.css"
+    { Standalone = true
+      InputExtensions = []
+      OutputExtensions = []
+      OtherOptions = [ css; highlightStyle; selfContained ]  }
+
 
 let runQuery (assetType : string) : Result<ClingoOutput, string> =  
     let workingDir = clingoDirectory ()
@@ -56,8 +79,8 @@ let runQuery (assetType : string) : Result<ClingoOutput, string> =
     | Ok output -> Ok output
 
 type FlocItem = 
-    { Name : string
-      ItemType : string 
+    { ItemType : string 
+      Name : string
     }
 
 type Descendants = 
@@ -66,66 +89,14 @@ type Descendants =
       EquipmentBelow : string list
     }
 
-//type TermValues = GroundTerm list
-//type AnswerMap = Map<string, TermValues list>
-
-//let makeAnswerMap (clingoAns : ClingoAnswer) : AnswerMap option = 
-//    let build1 (AnswerTerm(name, vals)) dict = 
-//        match Map.tryFind name dict with
-//        | Some xs -> Map.add name (vals :: xs) dict
-//        | None -> Map.add name [vals] dict
-//    match clingoAns.Status with
-//    | Satisfiable -> 
-//        List.foldBack build1 clingoAns.AnswerTerms Map.empty |> Some
-//    | _ -> None
-
-
-let tryGetString (ix:int) (term:AnswerTerm) : string option = 
-    match term with
-    | AnswerTerm(_, vals) -> 
-        match List.tryItem ix vals with
-        | Some (String str)  -> Some str
-        | _ -> None
-
-
-
-let tryGetInt64 (ix:int) (term:AnswerTerm) : int64 option = 
-    match term with
-    | AnswerTerm(_, vals) -> 
-        match List.tryItem ix vals with
-        | Some (Number n)  -> Some n
-        | _ -> None
-
-let tryGetSymbolicConstant (ix:int) (term:AnswerTerm) : string option = 
-    match term with
-    | AnswerTerm(_, vals) -> 
-        match List.tryItem ix vals with
-        | Some (SymbolicConstant str)  -> Some str
-        | _ -> None
-
-//let tryGetFirst (key : string) (dict : AnswerMap) : AnswerTerm option = 
-//    match Map.tryFind key dict with
-//    | Some (h1 :: _) -> AnswerTerm(key, h1) |> Some
-//    | _ -> None
-
-//let getAll (key : string) (dict : AnswerMap) : AnswerTerm list = 
-//    match Map.tryFind key dict with
-//    | Some xs -> List.map (fun vals -> AnswerTerm(key, vals)) xs
-//    | _ -> []
-
-
-
-//let getAllTranslate (key : string) 
-//                    (translate : AnswerTerm -> 'a) 
-//                    (dict : AnswerMap) : 'a list = 
-//    match Map.tryFind key dict with
-//    | Some xs -> List.map (fun vals -> AnswerTerm(key, vals) |> translate) xs
-//    | _ -> []
-
+// The simplest way of working with Potassco results might be to write
+// "matchers" and run them on the answer terms with List.tryPick and 
+// List.choose...
 
 let tryGetFlocBelow (term : AnswerTerm) : FlocItem option = 
     match term with
-    | AnswerTerm("get_floc_below", [String x; String y]) -> Some { Name = y; ItemType = x}
+    | AnswerTerm("get_floc_below", [String x; String y]) -> 
+        Some { Name = y; ItemType = x}
     | _ -> None
 
 let tryGetEquipBelow (term : AnswerTerm) : string option = 
@@ -149,21 +120,54 @@ let getDecendants (output : ClingoOutput) : Descendants list =
         match clingoAns.Status with
         | Satisfiable -> 
             let typename = List.tryPick tryGetType clingoAns.AnswerTerms 
-                                |> Option.defaultValue "<Unknown>"
+                                |> Option.defaultValue "<type unknown>"
             let identity = List.tryPick tryIdentity clingoAns.AnswerTerms 
                                 |> Option.defaultValue "<Unknown>"
             Some { Item = { Name = identity ; ItemType = typename }
-                   FlocItemsBelow = List.choose tryGetFlocBelow clingoAns.AnswerTerms 
-                   EquipmentBelow = List.choose tryGetEquipBelow clingoAns.AnswerTerms 
+                   FlocItemsBelow = 
+                        List.choose tryGetFlocBelow clingoAns.AnswerTerms |> List.sort
+                   EquipmentBelow = 
+                        List.choose tryGetEquipBelow clingoAns.AnswerTerms |> List.sort
                  }
         | _ -> None
     List.choose descendants1 output.Answers 
 
 
+let makeReport (descendants : Descendants list) : Markdown = 
+    let mdFlocs (flocsBelow : FlocItem list) : Markdown = 
+        let flocText (floc : FlocItem) : ParaElement = 
+            paraText (text floc.Name ^+^ character ':' ^+^ (underscores <| text floc.ItemType))
+        h3 (text "Descendant FLOCs") 
+            ^!!^ markdown (unorderedList <| List.map flocText flocsBelow)
+
+    let mdEquipment (equipNames : string list) : Markdown = 
+        h3 (text "Descendant Equipment") 
+            ^!!^ markdown (unorderedList <| List.map (paraText << text) equipNames)
+
+    let mdDescendants (desc : Descendants) : Markdown = 
+        h2 (text desc.Item.Name ^+^ character ':' ^+^ (underscores <| text desc.Item.ItemType))
+            ^!!^ mdFlocs desc.FlocItemsBelow
+            ^!!^ mdEquipment desc.EquipmentBelow
+
+    h1 (text "Elements Below") :: List.map mdDescendants descendants 
+        |> concatMarkdown
+       
+let exportMarkdown (descendants : Descendants list) : Result<int, string> = 
+    let doc = makeReport descendants
+    let mdPath = getOutputFile "descendants_report.md"
+    doc.Save(columnWidth = 140, outputPath = mdPath)
+    runPandocHtml5 true 
+                    (outputDirectory ()) 
+                    "descendants_report.md"
+                    "descendants_report.html" 
+                    (Some "Descendants Report")
+                    (pandocHtmlOptions ()) 
+        
 
 
-
-let runReport (assetType : string) = 
-    runQuery assetType 
-        |> Result.map getDecendants
-
+let runReport (assetType : string) : Result<int, string> = 
+    match runQuery assetType with
+    | Error msg -> Error msg
+    | Ok clingoAns -> 
+        clingoAns |> getDecendants |> exportMarkdown
+        
