@@ -8,6 +8,8 @@ descendent_floc(X,Z) :- descendent_floc(X,Y), descendent_floc(Y,Z).
 
 descendent_floc_with_type(X,Y,Z) :- descendent_floc(X,Y), base_asset_type(Y,Z).
 
+
+
 test(Ans) :- descendent_floc("WASTE WATER CROSSING", Ans).
 
 #show test/1.
