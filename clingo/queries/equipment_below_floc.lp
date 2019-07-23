@@ -14,10 +14,16 @@ descendant_floc(X,Z) :- descendant_floc(X,Y), descendant_floc(Y,Z).
 
 descendant_floc_with_type(X,Y,Z) :- descendant_floc(X,Y), base_asset_type(Y,Z).
 
+% Need two cases for equipment below.
+% 1. Equipment below kids of item
+% 2. equipment below item itself
 
 equip_below(X, Ans) :-
     descendant_floc(X, Kid),
     eqpt(Kid, Ans).
+
+equip_below(X, Ans) :-
+    eqpt(X, Ans).    
 
 % Queries
 
