@@ -60,11 +60,11 @@ let pandocHtmlOptions () : PandocOptions =
 
 let test01 () = 
     let assetRows1 = 
-        readAssetChangeExport @"G:\work\Projects\asset_sync\aide_report\aide_asset_changes.csv"
+        readAssetChangeExport @"G:\work\Projects\asset_sync\aide_report\asset_change_request_147854.csv"
             |> Result.map (Seq.map convertAssetChangeRow >> Seq.toList)
 
     let attrRows1 = 
-        readAttributeChangeExport @"G:\work\Projects\asset_sync\aide_report\aide_asset_attribute_changes.csv"
+        readAttributeChangeExport @"G:\work\Projects\asset_sync\aide_report\attibute_change_request_147854.csv"
             |> Result.map (Seq.map convertAttributeChangeRow >> Seq.toList)
 
     match assetRows1, attrRows1 with 

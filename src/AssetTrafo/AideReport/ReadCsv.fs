@@ -14,10 +14,10 @@ module ReadCsv =
     let AttributeChangeSchema = 
         "ChangeRequestId(int64),RequestStatus(string),\
          Reference(string),AssetName(string),\
-         AttributeName(string),AI2Value(string option),\
-         AILookupValue(string option),AILookupCode(int64 option),\
-         AIDEValue(string option),AIDELookupValue(string option),\
-         AIDELookupCode(int64 option),ChangeRequestTime(date)"
+         AttributeName(string),AiValue(string option),\
+         AiLookupValue(string option),AiLookupCode(int64 option),\
+         AideValue(string option),AideLookupValue(string option),\
+         AideLookupCode(int64 option),ChangeRequestTime(date)"
 
 
     [<Literal>]
@@ -56,10 +56,10 @@ module ReadCsv =
     let convertAttributeChangeRow (row : AttributeChangeRow) : AttributeChange = 
         { ChangeRequestId = row.ChangeRequestId
           AttributeName = row.AttributeName
-          AiValue = getValue row.AI2Value row.AILookupCode row.AILookupValue
-          AiSource = getValueSource row.AIDELookupCode
-          AideValue = getValue row.AIDEValue row.AIDELookupCode row.AIDELookupValue
-          AideSource = getValueSource row.AILookupCode
+          AiValue = getValue row.AiValue row.AiLookupCode row.AiLookupValue
+          AiSource = getValueSource row.AideLookupCode
+          AideValue = getValue row.AideValue row.AideLookupCode row.AideLookupValue
+          AideSource = getValueSource row.AiLookupCode
         }
 
     // ************************************************************************
@@ -68,14 +68,14 @@ module ReadCsv =
     let AssetChangeSchema = 
         "ChangeRequestId(int64),RequestStatus(string),\
          ChangeRequestType(string),AssetReference(string),\
-         AI2AssetName(string),AI2CommonName(string),\
-         AI2InstalledFromDate(date),AI2Manufacturer(string),\
-         AI2Model(string),AI2HierarchyKey(string),\
-         AI2AssetStatus(string),AI2LocationReference(string),\
+         AiAssetName(string),AiCommonName(string),\
+         AiInstalledFromDate(date),AiManufacturer(string),\
+         AiModel(string),AiHierarchyKey(string),\
+         AiAssetStatus(string),AiLocationReference(string),\
          AideAssetName(string),AideCommonName(string),\
-         AIDEInstalledFromDate(date),AIDEManufacturer(string),\
-         AIDEModel(string),AI2HierarchyKey(string),\
-         AIDEAssetStatus(string),AIDELocationReference(string),\
+         AideInstalledFromDate(date),AideManufacturer(string),\
+         AideModel(string),AideHierarchyKey(string),\
+         AideAssetStatus(string),AideLocationReference(string),\
          ChangeRequestTime(date)"        
 
     [<Literal>]
@@ -101,8 +101,36 @@ module ReadCsv =
         with
         | ex -> Error ex.Message
 
+    let readProperties (row : AssetChangeRow) : AssetProperty list = 
+        [ { PropertyName    = "Name"
+            ; AiValue       = row.AiAssetName 
+            ; AideValue     = row.AideAssetName }
+        ; { PropertyName    = "Common Name"
+            ; AiValue       = row.AiCommonName
+            ; AideValue     = row.AideCommonName }
+        ; { PropertyName    = "Installed From Date"
+            ; AiValue       = row.AiInstalledFromDate.ToString(format="dd/MM/yyyy hh:mm:ss")
+            ; AideValue     = row.AideInstalledFromDate.ToString(format="dd/MM/yyyy hh:mm:ss") }
+        ; { PropertyName    = "Manufacturer"
+            ; AiValue       = row.AiManufacturer
+            ; AideValue     = row.AideManufacturer }
+        ; { PropertyName    = "Model"
+            ; AiValue       = row.AiModel
+            ; AideValue     = row.AideModel }
+        ; { PropertyName    = "Hierarchy Key"
+            ; AiValue       = row.AiHierarchyKey
+            ; AideValue     = row.AideHierarchyKey }
+        ; { PropertyName    = "Asset Status"
+            ; AiValue       = row.AiAssetStatus
+            ; AideValue     = row.AideAssetStatus }
+        ; { PropertyName    = "Location Ref"
+            ; AiValue       = row.AiLocationReference
+            ; AideValue     = row.AideLocationReference }
+        ]
     let convertAssetChangeRow (row : AssetChangeRow) : AssetChange = 
         { ChangeRequestId = row.ChangeRequestId
           Reference = row.AssetReference
-          AssetName = row.AI2AssetName
+          AiAssetName = row.AiAssetName
+          AiCommonName = row.AiCommonName
+          AssetProperties = readProperties row
         }

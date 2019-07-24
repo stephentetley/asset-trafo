@@ -46,23 +46,49 @@ module MarkDownReport =
 
 
     let assetChangeMdRow (assetChange : AssetChange) : Markdown.Table.TableRow = 
-        [ assetChange.ChangeRequestId |> int64Doc |> paraText 
-        ; assetChange.Reference |> text |> paraText 
-        ; assetChange.AssetName |> text |> paraText 
+        [ assetChange.Reference     |> text |> paraText 
+        ; assetChange.AiAssetName   |> text |> paraText 
+        ; assetChange.AiCommonName  |> text |> paraText 
         ]
 
-    let assetChangesMdTable (assetChanges : AssetChange list) : Markdown.Table.Table = 
+    let assetHeaderMdTable (assetChanges : AssetChange list) : Markdown.Table.Table = 
         let (rows : TableRow list) = 
             assetChanges |> List.map assetChangeMdRow
         let specs = [ alignLeft 30; alignLeft 30; alignLeft 45 ]
-        let headers = [ "Change Request Id"; "Reference"; "Asset Name"] 
+        let headers = [ "Reference"; "Asset Name (AI2)"; "Common Name (AI2)" ] 
                         |> List.map ( paraText << doubleAsterisks << text)
         makeTable specs headers rows
+
+    let assetPropertyMdRow (changeRequestId : int64) 
+                            (assetProperty : AssetProperty) : Markdown.Table.TableRow option = 
+        if assetProperty.HasChanged then
+            [ changeRequestId               |> int64Doc |> paraText 
+            ; assetProperty.PropertyName    |> text |> paraText 
+            ; assetProperty.AiValue         |> text |> paraText 
+            ; assetProperty.AideValue       |> text |> paraText 
+            ] |> Some
+
+        else
+            None
+
+    let assetPropChangesMdTable (assetChange : AssetChange) : Markdown = 
+        if  assetChange.HasChangedProperties then
+            let (rows : TableRow list) = 
+                assetChange.AssetProperties 
+                    |> List.choose (assetPropertyMdRow assetChange.ChangeRequestId)
+            let specs = [ alignLeft 30; alignLeft 35; alignLeft 35; alignLeft 35 ]
+            let headers = [ "Change Request Id"; "Name"; "AI2 Value"; "AIDE Value" ] 
+                            |> List.map ( paraText << doubleAsterisks << text)
+            makeTable specs headers rows |> gridTable
+        else
+            Markdown.emptyMarkdown
 
     let makeReport (assetChanges : AssetChange list) 
                    (attrChanges : AttributeChange list) : Markdown = 
         h1 (text "AIDE Changes") 
+            ^!!^ h2 (text "Asset")
+            ^!!^ gridTable (assetHeaderMdTable assetChanges)
             ^!!^ h2 (text "Asset Changes")
-            ^!!^ gridTable (assetChangesMdTable assetChanges)
+            ^!!^ concatMarkdown (List.map assetPropChangesMdTable assetChanges)
             ^!!^ h2 (text "Attribute Changes")
             ^!!^ gridTable (attributeChangesMdTable attrChanges)
