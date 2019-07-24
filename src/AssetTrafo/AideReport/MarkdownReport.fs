@@ -6,11 +6,16 @@ namespace AssetTrafo.AideReport
 
 module MarkDownReport =
 
+    open System.IO
+
+    open SLFormat.CommandOptions
+
     open MarkdownDoc
     open MarkdownDoc.Markdown
     open MarkdownDoc.Pandoc
 
     open AssetTrafo.AideReport.Syntax
+    open AssetTrafo.AideReport.ReadCsv
 
     /// Markdown report 
 
@@ -83,8 +88,8 @@ module MarkDownReport =
         else
             Markdown.emptyMarkdown
 
-    let makeReport (assetChanges : AssetChange list) 
-                   (attrChanges : AttributeChange list) : Markdown = 
+    let makeMarkdownReport (assetChanges : AssetChange list) 
+                            (attrChanges : AttributeChange list) : Markdown = 
         h1 (text "AIDE Changes") 
             ^!!^ h2 (text "Asset")
             ^!!^ gridTable (assetHeaderMdTable assetChanges)
@@ -92,3 +97,52 @@ module MarkDownReport =
             ^!!^ concatMarkdown (List.map assetPropChangesMdTable assetChanges)
             ^!!^ h2 (text "Attribute Changes")
             ^!!^ gridTable (attributeChangesMdTable attrChanges)
+
+
+    let pandocHtmlDefaults (pathToCss : string) : PandocOptions = 
+        let highlightStyle = argument "--highlight-style" &= argValue "tango"
+        let selfContained = argument "--self-contained"
+        /// Github style is nicer for tables than Tufte
+        /// Note - body width has been changed on both stylesheets
+        let css = argument "--css" &= doubleQuote pathToCss
+        { Standalone = true
+          InputExtensions = []
+          OutputExtensions = []
+          OtherOptions = [ css; highlightStyle; selfContained ]  }
+
+
+    let generateChangesReport (assetChangesCsvFile : string) 
+                              (attributeChangesCsvFile : string) 
+                              (pandocOpts : PandocOptions)
+                              (outputHtmlFile : string) : Result<unit, string> = 
+        let assetRows1 = 
+            readAssetChangeExport assetChangesCsvFile
+                |> Result.map (Seq.map convertAssetChangeRow >> Seq.toList)
+    
+        let attrRows1 = 
+            readAttributeChangeExport attributeChangesCsvFile
+                |> Result.map (Seq.map convertAttributeChangeRow >> Seq.toList)
+    
+        match assetRows1, attrRows1 with 
+        | Ok assetRows, Ok attrRows -> 
+            let doc = makeMarkdownReport assetRows attrRows
+            let mdFileFull = Path.ChangeExtension(outputHtmlFile, "md") 
+            let mdFileName = Path.GetFileName(mdFileFull)
+            let htmlFileName = Path.GetFileName(outputHtmlFile)
+            let outputDirectory = Path.GetDirectoryName(outputHtmlFile)
+            doc.Save(columnWidth = 140, outputPath = mdFileFull)
+            let retCode = 
+                runPandocHtml5 
+                    true 
+                    outputDirectory 
+                    mdFileName
+                    htmlFileName
+                    (Some "Changes Report")
+                    pandocOpts
+            match retCode with
+            | Ok i -> printfn "Return code: %i" i ; Ok ()
+            | Error msg -> Error msg
+        | Error msg, _ -> Error msg
+        | _, Error msg -> Error msg
+        
+    

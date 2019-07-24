@@ -46,39 +46,14 @@ let alignLeft (width : int) : ColumnSpec =
 
 
 let pandocHtmlOptions () : PandocOptions = 
-    let highlightStyle = argument "--highlight-style" &= argValue "tango"
-    let selfContained = argument "--self-contained"
-    /// Github style is nicer for tables than Tufte
-    /// Note - body width has been changed on both stylesheets
-    let css = 
-        argument "--css" &= doubleQuote @"..\..\..\libs\markdown-css-master\github.css"
-    { Standalone = true
-      InputExtensions = []
-      OutputExtensions = []
-      OtherOptions = [ css; highlightStyle; selfContained ]  }
+    pandocHtmlDefaults @"..\..\..\libs\markdown-css-master\github.css"
 
 
-let test01 () = 
-    let assetRows1 = 
-        readAssetChangeExport @"G:\work\Projects\asset_sync\aide_report\asset_change_request_147854.csv"
-            |> Result.map (Seq.map convertAssetChangeRow >> Seq.toList)
 
-    let attrRows1 = 
-        readAttributeChangeExport @"G:\work\Projects\asset_sync\aide_report\attibute_change_request_147854.csv"
-            |> Result.map (Seq.map convertAttributeChangeRow >> Seq.toList)
+let test01 () : Result<unit, string> = 
+    generateChangesReport
+        @"G:\work\Projects\asset_sync\aide_report\asset_change_request_147854.csv"
+        @"G:\work\Projects\asset_sync\aide_report\attibute_change_request_147854.csv"
+        (pandocHtmlOptions ())
+        (getOutputFile "changes_report.html" )
 
-    match assetRows1, attrRows1 with 
-    | Ok assetRows, Ok attrRows -> 
-        let doc = makeReport assetRows attrRows
-        let mdPath = getOutputFile "changes_report.md"
-        doc.Save(columnWidth = 140, outputPath = mdPath)
-        runPandocHtml5 true 
-                        (outputDirectory ()) 
-                        "changes_report.md"
-                        "changes_report.html" 
-                        (Some "Changes Report")
-                        (pandocHtmlOptions ()) 
-            |> ignore
-    | Error msg, _ -> printfn "Error: %s" msg
-    | _, Error msg -> printfn "Error: %s" msg
-    
