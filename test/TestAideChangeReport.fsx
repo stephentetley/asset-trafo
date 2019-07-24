@@ -23,11 +23,10 @@ open MarkdownDoc.Pandoc
 
 
 #load "..\src\AssetTrafo\Base\Common.fs"
-#load "..\src\AssetTrafo\AideReport\Syntax.fs"
-#load "..\src\AssetTrafo\AideReport\ReadCsv.fs"
-#load "..\src\AssetTrafo\AideReport\MarkdownReport.fs"
-open AssetTrafo.AideReport.ReadCsv
-open AssetTrafo.AideReport.MarkDownReport
+#load "..\src\AssetTrafo\AideChangeReport\Syntax.fs"
+#load "..\src\AssetTrafo\AideChangeReport\ReadCsv.fs"
+#load "..\src\AssetTrafo\AideChangeReport\ChangeReport.fs"
+open AssetTrafo.AideChangeReport.ChangeReport
 
 
 let outputDirectory () = 
@@ -55,5 +54,5 @@ let test01 () : Result<unit, string> =
         @"G:\work\Projects\asset_sync\aide_report\asset_change_request_147854.csv"
         @"G:\work\Projects\asset_sync\aide_report\attibute_change_request_147854.csv"
         (pandocHtmlOptions ())
-        (getOutputFile "changes_report.html" )
+        (getOutputFile "changes_report.html")
 

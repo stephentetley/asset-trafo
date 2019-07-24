@@ -16,9 +16,9 @@
     <Compile Include="AssetTrafo\Aib\StructureRelationsSimple.fs" />
     <Compile Include="AssetTrafo\Aib\MarkdownOutput.fs" />
     <Compile Include="AssetTrafo\S4\S4Types.fs" />
-    <Compile Include="AssetTrafo\AideReport\Syntax.fs" />
-    <Compile Include="AssetTrafo\AideReport\ReadCsv.fs" />
-    <Compile Include="AssetTrafo\AideReport\MarkdownReport.fs" />
+    <Compile Include="AssetTrafo\AideChangeReport\Syntax.fs" />
+    <Compile Include="AssetTrafo\AideChangeReport\ReadCsv.fs" />
+    <Compile Include="AssetTrafo\AideChangeReport\ChangeReport.fs" />
     <Compile Include="AssetTrafo\AspFacts\Common.fs" />
     <Compile Include="AssetTrafo\AspFacts\AibRuleTable.fs" />
     <Compile Include="AssetTrafo\AspFacts\AssetTypes.fs" />

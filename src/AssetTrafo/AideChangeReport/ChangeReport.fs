@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetTrafo.AideReport
+namespace AssetTrafo.AideChangeReport
 
 
-module MarkDownReport =
+module ChangeReport =
 
     open System.IO
 
@@ -14,8 +14,8 @@ module MarkDownReport =
     open MarkdownDoc.Markdown
     open MarkdownDoc.Pandoc
 
-    open AssetTrafo.AideReport.Syntax
-    open AssetTrafo.AideReport.ReadCsv
+    open AssetTrafo.AideChangeReport.Syntax
+    open AssetTrafo.AideChangeReport.ReadCsv
 
     /// Markdown report 
 

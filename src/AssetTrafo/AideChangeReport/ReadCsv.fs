@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetTrafo.AideReport
+namespace AssetTrafo.AideChangeReport
 
 
 module ReadCsv =
     
     open FSharp.Data
 
-    open AssetTrafo.AideReport.Syntax
+    open AssetTrafo.AideChangeReport.Syntax
 
     [<Literal>]
     let AttributeChangeSchema = 
