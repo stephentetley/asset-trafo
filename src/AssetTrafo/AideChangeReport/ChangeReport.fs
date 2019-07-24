@@ -31,8 +31,8 @@ module ChangeReport =
     
     
     let attributeChangeMdRow (attrChange : AttributeChange) : Markdown.Table.TableRow = 
-        [ attrChange.ChangeRequestId |> int64Doc |> paraText
-        ; attrChange.AttributeName |> text |> paraText 
+        [ attrChange.ChangeRequestId    |> int64Doc |> paraText
+        ; attrChange.AttributeName      |> text     |> paraText 
         ; valueCell attrChange.AiValue 
         ; valueCell attrChange.AideValue
         ]
@@ -163,7 +163,7 @@ module ChangeReport =
                     outputDirectory 
                     mdFileName
                     htmlFileName
-                    (Some "Changes Report")
+                    (Some "Aide Changes Report")
                     pandocOpts
             match retCode with
             | Ok i -> printfn "Return code: %i" i ; Ok ()

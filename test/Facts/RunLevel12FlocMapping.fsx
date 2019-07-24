@@ -45,7 +45,7 @@ let outputFile (relativePath : string) =
 let main () = 
     let source = @"G:\work\Projects\asset_sync\Lvl1_2FlocMapping.xlsx"
     let rows = getSiteMappingRows source
-    generateCommonNameFacts rows (outputFile "aib_common_names.lp") 
     generateLevel12Mappings rows (outputFile "floc_mapping_1_2.lp") 
+    generateCommonNameFacts rows (outputFile "aib_common_names.lp") 
     generateAibInstallationType rows (outputFile "aib_installation_type.lp") 
 

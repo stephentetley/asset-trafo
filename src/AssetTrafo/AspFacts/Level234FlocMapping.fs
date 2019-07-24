@@ -4,7 +4,7 @@
 namespace AssetTrafo.AspFacts
 
 
-module HierarchyRules =
+module Level234FlocMapping =
 
     open FSharp.Interop.Excel
 

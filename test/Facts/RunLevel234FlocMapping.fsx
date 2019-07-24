@@ -31,8 +31,8 @@ open FParsec
 open SLPotassco.Potassco.Invoke
 
 #load "..\..\src\AssetTrafo\AspFacts\Common.fs"
-#load "..\..\src\AssetTrafo\AspFacts\HierarchyRules.fs"
-open AssetTrafo.AspFacts.HierarchyRules
+#load "..\..\src\AssetTrafo\AspFacts\Level234FlocMapping.fs"
+open AssetTrafo.AspFacts.Level234FlocMapping
 
 let clingoDirectory () = 
     System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"..\..\clingo")
@@ -45,7 +45,6 @@ let outputFile (relativePath : string) =
 let main () = 
     let source = @"G:\work\Projects\asset_sync\AI2_FLOC_Asset_Hierarchy_Rules_V3_FRAGMENT.xlsx"
     let rows = getMappingRows source
+    generateCodeMapping rows (outputFile "floc_mapping_2_3_4.lp")
     generateProcProcGroupFacts rows (outputFile "proc_proc_group.lp") 
     generateDescriptionLookupFacts rows (outputFile "description_lookup.lp") 
-    generateCodeMapping rows (outputFile "code_mapping.lp") 
-
