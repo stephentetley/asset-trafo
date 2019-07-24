@@ -88,9 +88,35 @@ module ChangeReport =
         else
             Markdown.emptyMarkdown
 
+    /// Add to markdown-doc?
+    let commaSpaceSep (texts : Text list) : Text = 
+        match texts with 
+        | [] -> Text.empty
+        | [d1] -> d1
+        | d1 :: rest -> List.fold (fun ac d -> ac ^^ character ',' ^+^ d) d1 rest
+        
+        
+
+
+    let makeTitle1 (assetChanges : AssetChange list) : Text = 
+        let ids = 
+            assetChanges |> List.map (fun x -> x.ChangeRequestId)
+        let display xs = 
+            let docs = List.map int64Doc xs
+            if docs.Length > 3 then
+                List.take 3 docs @ [text "..."] |> commaSpaceSep
+            else
+                docs |> commaSpaceSep
+                
+        match ids with
+        | [] -> text "AIDE Changes"
+        | [x] -> text "AIDE Changes - Change Request:" ^+^ int64Doc x
+        | _ -> text "AIDE Changes - Change Requests:" ^+^ display ids
+
+
     let makeMarkdownReport (assetChanges : AssetChange list) 
                             (attrChanges : AttributeChange list) : Markdown = 
-        h1 (text "AIDE Changes") 
+        h1 (makeTitle1 assetChanges) 
             ^!!^ h2 (text "Asset")
             ^!!^ gridTable (assetHeaderMdTable assetChanges)
             ^!!^ h2 (text "Asset Changes")

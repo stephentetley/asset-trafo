@@ -29,19 +29,11 @@ open MarkdownDoc.Pandoc
 open AssetTrafo.AideChangeReport.ChangeReport
 
 
-let outputDirectory () = 
-    Path.Combine(__SOURCE_DIRECTORY__, "..", "output")
 
 let getOutputFile (relFileName : string) = 
-    let dir = outputDirectory () in Path.Combine(dir, relFileName)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
 
-let tempDatetime () : System.DateTime = 
-    DateTime.Now
-
-let alignLeft (width : int) : ColumnSpec = 
-    { Width = width; Alignment = Alignment.AlignLeft }
-    
 
 
 let pandocHtmlOptions () : PandocOptions = 
