@@ -21,7 +21,7 @@
     <Compile Include="AssetTrafo\AideChangeReport\ChangeReport.fs" />
     <Compile Include="AssetTrafo\AspFacts\Common.fs" />
     <Compile Include="AssetTrafo\AspFacts\AibRuleTable.fs" />
-    <Compile Include="AssetTrafo\AspFacts\AssetTypes.fs" />
+    <Compile Include="AssetTrafo\AspFacts\AibAssetTypes.fs" />
     <Compile Include="AssetTrafo\AspFacts\Level12FlocMapping.fs" />
     <Compile Include="AssetTrafo\AspFacts\Level234FlocMapping.fs" />
   </ItemGroup>

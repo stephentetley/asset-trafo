@@ -70,9 +70,9 @@ let runQuery (assetType : string) : Result<ClingoOutput, string> =
     let setConst = argument "-c" &^^ setqvar
     printfn "Working Directory: %s" workingDir
     let files = 
-        [ "facts/rule_table_funcloc.lp"
-        ; "facts/base_asset_type.lp" 
-        ; "facts/rule_table_equipment.lp"
+        [ "facts/aib_rule_table_funcloc.lp"
+        ; "facts/aib_base_asset_type.lp" 
+        ; "facts/aib_rule_table_equipment.lp"
         ; "queries/equipment_below_floc.lp"
         ]
     match runClingo workingDir (Some 0) [setConst] files with

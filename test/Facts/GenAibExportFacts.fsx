@@ -29,8 +29,10 @@ open FactX.Skeletons
 open SLPotassco.Potassco.Invoke
 
 #load "..\..\src\AssetTrafo\AspFacts\Common.fs"
-#load "..\..\src\AssetTrafo\AspFacts\AssetTypes.fs"
-open AssetTrafo.AspFacts.AssetTypes
+#load "..\..\src\AssetTrafo\AspFacts\AibAssetTypes.fs"
+#load "..\..\src\AssetTrafo\AspFacts\AibRuleTable.fs"
+open AssetTrafo.AspFacts.AibAssetTypes
+open AssetTrafo.AspFacts.AibRuleTable
 
 let clingoDirectory () = 
     System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"..\..\clingo")
@@ -40,22 +42,18 @@ let outputFile (relativePath : string) =
     Path.Combine(__SOURCE_DIRECTORY__, @"..\..\clingo\facts", relativePath)
 
 
-let main () = 
+let ruleTableFacts () = 
+    let source = @"G:\work\Projects\asset_sync\rules\ai_rule_table_simple.csv"
+    generateFunLocFacts    source (outputFile @"aib_rule_table_funcloc.lp") 
+    generateEquipmentFacts source (outputFile @"aib_rule_table_equipment.lp") 
+         
+
+
+let assetTypeFacts () = 
     let source = @"G:\work\Projects\asset_sync\rules\asset_types_groups_categories.csv"
-    generateBaseAssetTypeFacts source (outputFile @"base_asset_type.lp") 
-    generateCategoryAndGroupFacts source (outputFile @"equipment_cats_groups.lp") 
+    generateBaseAssetTypeFacts      source (outputFile @"aib_base_asset_type.lp") 
+    generateCategoryAndGroupFacts   source (outputFile @"aib_equipment_cats_groups.lp") 
 
-
-
-let query (item : string) =  
-    let workingDir = clingoDirectory ()
-    let setqvar = sprintf "qvar_asset=\"\"\"%s\"\"\"" item
-    let setConst = argument "-c" &^^ setqvar
-    printfn "Working Directory: %s" workingDir
-    let files = 
-        [ "facts/rule_table_funcloc.lp"
-        ; "facts/base_asset_type.lp" 
-        ; "facts/rule_table_equipment.lp"
-        ; "queries/equipment_below_floc.lp"
-        ]
-    runClingo workingDir (Some 0) [setConst] files
+let main () = 
+    ruleTableFacts ()
+    assetTypeFacts ()

@@ -2,7 +2,7 @@
 
 
 % To run from the clingo toplevel ...
-% > clingo facts/code_mapping.lp facts/aib_common_names.lp facts/aib_installation_type.lp facts/floc_mapping_1_2.lp queries/floc_mapping2.lp
+% > clingo facts/floc_mapping_2_3_4.lp facts/aib_common_names.lp facts/aib_installation_type.lp facts/floc_mapping_1_2.lp queries/floc_mapping2.lp
 
 
 

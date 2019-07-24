@@ -4,7 +4,7 @@
 namespace AssetTrafo.AspFacts
 
 
-module AssetTypes =
+module AibAssetTypes =
 
     open FSharp.Data
 

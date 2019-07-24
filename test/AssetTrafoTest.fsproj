@@ -6,8 +6,7 @@
 
   <ItemGroup>
     <None Include="Facts\EquipmentLP.fsx" />
-    <None Include="Facts\RunAibRuleTable.fsx" />
-    <None Include="Facts\RunAssetTypes.fsx" />
+    <None Include="Facts\GenAibExportFacts.fsx" />
     <None Include="Facts\RunLevel12FlocMapping.fsx" />
     <None Include="Facts\RunLevel234FlocMapping.fsx" />
     <None Include="Facts\DescendantsReport.fsx" />

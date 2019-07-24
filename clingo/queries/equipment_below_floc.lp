@@ -2,7 +2,7 @@
 
 % To run from the clingo toplevel ...
 
-% bash> clingo -c qvar_asset='"VALVE"' facts/base_asset_type.lp facts/rule_table_equipment.lp facts/rule_table_funcloc.lp queries/equipment_below_floc.lp 
+% bash> clingo -c qvar_asset='"VALVE"' facts/aib_base_asset_type.lp facts/aib_rule_table_equipment.lp facts/aib_rule_table_funcloc.lp queries/equipment_below_floc.lp 
 
 
 #const qvar_asset = "VALVE".

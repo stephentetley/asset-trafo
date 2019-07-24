@@ -1,7 +1,7 @@
 % funcloc_query.lp
 
 % To run from the clingo toplevel ...
-% > clingo facts/rule_table_funcloc.lp facts/base_asset_type.lp queries/funcloc_query.lp
+% > clingo facts/aib_rule_table_funcloc.lp facts/aib_base_asset_type.lp queries/funcloc_query.lp
 
 descendent_floc(X,Y) :- funcloc(X,Y).
 descendent_floc(X,Z) :- descendent_floc(X,Y), descendent_floc(Y,Z).

@@ -2,7 +2,7 @@
 
 
 % To run from the clingo toplevel ...
-% > clingo facts/code_mapping.lp facts/aib_common_names.lp facts/aib_installation_type.lp facts/floc_mapping_1_2.lp queries/floc_mapping/floc_mapping_rules.lp queries/floc_mapping/query1.lp
+% > clingo facts/floc_mapping_2_3_4.lp facts/aib_common_names.lp facts/aib_installation_type.lp facts/floc_mapping_1_2.lp queries/floc_mapping/floc_mapping_rules.lp queries/floc_mapping/query1.lp
 
 #const argv1 = "ARKENDALE/WPS".
 #const argv2 = "ODOUR CONTROL".
