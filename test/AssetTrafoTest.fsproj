@@ -9,6 +9,7 @@
     <None Include="Facts\GenAibExportFacts.fsx" />
     <None Include="Facts\GenLevel12FlocMapping.fsx" />
     <None Include="Facts\GenLevel234FlocMapping.fsx" />
+    <None Include="Facts\GenPlantMapping.fsx" />
     <None Include="Facts\DescendantsReport.fsx" />
     <None Include="Test01.fsx" />
     <None Include="Test02.fsx" />
