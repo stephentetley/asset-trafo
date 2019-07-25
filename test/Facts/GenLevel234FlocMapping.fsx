@@ -26,10 +26,6 @@ open FParsec
 #r "FactX"
 
 
-#I @"C:\Users\stephen\.nuget\packages\slpotassco\1.0.0-alpha-20190721\lib\netstandard2.0"
-#r "SLPotassco"
-open SLPotassco.Potassco.Invoke
-
 #load "..\..\src\AssetTrafo\AspFacts\Common.fs"
 #load "..\..\src\AssetTrafo\AspFacts\Level234FlocMapping.fs"
 open AssetTrafo.AspFacts.Level234FlocMapping
@@ -45,6 +41,6 @@ let outputFile (relativePath : string) =
 let main () = 
     let source = @"G:\work\Projects\asset_sync\AI2_FLOC_Asset_Hierarchy_Rules_V3_FRAGMENT.xlsx"
     let rows = getMappingRows source
-    generateCodeMapping rows (outputFile "floc_mapping_2_3_4.lp")
+    generateLevel234Mapping rows (outputFile "floc_mapping_2_3_4.lp")
     generateProcProcGroupFacts rows (outputFile "proc_proc_group.lp") 
     generateDescriptionLookupFacts rows (outputFile "description_lookup.lp") 

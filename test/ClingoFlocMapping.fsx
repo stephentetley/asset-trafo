@@ -5,7 +5,9 @@
 #r "System.Xml.Linq.dll"
 open System.IO
 
-
+#I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\netstandard1.6"
+#r "FParsec"
+#r "FParsecCS"
 
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
@@ -46,10 +48,10 @@ let runQuery (s1 : string) (s2 : string) (s3 : string) : Result<ClingoOutput, st
         ]
     printfn "Working Directory: %s" workingDir
     let files = 
-        [ "facts/code_mapping.lp"
+        [ "facts/floc_mapping_1_2.lp" 
+        ; "facts/floc_mapping_2_3_4.lp"
         ; "facts/aib_common_names.lp"
         ; "facts/aib_installation_type.lp"
-        ; "facts/floc_mapping_1_2.lp" 
         ; "queries/floc_mapping/floc_mapping_rules.lp" 
         ; "queries/floc_mapping/query1.lp"
         ]
@@ -73,4 +75,10 @@ let interpResults (output : ClingoOutput) : string list =
 
 let demo01 () = 
     runQuery "ALWOODLEY/NO 2 SPS" "CONTROL SERVICES" "RTS MONITORING"
+        |> Result.map interpResults
+
+let demo02 () = 
+    // Note - this one shows the "error" where the rules are not 
+    // tuned enough to edscriminate "SOF" and "WTF" at Level 3.
+    runQuery "ABBEY LANE HULL/SPS" "" "SEWAGE PUMPING"
         |> Result.map interpResults

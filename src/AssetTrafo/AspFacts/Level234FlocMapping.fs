@@ -106,12 +106,12 @@ module Level234FlocMapping =
     // Code mapping
 
 
-    let codeMapping (row:MappingRow) : Predicate option = 
+    let level234Mapping (row:MappingRow) : Predicate option = 
         let quoted1 (item : string) : Term = 
             checkInput item
                 |> Option.defaultValue ""
                 |> stringTerm
-        predicate "code_mapping" 
+        predicate "level234_mapping" 
                     [ quoted1 row.InstAssetTypeCode
                     ; quoted1 row.PrcgAssetTypeDescription
                     ; quoted1 row.PrcAssetTypeDescription
@@ -121,7 +121,7 @@ module Level234FlocMapping =
                     ]
             |> Some
 
-    let generateCodeMapping (mappingRows : MappingRow list)
-                            (outputFile : string) : unit =  
+    let generateLevel234Mapping (mappingRows : MappingRow list)
+                                (outputFile : string) : unit =  
         writeFactsWithHeaderComment outputFile
-            <| generatePredicates codeMapping mappingRows
+            <| generatePredicates level234Mapping mappingRows

@@ -14,10 +14,6 @@ open System.IO
 #r "ExcelProvider.DesignTime.dll"
 open FSharp.Interop.Excel
 
-#I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\netstandard1.6"
-#r "FParsec"
-#r "FParsecCS"
-open FParsec
 
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat"
@@ -25,10 +21,6 @@ open FParsec
 #I @"C:\Users\stephen\.nuget\packages\factx\1.0.0-alpha-20190721\lib\netstandard2.0"
 #r "FactX"
 
-
-#I @"C:\Users\stephen\.nuget\packages\slpotassco\1.0.0-alpha-20190721\lib\netstandard2.0"
-#r "SLPotassco"
-open SLPotassco.Potassco.Invoke
 
 #load "..\..\src\AssetTrafo\AspFacts\Common.fs"
 #load "..\..\src\AssetTrafo\AspFacts\Level12FlocMapping.fs"

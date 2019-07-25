@@ -21,5 +21,5 @@ floc4(F1, F2, F3, F4, Site, Procg, Proc) :-
     floc1(F1, Site),
     level1_mapping(Sai, F1, _),
     aib_installation_type(Sai, InstType),
-    code_mapping(InstType, Procg, Proc, F2, F3, F4).
+    level234_mapping(InstType, Procg, Proc, F2, F3, F4).
 
