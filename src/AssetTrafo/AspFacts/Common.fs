@@ -11,6 +11,8 @@ module Common =
     open FactX
     open FactX.FactWriter
 
+    type ErrMsg = string
+
     let generatePredicates (makePred : 'row -> Predicate option) 
                             (source : 'row list) : FactWriter<unit> =
         List.choose makePred source
@@ -30,5 +32,4 @@ module Common =
                     return ()
                 }
 
-
-
+ 

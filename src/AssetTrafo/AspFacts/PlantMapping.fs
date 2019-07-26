@@ -9,7 +9,8 @@ module PlantMapping =
     open FSharp.Data
     open FactX
     open FactX.FactWriter
-
+    
+    open AssetTrafo.Aib.HKey
     open AssetTrafo.AspFacts.Common
 
     // ********** DATA SETUP **********
@@ -40,24 +41,50 @@ module PlantMapping =
         let elts = commonName.Split([| '/' |])
         String.concat "/" [ elts.[0]; elts.[1]]
 
-    /// TODO - this only works if the we know it is a process group at .[2]
-    /// This is not generally the case and we should decode the hkey to check 
-    /// whether it has a mask.
-    let commonNameGetProcessGroup (commonName : string) (hkey : string) : string = 
+    /// This uses the hkey to identify whether there is a Process Group
+    /// in the common name 
+    let commonNameGetProcessGroup (commonName : string) (hkey : string) : string option = 
+        try 
+            match hkeyProcessGroup hkey with
+            | Some fragment -> 
+                if isAnon fragment then
+                    Some ""
+                else
+                    let elts = commonName.Split([| '/' |])
+                    elts.[2] |> Some
+            | None -> None
+        with
+        | exn -> printfn "Failed for: %s" commonName; raise exn
+
+
+    let commonNameGetProcess (commonName : string) (hkey : string) : string option = 
         let elts = commonName.Split([| '/' |])
-        elts.[2]
+        try 
+            match hkeyProcessGroup hkey with
+            | Some fragment -> 
+                if isAnon fragment then
+                    elts.[2] |> Some
+                else
+                    elts.[3] |> Some
+            | None -> None
+        with
+        | exn -> 
+            if elts.Length <> 2 then
+                printfn "Unhandled for: %s" commonName            
+            None
 
     let processGroupFact (row : PlantRow) : Predicate option = 
         match row.Category with
-        | "PROCESS GROUP" ->
-            let pgName = commonNameGetProcessGroup row.CommonName row.HKey
-            predicate "processGroup" 
-                        [ stringTerm row.Reference
-                        ; stringTerm row.AssetType
-                        ; stringTerm (commonNameGetInstallation row.CommonName)
-                        ; stringTerm pgName
-                        ]
-                |> Some
+        | "PROCESS GROUP" -> 
+            match commonNameGetProcessGroup row.CommonName row.HKey with 
+            | Some pgName ->
+                predicate "processGroup" 
+                            [ stringTerm row.Reference
+                            ; stringTerm row.AssetType
+                            ; stringTerm (commonNameGetInstallation row.CommonName)
+                            ; stringTerm pgName
+                            ] |> Some
+            | _ -> None
         | _ -> None
 
     let generateProcessGroupFacts (rows : PlantRow list) 
@@ -66,26 +93,23 @@ module PlantMapping =
                 <| generatePredicates processGroupFact rows
                    
 
-    //let eqptRelation (row : RuleRow) : Predicate option = 
-    //    match row.RelationshipType with
-    //    | "EQPTRULES" ->
-    //        predicate "eqpt" 
-    //                    [ stringTerm row.AssetType1
-    //                    ; stringTerm row.AssetType2 
-    //                    ]
-    //            |> Some
-    //    | _ -> None
+    let processFact (row : PlantRow) : Predicate option = 
+        match row.Category with
+        | "PROCESS" -> 
+            match commonNameGetProcessGroup row.CommonName row.HKey, 
+                               commonNameGetProcess row.CommonName row.HKey with 
+            | Some pgName, Some pName -> 
+                predicate "process" 
+                            [ stringTerm row.Reference
+                            ; stringTerm row.AssetType
+                            ; stringTerm (commonNameGetInstallation row.CommonName)
+                            ; stringTerm pgName
+                            ; stringTerm pName
+                            ] |> Some
+            | _ -> None
+        | _ -> None
 
-
-    //let generateFunLocFacts (ruleTableCsvSourceFile : string) 
-    //                        (outputFile : string) : unit = 
-    //    let rows = getRows ruleTableCsvSourceFile
-    //    generatePredicates funcLocFact rows
-    //        |> writeFactsWithHeaderComment outputFile 
-         
-
-    //let generateEquipmentFacts (ruleTableCsvSourceFile : string) 
-    //                            (outputFile : string) : unit = 
-    //    let rows = getRows ruleTableCsvSourceFile
-    //    generatePredicates eqptRelation rows 
-    //        |> writeFactsWithHeaderComment outputFile 
+    let generateProcessFacts (rows : PlantRow list) 
+                                (outputFile : string) : unit =            
+        writeFactsWithHeaderComment outputFile
+            <| generatePredicates processFact rows
