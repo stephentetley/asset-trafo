@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetTrafo.AspFacts
+namespace AssetTrafo.XsbFacts
 
 
 module PlantMapping =
@@ -11,7 +11,7 @@ module PlantMapping =
     open FactX.FactWriter
     
     open AssetTrafo.Aib.HKey
-    open AssetTrafo.AspFacts.Common
+    open AssetTrafo.Base.FactsCommon
 
     // ********** DATA SETUP **********
 

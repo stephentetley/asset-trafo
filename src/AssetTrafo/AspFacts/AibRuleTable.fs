@@ -10,7 +10,7 @@ module AibRuleTable =
     open FactX
     open FactX.FactWriter
 
-    open AssetTrafo.AspFacts.Common
+    open AssetTrafo.Base.FactsCommon
 
     // ********** DATA SETUP **********
 

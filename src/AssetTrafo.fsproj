@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="AssetTrafo\Base\Common.fs" />
+    <Compile Include="AssetTrafo\Base\FactsCommon.fs" />
     <Compile Include="AssetTrafo\Base\CompilerMonad.fs" />
     <Compile Include="AssetTrafo\Base\JsonReader.fs" />
     <Compile Include="AssetTrafo\Base\JsonWriter.fs" />
@@ -20,12 +21,11 @@
     <Compile Include="AssetTrafo\AideChangeReport\Syntax.fs" />
     <Compile Include="AssetTrafo\AideChangeReport\ReadCsv.fs" />
     <Compile Include="AssetTrafo\AideChangeReport\ChangeReport.fs" />
-    <Compile Include="AssetTrafo\AspFacts\Common.fs" />
     <Compile Include="AssetTrafo\AspFacts\AibRuleTable.fs" />
     <Compile Include="AssetTrafo\AspFacts\AibAssetTypes.fs" />
     <Compile Include="AssetTrafo\AspFacts\Level12FlocMapping.fs" />
     <Compile Include="AssetTrafo\AspFacts\Level234FlocMapping.fs" />
-    <Compile Include="AssetTrafo\AspFacts\PlantMapping.fs" />
+    <Compile Include="AssetTrafo\XsbFacts\PlantMapping.fs" />
   </ItemGroup>
 
   <ItemGroup>

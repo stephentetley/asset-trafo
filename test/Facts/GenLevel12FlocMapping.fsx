@@ -22,7 +22,7 @@ open FSharp.Interop.Excel
 #r "FactX"
 
 
-#load "..\..\src\AssetTrafo\AspFacts\Common.fs"
+#load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
 #load "..\..\src\AssetTrafo\AspFacts\Level12FlocMapping.fs"
 open AssetTrafo.AspFacts.Level12FlocMapping
 

@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetTrafo.AspFacts
+namespace AssetTrafo.Base
 
 
-module Common =
+module FactsCommon =
 
     open System.IO
 

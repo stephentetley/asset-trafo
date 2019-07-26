@@ -19,10 +19,9 @@ open FactX.FactWriter
 open FactX.Skeletons
 
 
-#load "..\..\src\AssetTrafo\Aib\HKey.fs"
-#load "..\..\src\AssetTrafo\AspFacts\Common.fs"
-#load "..\..\src\AssetTrafo\AspFacts\PlantMapping.fs"
-open AssetTrafo.AspFacts.PlantMapping
+#load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
+#load "..\..\src\AssetTrafo\XsbFacts\PlantMapping.fs"
+open AssetTrafo.XsbFacts.PlantMapping
 
 
 let outputFile (relativePath : string) = 
@@ -32,8 +31,8 @@ let outputFile (relativePath : string) =
 let main () = 
     let source = @"G:\work\Projects\asset_sync\rules\plant_mapping_extract2.csv"
     let rows = getRows source |> Seq.toList
-    generateProcessGroupFacts rows (outputFile "aib_map_process_groups.pl")
-    generateProcessFacts rows (outputFile "aib_map_processes.pl")
+    generateProcessGroupFacts rows (outputFile "aib_map_process_group.pl")
+    generateProcessFacts rows (outputFile "aib_map_process.pl")
     generatePlantFacts rows (outputFile "aib_map_plant.pl")
     generatePlantItemFacts rows (outputFile "aib_map_plant_item.pl")
 

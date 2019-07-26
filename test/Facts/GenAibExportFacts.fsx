@@ -9,6 +9,8 @@ open System.IO
 #r @"FSharp.Data.dll"
 open FSharp.Data
 
+#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
+#r "SLFormat"
 
 #I @"C:\Users\stephen\.nuget\packages\factx\1.0.0-alpha-20190721\lib\netstandard2.0"
 #r "FactX"
@@ -18,7 +20,7 @@ open FactX.Skeletons
 
 
 
-#load "..\..\src\AssetTrafo\AspFacts\Common.fs"
+#load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
 #load "..\..\src\AssetTrafo\AspFacts\AibAssetTypes.fs"
 #load "..\..\src\AssetTrafo\AspFacts\AibRuleTable.fs"
 open AssetTrafo.AspFacts.AibAssetTypes
