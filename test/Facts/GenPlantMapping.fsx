@@ -26,25 +26,14 @@ open AssetTrafo.AspFacts.PlantMapping
 
 
 let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\clingo\facts", relativePath)
-
-
-
-
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\xsb\facts", relativePath)
 
 
 let main () = 
-    let source = @"G:\work\Projects\asset_sync\rules\plant_mapping_extract.csv"
+    let source = @"G:\work\Projects\asset_sync\rules\plant_mapping_extract2.csv"
     let rows = getRows source |> Seq.toList
-    generateProcessGroupFacts rows (outputFile "aib_map_process_groups.lp")
-    generateProcessFacts rows (outputFile "aib_map_processes.lp")
+    generateProcessGroupFacts rows (outputFile "aib_map_process_groups.pl")
+    generateProcessFacts rows (outputFile "aib_map_processes.pl")
+    generatePlantFacts rows (outputFile "aib_map_plant.pl")
+    generatePlantItemFacts rows (outputFile "aib_map_plant_item.pl")
 
-
-let temp01 () = 
-    let source = @"G:\work\Projects\asset_sync\rules\plant_mapping_extract.csv"
-    let rows = getRows source
-    rows |> Seq.fold (fun ac (row : PlantRow) -> max ac (String.length (row.HKey.Trim()) )) 0
-
-let hkeyIsAnon (start : int) (len : int) (hkey : string) : bool =
-    let fragment = hkey.[start .. start + (len - 1)]
-    String.forall (fun ch -> ch = 'X') fragment

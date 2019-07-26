@@ -19,11 +19,12 @@ module PlantMapping =
     let PlantTableSchema = 
         "Reference(string),HKey(string),\
          AssetName(string),AssetType(string),\
-         Category(string),CommonName(string)"    
+         Category(string),CommonName(string),\
+         ParentRef(string)"    
 
     [<Literal>]
     let PlantTableSample = 
-         "SAI0101,2OLDWW,NO 1 STARTER,MOTOR STARTER,PLANT ITEM,COMMON NAME/WITH/SEPARATORS"
+         "SAI0101,2OLDWW,NO 1 STARTER,MOTOR STARTER,PLANT ITEM,COMMON NAME/WITH/SEPARATORS,SAI0100"
      
 
     type PlantTable = 
@@ -37,79 +38,41 @@ module PlantMapping =
         let table = PlantTable.Load(uri = cvsPath)
         table.Rows |> Seq.toList
 
-    let commonNameGetInstallation (commonName : string) : string = 
-        let elts = commonName.Split([| '/' |])
-        String.concat "/" [ elts.[0]; elts.[1]]
-
-    /// This uses the hkey to identify whether there is a Process Group
-    /// in the common name 
-    let commonNameGetProcessGroup (commonName : string) (hkey : string) : string option = 
-        try 
-            match hkeyProcessGroup hkey with
-            | Some fragment -> 
-                if isAnon fragment then
-                    Some ""
-                else
-                    let elts = commonName.Split([| '/' |])
-                    elts.[2] |> Some
-            | None -> None
-        with
-        | exn -> printfn "Failed for: %s" commonName; raise exn
 
 
-    let commonNameGetProcess (commonName : string) (hkey : string) : string option = 
-        let elts = commonName.Split([| '/' |])
-        try 
-            match hkeyProcessGroup hkey with
-            | Some fragment -> 
-                if isAnon fragment then
-                    elts.[2] |> Some
-                else
-                    elts.[3] |> Some
-            | None -> None
-        with
-        | exn -> 
-            if elts.Length <> 2 then
-                printfn "Unhandled for: %s" commonName            
-            None
-
-    let processGroupFact (row : PlantRow) : Predicate option = 
-        match row.Category with
-        | "PROCESS GROUP" -> 
-            match commonNameGetProcessGroup row.CommonName row.HKey with 
-            | Some pgName ->
-                predicate "processGroup" 
-                            [ stringTerm row.Reference
-                            ; stringTerm row.AssetType
-                            ; stringTerm (commonNameGetInstallation row.CommonName)
-                            ; stringTerm pgName
-                            ] |> Some
-            | _ -> None
-        | _ -> None
+    /// All facts have the same format (arity 5) but different
+    /// predicate names 
+    let makeFact (categoryName : string) 
+                    (factName : string) 
+                    (row : PlantRow) : Predicate option = 
+        if row.Category= categoryName then
+            predicate factName 
+                        [ quotedAtom row.Reference
+                        ; quotedAtom row.AssetType
+                        ; quotedAtom row.AssetName
+                        ; quotedAtom row.CommonName
+                        ; quotedAtom row.ParentRef
+                        ] |> Some
+        else None
 
     let generateProcessGroupFacts (rows : PlantRow list) 
                                      (outputFile : string) : unit =            
             writeFactsWithHeaderComment outputFile
-                <| generatePredicates processGroupFact rows
+                <| generatePredicates (makeFact "PROCESS GROUP" "aib_process_group") rows
                    
-
-    let processFact (row : PlantRow) : Predicate option = 
-        match row.Category with
-        | "PROCESS" -> 
-            match commonNameGetProcessGroup row.CommonName row.HKey, 
-                               commonNameGetProcess row.CommonName row.HKey with 
-            | Some pgName, Some pName -> 
-                predicate "process" 
-                            [ stringTerm row.Reference
-                            ; stringTerm row.AssetType
-                            ; stringTerm (commonNameGetInstallation row.CommonName)
-                            ; stringTerm pgName
-                            ; stringTerm pName
-                            ] |> Some
-            | _ -> None
-        | _ -> None
 
     let generateProcessFacts (rows : PlantRow list) 
                                 (outputFile : string) : unit =            
         writeFactsWithHeaderComment outputFile
-            <| generatePredicates processFact rows
+             <| generatePredicates (makeFact "PROCESS" "aib_process") rows
+
+    
+    let generatePlantFacts (rows : PlantRow list) 
+                                (outputFile : string) : unit =            
+        writeFactsWithHeaderComment outputFile
+             <| generatePredicates (makeFact "PLANT" "aib_plant") rows
+
+    let generatePlantItemFacts (rows : PlantRow list) 
+                                (outputFile : string) : unit =            
+        writeFactsWithHeaderComment outputFile
+             <| generatePredicates (makeFact "PLANT ITEM" "aib_plant_item") rows
