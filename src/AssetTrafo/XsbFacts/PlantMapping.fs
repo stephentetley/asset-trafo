@@ -10,7 +10,7 @@ module PlantMapping =
     open FactX
     open FactX.FactWriter
     
-    open AssetTrafo.Aib.HKey
+    
     open AssetTrafo.Base.FactsCommon
 
     // ********** DATA SETUP **********
