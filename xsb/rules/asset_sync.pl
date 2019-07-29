@@ -1,10 +1,12 @@
-% asset_sync,pl
+% asset_sync.pl
 
 % ['facts/aib_asset_category.pl', 'facts/aib_equipment.pl', 'facts/aib_floc_l1_l2_installation.pl'].
 % ['facts/aib_floc_l3_process_group.pl', 'facts/aib_floc_l4_process.pl', 'facts/aib_floc_l5_plant.pl', 'facts/aib_floc_l6_plant_item.pl'].
 
 % ['facts/s4_floc_l1_installation.pl', 'facts/s4_floc_l2_function.pl', 'facts/s4_floc_l3_process_group.pl', 'facts/s4_floc_l4_process.pl'].
 % ['facts/s4_floc_l5_system.pl', 'facts/s4_floc_l6_unit.pl', 'facts/s4_floc_l7_subunit.pl'].
+
+% ['rules/asset_sync.pl'].
 
 % get aib_equipment below a floc code
 
@@ -68,6 +70,23 @@ aib_equipment_below(SaiCode, PliCode) :-
     aib_equipment_below(Kid1, PliCode).
 
 
+s4_sai_to_system(SaiCode, SysFloc) :-
+    s4_floc_l6_unit(_, _, SaiCode, _, SysFloc).
+
+s4_sai_to_system(SaiCode, SysFloc) :-
+    s4_floc_l7_subunit(_, _, SaiCode, _, _, UFloc),
+    s4_floc_l6_unit(UFloc, _, _, _, SysFloc).
+
+:- table get_system_by_floc/2.
+
+% May return more than one result at the higher levels in the tree.
+% Should be deterministic for plant and plant item.
+get_system_by_floc(SaiCode, SysFloc) :- 
+    s4_sai_to_system(SaiCode, SysFloc).
+
+get_system_by_floc(SaiCode, SysFloc) :- 
+    aib_floc_below(SaiCode, Kid1),
+    get_system(Kid1, SysFloc).
 
 %%% Test
 
