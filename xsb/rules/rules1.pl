@@ -32,9 +32,18 @@ aib_x3_x5(X3, X3Name, X4, X4Name, X5, X5Name) :-
     X4 = '',
     X4Name = ''.  
 
+
 aib_x3_x4(X3, X3Name, X4, X4Name) :-
     aib_process_group(X3, _, X3Name, _, _),
-    aib_process(X4, _, X4Name, _, X3).      
+    aib_process(X4, _, X4Name, _, X3).     
+
+
+aib_x3_x4(X3, X3Name, X4, X4Name) :-
+    aib_process(X4, _, X4Name, _, Parent),
+    aib_installation(Parent, _, _, _, _),
+    X3 = '',
+    X3Name = ''.
+    
 
 % Should we impose a virtual hierarchy with potentially empty process groups and plant / plant items?
 

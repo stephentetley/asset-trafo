@@ -55,6 +55,12 @@ module PlantMapping =
                         ] |> Some
         else None
 
+    let generateInstallationFacts (rows : PlantRow list) 
+                                     (outputFile : string) : unit =            
+            writeFactsWithHeaderComment outputFile
+                <| generatePredicates (makeFact "INSTALLATION" "aib_installation") rows
+
+
     let generateProcessGroupFacts (rows : PlantRow list) 
                                      (outputFile : string) : unit =            
             writeFactsWithHeaderComment outputFile

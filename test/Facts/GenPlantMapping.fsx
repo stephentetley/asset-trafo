@@ -29,8 +29,9 @@ let outputFile (relativePath : string) =
 
 
 let main () = 
-    let source = @"G:\work\Projects\asset_sync\rules\plant_mapping_extract2.csv"
+    let source = @"G:\work\Projects\asset_sync\rules\aib_asset_extract3.csv"
     let rows = getRows source |> Seq.toList
+    generateInstallationFacts rows (outputFile "aib_map_installation.pl")
     generateProcessGroupFacts rows (outputFile "aib_map_process_group.pl")
     generateProcessFacts rows (outputFile "aib_map_process.pl")
     generatePlantFacts rows (outputFile "aib_map_plant.pl")
