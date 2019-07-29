@@ -20,8 +20,8 @@ open FactX.Skeletons
 
 
 #load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
-#load "..\..\src\AssetTrafo\XsbFacts\PlantMapping.fs"
-open AssetTrafo.XsbFacts.PlantMapping
+#load "..\..\src\AssetTrafo\XsbFacts\AibAssetFacts.fs"
+open AssetTrafo.XsbFacts.AibAssetFacts
 
 
 let outputFile (relativePath : string) = 
@@ -31,9 +31,10 @@ let outputFile (relativePath : string) =
 let main () = 
     let source = @"G:\work\Projects\asset_sync\rules\aib_asset_extract3.csv"
     let rows = getRows source |> Seq.toList
-    generateInstallationFacts rows (outputFile "aib_map_installation.pl")
-    generateProcessGroupFacts rows (outputFile "aib_map_process_group.pl")
-    generateProcessFacts rows (outputFile "aib_map_process.pl")
-    generatePlantFacts rows (outputFile "aib_map_plant.pl")
-    generatePlantItemFacts rows (outputFile "aib_map_plant_item.pl")
-
+    generateInstallationFacts rows (outputFile "aib_asset_installation.pl")
+    generateProcessGroupFacts rows (outputFile "aib_asset_process_group.pl")
+    generateProcessFacts rows (outputFile "aib_asset_process.pl")
+    generatePlantFacts rows (outputFile "aib_asset_plant.pl")
+    generatePlantItemFacts rows (outputFile "aib_asset_plant_item.pl")
+    generateCategoryFacts rows (outputFile "aib_asset_category.pl")
+    printfn "Done."

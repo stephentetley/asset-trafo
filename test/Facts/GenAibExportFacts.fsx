@@ -26,7 +26,7 @@ open FactX.Skeletons
 open AssetTrafo.AspFacts.AibAssetTypes
 open AssetTrafo.AspFacts.AibRuleTable
 
-
+// Obsolete - targeting clingo
 
 
 let outputFile (relativePath : string) = 

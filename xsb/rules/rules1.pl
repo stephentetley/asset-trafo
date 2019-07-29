@@ -1,6 +1,7 @@
 
 
 
+
 parent_process_group(X, Procg) :- 
     aib_process(X, _, _, _, Procg),
     aib_process_group(Procg, _, _, _, _).

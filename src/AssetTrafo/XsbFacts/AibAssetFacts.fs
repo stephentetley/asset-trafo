@@ -4,7 +4,7 @@
 namespace AssetTrafo.XsbFacts
 
 
-module PlantMapping =
+module AibAssetFacts =
 
     open FSharp.Data
     open FactX
@@ -82,3 +82,18 @@ module PlantMapping =
                                 (outputFile : string) : unit =            
         writeFactsWithHeaderComment outputFile
              <| generatePredicates (makeFact "PLANT ITEM" "aib_plant_item") rows
+
+
+
+    /// All facts have the same format (arity 5) but different
+    /// predicate names 
+    let makeCategoryFact (row : PlantRow) : Predicate option = 
+        predicate "aib_category"
+                        [ quotedAtom row.Reference
+                        ; quotedAtom row.Category
+                        ] |> Some
+    
+    let generateCategoryFacts (rows : PlantRow list) 
+                                (outputFile : string) : unit =            
+        writeFactsWithHeaderComment outputFile
+             <| generatePredicates makeCategoryFact rows
