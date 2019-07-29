@@ -4,7 +4,7 @@
 namespace AssetTrafo.XsbFacts
 
 
-module AibAssetFacts =
+module AibFlocFacts =
 
     open FSharp.Data
     open FactX
@@ -58,37 +58,37 @@ module AibAssetFacts =
     let generateInstallationFacts (rows : PlantRow list) 
                                      (outputFile : string) : unit =            
             writeFactsWithHeaderComment outputFile
-                <| generatePredicates (makeFact "INSTALLATION" "aib_installation") rows
+                <| generatePredicates (makeFact "INSTALLATION" "aib_floc_installation") rows
 
 
     let generateProcessGroupFacts (rows : PlantRow list) 
                                      (outputFile : string) : unit =            
             writeFactsWithHeaderComment outputFile
-                <| generatePredicates (makeFact "PROCESS GROUP" "aib_process_group") rows
+                <| generatePredicates (makeFact "PROCESS GROUP" "aib_floc_process_group") rows
                    
 
     let generateProcessFacts (rows : PlantRow list) 
                                 (outputFile : string) : unit =            
         writeFactsWithHeaderComment outputFile
-             <| generatePredicates (makeFact "PROCESS" "aib_process") rows
+             <| generatePredicates (makeFact "PROCESS" "aib_floc_process") rows
 
     
     let generatePlantFacts (rows : PlantRow list) 
                                 (outputFile : string) : unit =            
         writeFactsWithHeaderComment outputFile
-             <| generatePredicates (makeFact "PLANT" "aib_plant") rows
+             <| generatePredicates (makeFact "PLANT" "aib_floc_plant") rows
 
     let generatePlantItemFacts (rows : PlantRow list) 
                                 (outputFile : string) : unit =            
         writeFactsWithHeaderComment outputFile
-             <| generatePredicates (makeFact "PLANT ITEM" "aib_plant_item") rows
+             <| generatePredicates (makeFact "PLANT ITEM" "aib_floc_plant_item") rows
 
 
 
-    /// All facts have the same format (arity 5) but different
-    /// predicate names 
+    /// This is not a 'floc' fact but a (hopefully) speedier 
+    /// lookup table.
     let makeCategoryFact (row : PlantRow) : Predicate option = 
-        predicate "aib_category"
+        predicate "aib_asset_category"
                         [ quotedAtom row.Reference
                         ; quotedAtom row.Category
                         ] |> Some
