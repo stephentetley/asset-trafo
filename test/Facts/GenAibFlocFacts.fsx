@@ -21,20 +21,29 @@ open FactX.Skeletons
 
 #load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
 #load "..\..\src\AssetTrafo\XsbFacts\AibFlocFacts.fs"
+#load "..\..\src\AssetTrafo\XsbFacts\AibEquipmentFacts.fs"
 open AssetTrafo.XsbFacts.AibFlocFacts
+open AssetTrafo.XsbFacts.AibEquipmentFacts
 
 
 let outputFile (relativePath : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\..\xsb\facts", relativePath)
 
 
-let main () = 
-    let source = @"G:\work\Projects\asset_sync\rules\aib_asset_extract3.csv"
-    let rows = getRows source |> Seq.toList
-    generateInstallationFacts rows (outputFile "aib_floc_installation.pl")
-    generateProcessGroupFacts rows (outputFile "aib_floc_process_group.pl")
-    generateProcessFacts rows (outputFile "aib_floc_process.pl")
-    generatePlantFacts rows (outputFile "aib_floc_plant.pl")
-    generatePlantItemFacts rows (outputFile "aib_floc_plant_item.pl")
+let genFlocFacts (csvSource : string) : unit = 
+    let rows = getFlocRows csvSource |> Seq.toList
+    generateInstallationFacts rows (outputFile "aib_floc_l1_l2_installation.pl")
+    generateProcessGroupFacts rows (outputFile "aib_floc_l3_process_group.pl")
+    generateProcessFacts rows (outputFile "aib_floc_l4_process.pl")
+    generatePlantFacts rows (outputFile "aib_floc_l5_plant.pl")
+    generatePlantItemFacts rows (outputFile "aib_floc_l6_plant_item.pl")
     generateCategoryFacts rows (outputFile "aib_asset_category.pl")
-    printfn "Done."
+
+let genEquipmentFacts (csvSource : string) : unit =  
+    let rows = getEquipmentRows csvSource |> Seq.toList
+    generateEquipmentFacts rows (outputFile "aib_equipment.pl")
+
+let main () = 
+    genFlocFacts @"G:\work\Projects\asset_sync\rules\aib_asset_extract3.csv"
+    genEquipmentFacts @"G:\work\Projects\asset_sync\rules\aib_equipment_extract1.csv"
+    printfn "Done." 

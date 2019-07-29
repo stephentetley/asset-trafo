@@ -26,7 +26,8 @@
     <Compile Include="AssetTrafo\AspFacts\Level12FlocMapping.fs" />
     <Compile Include="AssetTrafo\AspFacts\Level234FlocMapping.fs" />
     <Compile Include="AssetTrafo\XsbFacts\Level12FlocMapping.fs" />
-    <Compile Include="AssetTrafo\XsbFacts\AibAssetFacts.fs" />
+    <Compile Include="AssetTrafo\XsbFacts\AibFlocFacts.fs" />
+    <Compile Include="AssetTrafo\XsbFacts\AibEquipmentFacts.fs" />
   </ItemGroup>
 
   <ItemGroup>

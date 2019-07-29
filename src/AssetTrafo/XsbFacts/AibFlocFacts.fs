@@ -16,26 +16,26 @@ module AibFlocFacts =
     // ********** DATA SETUP **********
 
     [<Literal>]
-    let PlantTableSchema = 
+    let FlocTableSchema = 
         "Reference(string),HKey(string),\
          AssetName(string),AssetType(string),\
          Category(string),CommonName(string),\
          ParentRef(string)"    
 
     [<Literal>]
-    let PlantTableSample = 
+    let FlocTableSample = 
          "SAI0101,2OLDWW,NO 1 STARTER,MOTOR STARTER,PLANT ITEM,COMMON NAME/WITH/SEPARATORS,SAI0100"
      
 
-    type PlantTable = 
-        CsvProvider< Schema = PlantTableSchema
-                   , Sample = PlantTableSample
+    type FlocTable = 
+        CsvProvider< Schema = FlocTableSchema
+                   , Sample = FlocTableSample
                    , HasHeaders = true >
 
-    type PlantRow = PlantTable.Row
+    type FlocRow = FlocTable.Row
 
-    let getRows (cvsPath : string) : PlantRow list = 
-        let table = PlantTable.Load(uri = cvsPath)
+    let getFlocRows (cvsPath : string) : FlocRow list = 
+        let table = FlocTable.Load(uri = cvsPath)
         table.Rows |> Seq.toList
 
 
@@ -44,7 +44,7 @@ module AibFlocFacts =
     /// predicate names 
     let makeFact (categoryName : string) 
                     (factName : string) 
-                    (row : PlantRow) : Predicate option = 
+                    (row : FlocRow) : Predicate option = 
         if row.Category= categoryName then
             predicate factName 
                         [ quotedAtom row.Reference
@@ -55,45 +55,45 @@ module AibFlocFacts =
                         ] |> Some
         else None
 
-    let generateInstallationFacts (rows : PlantRow list) 
+    let generateInstallationFacts (rows : FlocRow list) 
                                      (outputFile : string) : unit =            
             writeFactsWithHeaderComment outputFile
-                <| generatePredicates (makeFact "INSTALLATION" "aib_floc_installation") rows
+                <| generatePredicates (makeFact "INSTALLATION" "aib_floc_l1_l2_installation") rows
 
 
-    let generateProcessGroupFacts (rows : PlantRow list) 
+    let generateProcessGroupFacts (rows : FlocRow list) 
                                      (outputFile : string) : unit =            
             writeFactsWithHeaderComment outputFile
-                <| generatePredicates (makeFact "PROCESS GROUP" "aib_floc_process_group") rows
+                <| generatePredicates (makeFact "PROCESS GROUP" "aib_floc_l3_process_group") rows
                    
 
-    let generateProcessFacts (rows : PlantRow list) 
+    let generateProcessFacts (rows : FlocRow list) 
                                 (outputFile : string) : unit =            
         writeFactsWithHeaderComment outputFile
-             <| generatePredicates (makeFact "PROCESS" "aib_floc_process") rows
+             <| generatePredicates (makeFact "PROCESS" "aib_floc_l4_process") rows
 
     
-    let generatePlantFacts (rows : PlantRow list) 
+    let generatePlantFacts (rows : FlocRow list) 
                                 (outputFile : string) : unit =            
         writeFactsWithHeaderComment outputFile
-             <| generatePredicates (makeFact "PLANT" "aib_floc_plant") rows
+             <| generatePredicates (makeFact "PLANT" "aib_floc_l5_plant") rows
 
-    let generatePlantItemFacts (rows : PlantRow list) 
+    let generatePlantItemFacts (rows : FlocRow list) 
                                 (outputFile : string) : unit =            
         writeFactsWithHeaderComment outputFile
-             <| generatePredicates (makeFact "PLANT ITEM" "aib_floc_plant_item") rows
+             <| generatePredicates (makeFact "PLANT ITEM" "aib_floc_l6_plant_item") rows
 
 
 
     /// This is not a 'floc' fact but a (hopefully) speedier 
     /// lookup table.
-    let makeCategoryFact (row : PlantRow) : Predicate option = 
+    let makeCategoryFact (row : FlocRow) : Predicate option = 
         predicate "aib_asset_category"
                         [ quotedAtom row.Reference
                         ; quotedAtom row.Category
                         ] |> Some
     
-    let generateCategoryFacts (rows : PlantRow list) 
+    let generateCategoryFacts (rows : FlocRow list) 
                                 (outputFile : string) : unit =            
         writeFactsWithHeaderComment outputFile
              <| generatePredicates makeCategoryFact rows
