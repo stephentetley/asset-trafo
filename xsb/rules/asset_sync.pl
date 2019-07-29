@@ -69,24 +69,47 @@ aib_equipment_below(SaiCode, PliCode) :-
     aib_floc_below(SaiCode, Kid1),
     aib_equipment_below(Kid1, PliCode).
 
+%% 
 
-s4_sai_to_system(SaiCode, SysFloc) :-
+aib_floc_to_s4_system(SaiCode, SysFloc) :-
     s4_floc_l6_unit(_, _, SaiCode, _, SysFloc).
 
-s4_sai_to_system(SaiCode, SysFloc) :-
+aib_floc_to_s4_system(SaiCode, SysFloc) :-
     s4_floc_l7_subunit(_, _, SaiCode, _, _, UFloc),
     s4_floc_l6_unit(UFloc, _, _, _, SysFloc).
+
+%% 
 
 :- table get_system_by_floc/2.
 
 % May return more than one result at the higher levels in the tree.
 % Should be deterministic for plant and plant item.
 get_system_by_floc(SaiCode, SysFloc) :- 
-    s4_sai_to_system(SaiCode, SysFloc).
+    aib_floc_to_s4_system(SaiCode, SysFloc).
 
 get_system_by_floc(SaiCode, SysFloc) :- 
     aib_floc_below(SaiCode, Kid1),
-    get_system(Kid1, SysFloc).
+    get_system_by_floc(Kid1, SysFloc).
+
+
+%% 
+
+aib_equipment_to_s4_system(PliCode, SysFloc) :-
+    s4_floc_l6_unit(_, _, _, PliCode, SysFloc).
+
+aib_equipment_to_s4_system(PliCode, SysFloc) :-
+    s4_floc_l7_subunit(_, _, _, _, PliCode, UFloc),
+    s4_floc_l6_unit(UFloc, _, _, _, SysFloc).
+
+%% 
+
+:- table get_system_by_equipment/2.
+
+
+get_system_by_equipment(PliCode, SysFloc) :- 
+    aib_equipment_to_s4_system(PliCode, SysFloc).
+
+
 
 %%% Test
 
