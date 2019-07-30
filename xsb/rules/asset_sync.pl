@@ -6,6 +6,8 @@
 % ['facts/s4_floc_l1_installation.pl', 'facts/s4_floc_l2_function.pl', 'facts/s4_floc_l3_process_group.pl', 'facts/s4_floc_l4_process.pl'].
 % ['facts/s4_floc_l5_system.pl', 'facts/s4_floc_l6_unit.pl', 'facts/s4_floc_l7_subunit.pl'].
 
+% ['rules/common.pl'].
+
 % ['rules/asset_sync.pl'].
 
 % get aib_equipment below a floc code

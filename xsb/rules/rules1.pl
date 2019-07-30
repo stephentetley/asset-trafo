@@ -6,6 +6,8 @@
 % ['facts/s4_floc_l1_installation.pl', 'facts/s4_floc_l2_function.pl', 'facts/s4_floc_l3_process_group.pl', 'facts/s4_floc_l4_process.pl'].
 % ['facts/s4_floc_l5_system.pl', 'facts/s4_floc_l6_unit.pl', 'facts/s4_floc_l7_subunit.pl'].
 
+% ['rules/rules1.pl'].
+
 parent_process_group(X, Procg) :- 
     aib_floc_l4_process(X, _, _, _, Procg),
     aib_floc_l3_process_group(Procg, _, _, _, _).

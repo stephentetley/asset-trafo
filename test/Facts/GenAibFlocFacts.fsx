@@ -44,6 +44,6 @@ let genEquipmentFacts (csvSource : string) : unit =
     generateEquipmentFacts rows (outputFile "aib_equipment.pl")
 
 let main () = 
-    genFlocFacts @"G:\work\Projects\asset_sync\rules\aib_asset_extract3.csv"
+    genFlocFacts @"G:\work\Projects\asset_sync\rules\aib_floc_extract4.csv"
     genEquipmentFacts @"G:\work\Projects\asset_sync\rules\aib_equipment_extract1.csv"
     printfn "Done." 

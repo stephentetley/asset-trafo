@@ -19,12 +19,12 @@ module AibFlocFacts =
     let FlocTableSchema = 
         "Reference(string),HKey(string),\
          AssetName(string),AssetType(string),\
-         Category(string),CommonName(string),\
-         ParentRef(string)"    
+         AssetCode(string), Category(string),\
+         CommonName(string),ParentRef(string)"    
 
     [<Literal>]
     let FlocTableSample = 
-         "SAI0101,2OLDWW,NO 1 STARTER,MOTOR STARTER,PLANT ITEM,COMMON NAME/WITH/SEPARATORS,SAI0100"
+         "SAI0101,2OLDWW,NO 1 STARTER,MOTOR STARTER,MOTR,PLANT ITEM,COMMON NAME/WITH/SEPARATORS,SAI0100"
      
 
     type FlocTable = 
@@ -48,23 +48,36 @@ module AibFlocFacts =
         if row.Category= categoryName then
             predicate factName 
                         [ quotedAtom row.Reference
-                        ; quotedAtom row.AssetType
                         ; quotedAtom row.AssetName
+                        ; quotedAtom row.AssetType
                         ; quotedAtom row.CommonName
                         ; quotedAtom row.ParentRef
                         ] |> Some
         else None
 
+    let makePredicate (categoryName : string) 
+                        (makePred : FlocRow -> Predicate) 
+                        (row : FlocRow) : Predicate option = 
+        if row.Category= categoryName then
+            makePred row |> Some
+        else None
+
     let generateInstallationFacts (rows : FlocRow list) 
-                                     (outputFile : string) : unit =            
-            writeFactsWithHeaderComment outputFile
-                <| generatePredicates (makeFact "INSTALLATION" "aib_floc_l1_l2_installation") rows
+                                     (outputFile : string) : unit = 
+        let instPred (row : FlocRow) = 
+            predicate "aib_floc_l1_l2_installation" 
+                [ quotedAtom row.Reference
+                ; quotedAtom row.AssetName
+                ; quotedAtom row.AssetCode
+                ]
+        writeFactsWithHeaderComment outputFile
+            <| generatePredicates (makePredicate "INSTALLATION" instPred) rows
 
 
     let generateProcessGroupFacts (rows : FlocRow list) 
                                      (outputFile : string) : unit =            
-            writeFactsWithHeaderComment outputFile
-                <| generatePredicates (makeFact "PROCESS GROUP" "aib_floc_l3_process_group") rows
+        writeFactsWithHeaderComment outputFile
+            <| generatePredicates (makeFact "PROCESS GROUP" "aib_floc_l3_process_group") rows
                    
 
     let generateProcessFacts (rows : FlocRow list) 
@@ -87,13 +100,12 @@ module AibFlocFacts =
 
     /// This is not a 'floc' fact but a (hopefully) speedier 
     /// lookup table.
-    let makeCategoryFact (row : FlocRow) : Predicate option = 
-        predicate "aib_asset_category"
-                        [ quotedAtom row.Reference
-                        ; quotedAtom row.Category
-                        ] |> Some
-    
     let generateCategoryFacts (rows : FlocRow list) 
-                                (outputFile : string) : unit =            
+                                (outputFile : string) : unit = 
+        let makePred1 (row : FlocRow) : Predicate option = 
+            predicate "aib_asset_category"
+                [ quotedAtom row.Reference
+                ; quotedAtom row.Category
+                ] |> Some
         writeFactsWithHeaderComment outputFile
-             <| generatePredicates makeCategoryFact rows
+             <| generatePredicates makePred1 rows
