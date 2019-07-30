@@ -2,6 +2,8 @@
 
 % see __load_clipboard, must load ['rules/common.pl'].
 
+% use abstract floc codes... ['rules/floc_codes.pl'].
+
 % ['rules/asset_sync.pl'].
 
 % get aib_equipment below a floc code
@@ -132,5 +134,26 @@ get_system_by_equipment(PliCode, SysFloc) :-
 
 % In short term use coversion rules...
 
+
+% Sai should be installation
 aib_ref_to_s4_floc(Sai, L1, L2) :- 
-    false.
+    aib_inst_floc1_s4_name(Sai, L1, L2).
+
+% Sai should be process group
+aib_ref_to_s4_floc(Sai, L1, L2, L3) :- 
+    aib_abs_floc(Sai, AibName1, AibName2, AibName3),
+    aib_installation_sai_name(S1, AibName1),
+    aib_ref_to_s4_floc(S1, L1, L2),
+    aib_stype_procg_s4_fun_procg(AibName2, AibName3, L2, L3).
+
+% Sai should be process
+aib_ref_to_s4_floc(Sai, L1, L2, L3, L4) :- 
+    aib_abs_floc(Sai, AibName1, AibName2, AibName3, AibName4),
+    writeln([AibName1, AibName2, AibName3, AibName4]),
+    aib_installation_sai_name(S1, AibName1),
+    aib_ref_to_s4_floc(S1, _, L1),
+    aib_stype_procg_proc_s4_fun_procg_proc(AibName2, AibName3, AibName4, L2, L3, L4).
+
+% aib_ref_to_s4_floc('SAI00003608', L1, L2).
+% aib_ref_to_s4_floc('SAI00167636', L1, L2, L3).
+% aib_ref_to_s4_floc('SAI00338989', L1, L2, L3, L4).

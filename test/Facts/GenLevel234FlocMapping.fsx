@@ -35,6 +35,7 @@ let xsbOutput (relativePath : string) =
 let main () = 
     let source = @"G:\work\Projects\asset_sync\AI2_FLOC_Asset_Hierarchy_Rules_V3_FRAGMENT.xlsx"
     let rows = getMappingRows source
+    generateLevel23Mapping rows (xsbOutput "floc_rule_mapping_2_3.pl")
     generateLevel234Mapping rows (xsbOutput "floc_rule_mapping_2_3_4.pl")
     generateDescriptionLookupFacts rows (xsbOutput "s4_description_lookup.pl") 
     // generateProcProcGroupFacts rows (xsbOutput "proc_proc_group.lp") 

@@ -112,6 +112,25 @@ module Level234FlocMapping =
     // ************************************************************************
     // Code mapping
 
+    let level23Mapping (row:MappingRow) : Predicate option = 
+        let quoted1 (item : string) : Term = 
+            checkInput item
+                |> Option.defaultValue ""
+                |> quotedAtom
+        predicate "aib_stype_procg_s4_fun_procg" 
+                    [ quoted1 row.InstAssetTypeCode
+                    ; quoted1 row.PrcgAssetTypeDescription
+                    ; quoted1 row.``L2 FLOC Code/Object Code``
+                    ; quoted1 row.``L3 FLOC Code/Object Code``
+                    ]
+            |> Some
+
+    let generateLevel23Mapping (mappingRows : MappingRow list)
+                                (outputFile : string) : unit =  
+        writeFactsWithHeaderComment outputFile
+            <| generatePredicates level23Mapping mappingRows
+
+
 
     let level234Mapping (row:MappingRow) : Predicate option = 
         let quoted1 (item : string) : Term = 

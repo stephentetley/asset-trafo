@@ -15,6 +15,8 @@ This file operates as a clipboard.
 
 ['facts/s4_floc_l5_system.pl', 'facts/s4_floc_l6_assembly.pl', 'facts/s4_floc_l7_item.pl'].
 
+['facts/floc_rule_mapping_1_2.pl', 'facts/floc_rule_mapping_2_3.pl', 'facts/floc_rule_mapping_2_3_4.pl', 'facts/s4_description_lookup.pl'].
+
 ['rules/common.pl'].
 
 ~~~~~
