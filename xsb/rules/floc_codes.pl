@@ -1,6 +1,6 @@
 % floc_codes.pl
 
-% see __load_clipboard, must also load ['rules/common.pl'].
+% see __load_clipboard, must load ['rules/common.pl'].
 
 % ['rules/floc_codes.pl'].
 
@@ -56,9 +56,38 @@ aib_abs_floc(Sai, F1, F2, F3, F4, F5, F6) :-
     aib_abs_floc(S2, F1, F2, F3, F4).
 
 %% plant_item - plant_item
+%% Note 'L6_plant_item' contains l7 plant items.
 aib_abs_floc(Sai, F1, F2, F3, F4, F5, F6, F7) :- 
     aib_floc_l6_plant_item(Sai, F7, _, _, S2),
     aib_abs_floc(S2, F1, F2, F3, F4, F5, F6).
+
+%% Wrap as list
+
+% no case for Length=1 floc
+
+get_aib_abs_floc(Sai, Xs) :-
+    aib_abs_floc(Sai, F1, F2), 
+    Xs = [F1, F2].
+
+get_aib_abs_floc(Sai, Xs) :-
+    aib_abs_floc(Sai, F1, F2, F3), 
+    Xs = [F1, F2, F3].
+
+get_aib_abs_floc(Sai, Xs) :-
+    aib_abs_floc(Sai, F1, F2, F3, F4), 
+    Xs = [F1, F2, F3, F4].
+
+get_aib_abs_floc(Sai, Xs) :-
+    aib_abs_floc(Sai, F1, F2, F3, F4, F5), 
+    Xs = [F1, F2, F3, F4, F5].
+
+get_aib_abs_floc(Sai, Xs) :-
+    aib_abs_floc(Sai, F1, F2, F3, F4, F5, F6), 
+    Xs = [F1, F2, F3, F4, F5, F6].
+
+get_aib_abs_floc(Sai, Xs) :-
+    aib_abs_floc(Sai, F1, F2, F3, F4, F5, F6, F7), 
+    Xs = [F1, F2, F3, F4, F5, F6, F7].
 
 %% 
 
@@ -79,3 +108,7 @@ aib_abs_floc(Sai, F1, F2, F3, F4, F5, F6, F7) :-
 
 % Plant item above plant item
 % aib_abs_floc('SAI00415646', F1, F2, F3, F4, F5, F6, F7).
+
+% get_aib_abs_floc('SAI00003608', Xs).
+% get_aib_abs_floc('AFL00076753', Xs).
+% get_aib_abs_floc('SAI00415646', Xs).

@@ -23,20 +23,18 @@ open FSharp.Interop.Excel
 
 
 #load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
-#load "..\..\src\AssetTrafo\AspFacts\Level234FlocMapping.fs"
-open AssetTrafo.AspFacts.Level234FlocMapping
-
-let clingoDirectory () = 
-    System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"..\..\clingo")
+#load "..\..\src\AssetTrafo\XsbFacts\Level234FlocMapping.fs"
+open AssetTrafo.XsbFacts.Level234FlocMapping
 
 
-let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\clingo\facts", relativePath)
+
+let xsbOutput (relativePath : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\xsb\facts", relativePath)
 
 
 let main () = 
     let source = @"G:\work\Projects\asset_sync\AI2_FLOC_Asset_Hierarchy_Rules_V3_FRAGMENT.xlsx"
     let rows = getMappingRows source
-    generateLevel234Mapping rows (outputFile "floc_mapping_2_3_4.lp")
-    generateProcProcGroupFacts rows (outputFile "proc_proc_group.lp") 
-    generateDescriptionLookupFacts rows (outputFile "description_lookup.lp") 
+    generateLevel234Mapping rows (xsbOutput "floc_rule_mapping_2_3_4.pl")
+    generateDescriptionLookupFacts rows (xsbOutput "s4_description_lookup.pl") 
+    // generateProcProcGroupFacts rows (xsbOutput "proc_proc_group.lp") 

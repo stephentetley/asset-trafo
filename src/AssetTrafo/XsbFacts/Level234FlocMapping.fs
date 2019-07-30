@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetTrafo.AspFacts
+namespace AssetTrafo.XsbFacts
 
 
 module Level234FlocMapping =
@@ -44,61 +44,68 @@ module Level234FlocMapping =
     // ************************************************************************
     // Processes and Process Groups (Aib)
     
-    let private aibPrcg (row : MappingRow) : Predicate option = 
-        let make1 = fun name -> predicate "aib_process_group" [ stringTerm name ]
-        checkInput row.PrcgAssetTypeDescription
-            |> Option.map make1
+    //let private aibPrcg (row : MappingRow) : Predicate option = 
+    //    let make1 = fun name -> predicate "aib_process_group" [ stringTerm name ]
+    //    checkInput row.PrcgAssetTypeDescription
+    //        |> Option.map make1
     
-    let private aibPrc (row : MappingRow) : Predicate option = 
-        let make1 = fun name -> predicate "aib_process" [ stringTerm name ]
-        checkInput row.PrcAssetTypeDescription
-            |> Option.map make1
+    //let private aibPrc (row : MappingRow) : Predicate option = 
+    //    let make1 = fun name -> predicate "aib_process" [ stringTerm name ]
+    //    checkInput row.PrcAssetTypeDescription
+    //        |> Option.map make1
 
     
 
-    let generateProcProcGroupFacts (mappingRows : MappingRow list)
-                                    (outputFile : string) : unit =  
-        writeFactsWithHeaderComment outputFile
-            <| factWriter { 
-                    do! generatePredicates aibPrcg mappingRows
-                    do! generatePredicates aibPrc mappingRows
-                    return ()
-                }
+    //let generateProcProcGroupFacts (mappingRows : MappingRow list)
+    //                                (outputFile : string) : unit =  
+    //    writeFactsWithHeaderComment outputFile
+    //        <| factWriter { 
+    //                do! generatePredicates aibPrcg mappingRows
+    //                do! generatePredicates aibPrc mappingRows
+    //                return ()
+    //            }
 
     // ************************************************************************
     // Description Lookups (code to description) (S4)
 
-    let level2Lookup (row : MappingRow) : Predicate option = 
-        let make1 = 
-            fun code desc -> predicate "level2_function_description" [ stringTerm code; stringTerm desc ]
+    let level2DescriptionLookup (row : MappingRow) : Predicate option = 
+        
         match (checkInput row.``L2 FLOC Code/Object Code``, 
                 checkInput row.``Function (L2 FLOC Description)``) with
-        | Some code, Some desc -> make1 code desc |> Some
+        | Some code, Some desc -> 
+            predicate "s4_description_l2_function" 
+                        [ quotedAtom code
+                        ; quotedAtom desc ] |> Some
         | _, _ -> None
 
-    let level3Lookup (row : MappingRow) : Predicate option = 
-        let make1 = 
-            fun code desc -> predicate "level3_prcg_description" [ stringTerm code; stringTerm desc ]
+    let level3DescriptionLookup (row : MappingRow) : Predicate option = 
         match (checkInput row.``L3 FLOC Code/Object Code``, 
                 checkInput row.``Process Group (L3 FLOC Description)``) with
-        | Some code, Some desc -> make1 code desc |> Some
+        | Some code, Some desc -> 
+            predicate "s4_description_l3_process_group" 
+                        [ quotedAtom code
+                        ; quotedAtom desc ] |> Some
         | _, _ -> None
 
-    let level4Lookup (row : MappingRow) : Predicate option = 
-        let make1 = 
-            fun code desc -> predicate "level4_prc_description" [ stringTerm code; stringTerm desc ]
+    let level4DescriptionLookup (row : MappingRow) : Predicate option = 
+        
         match (checkInput row.``L4 FLOC Code/Object Code``, 
                 checkInput row.``Process (L4 FLOC Description)``) with
-        | Some code, Some desc -> make1 code desc |> Some
+        | Some code, Some desc -> 
+            predicate "s4_description_l4_process" 
+                        [ quotedAtom code
+                        ; quotedAtom desc ] |> Some
         | _, _ -> None
+
+
 
     let generateDescriptionLookupFacts (mappingRows : MappingRow list)
                                         (outputFile : string) : unit =  
         writeFactsWithHeaderComment outputFile
             <| factWriter { 
-                    do! generatePredicates level2Lookup mappingRows
-                    do! generatePredicates level3Lookup mappingRows
-                    do! generatePredicates level4Lookup mappingRows
+                    do! generatePredicates level2DescriptionLookup mappingRows
+                    do! generatePredicates level3DescriptionLookup mappingRows
+                    do! generatePredicates level4DescriptionLookup mappingRows
                     return ()
                 }
 
@@ -110,8 +117,8 @@ module Level234FlocMapping =
         let quoted1 (item : string) : Term = 
             checkInput item
                 |> Option.defaultValue ""
-                |> stringTerm
-        predicate "level234_mapping" 
+                |> quotedAtom
+        predicate "aib_stype_procg_proc_s4_fun_procg_proc" 
                     [ quoted1 row.InstAssetTypeCode
                     ; quoted1 row.PrcgAssetTypeDescription
                     ; quoted1 row.PrcAssetTypeDescription

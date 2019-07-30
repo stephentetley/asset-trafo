@@ -1,12 +1,6 @@
 % asset_sync.pl
 
-% ['facts/aib_asset_category.pl', 'facts/aib_equipment.pl', 'facts/aib_floc_l1_l2_installation.pl'].
-% ['facts/aib_floc_l3_process_group.pl', 'facts/aib_floc_l4_process.pl', 'facts/aib_floc_l5_plant.pl', 'facts/aib_floc_l6_plant_item.pl'].
-
-% ['facts/s4_floc_l1_installation.pl', 'facts/s4_floc_l2_function.pl', 'facts/s4_floc_l3_process_group.pl', 'facts/s4_floc_l4_process.pl'].
-% ['facts/s4_floc_l5_system.pl', 'facts/s4_floc_l6_unit.pl', 'facts/s4_floc_l7_subunit.pl'].
-
-% ['rules/common.pl'].
+% see __load_clipboard, must load ['rules/common.pl'].
 
 % ['rules/asset_sync.pl'].
 
@@ -74,11 +68,11 @@ aib_equipment_below(SaiCode, PliCode) :-
 %% 
 
 aib_floc_to_s4_system(SaiCode, SysFloc) :-
-    s4_floc_l6_unit(_, _, SaiCode, _, SysFloc).
+    s4_floc_l6_assembly(_, _, SaiCode, _, SysFloc).
 
 aib_floc_to_s4_system(SaiCode, SysFloc) :-
-    s4_floc_l7_subunit(_, _, SaiCode, _, _, UFloc),
-    s4_floc_l6_unit(UFloc, _, _, _, SysFloc).
+    s4_floc_l7_item(_, _, SaiCode, _, _, UFloc),
+    s4_floc_l6_assembly(UFloc, _, _, _, SysFloc).
 
 %% 
 
@@ -97,11 +91,11 @@ get_system_by_floc(SaiCode, SysFloc) :-
 %% 
 
 aib_equipment_to_s4_system(PliCode, SysFloc) :-
-    s4_floc_l6_unit(_, _, _, PliCode, SysFloc).
+    s4_floc_l6_assembly(_, _, _, PliCode, SysFloc).
 
 aib_equipment_to_s4_system(PliCode, SysFloc) :-
-    s4_floc_l7_subunit(_, _, _, _, PliCode, UFloc),
-    s4_floc_l6_unit(UFloc, _, _, _, SysFloc).
+    s4_floc_l7_item(_, _, _, _, PliCode, UFloc),
+    s4_floc_l6_assembly(UFloc, _, _, _, SysFloc).
 
 %% 
 
@@ -128,3 +122,15 @@ get_system_by_equipment(PliCode, SysFloc) :-
 
 % import length/2 from basics.
 % setof(X, aib_floc_below('SAI00003608', X), Xs), length(Xs, Len).
+
+
+%% conversion
+
+% For s4 levels 1-4 do we rely on conversion rules (potentially going
+% out of date, incomplete, etc.) or data (potentially incomplete, not 
+% currently accessible)?
+
+% In short term use coversion rules...
+
+aib_ref_to_s4_floc(Sai, L1, L2) :- 
+    false.

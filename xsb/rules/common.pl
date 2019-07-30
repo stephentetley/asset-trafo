@@ -12,6 +12,9 @@ is_aib_process(Sai) :-
 is_aib_plant(Sai) :- 
     aib_floc_l5_plant(Sai, _, _, _, _).
 
+is_aib_plant_item(Sai) :- 
+    aib_floc_l6_plant_item(Sai, _, _, _, _).
+
 aib_installation_sai_name(Sai, Name) :- 
     aib_floc_l1_l2_installation(Sai, Name, _).
 

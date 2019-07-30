@@ -45,21 +45,21 @@ module Level12FlocMapping =
     // ************************************************************************
     // Aib Common Name
     
-    let private aibCommonName (row : SiteMappingRow) : Predicate option = 
-        let make1 = 
-            fun code name -> predicate "aib_common_name" [ stringTerm code; stringTerm name ]
-        match (checkInput row.AI2_InstallationReference, 
-                checkInput row.AI2_InstallationCommonName) with
-        | Some code, Some name -> make1 code name |> Some
-        | _, _ -> None
+    //let private aibCommonName (row : SiteMappingRow) : Predicate option = 
+    //    let make1 = 
+    //        fun code name -> predicate "aib_common_name" [ stringTerm code; stringTerm name ]
+    //    match (checkInput row.AI2_InstallationReference, 
+    //            checkInput row.AI2_InstallationCommonName) with
+    //    | Some code, Some name -> make1 code name |> Some
+    //    | _, _ -> None
 
 
     
 
-    let generateCommonNameFacts (mappingRows : SiteMappingRow list)
-                                (outputFile : string) : unit =  
-        generatePredicates aibCommonName mappingRows
-            |> writeFactsWithHeaderComment outputFile
+    //let generateCommonNameFacts (mappingRows : SiteMappingRow list)
+    //                            (outputFile : string) : unit =  
+    //    generatePredicates aibCommonName mappingRows
+    //        |> writeFactsWithHeaderComment outputFile
             
 
 
@@ -67,37 +67,35 @@ module Level12FlocMapping =
     // ************************************************************************
     // Description Lookups (code to description) (S4)
 
-    let level2Mapping (row : SiteMappingRow) : Predicate option = 
-        let make1 = 
-            fun sai floc1 s4Name -> 
-                predicate "level1_mapping" [ stringTerm sai
-                                           ; stringTerm floc1
-                                           ; stringTerm s4Name ]
+    let aibInstS4SiteMapping (row : SiteMappingRow) : Predicate option = 
         match (checkInput row.AI2_InstallationReference, 
-                checkInput row.``S/4 Hana Floc Lvl1_Code``, 
-                checkInput row.``S/4 Hana Floc Description``) with
-        | Some code, Some floc1, Some name -> make1 code floc1 name |> Some
+                checkInput row.``S/4 Hana Floc Description``, 
+                checkInput row.``S/4 Hana Floc Lvl1_Code``) with
+        | Some saicode, Some name, Some s4floc1 -> 
+            predicate "aib_inst_floc1_s4_name" 
+                        [ quotedAtom saicode
+                        ; quotedAtom name
+                        ; quotedAtom s4floc1 ] |> Some
         | _, _, _-> None
 
 
-    let level3Mapping (row : SiteMappingRow) : Predicate option = 
-        let make1 = 
-            fun sai floc1 floc2 -> 
-                predicate "level2_mapping" [ stringTerm sai
-                                           ; stringTerm floc1
-                                           ; stringTerm floc2 ]
+    let aibInstS4Level12Mapping (row : SiteMappingRow) : Predicate option = 
         match (checkInput row.AI2_InstallationReference, 
                 checkInput row.``S/4 Hana Floc Lvl1_Code``, 
                 checkInput row.``S/4 Hana Floc Lvl2_Code``) with
-        | Some code, Some floc1, Some name -> make1 code floc1 name |> Some
+        | Some saicode, Some floc1, Some floc2 -> 
+            predicate "aib_inst_floc1_floc2" 
+                        [ quotedAtom saicode
+                        ; quotedAtom floc1
+                        ; quotedAtom floc2 ] |> Some
         | _, _, _-> None
 
     let generateLevel12Mappings (mappingRows : SiteMappingRow list)
                                 (outputFile : string) : unit =  
         writeFactsWithHeaderComment outputFile
             <| factWriter { 
-                    do! generatePredicates level2Mapping mappingRows
-                    do! generatePredicates level3Mapping mappingRows
+                    do! generatePredicates aibInstS4SiteMapping mappingRows
+                    do! generatePredicates aibInstS4Level12Mapping mappingRows
                     return ()
                 }
 
@@ -105,20 +103,20 @@ module Level12FlocMapping =
     // ************************************************************************
     // Aib Common Name
     
-    let private aibInstallationType (row : SiteMappingRow) : Predicate option = 
-        let make1 = 
-            fun code typ -> 
-                predicate "aib_installation_type" [ stringTerm code; stringTerm typ ]
-        match (checkInput row.AI2_InstallationReference, 
-                checkInput row.AI2_InstallationAssetType) with
-        | Some code, Some typ -> make1 code typ |> Some
-        | _, _ -> None
+    //let private aibInstallationType (row : SiteMappingRow) : Predicate option = 
+    //    let make1 = 
+    //        fun code typ -> 
+    //            predicate "aib_installation_type" [ quotedAtom code; quotedAtom typ ]
+    //    match (checkInput row.AI2_InstallationReference, 
+    //            checkInput row.AI2_InstallationAssetType) with
+    //    | Some code, Some typ -> make1 code typ |> Some
+    //    | _, _ -> None
 
 
     
 
-    let generateAibInstallationType (mappingRows : SiteMappingRow list)
-                            (outputFile : string) : unit =  
-        generatePredicates aibInstallationType mappingRows
-            |> writeFactsWithHeaderComment outputFile
+    //let generateAibInstallationType (mappingRows : SiteMappingRow list)
+    //                        (outputFile : string) : unit =  
+    //    generatePredicates aibInstallationType mappingRows
+    //        |> writeFactsWithHeaderComment outputFile
 
