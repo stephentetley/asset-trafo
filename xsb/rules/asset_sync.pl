@@ -137,23 +137,37 @@ get_system_by_equipment(PliCode, SysFloc) :-
 
 % Sai should be installation
 aib_ref_to_s4_floc(Sai, L1, L2) :- 
-    aib_inst_floc1_s4_name(Sai, L1, L2).
+    aib_inst_floc1_floc2(Sai, L1, L2).
 
 % Sai should be process group
 aib_ref_to_s4_floc(Sai, L1, L2, L3) :- 
     aib_abs_floc(Sai, AibName1, AibName2, AibName3),
     aib_installation_sai_name(S1, AibName1),
-    aib_ref_to_s4_floc(S1, L1, L2),
-    aib_stype_procg_s4_fun_procg(AibName2, AibName3, L2, L3).
+    aib_inst_floc1_floc2(S1, L1, L2),
+    % WARNING - temporarily don't match L2 to avoid rule overlap prolems in the initial data
+    aib_stype_procg_s4_fun_procg(AibName2, AibName3, _L2, L3).  
 
 % Sai should be process
 aib_ref_to_s4_floc(Sai, L1, L2, L3, L4) :- 
     aib_abs_floc(Sai, AibName1, AibName2, AibName3, AibName4),
-    writeln([AibName1, AibName2, AibName3, AibName4]),
     aib_installation_sai_name(S1, AibName1),
-    aib_ref_to_s4_floc(S1, _, L1),
-    aib_stype_procg_proc_s4_fun_procg_proc(AibName2, AibName3, AibName4, L2, L3, L4).
+    aib_inst_floc1_floc2(S1, L1, L2),
+    % WARNING - temporarily don't match L2 to avoid rule overlap prolems in the initial data
+    aib_stype_procg_proc_s4_fun_procg_proc(AibName2, AibName3, AibName4, _L2, L3, L4).
 
 % aib_ref_to_s4_floc('SAI00003608', L1, L2).
 % aib_ref_to_s4_floc('SAI00167636', L1, L2, L3).
 % aib_ref_to_s4_floc('SAI00338989', L1, L2, L3, L4).
+
+% Sai should be plant
+% Note aib_ref_to_s4_floc/6 is just a degenerate case of aib_ref_to_s4_floc/7
+aib_ref_to_s4_floc(Sai, L1, L2, L3, L4, L5) :- 
+    aib_ref_to_s4_floc(Sai, L1, L2, L3, L4, L5, _).
+
+% Sai should be plant
+aib_ref_to_s4_floc(Sai, L1, L2, L3, L4, L5, L6) :- 
+    aib_abs_floc(Sai, AibName1, AibName2, AibName3, AibName4, AibName5),
+    writeln([AibName1, AibName2, AibName3, AibName4]),
+    false.
+
+% aib_ref_to_s4_floc('SAI00338990', L1, L2, L3, L4, L5, L6).
