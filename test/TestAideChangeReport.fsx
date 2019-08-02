@@ -26,8 +26,8 @@ open MarkdownDoc.Pandoc
 #load "..\src\AssetTrafo\AideChangeReport\Syntax.fs"
 #load "..\src\AssetTrafo\AideChangeReport\ReadCsv.fs"
 #load "..\src\AssetTrafo\AideChangeReport\ChangeReport.fs"
+open AssetTrafo.AideChangeReport.Syntax
 open AssetTrafo.AideChangeReport.ChangeReport
-
 
 
 let getOutputFile (relFileName : string) = 
@@ -43,8 +43,16 @@ let pandocHtmlOptions () : PandocOptions =
 
 let test01 () : Result<unit, string> = 
     generateChangesReport
-        @"G:\work\Projects\asset_sync\aide_report\asset_change_request_147854.csv"
-        @"G:\work\Projects\asset_sync\aide_report\attibute_change_request_147854.csv"
+        { AssetChangesCsv = Some @"G:\work\Projects\asset_sync\aide_report\asset_change_request_147854.csv"
+          AttributeChangesCsv = Some @"G:\work\Projects\asset_sync\aide_report\attibute_change_request_147854.csv" }
         (pandocHtmlOptions ())
         (getOutputFile "changes_report.html")
+
+
+let test02 () : Result<unit, string> = 
+    generateChangesReport
+        { AssetChangesCsv = None
+          AttributeChangesCsv = Some @"G:\work\Projects\asset_sync\aide_report\aide_asset_attributes_changes_20190802.csv" }
+        (pandocHtmlOptions ())
+        (getOutputFile "changes_report_20190802.html")
 

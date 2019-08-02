@@ -10,6 +10,10 @@ module Syntax =
     open MarkdownDoc.Markdown
     open MarkdownDoc.Pandoc
     
+    type ChangesSourceFiles = 
+        { AssetChangesCsv : string option 
+          AttributeChangesCsv : string option }
+
     type ChangeRequestStatus = 
         | Pending
         | Submitted

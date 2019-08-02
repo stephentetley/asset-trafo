@@ -158,7 +158,7 @@ aib_ref_to_s4_floc(Sai, L1, L2, L3) :-
     aib_abs_floc(Sai, AibName1, AibName2, AibName3),
     aib_installation_sai_name(S1, AibName1),
     aib_inst_floc1_floc2(S1, L1, L2),
-    % WARNING - temporarily don't match L2 to avoid rule overlap prolems in the initial data
+    % WARNING - temporarily don't match L2 to avoid rule overlap problems in the initial data
     aib_stype_procg_s4_fun_procg(AibName2, AibName3, _L2, L3).  
 
 % Sai should be process
@@ -166,7 +166,7 @@ aib_ref_to_s4_floc(Sai, L1, L2, L3, L4) :-
     aib_abs_floc(Sai, AibName1, AibName2, AibName3, AibName4),
     aib_installation_sai_name(S1, AibName1),
     aib_inst_floc1_floc2(S1, L1, L2),
-    % WARNING - temporarily don't match L2 to avoid rule overlap prolems in the initial data
+    % WARNING - temporarily don't match L2 to avoid rule overlap problems in the initial data
     aib_stype_procg_proc_s4_fun_procg_proc(AibName2, AibName3, AibName4, _L2, L3, L4).
 
 % aib_ref_to_s4_floc('SAI00003608', L1, L2).
@@ -181,9 +181,10 @@ aib_ref_to_s4_floc(Sai, L1, L2, L3, L4, L5) :-
 % Sai should be plant
 aib_ref_to_s4_floc(Sai, L1, L2, L3, L4, L5, L6) :- 
     aib_abs_floc(Sai, AibName1, AibName2, AibName3, AibName4, _AibName5),
+    writeln([AibName2, AibName3, AibName4]),
     aib_installation_sai_name(S1, AibName1),
     aib_inst_floc1_floc2(S1, L1, L2),
-    % WARNING - temporarily don't match L2 to avoid rule overlap prolems in the initial data
+    % WARNING - temporarily don't match L2 to avoid rule overlap problems in the initial data
     aib_stype_procg_proc_s4_fun_procg_proc(AibName2, AibName3, AibName4, _L2, L3, L4),
     aib_equipment_below(Sai, P1),
     aib_equipment_to_s4_system(P1, L5), 
@@ -193,3 +194,20 @@ aib_ref_to_s4_floc(Sai, L1, L2, L3, L4, L5, L6) :-
 % Note only a select number of sai numbers are mapped as the mapping is handcoded at the moment.
 
 % aib_ref_to_s4_floc('SAI00253999', L1, L2, L3, L4, L5, L6).
+
+
+% Sai should be plant item
+aib_ref_to_s4_floc(Sai, L1, L2, L3, L4, L5, L6, L7) :- 
+    aib_abs_floc(Sai, AibName1, AibName2, AibName3, AibName4, _AibName5),
+    writeln([AibName2, AibName3, AibName4]),
+    aib_installation_sai_name(S1, AibName1),
+    aib_inst_floc1_floc2(S1, L1, L2),
+    % WARNING - temporarily don't match L2 to avoid rule overlap problems in the initial data
+    aib_stype_procg_proc_s4_fun_procg_proc(AibName2, AibName3, AibName4, _L2, L3, L4),
+    aib_equipment_below(Sai, P1),
+    aib_equipment_to_s4_system(P1, L5), 
+    s4_floc_l7_item(_, L7, _, Sai, _, _, _),
+    aib_floc_l6_plant_item(Sai, _,_,_, S2),
+    s4_floc_l6_assembly(_, L6, _, S2, _, _).
+
+% aib_ref_to_s4_floc('SAI00131528', L1, L2, L3, L4, L5, L6, L7).

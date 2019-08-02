@@ -137,18 +137,23 @@ module ChangeReport =
           OtherOptions = [ css; highlightStyle; selfContained ]  }
 
 
-    let generateChangesReport (assetChangesCsvFile : string) 
-                              (attributeChangesCsvFile : string) 
+    let generateChangesReport (changesSource : ChangesSourceFiles) 
                               (pandocOpts : PandocOptions)
                               (outputHtmlFile : string) : Result<unit, string> = 
         let assetRows1 = 
-            readAssetChangeExport assetChangesCsvFile
-                |> Result.map (Seq.map convertAssetChangeRow >> Seq.toList)
+            match changesSource.AssetChangesCsv with
+            | Some src -> 
+                readAssetChangeExport src
+                    |> Result.map (Seq.map convertAssetChangeRow >> Seq.toList)
+            | None -> Ok []
     
         let attrRows1 = 
-            readAttributeChangeExport attributeChangesCsvFile
+            match changesSource.AttributeChangesCsv with
+            | Some src -> 
+                readAttributeChangeExport src
                 |> Result.map (Seq.map convertAttributeChangeRow >> Seq.toList)
-    
+            | None -> Ok []
+
         match assetRows1, attrRows1 with 
         | Ok assetRows, Ok attrRows -> 
             let doc = makeMarkdownReport assetRows attrRows
