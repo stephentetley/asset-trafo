@@ -38,6 +38,7 @@ module Syntax =
     /// be no record.
     type AttributeChange = 
         { AssetName : string
+          Reference : string
           AttributeName : string
           AiValue : string
           AiSource : ValueSource
@@ -72,6 +73,8 @@ module Syntax =
 
     type ChangeRequest = 
         { ChangeRequestId : int64
+          // RequestStatus : string
+          // RequestTime : string
           AssetChanges : AssetChange list
           AttributeChanges : AttributeChange list
         }

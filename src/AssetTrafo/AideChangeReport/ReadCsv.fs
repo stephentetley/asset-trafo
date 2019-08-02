@@ -56,6 +56,7 @@ module ReadCsv =
     let convertAttributeChangeRow (row : AttributeChangeRow) : int64 * AttributeChange = 
         let attrChange = 
             { AssetName = row.AssetName
+              Reference = row.Reference
               AttributeName = row.AttributeName
               AiValue = getValue row.AiValue row.AiLookupCode row.AiLookupValue
               AiSource = getValueSource row.AideLookupCode
@@ -152,6 +153,7 @@ module ReadCsv =
         | None -> Map.add ix ([], [change]) imap
         | Some (xs, ys) -> Map.add ix (xs, change :: ys) imap
 
+
     let private build1 (assetChanges : AssetChangeRow seq) 
                         (attrChanges : AttributeChangeRow seq) : ChangeRequest list =         
         let attrsMap : Map<int64, (AssetChange list * AttributeChange list)> = 
@@ -165,9 +167,6 @@ module ReadCsv =
                         let (ix, c1) = convertAttributeChangeRow x
                         pushR ix c1 st)
                         attrsMap attrChanges
-
-
-
         attrsMap2
             |> Map.toList 
             |> List.map (fun (ix, (xs, ys)) -> 
