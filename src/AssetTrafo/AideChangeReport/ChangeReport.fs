@@ -31,7 +31,8 @@ module ChangeReport =
     
     
     let attributeChangeMdRow (attrChange : AttributeChange) : Markdown.Table.TableRow = 
-        [ attrChange.AttributeName      |> text     |> paraText 
+        [ attrChange.AssetName          |> text     |> paraText
+        ; attrChange.AttributeName      |> text     |> paraText 
         ; valueCell attrChange.AiValue 
         ; valueCell attrChange.AideValue
         ]
@@ -40,9 +41,9 @@ module ChangeReport =
 
     let attributeChangesMdTable (attrChanges : AttributeChange list) : Markdown.Table.Table = 
         let (rows : TableRow list) = 
-            attrChanges |> List.map attributeChangeMdRow
+            attrChanges |> List.map attributeChangeMdRow 
         let specs = [ alignLeft 30; alignLeft 30; alignLeft 45; alignLeft 45 ]
-        let headers = [ "Attributes"; "AI Value"; "AIDE Value"] 
+        let headers = [ "Asset"; "Attributes"; "AI Value"; "AIDE Value"] 
                         |> List.map ( paraText << doubleAsterisks << text)
         makeTable specs headers rows
 
@@ -63,9 +64,13 @@ module ChangeReport =
                         |> List.map ( paraText << doubleAsterisks << text)
         makeTable specs headers rows
 
-    let assetPropertyMdRow (assetProperty : AssetProperty) : Markdown.Table.TableRow option = 
+
+
+
+    let assetPropertyMdRow (assetName : string) (assetProperty : AssetProperty) : Markdown.Table.TableRow option = 
         if assetProperty.HasChanged then
-            [ assetProperty.PropertyName    |> text |> paraText 
+            [ assetName                     |> text |> paraText
+            ; assetProperty.PropertyName    |> text |> paraText 
             ; assetProperty.AiValue         |> text |> paraText 
             ; assetProperty.AideValue       |> text |> paraText 
             ] |> Some
@@ -74,12 +79,12 @@ module ChangeReport =
             None
 
     let assetPropChangesMdTable (assetChange : AssetChange) : Markdown = 
-        if  assetChange.HasChangedProperties then
+        if assetChange.HasChangedProperties then
             let (rows : TableRow list) = 
                 assetChange.AssetProperties 
-                    |> List.choose assetPropertyMdRow
+                    |> List.choose (assetPropertyMdRow assetChange.AiAssetName)
             let specs = [ alignLeft 30; alignLeft 35; alignLeft 35; alignLeft 35 ]
-            let headers = [ "Change Request Id"; "Name"; "AI2 Value"; "AIDE Value" ] 
+            let headers = [ "Asset"; "Name"; "AI2 Value"; "AIDE Value" ] 
                             |> List.map ( paraText << doubleAsterisks << text)
             makeTable specs headers rows |> gridTable
         else

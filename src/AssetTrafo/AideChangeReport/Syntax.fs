@@ -37,7 +37,8 @@ module Syntax =
     /// shows changes. If an attribute is unchanged there will 
     /// be no record.
     type AttributeChange = 
-        { AttributeName : string
+        { AssetName : string
+          AttributeName : string
           AiValue : string
           AiSource : ValueSource
           AideValue : string
