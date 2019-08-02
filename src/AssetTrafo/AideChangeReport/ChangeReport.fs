@@ -31,8 +31,7 @@ module ChangeReport =
     
     
     let attributeChangeMdRow (attrChange : AttributeChange) : Markdown.Table.TableRow = 
-        [ attrChange.ChangeRequestId    |> int64Doc |> paraText
-        ; attrChange.AttributeName      |> text     |> paraText 
+        [ attrChange.AttributeName      |> text     |> paraText 
         ; valueCell attrChange.AiValue 
         ; valueCell attrChange.AideValue
         ]
@@ -43,7 +42,7 @@ module ChangeReport =
         let (rows : TableRow list) = 
             attrChanges |> List.map attributeChangeMdRow
         let specs = [ alignLeft 30; alignLeft 30; alignLeft 45; alignLeft 45 ]
-        let headers = [ "Change Request Id"; "Attributes"; "AI Value"; "AIDE Value"] 
+        let headers = [ "Attributes"; "AI Value"; "AIDE Value"] 
                         |> List.map ( paraText << doubleAsterisks << text)
         makeTable specs headers rows
 
@@ -64,11 +63,9 @@ module ChangeReport =
                         |> List.map ( paraText << doubleAsterisks << text)
         makeTable specs headers rows
 
-    let assetPropertyMdRow (changeRequestId : int64) 
-                            (assetProperty : AssetProperty) : Markdown.Table.TableRow option = 
+    let assetPropertyMdRow (assetProperty : AssetProperty) : Markdown.Table.TableRow option = 
         if assetProperty.HasChanged then
-            [ changeRequestId               |> int64Doc |> paraText 
-            ; assetProperty.PropertyName    |> text |> paraText 
+            [ assetProperty.PropertyName    |> text |> paraText 
             ; assetProperty.AiValue         |> text |> paraText 
             ; assetProperty.AideValue       |> text |> paraText 
             ] |> Some
@@ -80,7 +77,7 @@ module ChangeReport =
         if  assetChange.HasChangedProperties then
             let (rows : TableRow list) = 
                 assetChange.AssetProperties 
-                    |> List.choose (assetPropertyMdRow assetChange.ChangeRequestId)
+                    |> List.choose assetPropertyMdRow
             let specs = [ alignLeft 30; alignLeft 35; alignLeft 35; alignLeft 35 ]
             let headers = [ "Change Request Id"; "Name"; "AI2 Value"; "AIDE Value" ] 
                             |> List.map ( paraText << doubleAsterisks << text)
@@ -98,9 +95,7 @@ module ChangeReport =
         
 
 
-    let makeTitle1 (assetChanges : AssetChange list) : Text = 
-        let ids = 
-            assetChanges |> List.map (fun x -> x.ChangeRequestId)
+    let makeTitle1 (changeRequestIds : int64 list) : Text = 
         let display xs = 
             let docs = List.map int64Doc xs
             if docs.Length > 3 then
@@ -108,21 +103,24 @@ module ChangeReport =
             else
                 docs |> commaSpaceSep
                 
-        match ids with
+        match changeRequestIds with
         | [] -> text "AIDE Changes"
         | [x] -> text "AIDE Changes - Change Request:" ^+^ int64Doc x
-        | _ -> text "AIDE Changes - Change Requests:" ^+^ display ids
+        | xs -> text "AIDE Changes - Change Requests:" ^+^ display xs
 
 
-    let makeMarkdownReport (assetChanges : AssetChange list) 
-                            (attrChanges : AttributeChange list) : Markdown = 
-        h1 (makeTitle1 assetChanges) 
-            ^!!^ h2 (text "Asset")
-            ^!!^ gridTable (assetHeaderMdTable assetChanges)
-            ^!!^ h2 (text "Asset Changes")
-            ^!!^ concatMarkdown (List.map assetPropChangesMdTable assetChanges)
-            ^!!^ h2 (text "Attribute Changes")
-            ^!!^ gridTable (attributeChangesMdTable attrChanges)
+    let makeMarkdownReport (changeRequests : ChangeRequest list) : Markdown = 
+        let requestIds = changeRequests |> List.map (fun x -> x.ChangeRequestId)
+        let makeBody1 (changeRequest : ChangeRequest) = 
+            h2 (text "Asset")
+            ^!!^ gridTable (assetHeaderMdTable changeRequest.AssetChanges)
+            ^!!^ h2 (text "Asset Changes: change request" ^+^ int64Doc changeRequest.ChangeRequestId )
+            ^!!^ concatMarkdown (List.map assetPropChangesMdTable changeRequest.AssetChanges)
+            ^!!^ h2 (text "Attribute Changes: change request" ^+^ int64Doc changeRequest.ChangeRequestId )
+            ^!!^ gridTable (attributeChangesMdTable changeRequest.AttributeChanges)
+
+        h1 (makeTitle1 requestIds) 
+            ^!!^ Markdown.concatMarkdown (List.map makeBody1 changeRequests)
 
 
     let pandocHtmlDefaults (pathToCss : string) : PandocOptions = 
@@ -140,23 +138,9 @@ module ChangeReport =
     let generateChangesReport (changesSource : ChangesSourceFiles) 
                               (pandocOpts : PandocOptions)
                               (outputHtmlFile : string) : Result<unit, string> = 
-        let assetRows1 = 
-            match changesSource.AssetChangesCsv with
-            | Some src -> 
-                readAssetChangeExport src
-                    |> Result.map (Seq.map convertAssetChangeRow >> Seq.toList)
-            | None -> Ok []
-    
-        let attrRows1 = 
-            match changesSource.AttributeChangesCsv with
-            | Some src -> 
-                readAttributeChangeExport src
-                |> Result.map (Seq.map convertAttributeChangeRow >> Seq.toList)
-            | None -> Ok []
-
-        match assetRows1, attrRows1 with 
-        | Ok assetRows, Ok attrRows -> 
-            let doc = makeMarkdownReport assetRows attrRows
+         match readChangesSource changesSource with 
+        | Ok changes -> 
+            let doc = makeMarkdownReport changes
             let mdFileFull = Path.ChangeExtension(outputHtmlFile, "md") 
             let mdFileName = Path.GetFileName(mdFileFull)
             let htmlFileName = Path.GetFileName(outputHtmlFile)
@@ -173,7 +157,6 @@ module ChangeReport =
             match retCode with
             | Ok i -> printfn "Return code: %i" i ; Ok ()
             | Error msg -> Error msg
-        | Error msg, _ -> Error msg
-        | _, Error msg -> Error msg
+        | Error msg -> Error msg
         
     

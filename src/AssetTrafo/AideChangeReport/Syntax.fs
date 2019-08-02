@@ -37,8 +37,7 @@ module Syntax =
     /// shows changes. If an attribute is unchanged there will 
     /// be no record.
     type AttributeChange = 
-        { ChangeRequestId : int64
-          AttributeName : string
+        { AttributeName : string
           AiValue : string
           AiSource : ValueSource
           AideValue : string
@@ -61,8 +60,7 @@ module Syntax =
 
 
     type AssetChange = 
-        { ChangeRequestId : int64
-          Reference : string
+        { Reference : string
           AiAssetName : string
           AiCommonName : string
           AssetProperties : AssetProperty list
@@ -70,5 +68,11 @@ module Syntax =
         member x.HasChangedProperties 
             with get () : bool = 
                 x.AssetProperties |> List.exists (fun prop -> prop.HasChanged)
+
+    type ChangeRequest = 
+        { ChangeRequestId : int64
+          AssetChanges : AssetChange list
+          AttributeChanges : AttributeChange list
+        }
      
   

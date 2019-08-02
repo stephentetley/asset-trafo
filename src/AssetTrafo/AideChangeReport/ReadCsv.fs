@@ -53,14 +53,15 @@ module ReadCsv =
         | None -> Option.defaultValue "" value
         | Some _ -> Option.defaultValue "" lookupValue
 
-    let convertAttributeChangeRow (row : AttributeChangeRow) : AttributeChange = 
-        { ChangeRequestId = row.ChangeRequestId
-          AttributeName = row.AttributeName
-          AiValue = getValue row.AiValue row.AiLookupCode row.AiLookupValue
-          AiSource = getValueSource row.AideLookupCode
-          AideValue = getValue row.AideValue row.AideLookupCode row.AideLookupValue
-          AideSource = getValueSource row.AiLookupCode
-        }
+    let convertAttributeChangeRow (row : AttributeChangeRow) : int64 * AttributeChange = 
+        let attrChange = 
+            { AttributeName = row.AttributeName
+              AiValue = getValue row.AiValue row.AiLookupCode row.AiLookupValue
+              AiSource = getValueSource row.AideLookupCode
+              AideValue = getValue row.AideValue row.AideLookupCode row.AideLookupValue
+              AideSource = getValueSource row.AiLookupCode
+            }
+        row.ChangeRequestId, attrChange
 
     // ************************************************************************
 
@@ -127,10 +128,64 @@ module ReadCsv =
             ; AiValue       = row.AiLocationReference
             ; AideValue     = row.AideLocationReference }
         ]
-    let convertAssetChangeRow (row : AssetChangeRow) : AssetChange = 
-        { ChangeRequestId = row.ChangeRequestId
-          Reference = row.AssetReference
-          AiAssetName = row.AiAssetName
-          AiCommonName = row.AiCommonName
-          AssetProperties = readProperties row
-        }
+
+    let convertAssetChangeRow (row : AssetChangeRow) : int64 * AssetChange = 
+        let assetChange = 
+            { Reference = row.AssetReference
+              AiAssetName = row.AiAssetName
+              AiCommonName = row.AiCommonName
+              AssetProperties = readProperties row
+            }
+        row.ChangeRequestId, assetChange
+
+    type InterimMap =  Map<int64, (AssetChange list * AttributeChange list)>
+
+    let pushL (ix : int64) (change : AssetChange) (imap : InterimMap) : InterimMap = 
+        match Map.tryFind ix imap with
+        | None -> Map.add ix ([change], []) imap
+        | Some (xs, ys) -> Map.add ix (change :: xs, ys) imap
+ 
+ 
+    let pushR (ix : int64) (change : AttributeChange) (imap : InterimMap) : InterimMap = 
+        match Map.tryFind ix imap with
+        | None -> Map.add ix ([], [change]) imap
+        | Some (xs, ys) -> Map.add ix (xs, change :: ys) imap
+
+    let private build1 (assetChanges : AssetChangeRow seq) 
+                        (attrChanges : AttributeChangeRow seq) : ChangeRequest list =         
+        let attrsMap : Map<int64, (AssetChange list * AttributeChange list)> = 
+            Seq.fold (fun st x -> 
+                        let (ix, c1) = convertAssetChangeRow x
+                        pushL ix c1 st)
+                    Map.empty assetChanges
+
+        let attrsMap2 = 
+            Seq.fold (fun st x -> 
+                        let (ix, c1) = convertAttributeChangeRow x
+                        pushR ix c1 st)
+                        attrsMap attrChanges
+
+
+
+        attrsMap2
+            |> Map.toList 
+            |> List.map (fun (ix, (xs, ys)) -> 
+                                { ChangeRequestId = ix
+                                  AssetChanges = xs
+                                  AttributeChanges = ys })
+        
+
+    let readChangesSource (sourceFiles : ChangesSourceFiles) : Result<ChangeRequest list , string> = 
+        let optRead (readProc : string -> Result<'a seq, string>) (optfile : string option) = 
+            match optfile with
+            | None -> Ok Seq.empty
+            | Some name -> readProc name
+        match optRead readAssetChangeExport sourceFiles.AssetChangesCsv with
+        | Error msg -> Error msg
+        | Ok assets -> 
+            match optRead readAttributeChangeExport sourceFiles.AttributeChangesCsv with
+            | Error msg -> Error msg
+            | Ok attrs -> 
+                build1 assets attrs |> Ok
+        
+
