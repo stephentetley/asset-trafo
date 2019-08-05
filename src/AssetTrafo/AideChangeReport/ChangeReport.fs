@@ -17,6 +17,16 @@ module ChangeReport =
     open AssetTrafo.AideChangeReport.Syntax
     open AssetTrafo.AideChangeReport.ReadCsv
 
+
+
+    /// For MarkdownDoc
+    let aName (name : string) : Text = 
+        rawtext (sprintf "<a name=\"%s\"></a>" name)
+
+
+
+
+
     /// Markdown report 
 
     let alignLeft (width : int) : ColumnSpec = 
@@ -117,16 +127,29 @@ module ChangeReport =
         | [x] -> text "AIDE Changes - Change Request:" ^+^ int64Doc x
         | xs -> text "AIDE Changes - Change Requests:" ^+^ display xs
 
+    let changeRequestsTable (changeRequestIds : int64 list) : Markdown = 
+        let makeRow (requestId : int64) = 
+            let name = requestId.ToString()
+            [ inlineLink name ("#cr" + name) None |> paraText ]
+        let specs = [ alignLeft 70 ]
+        let headers = [ "ChangeRequest" ] |> List.map ( paraText << doubleAsterisks << text)
+        let rows = List.map makeRow changeRequestIds
+        makeTable specs headers rows |> gridTable
+
+
 
     let makeMarkdownReport (changeRequests : ChangeRequest list) : Markdown = 
         let requestIds = changeRequests |> List.map (fun x -> x.ChangeRequestId)
+
         let makeBody1 (changeRequest : ChangeRequest) = 
-            h2 (text "Asset Changes: change request" ^+^ int64Doc changeRequest.ChangeRequestId )
+            let refname = "cr" + changeRequest.ChangeRequestId.ToString()
+            h2 (aName refname ^^ text "Asset Changes: change request" ^+^ int64Doc changeRequest.ChangeRequestId )
             ^!!^ concatMarkdown (List.map assetPropChangesMdTable changeRequest.AssetChanges)
             ^!!^ h2 (text "Attribute Changes: change request" ^+^ int64Doc changeRequest.ChangeRequestId )
             ^!!^ gridTable (attributeChangesMdTable changeRequest.AttributeChanges)
 
-        h1 (makeTitle1 requestIds) 
+        h1 (text "AIDE Change Requests") 
+            ^!!^ changeRequestsTable requestIds
             ^!!^ Markdown.concatMarkdown (List.map makeBody1 changeRequests)
 
 
