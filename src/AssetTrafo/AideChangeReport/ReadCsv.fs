@@ -140,37 +140,50 @@ module ReadCsv =
             }
         row.ChangeRequestId, assetChange
 
-    type InterimMap =  Map<int64, (AssetChange list * AttributeChange list)>
+    type MValue= string * System.DateTime * AssetChange list * AttributeChange list
 
-    let pushL (ix : int64) (change : AssetChange) (imap : InterimMap) : InterimMap = 
+    type InterimMap =  Map<int64, MValue>
+
+    let pushL (ix : int64) 
+              (status: string) 
+              (requestTime : System.DateTime) 
+              (change : AssetChange) 
+              (imap : InterimMap) : InterimMap = 
         match Map.tryFind ix imap with
-        | None -> Map.add ix ([change], []) imap
-        | Some (xs, ys) -> Map.add ix (change :: xs, ys) imap
+        | None -> Map.add ix (status, requestTime, [change], []) imap
+        | Some (s, dt, xs, ys) -> Map.add ix (s, dt, change :: xs, ys) imap
  
  
-    let pushR (ix : int64) (change : AttributeChange) (imap : InterimMap) : InterimMap = 
+    let pushR (ix : int64)
+              (status: string) 
+              (requestTime : System.DateTime)  
+              (change : AttributeChange) 
+              (imap : InterimMap) : InterimMap = 
         match Map.tryFind ix imap with
-        | None -> Map.add ix ([], [change]) imap
-        | Some (xs, ys) -> Map.add ix (xs, change :: ys) imap
+        | None -> Map.add ix (status, requestTime, [], [change]) imap
+        | Some (s, dt, xs, ys) -> Map.add ix (s, dt, xs, change :: ys) imap
 
 
+    // Build ChangeRequests from tables of asset and attribute changes
     let private build1 (assetChanges : AssetChangeRow seq) 
                         (attrChanges : AttributeChangeRow seq) : ChangeRequest list =         
-        let attrsMap : Map<int64, (AssetChange list * AttributeChange list)> = 
+        let attrsMap : InterimMap = 
             Seq.fold (fun st x -> 
                         let (ix, c1) = convertAssetChangeRow x
-                        pushL ix c1 st)
+                        pushL ix x.RequestStatus x.ChangeRequestTime c1 st)
                     Map.empty assetChanges
 
         let attrsMap2 = 
             Seq.fold (fun st x -> 
                         let (ix, c1) = convertAttributeChangeRow x
-                        pushR ix c1 st)
+                        pushR ix x.RequestStatus x.ChangeRequestTime c1 st)
                         attrsMap attrChanges
         attrsMap2
             |> Map.toList 
-            |> List.map (fun (ix, (xs, ys)) -> 
+            |> List.map (fun (ix, (s, dt, xs, ys)) -> 
                                 { ChangeRequestId = ix
+                                  RequestStatus = s
+                                  RequestTime = dt
                                   AssetChanges = xs
                                   AttributeChanges = ys })
         

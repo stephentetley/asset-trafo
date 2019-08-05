@@ -73,10 +73,12 @@ module Syntax =
 
     type ChangeRequest = 
         { ChangeRequestId : int64
-          // RequestStatus : string
-          // RequestTime : string
+          RequestStatus : string
+          RequestTime : System.DateTime
           AssetChanges : AssetChange list
           AttributeChanges : AttributeChange list
         }
-     
+        member x.RequestInfo 
+            with get () : int64 * string * System.DateTime =
+                ( x.ChangeRequestId, x.RequestStatus, x.RequestTime)
   

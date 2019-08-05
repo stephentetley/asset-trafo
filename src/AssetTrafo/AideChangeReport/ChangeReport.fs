@@ -20,10 +20,15 @@ module ChangeReport =
 
 
     /// For MarkdownDoc
-    let aName (name : string) : Text = 
-        rawtext (sprintf "<a name=\"%s\"></a>" name)
 
+    let htmlIdAnchor (name : string) (body : Text) : Text = 
+        rawtext (sprintf "<a id=\"%s\">" name) ^^ body ^^ rawtext "</a>"
 
+    /// Print a DataTime. 
+    /// The output uses FSharp's ToString() so it may be printed in 
+    /// exponential notation.
+    let dataTimeDoc (datetime : System.DateTime) (format : string) : Text = 
+        datetime.ToString(format) |> text
 
 
 
@@ -127,29 +132,40 @@ module ChangeReport =
         | [x] -> text "AIDE Changes - Change Request:" ^+^ int64Doc x
         | xs -> text "AIDE Changes - Change Requests:" ^+^ display xs
 
-    let changeRequestsTable (changeRequestIds : int64 list) : Markdown = 
-        let makeRow (requestId : int64) = 
+
+
+    type ChangeRequestInfo = int64 * string * System.DateTime
+
+
+    let changeRequestsTable (infos : ChangeRequestInfo list) : Markdown = 
+        let makeRow (requestId, status, requestTime) = 
             let name = requestId.ToString()
-            [ inlineLink name ("#cr" + name) None |> paraText ]
-        let specs = [ alignLeft 70 ]
-        let headers = [ "ChangeRequest" ] |> List.map ( paraText << doubleAsterisks << text)
-        let rows = List.map makeRow changeRequestIds
+            [ inlineLink name ("#cr" + name) None |> paraText 
+            ; text status |> paraText
+            ; dataTimeDoc requestTime "yyyy-MM-dd hh:mm:ss" |> paraText 
+            ]
+        let specs = [ alignLeft 70 ; alignLeft 40; alignLeft 40 ]
+        let headers = 
+            [ "ChangeRequest"; "Status"; "Change Request Time" ] 
+                |> List.map ( paraText << doubleAsterisks << text)
+        let rows = List.map makeRow infos
         makeTable specs headers rows |> gridTable
 
 
 
     let makeMarkdownReport (changeRequests : ChangeRequest list) : Markdown = 
-        let requestIds = changeRequests |> List.map (fun x -> x.ChangeRequestId)
+        let requestInfos = 
+            changeRequests |> List.map (fun x -> x.RequestInfo)
 
         let makeBody1 (changeRequest : ChangeRequest) = 
             let refname = "cr" + changeRequest.ChangeRequestId.ToString()
-            h2 (aName refname ^^ text "Asset Changes: change request" ^+^ int64Doc changeRequest.ChangeRequestId )
+            h2 (htmlIdAnchor refname (text "Asset Changes: change request" ^+^ int64Doc changeRequest.ChangeRequestId ))
             ^!!^ concatMarkdown (List.map assetPropChangesMdTable changeRequest.AssetChanges)
             ^!!^ h2 (text "Attribute Changes: change request" ^+^ int64Doc changeRequest.ChangeRequestId )
             ^!!^ gridTable (attributeChangesMdTable changeRequest.AttributeChanges)
 
         h1 (text "AIDE Change Requests") 
-            ^!!^ changeRequestsTable requestIds
+            ^!!^ changeRequestsTable requestInfos
             ^!!^ Markdown.concatMarkdown (List.map makeBody1 changeRequests)
 
 
