@@ -23,19 +23,25 @@ open FSharp.Interop.Excel
 
 
 #load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
-#load "..\..\src\AssetTrafo\XsbFacts\Level234FlocMapping.fs"
-open AssetTrafo.XsbFacts.Level234FlocMapping
+#load "..\..\src\AssetTrafo\PrologFacts\Level234FlocMapping.fs"
+open AssetTrafo.PrologFacts.Level234FlocMapping
 
 
 
 let xsbOutput (relativePath : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\..\xsb\facts", relativePath)
 
+let swiOutput (relativePath : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\swi-prolog", relativePath)
 
 let main () = 
     let source = @"G:\work\Projects\asset_sync\AI2_FLOC_Asset_Hierarchy_Rules_V3_FRAGMENT.xlsx"
     let rows = getMappingRows source
-    generateLevel23Mapping rows (xsbOutput "floc_rule_mapping_2_3.pl")
-    generateLevel234Mapping rows (xsbOutput "floc_rule_mapping_2_3_4.pl")
-    generateDescriptionLookupFacts rows (xsbOutput "s4_description_lookup.pl") 
-    // generateProcProcGroupFacts rows (xsbOutput "proc_proc_group.lp") 
+    // Xsb
+    xsbLevel23Mapping rows (xsbOutput "floc_rule_mapping_2_3.pl")
+    xsbLevel234Mapping rows (xsbOutput "floc_rule_mapping_2_3_4.pl")
+    xsbDescriptionLookupFacts rows (xsbOutput "s4_description_lookup.pl")
+    // Swi-Prolog
+    swiLevel23Mapping "floc_rule_mapping_2_3" rows (swiOutput "floc_rule_mapping_2_3.pl")
+    swiLevel234Mapping "floc_rule_mapping_2_3_4" rows (swiOutput "floc_rule_mapping_2_3_4.pl")
+    swiDescriptionLookupFacts "s4_description_lookup" rows (swiOutput "s4_description_lookup.pl")  

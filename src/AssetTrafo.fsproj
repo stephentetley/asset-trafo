@@ -23,10 +23,10 @@
     <Compile Include="AssetTrafo\AideChangeReport\ChangeReport.fs" />
     <Compile Include="AssetTrafo\AspFacts\AibRuleTable.fs" />
     <Compile Include="AssetTrafo\AspFacts\AibAssetTypes.fs" />
-    <Compile Include="AssetTrafo\XsbFacts\Level12FlocMapping.fs" />
-    <Compile Include="AssetTrafo\XsbFacts\Level234FlocMapping.fs" />
-    <Compile Include="AssetTrafo\XsbFacts\AibFlocFacts.fs" />
-    <Compile Include="AssetTrafo\XsbFacts\AibEquipmentFacts.fs" />
+    <Compile Include="AssetTrafo\PrologFacts\Level12FlocMapping.fs" />
+    <Compile Include="AssetTrafo\PrologFacts\Level234FlocMapping.fs" />
+    <Compile Include="AssetTrafo\PrologFacts\AibFlocFacts.fs" />
+    <Compile Include="AssetTrafo\PrologFacts\AibEquipmentFacts.fs" />
   </ItemGroup>
 
   <ItemGroup>

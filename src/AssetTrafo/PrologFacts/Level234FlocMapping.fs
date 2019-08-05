@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetTrafo.XsbFacts
+namespace AssetTrafo.PrologFacts
 
 
 module Level234FlocMapping =
@@ -99,8 +99,8 @@ module Level234FlocMapping =
 
 
 
-    let generateDescriptionLookupFacts (mappingRows : MappingRow list)
-                                        (outputFile : string) : unit =  
+    let xsbDescriptionLookupFacts (mappingRows : MappingRow list)
+                                  (outputFile : string) : unit =  
         writeFactsWithHeaderComment outputFile
             <| factWriter { 
                     do! generatePredicates level2DescriptionLookup mappingRows
@@ -109,8 +109,25 @@ module Level234FlocMapping =
                     return ()
                 }
 
+    let swiDescriptionLookupFacts (moduleName : string)
+                                  (mappingRows : MappingRow list)
+                                  (outputFile : string) : unit =  
+        let proc =  
+            factWriter { 
+                do! generatePredicates level2DescriptionLookup mappingRows
+                do! generatePredicates level3DescriptionLookup mappingRows
+                do! generatePredicates level4DescriptionLookup mappingRows
+                return ()
+            }
+        let exportlist = 
+            [ "s4_description_l2_function/2"
+            ; "s4_description_l3_process_group/2"
+            ; "s4_description_l4_process/2" ]
+        writeFactsWithModuleDecl outputFile moduleName exportlist proc
+
+
     // ************************************************************************
-    // Code mapping
+    // 2 & 3 Mapping
 
     let level23Mapping (row:MappingRow) : Predicate option = 
         let quoted1 (item : string) : Term = 
@@ -125,12 +142,21 @@ module Level234FlocMapping =
                     ]
             |> Some
 
-    let generateLevel23Mapping (mappingRows : MappingRow list)
+    let xsbLevel23Mapping (mappingRows : MappingRow list)
                                 (outputFile : string) : unit =  
         writeFactsWithHeaderComment outputFile
             <| generatePredicates level23Mapping mappingRows
 
+    let swiLevel23Mapping (moduleName : string)
+                           (mappingRows : MappingRow list)
+                           (outputFile : string) : unit =  
+        let proc = generatePredicates level23Mapping mappingRows
+        let exportlist = [ "aib_stype_procg_s4_fun_procg/4"]
+        writeFactsWithModuleDecl outputFile moduleName exportlist proc
 
+
+    // ************************************************************************
+    // 2, 3 & 4 Mapping
 
     let level234Mapping (row:MappingRow) : Predicate option = 
         let quoted1 (item : string) : Term = 
@@ -147,7 +173,15 @@ module Level234FlocMapping =
                     ]
             |> Some
 
-    let generateLevel234Mapping (mappingRows : MappingRow list)
+    let xsbLevel234Mapping (mappingRows : MappingRow list)
                                 (outputFile : string) : unit =  
         writeFactsWithHeaderComment outputFile
             <| generatePredicates level234Mapping mappingRows
+
+
+    let swiLevel234Mapping (moduleName : string)
+                           (mappingRows : MappingRow list)
+                           (outputFile : string) : unit =  
+        let proc = generatePredicates level234Mapping mappingRows
+        let exportlist = [ "aib_stype_procg_proc_s4_fun_procg_proc/6"]
+        writeFactsWithModuleDecl outputFile moduleName exportlist proc

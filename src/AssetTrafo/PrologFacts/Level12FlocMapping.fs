@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetTrafo.XsbFacts
+namespace AssetTrafo.PrologFacts
 
 
 module Level12FlocMapping =
@@ -69,8 +69,8 @@ module Level12FlocMapping =
                         ; quotedAtom floc2 ] |> Some
         | _, _, _-> None
 
-    let xsbGenerateLevel12Mappings (mappingRows : SiteMappingRow list)
-                                   (outputFile : string) : unit =  
+    let xsbLevel12Mappings (mappingRows : SiteMappingRow list)
+                           (outputFile : string) : unit =  
         writeFactsWithHeaderComment outputFile
             <| factWriter { 
                     do! generatePredicates aibInstS4SiteMapping mappingRows
@@ -78,9 +78,9 @@ module Level12FlocMapping =
                     return ()
                 }
 
-    let swiGenerateLevel12Mappings (mappingRows : SiteMappingRow list)
-                                   (moduleName : string)
-                                   (outputFile : string) : unit =  
+    let swiLevel12Mappings (moduleName : string)
+                           (mappingRows : SiteMappingRow list)
+                           (outputFile : string) : unit =  
         let proc = 
             factWriter { 
                 do! generatePredicates aibInstS4SiteMapping mappingRows

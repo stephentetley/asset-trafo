@@ -23,8 +23,8 @@ open FSharp.Interop.Excel
 
 
 #load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
-#load "..\..\src\AssetTrafo\XsbFacts\Level12FlocMapping.fs"
-open AssetTrafo.XsbFacts.Level12FlocMapping
+#load "..\..\src\AssetTrafo\PrologFacts\Level12FlocMapping.fs"
+open AssetTrafo.PrologFacts.Level12FlocMapping
 
 
 let xsbOutput (relativePath : string) = 
@@ -38,7 +38,7 @@ let swiOutput (relativePath : string) =
 let main () = 
     let source = @"G:\work\Projects\asset_sync\Lvl1_2FlocMapping.xlsx"
     let rows = getSiteMappingRows source
-    xsbGenerateLevel12Mappings rows (xsbOutput "floc_rule_mapping_1_2.pl") 
-    swiGenerateLevel12Mappings rows "floc_rule_mapping_1_2" (swiOutput "floc_rule_mapping_1_2.pl") 
+    xsbLevel12Mappings rows (xsbOutput "floc_rule_mapping_1_2.pl") 
+    swiLevel12Mappings rows "floc_rule_mapping_1_2" (swiOutput "floc_rule_mapping_1_2.pl") 
     
 
