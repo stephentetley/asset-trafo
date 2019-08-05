@@ -7,10 +7,11 @@
   <ItemGroup>
     <None Include="AspFacts\EquipmentLP.fsx" />
     <None Include="AspFacts\DescendantsReport.fsx" />
-    <None Include="PrologFacts\GenAibExportFacts.fsx" />
-    <None Include="PrologFacts\GenAibFlocFacts.fsx" />
+    <None Include="AspFacts\AibExportFacts.fsx" />
     <None Include="PrologFacts\GenLevel12FlocMapping.fsx" />
     <None Include="PrologFacts\GenLevel234FlocMapping.fsx" />
+    <None Include="PrologFacts\GenXsbAibDbExport.fsx" />
+    <None Include="PrologFacts\GenSwiAibDbExport.fsx" />
     <None Include="Test01.fsx" />
     <None Include="Test02.fsx" />
     <None Include="Test03.fsx" />

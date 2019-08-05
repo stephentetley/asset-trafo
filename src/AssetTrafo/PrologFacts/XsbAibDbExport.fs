@@ -4,7 +4,7 @@
 namespace AssetTrafo.PrologFacts
 
 
-module XsbAibFlocFacts =
+module XsbAibDbExport =
 
     open FSharp.Data
     open FactX
@@ -12,31 +12,7 @@ module XsbAibFlocFacts =
     
     
     open AssetTrafo.Base.FactsCommon
-
-    // ********** DATA SETUP **********
-
-    [<Literal>]
-    let FlocTableSchema = 
-        "Reference(string),HKey(string),\
-         AssetName(string),AssetType(string),\
-         AssetCode(string), Category(string),\
-         CommonName(string),ParentRef(string)"    
-
-    [<Literal>]
-    let FlocTableSample = 
-         "SAI0101,2OLDWW,NO 1 STARTER,MOTOR STARTER,MOTR,PLANT ITEM,COMMON NAME/WITH/SEPARATORS,SAI0100"
-     
-
-    type FlocTable = 
-        CsvProvider< Schema = FlocTableSchema
-                   , Sample = FlocTableSample
-                   , HasHeaders = true >
-
-    type FlocRow = FlocTable.Row
-
-    let getFlocRows (cvsPath : string) : FlocRow list = 
-        let table = FlocTable.Load(uri = cvsPath)
-        table.Rows |> Seq.toList
+    open AssetTrafo.PrologFacts.AibDbExportCommon
 
 
 
@@ -109,3 +85,21 @@ module XsbAibFlocFacts =
                 ] |> Some
         writeFactsWithHeaderComment outputFile
              <| generatePredicates makePred1 rows
+
+
+    
+    let makeEquipmentFact (row : EquipmentRow) : Predicate option = 
+        predicate "aib_equipment" 
+                    [ quotedAtom row.Reference
+                    ; quotedAtom row.AssetType
+                    ; quotedAtom row.AssetName
+                    ; quotedAtom row.CommonName
+                    ; quotedAtom row.ParentRef
+                    ] |> Some
+
+    let generateEquipmentFacts (rows : EquipmentRow list) 
+                                (outputFile : string) : unit =            
+            writeFactsWithHeaderComment outputFile
+                <| generatePredicates makeEquipmentFact rows
+
+

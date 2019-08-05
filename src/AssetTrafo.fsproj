@@ -25,8 +25,9 @@
     <Compile Include="AssetTrafo\AspFacts\AibAssetTypes.fs" />
     <Compile Include="AssetTrafo\PrologFacts\Level12FlocMapping.fs" />
     <Compile Include="AssetTrafo\PrologFacts\Level234FlocMapping.fs" />
-    <Compile Include="AssetTrafo\PrologFacts\XsbAibFlocFacts.fs" />
-    <Compile Include="AssetTrafo\PrologFacts\XsbAibEquipmentFacts.fs" />
+    <Compile Include="AssetTrafo\PrologFacts\AibDbExportCommon.fs" />
+    <Compile Include="AssetTrafo\PrologFacts\XsbAibDbExport.fs" />
+    <Compile Include="AssetTrafo\PrologFacts\SwiAibDbExport.fs" />
   </ItemGroup>
 
   <ItemGroup>

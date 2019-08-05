@@ -14,16 +14,13 @@ open FSharp.Data
 
 #I @"C:\Users\stephen\.nuget\packages\factx\1.0.0-alpha-20190721\lib\netstandard2.0"
 #r "FactX"
-open FactX
-open FactX.FactWriter
-open FactX.Skeletons
 
 
 #load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
-#load "..\..\src\AssetTrafo\PrologFacts\XsbAibFlocFacts.fs"
-#load "..\..\src\AssetTrafo\PrologFacts\XsbAibEquipmentFacts.fs"
-open AssetTrafo.PrologFacts.XsbAibFlocFacts
-open AssetTrafo.PrologFacts.XsbAibEquipmentFacts
+#load "..\..\src\AssetTrafo\PrologFacts\AibDbExportCommon.fs"
+#load "..\..\src\AssetTrafo\PrologFacts\XsbAibDbExport.fs"
+open AssetTrafo.PrologFacts.AibDbExportCommon
+open AssetTrafo.PrologFacts.XsbAibDbExport
 
 
 let outputFile (relativePath : string) = 
