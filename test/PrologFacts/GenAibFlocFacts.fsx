@@ -22,8 +22,8 @@ open FactX.Skeletons
 #load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
 #load "..\..\src\AssetTrafo\PrologFacts\XsbAibFlocFacts.fs"
 #load "..\..\src\AssetTrafo\PrologFacts\XsbAibEquipmentFacts.fs"
-open AssetTrafo.PrologFacts.AibFlocFacts
-open AssetTrafo.PrologFacts.AibEquipmentFacts
+open AssetTrafo.PrologFacts.XsbAibFlocFacts
+open AssetTrafo.PrologFacts.XsbAibEquipmentFacts
 
 
 let outputFile (relativePath : string) = 

@@ -5,12 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Facts\EquipmentLP.fsx" />
-    <None Include="Facts\DescendantsReport.fsx" />
-    <None Include="Facts\GenAibExportFacts.fsx" />
-    <None Include="Facts\GenAibFlocFacts.fsx" />
-    <None Include="Facts\GenLevel12FlocMapping.fsx" />
-    <None Include="Facts\GenLevel234FlocMapping.fsx" />
+    <None Include="AspFacts\EquipmentLP.fsx" />
+    <None Include="AspFacts\DescendantsReport.fsx" />
+    <None Include="PrologFacts\GenAibExportFacts.fsx" />
+    <None Include="PrologFacts\GenAibFlocFacts.fsx" />
+    <None Include="PrologFacts\GenLevel12FlocMapping.fsx" />
+    <None Include="PrologFacts\GenLevel234FlocMapping.fsx" />
     <None Include="Test01.fsx" />
     <None Include="Test02.fsx" />
     <None Include="Test03.fsx" />
