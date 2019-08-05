@@ -31,9 +31,14 @@ let xsbOutput (relativePath : string) =
     Path.Combine(__SOURCE_DIRECTORY__, @"..\..\xsb\facts", relativePath)
 
 
+let swiOutput (relativePath : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\swi-prolog", relativePath)
+
+
 let main () = 
     let source = @"G:\work\Projects\asset_sync\Lvl1_2FlocMapping.xlsx"
     let rows = getSiteMappingRows source
-    generateLevel12Mappings rows (xsbOutput "floc_rule_mapping_1_2.pl") 
+    xsbGenerateLevel12Mappings rows (xsbOutput "floc_rule_mapping_1_2.pl") 
+    swiGenerateLevel12Mappings rows "floc_rule_mapping_1_2" (swiOutput "floc_rule_mapping_1_2.pl") 
     
 

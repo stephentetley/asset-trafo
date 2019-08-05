@@ -42,27 +42,6 @@ module Level12FlocMapping =
         | _ -> input.Trim() |> Some
 
 
-    // ************************************************************************
-    // Aib Common Name
-    
-    //let private aibCommonName (row : SiteMappingRow) : Predicate option = 
-    //    let make1 = 
-    //        fun code name -> predicate "aib_common_name" [ stringTerm code; stringTerm name ]
-    //    match (checkInput row.AI2_InstallationReference, 
-    //            checkInput row.AI2_InstallationCommonName) with
-    //    | Some code, Some name -> make1 code name |> Some
-    //    | _, _ -> None
-
-
-    
-
-    //let generateCommonNameFacts (mappingRows : SiteMappingRow list)
-    //                            (outputFile : string) : unit =  
-    //    generatePredicates aibCommonName mappingRows
-    //        |> writeFactsWithHeaderComment outputFile
-            
-
-
 
     // ************************************************************************
     // Description Lookups (code to description) (S4)
@@ -90,8 +69,8 @@ module Level12FlocMapping =
                         ; quotedAtom floc2 ] |> Some
         | _, _, _-> None
 
-    let generateLevel12Mappings (mappingRows : SiteMappingRow list)
-                                (outputFile : string) : unit =  
+    let xsbGenerateLevel12Mappings (mappingRows : SiteMappingRow list)
+                                   (outputFile : string) : unit =  
         writeFactsWithHeaderComment outputFile
             <| factWriter { 
                     do! generatePredicates aibInstS4SiteMapping mappingRows
@@ -99,24 +78,18 @@ module Level12FlocMapping =
                     return ()
                 }
 
+    let swiGenerateLevel12Mappings (mappingRows : SiteMappingRow list)
+                                   (moduleName : string)
+                                   (outputFile : string) : unit =  
+        let proc = 
+            factWriter { 
+                do! generatePredicates aibInstS4SiteMapping mappingRows
+                do! generatePredicates aibInstS4Level12Mapping mappingRows
+                return ()
+            }
+        let exportlist = [ "aib_inst_floc1_s4_name/3"; "aib_inst_floc1_floc2/3"]
+        writeFactsWithModuleDecl outputFile moduleName exportlist proc
+               
 
-    // ************************************************************************
-    // Aib Common Name
-    
-    //let private aibInstallationType (row : SiteMappingRow) : Predicate option = 
-    //    let make1 = 
-    //        fun code typ -> 
-    //            predicate "aib_installation_type" [ quotedAtom code; quotedAtom typ ]
-    //    match (checkInput row.AI2_InstallationReference, 
-    //            checkInput row.AI2_InstallationAssetType) with
-    //    | Some code, Some typ -> make1 code typ |> Some
-    //    | _, _ -> None
 
-
-    
-
-    //let generateAibInstallationType (mappingRows : SiteMappingRow list)
-    //                        (outputFile : string) : unit =  
-    //    generatePredicates aibInstallationType mappingRows
-    //        |> writeFactsWithHeaderComment outputFile
 
