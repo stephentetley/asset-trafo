@@ -27,12 +27,25 @@ module ChangeReport =
     /// Print a DataTime. 
     /// The output uses FSharp's ToString() so it may be printed in 
     /// exponential notation.
-    let dataTimeDoc (datetime : System.DateTime) (format : string) : Text = 
+    let dateTimeDoc (datetime : System.DateTime) (format : string) : Text = 
         datetime.ToString(format) |> text
 
+    let iso8601DateTimeDoc (datetime : System.DateTime) : Text = 
+        dateTimeDoc datetime "yyyy-MM-dd hh:mm:ss"
+
+
+    /// Add to markdown-doc?
+    let commaSpaceSep (texts : Text list) : Text = 
+        match texts with 
+        | [] -> Text.empty
+        | [d1] -> d1
+        | d1 :: rest -> List.fold (fun ac d -> ac ^^ character ',' ^+^ d) d1 rest
 
 
     /// Markdown report 
+
+    let linkToTop () : Markdown = 
+        inlineLink "Back to top" "#top" None |> markdownText
 
     let alignLeft (width : int) : ColumnSpec = 
         { Width = width; Alignment = Alignment.AlignLeft }
@@ -43,9 +56,30 @@ module ChangeReport =
         | null | "NULL" -> "" |> text |> paraText 
         |_ -> value |> text |> paraText 
     
+
+
+    /// Change Request Table
+    let changeRequestInfosTable (infos : ChangeRequestInfo list) : Markdown = 
+        let makeRow (requestId, status, requestTime) = 
+            let name = requestId.ToString()
+            [ inlineLink name ("#cr" + name) None |> paraText 
+            ; text status |> paraText
+            ; iso8601DateTimeDoc requestTime |> paraText 
+            ]
+        let specs = [ alignLeft 70 ; alignLeft 40; alignLeft 40 ]
+        let headers = 
+            [ "Change Request Id"; "Status"; "Request Time" ] 
+                |> List.map ( paraText << doubleAsterisks << text)
+        let rows = List.map makeRow infos
+        
+        match infos with
+        | [] -> text "No change requests"  |> markdownText
+        | _ -> makeTable specs headers rows |> gridTable
+        
     
-    
-    let attributeChangeMdRow (attrChange : AttributeChange) : Markdown.Table.TableRow = 
+    // Make Attribute Changes table
+
+    let attributeChangeRow (attrChange : AttributeChange) : Markdown.Table.TableRow = 
         [ attrChange.Reference          |> text     |> paraText
         ; attrChange.AssetName          |> text     |> paraText
         ; attrChange.AttributeName      |> text     |> paraText 
@@ -53,39 +87,30 @@ module ChangeReport =
         ; valueCell attrChange.AideValue
         ]
 
+    let attributeChangesTable (attrChanges : AttributeChange list) : Markdown = 
 
-
-    let attributeChangesMdTable (attrChanges : AttributeChange list) : Markdown.Table.Table = 
         let (rows : TableRow list) = 
-            attrChanges |> List.map attributeChangeMdRow 
+            attrChanges |> List.map attributeChangeRow 
+
         let specs = [ alignLeft 30; alignLeft 40; alignLeft 30; alignLeft 45; alignLeft 45 ]
+        
         let headers = [ "Reference"; "Asset"; "Attributes"; "AI Value"; "AIDE Value"] 
                         |> List.map ( paraText << doubleAsterisks << text)
-        makeTable specs headers rows
+
+        match attrChanges with
+        | [] -> asterisks (text "No attribute changes")  |> h3
+        | _ -> 
+            h3 (text "Attribute Changes" )
+            ^!!^ (makeTable specs headers rows |> gridTable)
 
 
 
-
-    //let assetChangeMdRow (assetChange : AssetChange) : Markdown.Table.TableRow = 
-    //    [ assetChange.Reference     |> text |> paraText 
-    //    ; assetChange.AiAssetName   |> text |> paraText 
-    //    ; assetChange.AiCommonName  |> text |> paraText 
-    //    ]
-
-    //let assetHeaderMdTable (assetChanges : AssetChange list) : Markdown.Table.Table = 
-    //    let (rows : TableRow list) = 
-    //        assetChanges |> List.map assetChangeMdRow
-    //    let specs = [ alignLeft 30; alignLeft 30; alignLeft 45 ]
-    //    let headers = [ "Reference"; "Asset Name (AI2)"; "Common Name (AI2)" ] 
-    //                    |> List.map ( paraText << doubleAsterisks << text)
-    //    makeTable specs headers rows
+    // Make "Asset Property" Changes table
 
 
-
-
-    let assetPropertyMdRow (reference : string) 
-                            (assetName : string) 
-                            (assetProperty : AssetProperty) : Markdown.Table.TableRow option = 
+    let assetPropertyChangeRow (reference : string) 
+                               (assetName : string) 
+                               (assetProperty : AssetProperty) : Markdown.Table.TableRow option = 
         if assetProperty.HasChanged then
             [ reference                     |> text |> paraText
             ; assetName                     |> text |> paraText
@@ -93,80 +118,50 @@ module ChangeReport =
             ; assetProperty.AiValue         |> text |> paraText 
             ; assetProperty.AideValue       |> text |> paraText 
             ] |> Some
+        else None
 
-        else
-            None
+    let assetPropertyChangeRows (assetChanges : AssetChange list) : Markdown.Table.TableRow list = 
+        let changeRows1 (changes : AssetChange) : Markdown.Table.TableRow list = 
+            if changes.HasChangedProperties then
+                changes.AssetProperties 
+                |> List.choose (assetPropertyChangeRow changes.Reference changes.AiAssetName)
+            else []
+        List.map changeRows1 assetChanges |> List.concat
 
-    let assetPropChangesMdTable (assetChange : AssetChange) : Markdown = 
-        if assetChange.HasChangedProperties then
-            let (rows : TableRow list) = 
-                assetChange.AssetProperties 
-                    |> List.choose (assetPropertyMdRow assetChange.Reference assetChange.AiAssetName)
-            let specs = [ alignLeft 30; alignLeft 35; alignLeft 35; alignLeft 35 ]
-            let headers = [ "Asset"; "Name"; "AI2 Value"; "AIDE Value" ] 
+    let assetPropertyChangesTable (assetChanges : AssetChange list) : Markdown = 
+        let rows = assetPropertyChangeRows assetChanges
+        let specs = [ alignLeft 30; alignLeft 35; alignLeft 35; alignLeft 35 ]
+        let headers = [ "Asset"; "Name"; "AI2 Value"; "AIDE Value" ] 
                             |> List.map ( paraText << doubleAsterisks << text)
-            makeTable specs headers rows |> gridTable
-        else
-            Markdown.emptyMarkdown
 
-    /// Add to markdown-doc?
-    let commaSpaceSep (texts : Text list) : Text = 
-        match texts with 
-        | [] -> Text.empty
-        | [d1] -> d1
-        | d1 :: rest -> List.fold (fun ac d -> ac ^^ character ',' ^+^ d) d1 rest
+        match rows with
+        | [] -> asterisks (text "No asset property changes")  |> h3
+        | _ -> 
+            h3 (text "Asset Property Changes" )
+            ^!!^ (makeTable specs headers rows |> gridTable)
         
-        
+            
 
+    let changeRequestSection (changeRequest : ChangeRequest) = 
+        let requestId =  changeRequest.ChangeRequestId       
 
-    let makeTitle1 (changeRequestIds : int64 list) : Text = 
-        let display xs = 
-            let docs = List.map int64Doc xs
-            if docs.Length > 3 then
-                List.take 3 docs @ [text "..."] |> commaSpaceSep
-            else
-                docs |> commaSpaceSep
-                
-        match changeRequestIds with
-        | [] -> text "AIDE Changes"
-        | [x] -> text "AIDE Changes - Change Request:" ^+^ int64Doc x
-        | xs -> text "AIDE Changes - Change Requests:" ^+^ display xs
+        let title = 
+            let refname = sprintf "cr%i" requestId
+            htmlIdAnchor refname (text "Change request" ^+^ int64Doc requestId)
 
-
-
-    type ChangeRequestInfo = int64 * string * System.DateTime
-
-
-    let changeRequestsTable (infos : ChangeRequestInfo list) : Markdown = 
-        let makeRow (requestId, status, requestTime) = 
-            let name = requestId.ToString()
-            [ inlineLink name ("#cr" + name) None |> paraText 
-            ; text status |> paraText
-            ; dataTimeDoc requestTime "yyyy-MM-dd hh:mm:ss" |> paraText 
-            ]
-        let specs = [ alignLeft 70 ; alignLeft 40; alignLeft 40 ]
-        let headers = 
-            [ "ChangeRequest"; "Status"; "Change Request Time" ] 
-                |> List.map ( paraText << doubleAsterisks << text)
-        let rows = List.map makeRow infos
-        makeTable specs headers rows |> gridTable
-
-
+        h2 title
+        ^!!^ markdownText (text "Request status:" ^+^ text changeRequest.RequestStatus)
+        ^!!^ markdownText (text "Request time:" ^+^ iso8601DateTimeDoc changeRequest.RequestTime)
+        ^!!^ assetPropertyChangesTable changeRequest.AssetChanges
+        ^!!^ attributeChangesTable changeRequest.AttributeChanges
+        ^!!^ linkToTop ()
 
     let makeMarkdownReport (changeRequests : ChangeRequest list) : Markdown = 
-        let requestInfos = 
-            changeRequests |> List.map (fun x -> x.RequestInfo)
+        let requestInfos = changeRequests |> List.map (fun x -> x.RequestInfo)
 
-        let makeBody1 (changeRequest : ChangeRequest) = 
-            let refname = "cr" + changeRequest.ChangeRequestId.ToString()
-            h2 (htmlIdAnchor refname (text "Asset Changes: change request" ^+^ int64Doc changeRequest.ChangeRequestId ))
-            ^!!^ concatMarkdown (List.map assetPropChangesMdTable changeRequest.AssetChanges)
-            ^!!^ h2 (text "Attribute Changes: change request" ^+^ int64Doc changeRequest.ChangeRequestId )
-            ^!!^ gridTable (attributeChangesMdTable changeRequest.AttributeChanges)
-
-        h1 (text "AIDE Change Requests") 
-            ^!!^ changeRequestsTable requestInfos
-            ^!!^ Markdown.concatMarkdown (List.map makeBody1 changeRequests)
+        h1 (htmlIdAnchor "top" (text "AIDE Change Requests"))
+            ^!!^ changeRequestInfosTable requestInfos
+            ^!!^ Markdown.concatMarkdown (List.map changeRequestSection changeRequests)
 
 
     let pandocHtmlDefaults (pathToCss : string) : PandocOptions = 

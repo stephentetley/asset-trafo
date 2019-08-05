@@ -71,6 +71,9 @@ module Syntax =
             with get () : bool = 
                 x.AssetProperties |> List.exists (fun prop -> prop.HasChanged)
 
+
+    type ChangeRequestInfo = int64 * string * System.DateTime
+
     type ChangeRequest = 
         { ChangeRequestId : int64
           RequestStatus : string
@@ -79,6 +82,6 @@ module Syntax =
           AttributeChanges : AttributeChange list
         }
         member x.RequestInfo 
-            with get () : int64 * string * System.DateTime =
+            with get () : ChangeRequestInfo =
                 ( x.ChangeRequestId, x.RequestStatus, x.RequestTime)
   
