@@ -39,6 +39,6 @@ let main () =
     let source = @"G:\work\Projects\asset_sync\Lvl1_2FlocMapping.xlsx"
     let rows = getSiteMappingRows source
     xsbLevel12Mappings rows (xsbOutput "floc_rule_mapping_1_2.pl") 
-    swiLevel12Mappings rows "floc_rule_mapping_1_2" (swiOutput "floc_rule_mapping_1_2.pl") 
+    swiLevel12Mappings "floc_rule_mapping_1_2" rows (swiOutput "floc_rule_mapping_1_2.pl") 
     
 

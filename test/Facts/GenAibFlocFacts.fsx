@@ -20,8 +20,8 @@ open FactX.Skeletons
 
 
 #load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
-#load "..\..\src\AssetTrafo\PrologFacts\AibFlocFacts.fs"
-#load "..\..\src\AssetTrafo\PrologFacts\AibEquipmentFacts.fs"
+#load "..\..\src\AssetTrafo\PrologFacts\XsbAibFlocFacts.fs"
+#load "..\..\src\AssetTrafo\PrologFacts\XsbAibEquipmentFacts.fs"
 open AssetTrafo.PrologFacts.AibFlocFacts
 open AssetTrafo.PrologFacts.AibEquipmentFacts
 

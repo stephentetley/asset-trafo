@@ -4,7 +4,7 @@
 namespace AssetTrafo.PrologFacts
 
 
-module AibEquipmentFacts =
+module XsbAibEquipmentFacts =
 
     open FSharp.Data
     open FactX

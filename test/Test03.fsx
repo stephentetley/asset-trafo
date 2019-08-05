@@ -24,7 +24,7 @@ open MarkdownDoc.Pandoc
 #r "TikZDoc.dll"
 
 
-#load "..\src\AssetTrafo\Base\TreeDiff.fs"
+#load "..\src\AssetTrafo\Aib\TreeDiff.fs"
 #load "..\src\AssetTrafo\Aib\StructureRelationsSimple.fs"
 #load "..\src\AssetTrafo\Aib\MarkdownOutput.fs"
 open AssetTrafo.Aib.TreeDiff
