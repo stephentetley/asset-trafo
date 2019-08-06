@@ -21,7 +21,7 @@ open SLPotassco.Potassco.Invoke
 
 
 let clingoDirectory () = 
-    System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"..\clingo")
+    System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"..\..\clingo")
 
 
 // For sl-format

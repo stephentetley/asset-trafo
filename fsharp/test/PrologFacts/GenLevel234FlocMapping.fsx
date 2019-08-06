@@ -29,10 +29,10 @@ open AssetTrafo.PrologFacts.Level234FlocMapping
 
 
 let xsbOutput (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\xsb\facts", relativePath)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\..\xsb\facts", relativePath)
 
 let swiOutput (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\swi-prolog", relativePath)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\..\output\swi-prolog", relativePath)
 
 let main () = 
     let source = @"G:\work\Projects\asset_sync\AI2_FLOC_Asset_Hierarchy_Rules_V3_FRAGMENT.xlsx"

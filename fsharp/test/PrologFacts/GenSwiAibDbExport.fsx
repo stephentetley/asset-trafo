@@ -24,12 +24,12 @@ open AssetTrafo.PrologFacts.SwiAibDbExport
 
 
 let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\swi-prolog", relativePath)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\..\output\swi-prolog", relativePath)
 
 
 
 let main () = 
-    let patt = "^ABBEY LANE HULL.*SPS"
+    let patt = "^ABBEY LANE HULL.*(SPS|CSO)"
     let flocCsv = @"G:\work\Projects\asset_sync\rules\aib_floc_extract4.csv"
     let equipCsv = @"G:\work\Projects\asset_sync\rules\aib_equipment_extract1.csv"
     let flocRows = getFlocRows flocCsv |> Seq.toList

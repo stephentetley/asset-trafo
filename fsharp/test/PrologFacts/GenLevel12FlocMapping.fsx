@@ -28,11 +28,11 @@ open AssetTrafo.PrologFacts.Level12FlocMapping
 
 
 let xsbOutput (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\xsb\facts", relativePath)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\..\xsb\facts", relativePath)
 
 
 let swiOutput (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\swi-prolog", relativePath)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\..\output\swi-prolog", relativePath)
 
 
 let main () = 

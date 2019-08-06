@@ -24,7 +24,7 @@ open AssetTrafo.PrologFacts.XsbAibDbExport
 
 
 let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\xsb\facts", relativePath)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\..\xsb\facts", relativePath)
 
 
 let genFlocFacts (csvSource : string) : unit = 

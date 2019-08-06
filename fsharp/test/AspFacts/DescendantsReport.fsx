@@ -31,11 +31,11 @@ open SLPotassco.Potassco.Invoke
 
 
 let clingoDirectory () = 
-    System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"..\..\clingo")
+    System.IO.Path.Combine(__SOURCE_DIRECTORY__, @"..\..\..\clingo")
 
 
 let outputDirectory () = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..", "output")
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\..\output")
 
 let getOutputFile (relFileName : string) = 
     let dir = outputDirectory () in Path.Combine(dir, relFileName)
@@ -171,4 +171,7 @@ let runReport (assetType : string) : Result<int, string> =
     | Error msg -> Error msg
     | Ok clingoAns -> 
         clingoAns |> getDecendants |> exportMarkdown
+
+let demo01 () = 
+    runReport "PLC CONTROL"
         

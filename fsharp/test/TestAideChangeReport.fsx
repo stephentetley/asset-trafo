@@ -31,7 +31,7 @@ open AssetTrafo.AideChangeReport.ChangeReport
 
 
 let getOutputFile (relFileName : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output", relFileName)
 
 
 
