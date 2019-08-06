@@ -28,6 +28,7 @@
     <Compile Include="AssetTrafo\PrologFacts\AibDbExportCommon.fs" />
     <Compile Include="AssetTrafo\PrologFacts\XsbAibDbExport.fs" />
     <Compile Include="AssetTrafo\PrologFacts\SwiAibDbExport.fs" />
+    <Compile Include="AssetTrafo\PrologFacts\S4EquipmentExport.fs" />
   </ItemGroup>
 
   <ItemGroup>

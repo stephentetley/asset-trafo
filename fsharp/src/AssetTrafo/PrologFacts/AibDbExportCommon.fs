@@ -7,11 +7,6 @@ namespace AssetTrafo.PrologFacts
 module AibDbExportCommon =
 
     open FSharp.Data
-    open FactX
-    open FactX.FactWriter
-    
-    
-    open AssetTrafo.Base.FactsCommon
 
 
     // ************************************************************************

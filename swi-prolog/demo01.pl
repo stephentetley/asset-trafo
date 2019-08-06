@@ -72,7 +72,6 @@ demo10a(X) :-
 
 demo10b(X) :- 
     % process
-    % currently failing due to lack of data in s4 sample.
     aib_to_s4_floc('SAI00338989', X).
 
 demo10c(X) :- 
@@ -88,3 +87,7 @@ demo10e(X) :-
     % plant item
     aib_to_s4_floc('SAI00215603', X).
 
+
+demo10f(X) :- 
+    % equipment
+    aib_to_s4_floc('PLI00076762', X).

@@ -29,6 +29,7 @@
 %% Ideally this would be somehow dynamic 
 :- use_module(sample_data/aib_inst_facts1).
 :- use_module(sample_data/s4_site_facts1).
+:- use_module(sample_data/s4_equipment_facts1).
 
 atoms_to_floc(List, Floc) :- 
     atomics_to_string(List, "-", Floc).
@@ -185,6 +186,8 @@ aib_equipment_to_s4_item(PliCode, ItemFloc) :-
     s4_item(ItemFloc, _, _, _, _,  _, PliCode, _).
 
 
+aib_equipment_to_s4_floc(PliCode, Floc) :- 
+    s4_equipment(_, PliCode, _, _, _, _, Floc).
 
 
 %%%
@@ -193,14 +196,14 @@ aib_equipment_to_s4_item(PliCode, ItemFloc) :-
 aib_to_s4_floc_aux(Ref, Floc) :- 
     aib_installation(Ref, _, _),
     aib_equipment_below(Ref, Equip), 
-    aib_equipment_to_s4_system(Equip, Floc1),
+    aib_equipment_to_s4_floc(Equip, Floc1),
     floc_take(Floc1, 1, Floc).
 
 % process_group retrieves a length 3 floc (process group)
 aib_to_s4_floc_aux(Ref, Floc) :- 
     aib_process_group(Ref, _, _, _),
     aib_equipment_below(Ref, Equip), 
-    aib_equipment_to_s4_system(Equip, Floc1),
+    aib_equipment_to_s4_floc(Equip, Floc1),
     floc_take(Floc1, 3, Floc).
 
 
@@ -208,14 +211,14 @@ aib_to_s4_floc_aux(Ref, Floc) :-
 aib_to_s4_floc_aux(Ref, Floc) :- 
     aib_process(Ref, _, _, _),
     aib_equipment_below(Ref, Equip), 
-    aib_equipment_to_s4_system(Equip, Floc1),
+    aib_equipment_to_s4_floc(Equip, Floc1),
     floc_take(Floc1, 4, Floc).
 
 % plant retrieves a length 6 floc (assembly)
 aib_to_s4_floc_aux(Ref, Floc) :- 
     aib_plant(Ref, _, _, _),
     aib_equipment_below(Ref, Equip), 
-    aib_equipment_to_s4_assembly(Equip, Floc1),
+    aib_equipment_to_s4_floc(Equip, Floc1),
     floc_take(Floc1, 6, Floc).
 
 
@@ -223,8 +226,15 @@ aib_to_s4_floc_aux(Ref, Floc) :-
 aib_to_s4_floc_aux(Ref, Floc) :- 
     aib_plant_item(Ref, _, _, _),
     aib_equipment_below(Ref, Equip), 
-    aib_equipment_to_s4_item(Equip, Floc1),
+    aib_equipment_to_s4_floc(Equip, Floc1),
     floc_take(Floc1, 7, Floc).
+
+% Equipment floc is variable length
+aib_to_s4_floc_aux(Ref, Floc) :-
+    s4_equipment(_, Ref, _, _, _, _, Floc).
+
 
 aib_to_s4_floc(Ref, Flocs) :- 
     setof(X, aib_to_s4_floc_aux(Ref,X), Flocs).
+
+
