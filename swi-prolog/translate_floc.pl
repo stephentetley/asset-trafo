@@ -3,6 +3,7 @@
 :- module(translate_floc,
     [
       atoms_to_floc/2
+    , floc_take/3
 
     , process_group_installation_root/2
     , process_installation_root/2
@@ -17,6 +18,8 @@
     , aib_floc_to_s4_system/2
     , aib_equipment_to_s4_system/2
 
+    , aib_to_s4_floc/2
+
     ]).
 
 :- use_module(floc_rules/floc_rule_mapping_1_2).
@@ -29,6 +32,16 @@
 
 atoms_to_floc(List, Floc) :- 
     atomics_to_string(List, "-", Floc).
+
+% if count > len take whole list.
+list_take(Src, Count, List) :- 
+    findall(Elt, (nth1(Ix, Src, Elt), Ix =< Count), List).
+
+floc_take(Src, Len, Floc) :- 
+    atomics_to_string(List, "-", Src),
+    list_take(List, Len, List1),
+    atomics_to_string(List1, "-", Floc).
+
 
 norm_floc_part('', '@@@') :- !.
 norm_floc_part(Part, Part) :- !.
@@ -158,3 +171,60 @@ aib_equipment_to_s4_system(PliCode, SysFloc) :-
 aib_equipment_to_s4_system(PliCode, SysFloc) :-
     s4_item(_, _, _, _, _, _, PliCode, UFloc),
     s4_assembly(UFloc, _, _, _, _, _, SysFloc).
+
+
+aib_equipment_to_s4_assembly(PliCode, AsmFloc) :-
+    s4_assembly(AsmFloc, _, _, _, _, PliCode, _).
+
+aib_equipment_to_s4_assembly(PliCode, AsmFloc) :-
+    s4_item(_, _, _, _, _, _, PliCode, AsmFloc),
+    s4_assembly(AsmFloc, _, _, _, _, _, _).
+
+
+aib_equipment_to_s4_item(PliCode, ItemFloc) :-
+    s4_item(ItemFloc, _, _, _, _,  _, PliCode, _).
+
+
+
+
+%%%
+
+% installation retrieves a length 1 floc (site)
+aib_to_s4_floc_aux(Ref, Floc) :- 
+    aib_installation(Ref, _, _),
+    aib_equipment_below(Ref, Equip), 
+    aib_equipment_to_s4_system(Equip, Floc1),
+    floc_take(Floc1, 1, Floc).
+
+% process_group retrieves a length 3 floc (process group)
+aib_to_s4_floc_aux(Ref, Floc) :- 
+    aib_process_group(Ref, _, _, _),
+    aib_equipment_below(Ref, Equip), 
+    aib_equipment_to_s4_system(Equip, Floc1),
+    floc_take(Floc1, 3, Floc).
+
+
+% process retrieves a length 4 floc (process)
+aib_to_s4_floc_aux(Ref, Floc) :- 
+    aib_process(Ref, _, _, _),
+    aib_equipment_below(Ref, Equip), 
+    aib_equipment_to_s4_system(Equip, Floc1),
+    floc_take(Floc1, 4, Floc).
+
+% plant retrieves a length 6 floc (assembly)
+aib_to_s4_floc_aux(Ref, Floc) :- 
+    aib_plant(Ref, _, _, _),
+    aib_equipment_below(Ref, Equip), 
+    aib_equipment_to_s4_assembly(Equip, Floc1),
+    floc_take(Floc1, 6, Floc).
+
+
+% plant_item retrieves a length 7 floc (item)
+aib_to_s4_floc_aux(Ref, Floc) :- 
+    aib_plant_item(Ref, _, _, _),
+    aib_equipment_below(Ref, Equip), 
+    aib_equipment_to_s4_item(Equip, Floc1),
+    floc_take(Floc1, 7, Floc).
+
+aib_to_s4_floc(Ref, Flocs) :- 
+    setof(X, aib_to_s4_floc_aux(Ref,X), Flocs).

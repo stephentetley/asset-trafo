@@ -18,9 +18,12 @@ demo02(X,Y) :-
 demo03(Inst) :-
     process_group_installation_root('SAI00075549', Inst).
 
-demo03a(Sai, Body) :-
+find_process_group(Sai, Ans) :- 
     aib_process_group(Sai, X, Y, Z),
-    Body = aib_process_group(Sai, X, Y, Z).
+    Ans = aib_process_group(Sai, X, Y, Z).
+
+demo03a(Body) :-
+    find_process_group('SAI00167635', Body).
 
 
 demo04(Inst) :-
@@ -59,6 +62,29 @@ demo09(Xs) :-
 
 
 
+demo10(X) :- 
+    % installation
+    aib_to_s4_floc('SAI00003608', X).
+
+demo10a(X) :- 
+    % process_group
+    aib_to_s4_floc('SAI00167636', X).
+
+demo10b(X) :- 
+    % process
+    % currently failing due to lack of data in s4 sample.
+    aib_to_s4_floc('SAI00338989', X).
+
+demo10c(X) :- 
+    % process no process group
+    aib_to_s4_floc('SAI00075544', X).
+
+demo10d(X) :- 
+    % plant
+    aib_to_s4_floc('SAI00215602', X).
 
 
+demo10e(X) :- 
+    % plant item
+    aib_to_s4_floc('SAI00215603', X).
 
