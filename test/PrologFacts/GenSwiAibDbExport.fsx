@@ -28,11 +28,11 @@ let outputFile (relativePath : string) =
 
 
 
-
-let genEquipmentFacts (csvSource : string) : unit =  
-    let rows = getEquipmentRows csvSource |> Seq.toList
-    generateEquipmentFacts "aib_inst_facts1" rows (outputFile "aib_inst_facts1.pl")
-
 let main () = 
-    genEquipmentFacts @"G:\work\Projects\asset_sync\rules\aib_equipment_extract1.csv"
+    let patt = "^ABBEY LANE HULL.*SPS"
+    let flocCsv = @"G:\work\Projects\asset_sync\rules\aib_floc_extract4.csv"
+    let equipCsv = @"G:\work\Projects\asset_sync\rules\aib_equipment_extract1.csv"
+    let flocRows = getFlocRows flocCsv |> Seq.toList
+    let equipRows = getEquipmentRows equipCsv |> Seq.toList
+    generateExportFacts patt "aib_inst_facts1" flocRows equipRows (outputFile "aib_inst_facts1.pl")
     printfn "Done." 
