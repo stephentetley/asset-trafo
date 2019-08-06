@@ -23,10 +23,10 @@ open SLFormat.CommandOptions.SimpleInvoke
 open MarkdownDoc.Markdown
 open MarkdownDoc.Pandoc
 
-#I @"C:\Users\stephen\.nuget\packages\slpotassco\1.0.0-alpha-20190723a\lib\netstandard2.0"
-#r "SLPotassco"
-open SLPotassco.Potassco.Base
-open SLPotassco.Potassco.Invoke
+#I @"C:\Users\stephen\.nuget\packages\slclingo\1.0.0-alpha-20190806\lib\netstandard2.0"
+#r "SLClingo"
+open SLClingo.Clingo.Base
+open SLClingo.Clingo.Invoke
 
 
 
@@ -76,8 +76,8 @@ let runQuery (assetType : string) : Result<ClingoOutput, string> =
         ; "queries/equipment_below_floc.lp"
         ]
     match runClingo workingDir (Some 0) [setConst] files with
-    | Error err -> Error (clingoFailureDescription err)
-    | Ok output -> Ok output
+    | Result.Error err -> Result.Error (clingoFailureDescription err)
+    | Result.Ok output -> Result.Ok output
 
 type FlocItem = 
     { ItemType : string 
@@ -168,8 +168,8 @@ let exportMarkdown (descendants : Descendants list) : Result<int, string> =
 
 let runReport (assetType : string) : Result<int, string> = 
     match runQuery assetType with
-    | Error msg -> Error msg
-    | Ok clingoAns -> 
+    | Result.Error msg -> Result.Error msg
+    | Result.Ok clingoAns -> 
         clingoAns |> getDecendants |> exportMarkdown
 
 let demo01 () = 
