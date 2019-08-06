@@ -36,8 +36,9 @@
     <PackageReference Include="FactX" Version="1.0.0-alpha-20190721" />
     <PackageReference Include="FSharp.Data" Version="3.1.1" />
     <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20190721" />
+    <PackageReference Include="SLClingo" Version="1.0.0-alpha-20190806" />
     <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190721" />
-    <PackageReference Include="SLPotassco" Version="1.0.0-alpha-20190723a" />
+    <PackageReference Include="System.Data.SQLite" Version="1.0.111" />
     <PackageReference Include="TikZDoc" Version="1.0.0-alpha-20190721" />
   </ItemGroup>
 
