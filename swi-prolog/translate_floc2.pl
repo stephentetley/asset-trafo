@@ -15,10 +15,22 @@
     , aib_equipment_below/2
 
     , aib_ref_to_s4_floc/2
+    , s4_floc_to_aib_ref/2
     ]).
 
 :- use_module(library(prosqlite)).
 :- use_module(library(db_facts)).
+
+
+%% # aib_ref_to_s4_floc/2
+%%
+%% This is a data-oriented translation bewteen function locations
+%% for Aib and S4.
+%% If the fingerprint data exists in both systems, we can translate 
+%% functional locations from Aib to S4.
+%% Sometimes the trnslate may generate more than one result, if 
+%% children of the function location have been mapped to different
+%% parts of the tree.
 
 
 %%% Manipulate s4 FLOC symbols
@@ -128,7 +140,7 @@ aib_equipment_to_s4_floc(PliCode, Floc) :-
 aib_ref_to_s4_floc_aux(Ref, Floc) :- 
     is_aib_installation(Ref),
     aib_equipment_below(Ref, Equip), 
-    !, 
+    !,      % Cut at first equipment.
     aib_equipment_to_s4_floc(Equip, Floc1),
     floc_take(Floc1, 1, Floc).
 
@@ -164,6 +176,15 @@ aib_ref_to_s4_floc_aux(Ref, Floc) :-
 aib_ref_to_s4_floc_aux(Ref, Floc) :-
     aib_equipment_to_s4_floc(Ref, Floc).
 
-
+% This is not bi-directional!
 aib_ref_to_s4_floc(Ref, Flocs) :- 
     setof(X, aib_ref_to_s4_floc_aux(Ref,X), Flocs).
+
+
+%%%
+
+%% This does not work - we will have to code this form scratch,
+%% the forward translation is not bi-directional.
+s4_floc_to_aib_ref(Floc, Ref) :- 
+    aib_ref_to_s4_floc_aux(Ref, Floc).
+
