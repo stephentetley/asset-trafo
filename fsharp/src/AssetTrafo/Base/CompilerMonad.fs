@@ -6,7 +6,7 @@ namespace AssetTrafo.Base
 
 module CompilerMonad =
 
-    type ErrMsg = string
+    open AssetTrafo.Base.Common
 
     type Ans<'a, 'state> = Result<'a * 'state, ErrMsg> 
 

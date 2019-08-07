@@ -17,11 +17,15 @@ open System.Data.SQLite
 // A hack to get over Dll loading error due to the native dll `SQLite.Interop.dll`
 [<Literal>] 
 let SQLiteInterop = @"C:\Users\stephen\.nuget\packages\System.Data.SQLite.Core\1.0.111\runtimes\win-x64\native\netstandard2.0"
+
 Environment.SetEnvironmentVariable("PATH", 
     Environment.GetEnvironmentVariable("PATH") + ";" + SQLiteInterop
     )
 
-
+#load "..\src\AssetTrafo\Base\Common.fs"
+#load "..\src\AssetTrafo\Base\SqliteConn.fs"
+open AssetTrafo.Base.Common
+open AssetTrafo.Base.SqliteConn
 
 
 // ********** DATA SETUP **********
@@ -89,6 +93,13 @@ let insertRow (conn : SQLiteConnection) (row : S4EquipmentRow) =
         ()
     | None -> ()
 
+let insertRow2(row : S4EquipmentRow) : SqliteConn<unit> = 
+    match makeInsert row with
+    | Some statement -> 
+        executeNonQuery statement |>> ignore
+    | None -> mreturn ()
+
+
 let main () = 
     let equipmentRows = getEquipmentRows @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
     let dbTemplate = pathToDbTemplate ()
@@ -104,9 +115,6 @@ let main () =
     try 
         let dbconn = new SQLiteConnection(conn)
         dbconn.Open()
-        //let statement = "INSERT INTO s4_equipment (s4_ref, name) VALUES(1000, 'TODO');"
-        //let cmd : SQLiteCommand = new SQLiteCommand(statement, dbconn)
-        //let ans = cmd.ExecuteNonQuery ()
         let trans = dbconn.BeginTransaction(System.Data.IsolationLevel.ReadCommitted)
         try 
             List.iter (insertRow dbconn) equipmentRows

@@ -8,6 +8,8 @@ module Common =
     
     open System
 
+    type ErrMsg = string
+
     let toIso8601String (dt : DateTime) : string = 
         dt.ToString(format = "yyyy-MM-ddThh:mm:ss")
 

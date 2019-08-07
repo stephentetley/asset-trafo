@@ -6,8 +6,9 @@ namespace AssetTrafo.Base
 
 module JsonReader =
     
-    
     open FSharp.Data
+    
+    open AssetTrafo.Base.Common
     open AssetTrafo.Base.CompilerMonad
     
     type GenReader<'ans, 'src> = CompilerMonad<'ans, unit, 'src, unit>
