@@ -229,7 +229,7 @@ aib_to_s4_floc_aux(Ref, Floc) :-
     aib_equipment_to_s4_floc(Equip, Floc1),
     floc_take(Floc1, 7, Floc).
 
-% Equipment floc is variable length
+% Equipment floc is variable length (no truncation)
 aib_to_s4_floc_aux(Ref, Floc) :-
     s4_equipment(_, Ref, _, _, _, _, Floc).
 

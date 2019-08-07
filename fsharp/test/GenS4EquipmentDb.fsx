@@ -54,18 +54,45 @@ let paramsConnString (config:SQLiteConnParams) : string =
 let sqliteConnParamsVersion3 (pathToDB:string) : SQLiteConnParams = 
     { PathToDB = pathToDB; SQLiteVersion = "3" }
 
+let emptyIfNull (source : string) : string = 
+    match source with
+    | null | "NULL" -> ""
+    | _ -> source
+
+let emptyIfNone (source : string option) : string = 
+    match source with
+    | Some str -> emptyIfNull str
+    | None -> ""
+
 
 let makeInsert (row : S4EquipmentRow) : string option = 
     match row.``400 S/4 Equip Reference``, row.``Migration Status (Y/N)`` with
     | Some(num), true -> 
-        sprintf "INSERT INTO s4_equipment () VALUES(%i, %s);" num "todo" |> Some
+        let line1 = "INSERT INTO s4_equipment (s4_ref, pli_code, s4_name, category, obj_type, obj_class, s4_floc) "
+        let line2 = 
+            sprintf "VALUES(%i, '%s', '%s', '%s', '%s', '%s', '%s');" 
+                    num 
+                    (emptyIfNull row.``AI2 AIB Reference``)
+                    (emptyIfNone row.``Equipment Description``)
+                    (emptyIfNull row.Category)
+                    (emptyIfNone row.``Object Type``)
+                    (emptyIfNone row.Class)
+                    (emptyIfNull row.``L6_Floc Code``)
+        String.concat "\n" [line1; line2] |> Some
     | _,_ -> None
 
-
+let insertRow (conn : SQLiteConnection) (row : S4EquipmentRow) = 
+    match makeInsert row with
+    | Some statement -> 
+        let cmd : SQLiteCommand = new SQLiteCommand(statement, conn)
+        cmd.ExecuteNonQuery () |> ignore
+        ()
+    | None -> ()
 
 let main () = 
+    let equipmentRows = getEquipmentRows @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
     let dbTemplate = pathToDbTemplate ()
-    let dbActive = outputFile "assets_db.sqlite" |> Path.GetFullPath
+    let dbActive = outputFile "assets.sqlite" |> Path.GetFullPath
     printfn "%s" dbActive
     if File.Exists(dbActive) then
         System.IO.File.Delete dbActive
@@ -77,12 +104,17 @@ let main () =
     try 
         let dbconn = new SQLiteConnection(conn)
         dbconn.Open()
-        let statement = "INSERT INTO s4_equipment (s4_ref, name) VALUES(1000, 'TODO');"
-        let cmd : SQLiteCommand = new SQLiteCommand(statement, dbconn)
-        let ans = cmd.ExecuteNonQuery ()
+        //let statement = "INSERT INTO s4_equipment (s4_ref, name) VALUES(1000, 'TODO');"
+        //let cmd : SQLiteCommand = new SQLiteCommand(statement, dbconn)
+        //let ans = cmd.ExecuteNonQuery ()
+        let trans = dbconn.BeginTransaction(System.Data.IsolationLevel.ReadCommitted)
+        try 
+            List.iter (insertRow dbconn) equipmentRows
+            trans.Commit ()
+        with 
+        | ex -> trans.Rollback ()
         dbconn.Close()
-        Ok ans
     with
-    | err -> Error err.Message
+    | err -> printfn "%s" err.Message
 
     
