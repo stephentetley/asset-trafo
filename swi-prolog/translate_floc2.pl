@@ -120,11 +120,15 @@ aib_equipment_to_s4_floc(PliCode, Floc) :-
 %% aib_ref_to_s4_floc_aux
 
 % Installation retrieves a length 1 floc (site)
-% This is two slow as it finds all kids - it should be a 
-% special case that short circuits...
+% We assume that all children of an installation have been mapped
+% to the same site in S4, and hence we use a cut after we have found 
+% the first child.
+% For lower nodes a similar uniqueness is not guaranteed and we must
+% return a set of successes.
 aib_ref_to_s4_floc_aux(Ref, Floc) :- 
     is_aib_installation(Ref),
     aib_equipment_below(Ref, Equip), 
+    !, 
     aib_equipment_to_s4_floc(Equip, Floc1),
     floc_take(Floc1, 1, Floc).
 
