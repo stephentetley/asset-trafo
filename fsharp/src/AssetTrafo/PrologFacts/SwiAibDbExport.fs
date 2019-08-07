@@ -17,7 +17,8 @@ module SwiAibDbExport =
     open AssetTrafo.Base.DbExportSchema
 
     // aib_installation(ref, name, type).
-    let makeInstallationFact (namePattern : string) (row : FlocRow) : Predicate option = 
+    let makeInstallationFact (namePattern : string) 
+                             (row : AibFlocRow) : Predicate option = 
          if row.Category = "INSTALLATION" 
                 && Regex.IsMatch(input = row.CommonName, pattern = namePattern) then 
              predicate "aib_installation" 
@@ -28,7 +29,8 @@ module SwiAibDbExport =
          else None
 
     // aib_process_group(ref, name, type, parent).
-    let makeProcessGroupFact (namePattern : string) (row : FlocRow) : Predicate option = 
+    let makeProcessGroupFact (namePattern : string) 
+                             (row : AibFlocRow) : Predicate option = 
          if row.Category = "PROCESS GROUP" 
                 && Regex.IsMatch(input = row.CommonName, pattern = namePattern) then 
              predicate "aib_process_group" 
@@ -40,7 +42,8 @@ module SwiAibDbExport =
          else None
 
     // aib_process(ref, name, type, parent).
-    let makeProcessFact (namePattern : string) (row : FlocRow) : Predicate option = 
+    let makeProcessFact (namePattern : string) 
+                        (row : AibFlocRow) : Predicate option = 
          if row.Category = "PROCESS" 
                 && Regex.IsMatch(input = row.CommonName, pattern = namePattern) then 
              predicate "aib_process" 
@@ -53,7 +56,8 @@ module SwiAibDbExport =
 
 
     // aib_plant(ref, name, type, parent).
-    let makePlantFact (namePattern : string) (row : FlocRow) : Predicate option = 
+    let makePlantFact (namePattern : string) 
+                      (row : AibFlocRow) : Predicate option = 
         if row.Category = "PLANT" 
                && Regex.IsMatch(input = row.CommonName, pattern = namePattern) then 
             predicate "aib_plant" 
@@ -65,7 +69,8 @@ module SwiAibDbExport =
         else None
 
     // aib_plant_item(ref, name, type, parent).
-    let makePlantItemFact (namePattern : string) (row : FlocRow) : Predicate option = 
+    let makePlantItemFact (namePattern : string) 
+                          (row : AibFlocRow) : Predicate option = 
         if row.Category = "PLANT ITEM"
                && Regex.IsMatch(input = row.CommonName, pattern = namePattern) then 
             predicate "aib_plant_item" 
@@ -77,7 +82,8 @@ module SwiAibDbExport =
         else None
 
     // aib_installation(ref, name, type, parent).
-    let makeEquipmentFact (namePattern : string) (row : EquipmentRow) : Predicate option = 
+    let makeEquipmentFact (namePattern : string) 
+                          (row : AibEquipmentRow) : Predicate option = 
         if Regex.IsMatch(input = row.CommonName, pattern = namePattern) then 
             predicate "aib_equipment" 
                         [ quotedAtom row.Reference
@@ -90,8 +96,8 @@ module SwiAibDbExport =
 
     let generateExportFacts (commonNameFilterPattern : string) 
                                (moduleName : string)
-                               (flocRows : FlocRow list) 
-                               (equipRows : EquipmentRow list) 
+                               (flocRows : AibFlocRow list) 
+                               (equipRows : AibEquipmentRow list) 
                                (outputFile : string) : unit =             
         let proc =  
             factWriter { 

@@ -10,8 +10,8 @@ module PopulateAssetsDb =
 
     open FSharp.Data
 
-    
     open AssetTrafo.Base.SqliteConn
+    open AssetTrafo.Base.DbExportSchema
 
     
     let emptyIfNull (source : string) : string = 
@@ -25,14 +25,16 @@ module PopulateAssetsDb =
         | None -> ""
 
     
-    // ********** DATA SETUP **********
+    // ************************************************************************
+    // S4 Equipment
+
     type S4EquipmentTable = 
         CsvProvider< Sample = @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
                    , PreferOptionals = true >
     
     type S4EquipmentRow = S4EquipmentTable.Row
 
-    let getEquipmentRows(cvsPath : string) : S4EquipmentRow list = 
+    let getS4EquipmentRows (cvsPath : string) : S4EquipmentRow list = 
         let table = S4EquipmentTable.Load(uri = cvsPath) in Seq.toList table.Rows
 
 
@@ -65,10 +67,38 @@ module PopulateAssetsDb =
     
     let insertS4EquipmentRows (csvPath : string) : SqliteConn<unit> = 
         sqliteConn { 
-            let! rows = liftOperation (fun _ -> getEquipmentRows csvPath)
+            let! rows = liftOperation (fun _ -> getS4EquipmentRows csvPath)
             return! withTransaction <| forMz rows insertEquipmentRow
         }
         
+    // ************************************************************************
+    // aib installation
+
+    let makeAibInstallationInsert (row : AibFlocRow) : string option = 
+        if row.Category = "INSTALLATION" then
+            let line1 = "INSERT INTO aib_installation (sai_ref, common_name, installation_type) "
+            let line2 = 
+                sprintf "VALUES('%s', '%s', '%s');" 
+                        row.Reference 
+                        row.AssetName
+                        row.AssetCode
+            String.concat "\n" [line1; line2] |> Some
+        else None
+
+
+   
+    let insertAibInstallationRow (row : AibFlocRow) : SqliteConn<unit> = 
+        match makeAibInstallationInsert row with
+        | Some statement -> 
+            executeNonQuery statement |>> ignore
+        | None -> mreturn ()
+
+
+    let insertAibRows (csvPath : string) : SqliteConn<unit> = 
+        sqliteConn { 
+            let! rows = liftOperation (fun _ -> getAibFlocRows csvPath)
+            return! withTransaction <| forMz rows insertAibInstallationRow
+        }
 
 
     //// aib_installation(ref, name, type).

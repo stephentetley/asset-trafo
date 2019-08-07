@@ -14,26 +14,26 @@ module DbExportSchema =
 
 
     [<Literal>]
-    let FlocTableSchema = 
+    let AibFlocTableSchema = 
         "Reference(string),HKey(string),\
          AssetName(string),AssetType(string),\
          AssetCode(string), Category(string),\
          CommonName(string),ParentRef(string)"    
 
     [<Literal>]
-    let FlocTableSample = 
+    let AibFlocTableSample = 
          "SAI0101,2OLDWW,NO 1 STARTER,MOTOR STARTER,MOTR,PLANT ITEM,COMMON NAME/WITH/SEPARATORS,SAI0100"
      
 
-    type FlocTable = 
-        CsvProvider< Schema = FlocTableSchema
-                   , Sample = FlocTableSample
+    type AibFlocTable = 
+        CsvProvider< Schema = AibFlocTableSchema
+                   , Sample = AibFlocTableSample
                    , HasHeaders = true >
 
-    type FlocRow = FlocTable.Row
+    type AibFlocRow = AibFlocTable.Row
 
-    let getFlocRows (cvsPath : string) : FlocRow list = 
-        let table = FlocTable.Load(uri = cvsPath)
+    let getAibFlocRows (cvsPath : string) : AibFlocRow list = 
+        let table = AibFlocTable.Load(uri = cvsPath)
         table.Rows |> Seq.toList
 
     // ************************************************************************
@@ -41,26 +41,26 @@ module DbExportSchema =
 
 
     [<Literal>]
-    let EquipmentTableSchema = 
+    let AibEquipmentTableSchema = 
         "Reference(string),\
          AssetName(string),AssetType(string),\
          Category(string),CommonName(string),\
          ParentRef(string)"    
 
     [<Literal>]
-    let EquipmentTableSample = 
+    let AibEquipmentTableSample = 
          "SAI0101,EQUIPMENT: NO 1 STARTER,EQUIPMENT: NO 1 STARTER,MECHANICAL,COMMON NAME/WITH/SEPARATORS,SAI0100"
      
 
-    type EquipmentTable = 
-        CsvProvider< Schema = EquipmentTableSchema
-                   , Sample = EquipmentTableSample
+    type AibEquipmentTable = 
+        CsvProvider< Schema = AibEquipmentTableSchema
+                   , Sample = AibEquipmentTableSample
                    , HasHeaders = true >
 
-    type EquipmentRow = EquipmentTable.Row
+    type AibEquipmentRow = AibEquipmentTable.Row
 
-    let getEquipmentRows (cvsPath : string) : EquipmentRow list = 
-        let table = EquipmentTable.Load(uri = cvsPath)
+    let getAibEquipmentRows (cvsPath : string) : AibEquipmentRow list = 
+        let table = AibEquipmentTable.Load(uri = cvsPath)
         table.Rows |> Seq.toList
 
 

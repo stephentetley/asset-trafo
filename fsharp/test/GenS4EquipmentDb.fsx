@@ -48,6 +48,10 @@ let pathToDbTemplate () : string =
 
 let main () : Result<unit, ErrMsg> = 
     let s4EquipmentCsv = @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
+    let aibFlocCsv = @"G:\work\Projects\asset_sync\rules\aib_floc_extract4.csv"
+    // let aibEquipCsv = @"G:\work\Projects\asset_sync\rules\aib_equipment_extract1.csv"
+
+    // Copy template
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputFile "assets.sqlite" |> Path.GetFullPath
     printfn "%s" dbActive
@@ -58,6 +62,9 @@ let main () : Result<unit, ErrMsg> =
 
     let connParams = sqliteConnParamsVersion3 dbActive
     runSqliteConnection connParams 
-        <| insertS4EquipmentRows s4EquipmentCsv
-
+        <| sqliteConn { 
+                do! insertS4EquipmentRows s4EquipmentCsv
+                do! insertAibRows aibFlocCsv
+                return ()
+            }
 
