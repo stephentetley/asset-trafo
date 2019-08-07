@@ -72,128 +72,100 @@ module PopulateAssetsDb =
         }
         
     // ************************************************************************
-    // aib installation
+    // aib flocs
 
-    let makeAibInstallationInsert (row : AibFlocRow) : string option = 
-        if row.Category = "INSTALLATION" then
+    let makeAibFlocInsert (row : AibFlocRow) : string option = 
+        match row.Category with 
+        | "INSTALLATION" -> 
             let line1 = "INSERT INTO aib_installation (sai_ref, common_name, installation_type) "
             let line2 = 
                 sprintf "VALUES('%s', '%s', '%s');" 
                         row.Reference 
-                        row.AssetName
+                        (stringValue row.AssetName)
                         row.AssetCode
             String.concat "\n" [line1; line2] |> Some
-        else None
+
+        | "PROCESS GROUP" ->
+            let line1 = "INSERT INTO aib_process_group (sai_ref, asset_name, asset_type, parent_ref) "
+            let line2 = 
+                sprintf "VALUES('%s', '%s', '%s', '%s');" 
+                        row.Reference 
+                        (stringValue row.AssetName)
+                        row.AssetType
+                        row.ParentRef
+            String.concat "\n" [line1; line2] |> Some
+
+        | "PROCESS" ->
+            let line1 = "INSERT INTO aib_process (sai_ref, asset_name, asset_type, parent_ref) "
+            let line2 = 
+                sprintf "VALUES('%s', '%s', '%s', '%s');" 
+                        row.Reference 
+                        (stringValue row.AssetName)
+                        row.AssetType
+                        row.ParentRef
+            String.concat "\n" [line1; line2] |> Some
+        
+        | "PLANT" ->
+            let line1 = "INSERT INTO aib_plant (sai_ref, asset_name, asset_type, parent_ref) "
+            let line2 = 
+                sprintf "VALUES('%s', '%s', '%s', '%s');" 
+                        row.Reference 
+                        (stringValue row.AssetName)
+                        row.AssetType
+                        row.ParentRef
+            String.concat "\n" [line1; line2] |> Some
+
+        | "PLANT ITEM" ->
+            let line1 = "INSERT INTO aib_plant_item (sai_ref, asset_name, asset_type, parent_ref) "
+            let line2 = 
+                sprintf "VALUES('%s', '%s', '%s', '%s');" 
+                        row.Reference 
+                        (stringValue row.AssetName)
+                        row.AssetType
+                        row.ParentRef
+            String.concat "\n" [line1; line2] |> Some
+        | _ -> None
 
 
-   
-    let insertAibInstallationRow (row : AibFlocRow) : SqliteConn<unit> = 
-        match makeAibInstallationInsert row with
+    let insertAibFlocRow (row : AibFlocRow) : SqliteConn<unit> = 
+        match makeAibFlocInsert row with
         | Some statement -> 
             executeNonQuery statement |>> ignore
         | None -> mreturn ()
 
 
-    let insertAibRows (csvPath : string) : SqliteConn<unit> = 
+    let insertAibFlocRows (csvPath : string) : SqliteConn<unit> = 
         sqliteConn { 
             let! rows = liftOperation (fun _ -> getAibFlocRows csvPath)
-            return! withTransaction <| forMz rows insertAibInstallationRow
+            return! withTransaction <| forMz rows insertAibFlocRow
         }
 
+    // ************************************************************************
+    // aib equipment
 
-    //// aib_installation(ref, name, type).
-    //let makeInstallationFact (namePattern : string) (row : FlocRow) : Predicate option = 
-    //     if row.Category = "INSTALLATION" 
-    //            && Regex.IsMatch(input = row.CommonName, pattern = namePattern) then 
-    //         predicate "aib_installation" 
-    //                     [ quotedAtom row.Reference
-    //                     ; quotedAtom row.AssetName
-    //                     ; quotedAtom row.AssetCode
-    //                     ] |> Some
-    //     else None
+    let makeAibEquipmentInsert (row : AibEquipmentRow) : string option = 
+        match row.Reference with 
+        | null | "" -> None
+        | _ -> 
+            let line1 = "INSERT INTO aib_equipment (pli_ref, equipment_name, equipment_type, category, parent_ref) "
+            let line2 = 
+                sprintf "VALUES('%s', '%s', '%s', '%s', '%s');" 
+                        row.Reference
+                        (stringValue row.AssetName)
+                        (stringValue row.AssetType)
+                        row.Category
+                        row.ParentRef
+            String.concat "\n" [line1; line2] |> Some
 
-    //// aib_process_group(ref, name, type, parent).
-    //let makeProcessGroupFact (namePattern : string) (row : FlocRow) : Predicate option = 
-    //     if row.Category = "PROCESS GROUP" 
-    //            && Regex.IsMatch(input = row.CommonName, pattern = namePattern) then 
-    //         predicate "aib_process_group" 
-    //                     [ quotedAtom row.Reference
-    //                     ; quotedAtom row.AssetName
-    //                     ; quotedAtom row.AssetType
-    //                     ; quotedAtom row.ParentRef
-    //                     ] |> Some
-    //     else None
+    let insertAibEquipmentRow (row : AibEquipmentRow) : SqliteConn<unit> = 
+        match makeAibEquipmentInsert row with
+        | Some statement -> 
+            executeNonQuery statement |>> ignore
+        | None -> mreturn ()
 
-    //// aib_process(ref, name, type, parent).
-    //let makeProcessFact (namePattern : string) (row : FlocRow) : Predicate option = 
-    //     if row.Category = "PROCESS" 
-    //            && Regex.IsMatch(input = row.CommonName, pattern = namePattern) then 
-    //         predicate "aib_process" 
-    //                     [ quotedAtom row.Reference
-    //                     ; quotedAtom row.AssetName
-    //                     ; quotedAtom row.AssetType
-    //                     ; quotedAtom row.ParentRef
-    //                     ] |> Some
-    //     else None
-
-
-    //// aib_plant(ref, name, type, parent).
-    //let makePlantFact (namePattern : string) (row : FlocRow) : Predicate option = 
-    //    if row.Category = "PLANT" 
-    //           && Regex.IsMatch(input = row.CommonName, pattern = namePattern) then 
-    //        predicate "aib_plant" 
-    //                    [ quotedAtom row.Reference
-    //                    ; quotedAtom row.AssetName
-    //                    ; quotedAtom row.AssetType
-    //                    ; quotedAtom row.ParentRef
-    //                    ] |> Some
-    //    else None
-
-    //// aib_plant_item(ref, name, type, parent).
-    //let makePlantItemFact (namePattern : string) (row : FlocRow) : Predicate option = 
-    //    if row.Category = "PLANT ITEM"
-    //           && Regex.IsMatch(input = row.CommonName, pattern = namePattern) then 
-    //        predicate "aib_plant_item" 
-    //                    [ quotedAtom row.Reference
-    //                    ; quotedAtom row.AssetName
-    //                    ; quotedAtom row.AssetType
-    //                    ; quotedAtom row.ParentRef
-    //                    ] |> Some
-    //    else None
-
-    //// aib_installation(ref, name, type, parent).
-    //let makeEquipmentFact (namePattern : string) (row : EquipmentRow) : Predicate option = 
-    //    if Regex.IsMatch(input = row.CommonName, pattern = namePattern) then 
-    //        predicate "aib_equipment" 
-    //                    [ quotedAtom row.Reference
-    //                    ; quotedAtom row.AssetName
-    //                    ; quotedAtom row.AssetType
-    //                    ; quotedAtom row.ParentRef
-    //                    ] |> Some
-    //    else None
-
-
-    //let generateExportFacts (commonNameFilterPattern : string) 
-    //                           (moduleName : string)
-    //                           (flocRows : FlocRow list) 
-    //                           (equipRows : EquipmentRow list) 
-    //                           (outputFile : string) : unit =             
-    //    let proc =  
-    //        factWriter { 
-    //            do! generatePredicates (makeInstallationFact commonNameFilterPattern) flocRows
-    //            do! generatePredicates (makeProcessGroupFact commonNameFilterPattern) flocRows
-    //            do! generatePredicates (makeProcessFact commonNameFilterPattern) flocRows
-    //            do! generatePredicates (makePlantFact commonNameFilterPattern) flocRows
-    //            do! generatePredicates (makePlantItemFact commonNameFilterPattern) flocRows
-    //            do! generatePredicates (makeEquipmentFact commonNameFilterPattern) equipRows
-    //            return ()
-    //        }
-    //    let exportlist = 
-    //        [ "aib_installation/3"
-    //        ; "aib_process_group/4"
-    //        ; "aib_process/4"
-    //        ; "aib_plant/4"
-    //        ; "aib_plant_item/4"
-    //        ; "aib_equipment/4" ]
-    //    writeFactsWithModuleDecl outputFile moduleName exportlist proc
+    let insertAibEquipmentRows (csvPath : string) : SqliteConn<unit> = 
+        sqliteConn { 
+            let! rows = liftOperation (fun _ -> getAibEquipmentRows csvPath)
+            return! withTransaction <| forMz rows insertAibEquipmentRow
+        }
 

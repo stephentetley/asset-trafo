@@ -21,6 +21,6 @@ demo02(Xs) :-
     sqlite_disconnect('assets').
 
 demo02a(Xs) :- 
-    sqlite_connect('sample_data/assets.sqlite', assets),
+    sqlite_connect('data/assets.sqlite', assets),
     findall( X, db_holds(s4_equipment([s4_ref=X, category='I'])), Xs),
     sqlite_disconnect('assets').

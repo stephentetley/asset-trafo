@@ -428,3 +428,13 @@ module SqliteConn =
     let deleteAllRows (tableName:string) : SqliteConn<int> = 
         let query = sprintf "DELETE FROM %s;" tableName
         executeNonQuery query
+
+
+    let escapeString (source: string) : string = 
+        source.Replace("'", "''")
+
+
+    let stringValue (source : string) : string = 
+        match source with
+        | null -> ""
+        | _ -> escapeString source

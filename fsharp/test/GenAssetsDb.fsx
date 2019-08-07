@@ -49,7 +49,7 @@ let pathToDbTemplate () : string =
 let main () : Result<unit, ErrMsg> = 
     let s4EquipmentCsv = @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
     let aibFlocCsv = @"G:\work\Projects\asset_sync\rules\aib_floc_extract4.csv"
-    // let aibEquipCsv = @"G:\work\Projects\asset_sync\rules\aib_equipment_extract1.csv"
+    let aibEquipCsv = @"G:\work\Projects\asset_sync\rules\aib_equipment_extract2.csv"
 
     // Copy template
     let dbTemplate = pathToDbTemplate ()
@@ -64,7 +64,8 @@ let main () : Result<unit, ErrMsg> =
     runSqliteConnection connParams 
         <| sqliteConn { 
                 do! insertS4EquipmentRows s4EquipmentCsv
-                do! insertAibRows aibFlocCsv
+                do! insertAibFlocRows aibFlocCsv
+                do! insertAibEquipmentRows aibEquipCsv
                 return ()
             }
 

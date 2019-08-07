@@ -32,7 +32,7 @@ let main () =
     let patt = "^ABBEY LANE HULL.*(SPS|CSO)"
     let flocCsv = @"G:\work\Projects\asset_sync\rules\aib_floc_extract4.csv"
     let equipCsv = @"G:\work\Projects\asset_sync\rules\aib_equipment_extract1.csv"
-    let flocRows = getFlocRows flocCsv |> Seq.toList
-    let equipRows = getEquipmentRows equipCsv |> Seq.toList
+    let flocRows = getAibFlocRows flocCsv |> Seq.toList
+    let equipRows = getAibEquipmentRows equipCsv |> Seq.toList
     generateExportFacts patt "aib_inst_facts1" flocRows equipRows (outputFile "aib_inst_facts1.pl")
     printfn "Done." 
