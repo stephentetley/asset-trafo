@@ -14,7 +14,7 @@ module SwiAibDbExport =
     
     
     open AssetTrafo.Base.FactsCommon
-    open AssetTrafo.PrologFacts.AibDbExportCommon
+    open AssetTrafo.Base.DbExportSchema
 
     // aib_installation(ref, name, type).
     let makeInstallationFact (namePattern : string) (row : FlocRow) : Predicate option = 

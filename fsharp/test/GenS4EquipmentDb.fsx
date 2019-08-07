@@ -24,21 +24,17 @@ Environment.SetEnvironmentVariable("PATH",
 
 #load "..\src\AssetTrafo\Base\Common.fs"
 #load "..\src\AssetTrafo\Base\SqliteConn.fs"
+#load "..\src\AssetTrafo\Base\DbExportSchema.fs"
+#load "..\src\AssetTrafo\SQLiteFacts\PopulateAssetsDb.fs"
 open AssetTrafo.Base.Common
 open AssetTrafo.Base.SqliteConn
-
-
-// ********** DATA SETUP **********
-type S4EquipmentTable = 
-    CsvProvider< Sample = @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
-               , PreferOptionals = true >
-
-type S4EquipmentRow = S4EquipmentTable.Row
+open AssetTrafo.SQLiteFacts.PopulateAssetsDb
 
 
 
-let getEquipmentRows(cvsPath : string) : S4EquipmentRow list = 
-    let table = S4EquipmentTable.Load(uri = cvsPath) in Seq.toList table.Rows
+
+
+
 
 
 let outputFile (relativePath : string) = 
@@ -48,47 +44,10 @@ let pathToDbTemplate () : string =
     Path.Combine(__SOURCE_DIRECTORY__, @"..\..\data\", "assets_db_template.sqlite")
 
 
-let emptyIfNull (source : string) : string = 
-    match source with
-    | null | "NULL" -> ""
-    | _ -> source
 
-let emptyIfNone (source : string option) : string = 
-    match source with
-    | Some str -> emptyIfNull str
-    | None -> ""
-
-
-let makeInsert (row : S4EquipmentRow) : string option = 
-    match row.``400 S/4 Equip Reference``, row.``Migration Status (Y/N)`` with
-    | Some(num), true -> 
-        let line1 = "INSERT INTO s4_equipment (s4_ref, pli_code, s4_name, category, obj_type, obj_class, s4_floc) "
-        let line2 = 
-            sprintf "VALUES(%i, '%s', '%s', '%s', '%s', '%s', '%s');" 
-                    num 
-                    (emptyIfNull row.``AI2 AIB Reference``)
-                    (emptyIfNone row.``Equipment Description``)
-                    (emptyIfNull row.Category)
-                    (emptyIfNone row.``Object Type``)
-                    (emptyIfNone row.Class)
-                    (emptyIfNull row.``L6_Floc Code``)
-        String.concat "\n" [line1; line2] |> Some
-    | _,_ -> None
-
-
-let insertEquipmentRow (row : S4EquipmentRow) : SqliteConn<unit> = 
-    match makeInsert row with
-    | Some statement -> 
-        executeNonQuery statement |>> ignore
-    | None -> mreturn ()
-
-
-
-let insertS4EquipmentRows (rows : S4EquipmentRow list) : SqliteConn<unit> = 
-    withTransaction <| forMz rows insertEquipmentRow
 
 let main () : Result<unit, ErrMsg> = 
-    let equipmentRows = getEquipmentRows @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
+    let s4EquipmentCsv = @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputFile "assets.sqlite" |> Path.GetFullPath
     printfn "%s" dbActive
@@ -99,6 +58,6 @@ let main () : Result<unit, ErrMsg> =
 
     let connParams = sqliteConnParamsVersion3 dbActive
     runSqliteConnection connParams 
-        <| insertS4EquipmentRows equipmentRows
+        <| insertS4EquipmentRows s4EquipmentCsv
 
 

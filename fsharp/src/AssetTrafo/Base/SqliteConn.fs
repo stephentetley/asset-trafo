@@ -102,6 +102,15 @@ module SqliteConn =
         with
         | err -> Error (sprintf "*** Exception: %s" err.Message)
 
+
+    let liftOperation (operation : unit -> 'a) : SqliteConn<'a> = 
+        SqliteConn <| fun _ -> 
+            try 
+                let ans = operation () in Ok ans
+            with
+                | _ -> Error "liftOperation" 
+
+
     let liftConn (proc:SQLite.SQLiteConnection -> 'a) : SqliteConn<'a> = 
         SqliteConn <| fun conn -> 
             try 

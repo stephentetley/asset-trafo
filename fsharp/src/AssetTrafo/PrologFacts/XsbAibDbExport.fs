@@ -12,7 +12,7 @@ module XsbAibDbExport =
     
     
     open AssetTrafo.Base.FactsCommon
-    open AssetTrafo.PrologFacts.AibDbExportCommon
+    open AssetTrafo.Base.DbExportSchema
 
 
 

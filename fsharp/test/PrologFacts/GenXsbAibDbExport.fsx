@@ -17,9 +17,9 @@ open FSharp.Data
 
 
 #load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
-#load "..\..\src\AssetTrafo\PrologFacts\AibDbExportCommon.fs"
+#load "..\..\src\AssetTrafo\Base\DbExportSchema.fs"
 #load "..\..\src\AssetTrafo\PrologFacts\XsbAibDbExport.fs"
-open AssetTrafo.PrologFacts.AibDbExportCommon
+open AssetTrafo.Base.DbExportSchema
 open AssetTrafo.PrologFacts.XsbAibDbExport
 
 
