@@ -41,22 +41,28 @@ floc_take(Src, Count, Floc) :-
 %%% 
 
 is_aib_installation(Ref) :- 
-    db_holds(assets, aib_installation([sai_ref=Ref])).
+    db_holds(assets, aib_installation([sai_ref=Ref, common_name=_])), 
+    !.
 
 is_aib_process_group(Ref) :- 
-    db_holds(assets, aib_process_group([sai_ref=Ref])).
+    db_holds(assets, aib_process_group([sai_ref=Ref, asset_name=_])),
+    !.
 
 is_aib_process(Ref) :- 
-    db_holds(assets, aib_process([sai_ref=Ref])).
+    db_holds(assets, aib_process([sai_ref=Ref, asset_name=_])),
+    !.
 
 is_aib_plant(Ref) :- 
-    db_holds(assets, aib_plant([sai_ref=Ref])).
+    db_holds(assets, aib_plant([sai_ref=Ref, asset_name=_])),
+    !.
 
 is_aib_plant_item(Ref) :- 
-    db_holds(assets, aib_plant_item([sai_ref=Ref])).
+    db_holds(assets, aib_plant_item([sai_ref=Ref, asset_name=_])),
+    !.
 
 is_aib_equipment(Ref) :- 
-    db_holds(assets, aib_equipment([pli_ref=Ref])).
+    db_holds(assets, aib_equipment([pli_ref=Ref, equipment_name=_])),
+    !.
 
 
 %%
@@ -114,6 +120,8 @@ aib_equipment_to_s4_floc(PliCode, Floc) :-
 %% aib_ref_to_s4_floc_aux
 
 % Installation retrieves a length 1 floc (site)
+% This is two slow as it finds all kids - it should be a 
+% special case that short circuits...
 aib_ref_to_s4_floc_aux(Ref, Floc) :- 
     is_aib_installation(Ref),
     aib_equipment_below(Ref, Equip), 
