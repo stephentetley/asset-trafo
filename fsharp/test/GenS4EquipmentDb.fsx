@@ -30,8 +30,8 @@ open AssetTrafo.Base.SqliteConn
 
 // ********** DATA SETUP **********
 type S4EquipmentTable = 
-    CsvProvider<Sample = @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
-                , PreferOptionals = true >
+    CsvProvider< Sample = @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
+               , PreferOptionals = true >
 
 type S4EquipmentRow = S4EquipmentTable.Row
 
@@ -47,16 +47,6 @@ let outputFile (relativePath : string) =
 let pathToDbTemplate () : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\..\data\", "assets_db_template.sqlite")
 
-type SQLiteConnParams = 
-    { PathToDB : string 
-      SQLiteVersion : string }
-
-
-let paramsConnString (config:SQLiteConnParams) : string = 
-    sprintf "Data Source=%s;Version=%s;" config.PathToDB config.SQLiteVersion
-
-let sqliteConnParamsVersion3 (pathToDB:string) : SQLiteConnParams = 
-    { PathToDB = pathToDB; SQLiteVersion = "3" }
 
 let emptyIfNull (source : string) : string = 
     match source with
@@ -85,22 +75,19 @@ let makeInsert (row : S4EquipmentRow) : string option =
         String.concat "\n" [line1; line2] |> Some
     | _,_ -> None
 
-let insertRow (conn : SQLiteConnection) (row : S4EquipmentRow) = 
-    match makeInsert row with
-    | Some statement -> 
-        let cmd : SQLiteCommand = new SQLiteCommand(statement, conn)
-        cmd.ExecuteNonQuery () |> ignore
-        ()
-    | None -> ()
 
-let insertRow2(row : S4EquipmentRow) : SqliteConn<unit> = 
+let insertEquipmentRow (row : S4EquipmentRow) : SqliteConn<unit> = 
     match makeInsert row with
     | Some statement -> 
         executeNonQuery statement |>> ignore
     | None -> mreturn ()
 
 
-let main () = 
+
+let insertS4EquipmentRows (rows : S4EquipmentRow list) : SqliteConn<unit> = 
+    withTransaction <| forMz rows insertEquipmentRow
+
+let main () : Result<unit, ErrMsg> = 
     let equipmentRows = getEquipmentRows @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputFile "assets.sqlite" |> Path.GetFullPath
@@ -111,18 +98,7 @@ let main () =
     System.IO.File.Copy(sourceFileName = dbTemplate, destFileName = dbActive)
 
     let connParams = sqliteConnParamsVersion3 dbActive
-    let conn = paramsConnString connParams
-    try 
-        let dbconn = new SQLiteConnection(conn)
-        dbconn.Open()
-        let trans = dbconn.BeginTransaction(System.Data.IsolationLevel.ReadCommitted)
-        try 
-            List.iter (insertRow dbconn) equipmentRows
-            trans.Commit ()
-        with 
-        | ex -> trans.Rollback ()
-        dbconn.Close()
-    with
-    | err -> printfn "%s" err.Message
+    runSqliteConnection connParams 
+        <| insertS4EquipmentRows equipmentRows
 
-    
+
