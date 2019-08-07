@@ -13,14 +13,14 @@ demo01(Xs) :-
     sqlite_connect('data/assets.sqlite', assets),
     Sel = 'SELECT * FROM aib_installation',
     findall( X, (sqlite_query(assets, Sel, R), row_to_aib_installation(R,X)), Xs),
-    sqlite_disconnect('assets').
+    sqlite_disconnect(assets).
 
 demo02(Xs) :- 
     sqlite_connect('data/assets.sqlite', assets),
     findall( X, db_holds(assets, s4_equipment([s4_ref=X, category='I'])), Xs),
-    sqlite_disconnect('assets').
+    sqlite_disconnect(assets).
 
 demo02a(Xs) :- 
     sqlite_connect('data/assets.sqlite', assets),
     findall( X, db_holds(s4_equipment([s4_ref=X, category='I'])), Xs),
-    sqlite_disconnect('assets').
+    sqlite_disconnect(assets).

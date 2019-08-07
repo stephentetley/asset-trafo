@@ -105,32 +105,33 @@ aib_process_to_s4_floc(Sai, Floc) :-
 
 %%% 
 
+%% One above plant_item
 aib_floc_below(Parent, Child) :-
     aib_plant_item(Child, _, _, Parent).
 
-% one below plant
+%% One above plant
 aib_floc_below(Parent, Child) :-
     aib_plant(Child, _, _, Parent).    
 
-% below-below plant
+%% Above-above plant
 aib_floc_below(Parent, Child) :-
     aib_plant(X1, _, _, Parent), 
     aib_floc_below(X1, Child).
 
-% one below process
+%% One above process
 aib_floc_below(Parent, Child) :-
     aib_process(Child, _, _, Parent).  
 
-% below-below process
+%% Above-above process
 aib_floc_below(Parent, Child) :-
     aib_process(X1, _, _, Parent),
     aib_floc_below(X1, Child).
 
-% one below process_group
+%% One above process_group
 aib_floc_below(Parent, Child) :-
     aib_process_group(Child, _, _, Parent).  
 
-% below-below process_group
+%% Above-above process_group
 aib_floc_below(Parent, Child) :-
     aib_process_group(X1, _, _, Parent),
     aib_floc_below(X1, Child).   
