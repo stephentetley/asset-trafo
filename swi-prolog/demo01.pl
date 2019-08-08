@@ -1,93 +1,82 @@
-% demo01.pl
+% demo02.pl
 
-:- use_module(floc_rules/floc_rule_mapping_1_2).
-:- use_module(floc_rules/floc_rule_mapping_2_3).
+:- use_module(library(prosqlite)).
+:- use_module(library(db_facts)).
+
 :- use_module(translate_floc).
 
-:- use_module(sample_data/aib_inst_facts1).
-:- use_module(sample_data/s4_site_facts1).
+%% Before testing the demos at the prompt...
+%% ?-  assets_connect.
+
+%% When done
+%% ?- assets_disconnect.
+
+assets_connect :- 
+    sqlite_connect('data/assets.sqlite', assets).
+
+assets_disconnect :- 
+    db_disconnect(assets).
 
 
-demo01(Floc) :- 
-    aib_installation_to_s4_floc('SAI00003608', Floc).
+temp01(S) :- 
+    atoms_to_floc(['ABB01', 'WTN'], S).
 
-demo02(X,Y) :- 
-    aib_installation(Sai, 'ABBEY LANE HULL/SPS', _),
-    aib_inst_floc1_s4_name(Sai, X, Y).
+temp02(S) :- 
+    floc_take('ABB01-WTN-WTF-PMG-SYS01-PMP01', 3, S).
 
-demo03(Inst) :-
-    process_group_installation_root('SAI00075549', Inst).
+demo01(Xs) :- 
+    findall(X, aib_funloc_below('SAI00162176', X), Xs).
 
-find_process_group(Sai, Ans) :- 
-    aib_process_group(Sai, X, Y, Z),
-    Ans = aib_process_group(Sai, X, Y, Z).
+demo02(Xs) :- 
+    findall(X, aib_funloc_below('SAI00130369', X), Xs).
 
-demo03a(Body) :-
-    find_process_group('SAI00167635', Body).
+demo03(Xs) :- 
+    findall(X, aib_funloc_below('SAI00130367', X), Xs).
 
+demo04(Xs) :- 
+    % Note this is slooowwww...
+    findall(X, aib_funloc_below('SAI00002341', X), Xs).
 
-demo04(Inst) :-
-    process_installation_root('SAI00338989', Inst).
+demo05(Xs) :- 
+    findall(X, aib_equipment_below('SAI00130367', X), Xs).
 
-demo04a(Inst) :-
-    process_installation_root('SAI00075544', Inst).
-
-
-demo05(Floc) :- 
-    aib_process_group_to_s4_floc('SAI00167635', Floc).
+demo06(Xs) :- 
+    aib_ref_to_s4_floc('PLI00317969', Xs).
 
 
-
-demo06(Floc) :- 
-    aib_process_to_s4_floc('SAI00338989', Floc).
-
-demo06a(Floc) :- 
-    aib_process_to_s4_floc('SAI00075544', Floc).
-
-
-demo07(X) :-
-    %% TODO this probably wants to be wrapped in setof at the call site
-    aib_floc_below('SAI00338990', X).
-
+demo07(Xs) :- 
+    %% Plant 'TELEMETRY OUTSTATION'
+    aib_ref_to_s4_floc('SAI00162177', Xs).
 
 
 demo08(Xs) :- 
-    %% TODO this probably wants to be wrapped in setof at the call site
-    setof(X, aib_floc_to_s4_system('SAI00215602', X), Xs).
+    %% Process 'RTS MONITORING'
+    aib_ref_to_s4_floc('SAI00130369', Xs).
 
 
 demo09(Xs) :- 
-    %% TODO this probably wants to be wrapped in setof at the call site
-    setof(X, aib_equipment_to_s4_system('PLI00358197', X), Xs).
+    %% Process Group 'CONTROL SERVICES'
+    %% This appears to have a valid reason for returning multiple 
+    %% results - children in Aib have been moved under different
+    %% (more than 1) process groups in S4.
+    aib_ref_to_s4_floc('SAI00130367', Xs).
 
 
-
-demo10(X) :- 
-    % installation
-    aib_to_s4_floc('SAI00003608', X).
+demo10(Xs) :- 
+    %% Installation ...
+    aib_ref_to_s4_floc('SAI00002341', Xs).
 
 demo10a(X) :- 
-    % process_group
-    aib_to_s4_floc('SAI00167636', X).
+    s4_floc_to_aib_ref('ALDWK', X).
 
-demo10b(X) :- 
-    % process
-    aib_to_s4_floc('SAI00338989', X).
+demo20(Xs) :- 
+    aib_ref_to_s4_floc('SAI00002341', Xs).
 
-demo10c(X) :- 
-    % process no process group
-    aib_to_s4_floc('SAI00075544', X).
+demo20a :-
+    % should be true
+    is_aib_installation('SAI00002341').
 
-demo10d(X) :- 
-    % plant
-    aib_to_s4_floc('SAI00215602', X).
+demo20b(Ref) :- 
+    db_holds(assets, aib_installation([sai_ref=Ref, common_name=_])),
+    !.
 
-
-demo10e(X) :- 
-    % plant item
-    aib_to_s4_floc('SAI00215603', X).
-
-
-demo10f(X) :- 
-    % equipment
-    aib_to_s4_floc('PLI00076762', X).

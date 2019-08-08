@@ -24,7 +24,11 @@ module PopulateAssetsDb =
         | Some str -> emptyIfNull str
         | None -> ""
 
-    
+    // ************************************************************************
+    // S4 Flocs
+
+
+
     // ************************************************************************
     // S4 Equipment
 
@@ -43,12 +47,12 @@ module PopulateAssetsDb =
     let makeS4EquipmentInsert (row : S4EquipmentRow) : string option = 
         match row.``400 S/4 Equip Reference``, row.``Migration Status (Y/N)`` with
         | Some(num), true -> 
-            let line1 = "INSERT INTO s4_equipment (s4_ref, pli_code, s4_name, category, obj_type, obj_class, s4_floc) "
+            let line1 = "INSERT INTO s4_equipment (s4_ref, s4_name, aib_pli_code, category, obj_type, obj_class, s4_floc) "
             let line2 = 
                 sprintf "VALUES(%i, '%s', '%s', '%s', '%s', '%s', '%s');" 
                         num 
-                        (emptyIfNull row.``AI2 AIB Reference``)
                         (emptyIfNone row.``Equipment Description``)
+                        (emptyIfNull row.``AI2 AIB Reference``)
                         (emptyIfNull row.Category)
                         (emptyIfNone row.``Object Type``)
                         (emptyIfNone row.Class)
