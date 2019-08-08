@@ -219,6 +219,42 @@ module PopulateAssetsDb =
                         (Option.defaultValue "" row.``L5_Floc Code``) 
         }
 
+    // S4 item (level 7)
+    let s4StrategyItem : S4Strategy = 
+        { TableName = "s4_item"
+          ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
+          GetUniqueKeyForValidRow = 
+            fun row -> 
+                match row.``L7_Floc Code``, row.``L7_Sub Unit Description`` with
+                | Some code, Some _ -> Some code
+                | _ , _  -> None
+          MakeValues = 
+            fun row -> 
+                sprintf "'%s', '%s', '%s', '%s'" 
+                        (Option.defaultValue "impossible" row.``L7_Floc Code``) 
+                        (Option.defaultValue "impossible" row.``L7_Sub Unit Description``)
+                        (emptyIfNone row.PlantReference)        // Should this be the same as parent?
+                        (Option.defaultValue "" row.``L6_Floc Code``) 
+        }
+
+    // S4 component (level 6)
+    let s4StrategyComponent : S4Strategy = 
+        { TableName = "s4_component"
+          ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
+          GetUniqueKeyForValidRow = 
+            fun row -> 
+                match row.``L8_Floc Code``, row.``L8_Item Description`` with
+                | Some code, Some _ -> Some code
+                | _ , _  -> None
+          MakeValues = 
+            fun row -> 
+                sprintf "'%s', '%s', '%s', '%s'" 
+                        (Option.defaultValue "impossible" row.``L8_Floc Code``) 
+                        (Option.defaultValue "impossible" row.``L8_Item Description``)
+                        (emptyIfNone row.PlantReference) 
+                        (Option.defaultValue "" row.``L7_Floc Code``) 
+        }
+
     // Multiple traversal is simpler to think about, but 
     // we can't see to travers multiple times on table.Rows,
     // so we load the file each time.
@@ -233,6 +269,8 @@ module PopulateAssetsDb =
             do! insertRecords s4StrategyProcess
             do! insertRecords s4StrategySystem
             do! insertRecords s4StrategyAssembly
+            do! insertRecords s4StrategyComponent
+            do! insertRecords s4StrategyItem
             return ()
         }
 

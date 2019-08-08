@@ -327,6 +327,24 @@ module SqliteConn =
             work state source (fun msg -> Error msg) (fun ans -> Ok ans)
 
 
+
+    let seqMapM (action : 'a -> SqliteConn<'b>) 
+                (source : seq<'a>) : SqliteConn<seq<'b>> = 
+        SqliteConn <| fun conn ->
+            let sourceEnumerator = source.GetEnumerator()
+            let rec work (fk : ErrMsg -> Result<seq<'b>, ErrMsg>) 
+                            (sk : seq<'b> -> Result<seq<'b>, ErrMsg>) = 
+                if not (sourceEnumerator.MoveNext()) then 
+                    sk Seq.empty
+                else
+                    let a1 = sourceEnumerator.Current
+                    match apply1 (action a1) conn with
+                    | Error msg -> fk msg
+                    | Ok b1 -> 
+                        work fk (fun sx -> 
+                        sk (seq { yield b1; yield! sx }))
+            work (fun msg -> Error msg) (fun ans -> Ok ans)
+
             
     let seqFoldM (action : 'state -> 'a -> SqliteConn<'state>) 
                     (state : 'state)
@@ -488,7 +506,7 @@ module SqliteConn =
 
 
     // ************************************************************************
-    // "Prepackaged" SQL
+    // "Prepackaged" SQL and helpers 
 
     // Run a ``DELETE FROM`` query
     let deleteAllRows (tableName:string) : SqliteConn<int> = 
