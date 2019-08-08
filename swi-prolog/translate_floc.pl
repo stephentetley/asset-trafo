@@ -1,6 +1,6 @@
-% translate_floc2.pl
+% translate_floc.pl
 
-:- module(translate_floc2,
+:- module(translate_floc,
     [ atoms_to_floc/2
     , floc_take/3
     , floc_prefix/2
@@ -14,6 +14,16 @@
 
     , aib_funloc_below/2
     , aib_equipment_below/2
+
+    , is_s4_site/1
+    , is_s4_function/1
+    , is_s4_process_group/1
+    , is_s4_process/1
+    , is_s4_system/1
+    , is_s4_assembly/1
+    , is_s4_item/1
+    , is_s4_component/1
+    , is_s4_equipment/1
 
     , aib_ref_to_s4_floc/2
     , s4_floc_to_aib_ref/2
@@ -186,17 +196,90 @@ aib_ref_to_s4_floc(Ref, Flocs) :-
     setof(X, aib_ref_to_s4_floc_aux(Ref,X), Flocs).
 
 
+
+
+%%% 
+
+is_s4_site(Floc) :- 
+    db_holds(assets, s4_site([s4_floc=Floc, name=_])), 
+    !.
+
+is_s4_function(Floc) :- 
+    db_holds(assets, s4_function([s4_floc=Floc, name=_])), 
+    !.
+
+is_s4_process_group(Floc) :- 
+    db_holds(assets, s4_process_group([s4_floc=Floc, name=_])), 
+    !.
+
+
+is_s4_process(Floc) :- 
+    db_holds(assets, s4_process([s4_floc=Floc, name=_])), 
+    !.
+
+is_s4_system(Floc) :- 
+    db_holds(assets, s4_system([s4_floc=Floc, name=_])), 
+    !.
+
+is_s4_assembly(Floc) :- 
+    db_holds(assets, s4_assembly([s4_floc=Floc, name=_])), 
+    !.
+
+is_s4_item(Floc) :- 
+    db_holds(assets, s4_item([s4_floc=Floc, name=_])), 
+    !.
+
+is_s4_component(Floc) :- 
+    db_holds(assets, s4_component([s4_floc=Floc, name=_])), 
+    !.
+
+%% Ref is a BIGINT, printed with leading zeros in the initial extraction
+is_s4_equipment(Ref) :- 
+    db_holds(assets, s4_component([s4_ref=Ref, name=_])), 
+    !.
+
 %%% s4_floc_to_aib_ref/2
 
-%% This does not work - we will have to code the reverse 
-%% translation form scratch, asthe forward translation is 
-%% not bi-directional.
+%% The reverse translation works on the S4 objects always having 
+%% a reference to the Aib Sai number. 
+%% This assumption may be overreaching.
+
 s4_floc_to_aib_ref(Floc, Ref) :- 
-    aib_ref_to_s4_floc_aux(Ref, Floc).
+    db_holds(assets, s4_site([ s4_floc=Floc, aib_ref=Ref ])), 
+    !.
+
+s4_floc_to_aib_ref(Floc, Ref) :- 
+    db_holds(assets, s4_function([ s4_floc=Floc, aib_ref=Ref ])), 
+    !.
+
+s4_floc_to_aib_ref(Floc, Ref) :- 
+    db_holds(assets, s4_process_group([ s4_floc=Floc, aib_ref=Ref ])), 
+    !.
+
+s4_floc_to_aib_ref(Floc, Ref) :- 
+    db_holds(assets, s4_process([ s4_floc=Floc, aib_ref=Ref ])),
+    !.
+
+s4_floc_to_aib_ref(Floc, Ref) :- 
+    db_holds(assets, s4_system([ s4_floc=Floc, aib_ref=Ref ])),
+    !.
+
+s4_floc_to_aib_ref(Floc, Ref) :- 
+    db_holds(assets, s4_assembly([ s4_floc=Floc, aib_ref=Ref ])), 
+    !.
+
+s4_floc_to_aib_ref(Floc, Ref) :- 
+    db_holds(assets, s4_item([ s4_floc=Floc, aib_ref=Ref ])), 
+    !.
+
+s4_floc_to_aib_ref(Floc, Ref) :- 
+    db_holds(assets, s4_component([ s4_floc=Floc, aib_ref=Ref ])),
+    !.
 
 %% Natural mapping for equipment.
 %% 
 
 
-s4_floc_to_aib_equipment_to(Floc, PliCode) :- 
-    db_holds(assets, s4_equipment([ aib_pli_code=PliCode, s4_floc=Floc])).
+s4_floc_to_aib_equipment(Floc, PliCode) :- 
+    db_holds(assets, s4_equipment([ s4_floc=Floc, aib_pli_code=PliCode ])).
+
