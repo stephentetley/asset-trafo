@@ -47,6 +47,7 @@ let pathToDbTemplate () : string =
 
 
 let main () : Result<unit, ErrMsg> = 
+    let s4FlocCsv = @"G:\work\Projects\asset_sync\S4_Floc_Mapping_Site-A-Z_General_Structure_Initial.csv"
     let s4EquipmentCsv = @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
     let aibFlocCsv = @"G:\work\Projects\asset_sync\rules\aib_floc_extract4.csv"
     let aibEquipCsv = @"G:\work\Projects\asset_sync\rules\aib_equipment_extract2.csv"
@@ -63,9 +64,19 @@ let main () : Result<unit, ErrMsg> =
     let connParams = sqliteConnParamsVersion3 dbActive
     runSqliteConnection connParams 
         <| sqliteConn { 
-                do! insertS4EquipmentRows s4EquipmentCsv
-                do! insertAibFlocRows aibFlocCsv
-                do! insertAibEquipmentRows aibEquipCsv
+                do! insertS4FlocRecords s4FlocCsv
+                do! insertS4EquipmentRecords s4EquipmentCsv
+                do! insertAibFlocRecords aibFlocCsv
+                do! insertAibEquipmentRecords aibEquipCsv
                 return ()
             }
 
+let temp01 ()  = 
+    let longestFloc (acc : int) (row: S4FlocRow) : int = 
+        match row.``L8_Floc Code`` with
+        | None -> acc
+        | Some str -> max acc (str.Length)
+        
+    let s4FlocCsv = @"G:\work\Projects\asset_sync\S4_Floc_Mapping_Site-A-Z_General_Structure_Initial.csv"
+    getS4FlocRows s4FlocCsv 
+        |> Seq.fold longestFloc 0

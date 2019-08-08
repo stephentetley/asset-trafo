@@ -27,7 +27,55 @@ module PopulateAssetsDb =
     // ************************************************************************
     // S4 Flocs
 
+    // This table is huge, but we process it with multiple traversals anyway
+    // otherwise the processing is too complicated
 
+    type S4FlocTable = 
+        CsvProvider< Sample = @"G:\work\Projects\asset_sync\S4_Floc_Mapping_Site-A-Z_General_Structure_Initial.csv"
+                   , MissingValues = @"#N/A,NULL"
+                   , CacheRows = false
+                   , PreferOptionals = true
+                   , AssumeMissingValues = true
+                   >
+    
+    type S4FlocRow = S4FlocTable.Row
+
+    let getS4FlocRows (cvsPath : string) : seq<S4FlocRow> = 
+        let table = S4FlocTable.Load(uri = cvsPath) in table.Rows
+
+
+
+    let makeS4InstallationInsert (row : S4FlocRow) : string = 
+        let code = Option.defaultValue "impossible" row.L1_Site_Code
+        let line1 = "INSERT INTO s4_installation (s4_floc) "
+        let line2 = 
+            sprintf "VALUES('%s');" 
+                    code 
+        String.concat "\n" [line1; line2]
+    
+    let insertS4Installation (encountered : Set<string>) 
+                                (row : S4FlocRow) : SqliteConn<Set<string>> = 
+        match row.L1_Site_Code with
+        | Some code -> 
+            if not (encountered.Contains code) then
+                let statement = makeS4InstallationInsert row
+                executeNonQuery statement >>. mreturn (encountered.Add code)
+            else
+                mreturn encountered
+        | _ -> mreturn encountered
+
+
+    let insertS4InstallationRecords (rows : seq<S4FlocRow>) : SqliteConn<unit> = 
+        withTransaction <| 
+            (seqFoldM insertS4Installation Set.empty rows |>> ignore)
+        
+
+    let insertS4FlocRecords (csvPath : string) : SqliteConn<unit> = 
+        sqliteConn { 
+            let! rows = liftOperation (fun _ -> getS4FlocRows csvPath)
+            do! insertS4InstallationRecords rows
+            return ()
+        }
 
     // ************************************************************************
     // S4 Equipment
@@ -42,7 +90,6 @@ module PopulateAssetsDb =
         let table = S4EquipmentTable.Load(uri = cvsPath) in Seq.toList table.Rows
 
 
-    
     
     let makeS4EquipmentInsert (row : S4EquipmentRow) : string option = 
         match row.``400 S/4 Equip Reference``, row.``Migration Status (Y/N)`` with
@@ -69,7 +116,7 @@ module PopulateAssetsDb =
     
     
     
-    let insertS4EquipmentRows (csvPath : string) : SqliteConn<unit> = 
+    let insertS4EquipmentRecords (csvPath : string) : SqliteConn<unit> = 
         sqliteConn { 
             let! rows = liftOperation (fun _ -> getS4EquipmentRows csvPath)
             return! withTransaction <| forMz rows insertEquipmentRow
@@ -138,7 +185,7 @@ module PopulateAssetsDb =
         | None -> mreturn ()
 
 
-    let insertAibFlocRows (csvPath : string) : SqliteConn<unit> = 
+    let insertAibFlocRecords (csvPath : string) : SqliteConn<unit> = 
         sqliteConn { 
             let! rows = liftOperation (fun _ -> getAibFlocRows csvPath)
             return! withTransaction <| forMz rows insertAibFlocRow
@@ -167,7 +214,7 @@ module PopulateAssetsDb =
             executeNonQuery statement |>> ignore
         | None -> mreturn ()
 
-    let insertAibEquipmentRows (csvPath : string) : SqliteConn<unit> = 
+    let insertAibEquipmentRecords (csvPath : string) : SqliteConn<unit> = 
         sqliteConn { 
             let! rows = liftOperation (fun _ -> getAibEquipmentRows csvPath)
             return! withTransaction <| forMz rows insertAibEquipmentRow

@@ -8,6 +8,7 @@ namespace AssetTrafo.Base
 
 module SqliteConn = 
 
+    open System.Collections.Generic
 
     open System.Data
     open System.Data.SQLite
@@ -168,6 +169,34 @@ module SqliteConn =
         apM ma mb
 
 
+    /// Perform two actions in sequence. 
+    /// Ignore the results of the second action if both succeed.
+    let seqL (ma : SqliteConn<'a>) (mb : SqliteConn<'b>) : SqliteConn<'a> = 
+        sqliteConn { 
+            let! a = ma
+            let! b = mb
+            return a
+        }
+
+    /// Operator for seqL
+    let (.>>) (ma : SqliteConn<'a>) 
+              (mb : SqliteConn<'b>) : SqliteConn<'a> = 
+        seqL ma mb
+
+    /// Perform two actions in sequence. 
+    /// Ignore the results of the first action if both succeed.
+    let seqR (ma : SqliteConn<'a>) (mb : SqliteConn<'b>) : SqliteConn<'b> = 
+        sqliteConn { 
+            let! a = ma
+            let! b = mb
+            return b
+        }
+
+    /// Operator for seqR
+    let (>>.) (ma : SqliteConn<'a>) 
+              (mb : SqliteConn<'b>) : SqliteConn<'b> = 
+        seqR ma mb
+
     /// Bind operator
     let ( >>= ) (ma : SqliteConn<'a>) 
                 (fn : 'a -> SqliteConn<'b>) : SqliteConn<'b> = 
@@ -279,6 +308,43 @@ module SqliteConn =
 
     let forMz (xs : 'a list) (fn : 'a -> SqliteConn<'b>) : SqliteConn<unit> = mapMz fn xs
 
+    let foldM (action : 'state -> 'a -> SqliteConn<'state>) 
+                (state : 'state)
+                (source : 'a list) : SqliteConn<'state> = 
+        SqliteConn <| fun conn -> 
+            let rec work (st : 'state) 
+                            (xs : 'a list) 
+                            (fk : ErrMsg -> Result<'state, ErrMsg>) 
+                            (sk : 'state -> Result<'state, ErrMsg>) = 
+                match xs with
+                | [] -> sk st
+                | x1 :: rest -> 
+                    match apply1 (action st x1) conn with
+                    | Error msg -> fk msg
+                    | Ok st1 -> 
+                        work st1 rest fk (fun acc ->
+                        sk acc)
+            work state source (fun msg -> Error msg) (fun ans -> Ok ans)
+
+
+            
+    let seqFoldM (action : 'state -> 'a -> SqliteConn<'state>) 
+                    (state : 'state)
+                    (source : seq<'a>) : SqliteConn<'state> = 
+        SqliteConn <| fun conn ->
+            let sourceEnumerator = source.GetEnumerator()
+            let rec work (st : 'state) 
+                            (fk : ErrMsg -> Result<'state, ErrMsg>) 
+                            (sk : 'state -> Result<'state, ErrMsg>) = 
+                if not (sourceEnumerator.MoveNext()) then 
+                    sk st
+                else
+                    let x1 = sourceEnumerator.Current
+                    match apply1 (action st x1) conn with
+                    | Error msg -> fk msg
+                    | Ok st1 -> 
+                        work st1 fk sk
+            work state (fun msg -> Error msg) (fun ans -> Ok ans)
 
     //let mapiM (fn:int -> 'a -> SqliteConn<'b>) (xs:'a list) : SqliteConn<'b list> = 
     //    SqliteConn <| fun conn ->
