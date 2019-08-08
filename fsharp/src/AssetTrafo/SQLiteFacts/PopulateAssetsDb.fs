@@ -61,76 +61,182 @@ module PopulateAssetsDb =
 
     // S4 Installation
 
+   
+    
+
+    type S4Strategy = 
+        { TableName : string 
+          ColumnNames : string list
+          GetUniqueKeyForValidRow : S4FlocRow -> string option
+          MakeValues : S4FlocRow -> string 
+        }
+
+
+    // Generic - most tabels are the same
+    
+
+    let makeS4GenericInsert (strategy : S4Strategy) (row : S4FlocRow) : string = 
+        sprintf "INSERT INTO %s (%s) VALUES(%s);"
+                    strategy.TableName
+                    (String.concat ", " strategy.ColumnNames)
+                    (strategy.MakeValues row)
+                
+                    
+ 
+    
+    let insertS4Generic (strategy : S4Strategy) 
+                        (encountered : Set<string>) 
+                        (row : S4FlocRow) : SqliteConn<Set<string>> = 
+        match strategy.GetUniqueKeyForValidRow row with
+        | Some code -> 
+            if not (encountered.Contains code) then
+                let statement = makeS4GenericInsert strategy row
+                executeNonQuery statement >>. mreturn (encountered.Add code)
+            else
+                mreturn encountered
+        | _ -> mreturn encountered
+
+    let insertS4RecordsGeneric (strategy : S4Strategy) 
+                                (rows : seq<S4FlocRow>) : SqliteConn<unit> = 
+        withTransaction <| 
+            (seqFoldM (insertS4Generic strategy) Set.empty rows |>> ignore)
+
     let instAibRef (row : S4FlocRow) : string = 
-        match (emptyIfNone row.InstallationReference, emptyIfNone row.SubInstallationReference) with
-        | inst, "" -> inst
-        | _, subInst  -> subInst
-
-    let makeS4InstallationInsert (row : S4FlocRow) : string = 
-        let line1 = "INSERT INTO s4_site (s4_floc, site_name, aib_ref) "
-        let line2 = 
-            sprintf "VALUES('%s', '%s', '%s');" 
-                    (Option.defaultValue "impossible" row.L1_Site_Code) 
-                    (Option.defaultValue "impossible" row.``S/4 Hana Floc Description``)
-                    (instAibRef row)
-        String.concat "\n" [line1; line2]
-    
-    let insertS4Installation (encountered : Set<string>) 
-                                (row : S4FlocRow) : SqliteConn<Set<string>> = 
-        match row.L1_Site_Code, row.``S/4 Hana Floc Description`` with
-        | Some code, Some _ -> 
-            if not (encountered.Contains code) then
-                let statement = makeS4InstallationInsert row
-                executeNonQuery statement >>. mreturn (encountered.Add code)
-            else
-                mreturn encountered
-        | _ -> mreturn encountered
+           match (emptyIfNone row.InstallationReference, emptyIfNone row.SubInstallationReference) with
+           | inst, "" -> inst
+           | _, subInst  -> subInst
 
 
-    let insertS4InstallationRecords (rows : seq<S4FlocRow>) : SqliteConn<unit> = 
-        withTransaction <| 
-            (seqFoldM insertS4Installation Set.empty rows |>> ignore)
-    
-    
-    // S4 Function
-    
 
-    let makeS4FunctionInsert (row : S4FlocRow) : string = 
-        let line1 = "INSERT INTO s4_function (s4_floc, function_name, aib_ref, parent_floc) "
-        let line2 = 
-            sprintf "VALUES('%s', '%s', '%s', '%s');" 
-                    (Option.defaultValue "impossible" row.``L2_Floc Code``) 
-                    (Option.defaultValue "impossible" row.L2_Function)
-                    (instAibRef row)        // same as site
-                    (Option.defaultValue "impossible" row.L1_Site_Code) 
-        String.concat "\n" [line1; line2]
-    
-    let insertS4Function (encountered : Set<string>) 
-                                (row : S4FlocRow) : SqliteConn<Set<string>> = 
-        match row.``L2_Floc Code``, row.L2_Function with
-        | Some code, Some _ -> 
-            if not (encountered.Contains code) then
-                let statement = makeS4FunctionInsert row
-                executeNonQuery statement >>. mreturn (encountered.Add code)
-            else
-                mreturn encountered
-        | _ -> mreturn encountered
+    // S4 site (level 1)
+    let s4StrategySite : S4Strategy = 
+        { TableName = "s4_site"
+          ColumnNames = ["s4_floc"; "name"; "aib_ref"]
+          GetUniqueKeyForValidRow = 
+            fun row -> 
+                match row.L1_Site_Code, row.``S/4 Hana Floc Description`` with
+                | Some code, Some _ -> Some code
+                | _ , _  -> None
+          MakeValues = 
+            fun row -> 
+                sprintf "'%s', '%s', '%s'" 
+                        (Option.defaultValue "impossible" row.L1_Site_Code) 
+                        (Option.defaultValue "impossible" row.``S/4 Hana Floc Description``)
+                        (instAibRef row)
+        }
 
-    let insertS4FunctionRecords (rows : seq<S4FlocRow>) : SqliteConn<unit> = 
-        withTransaction <| 
-            (seqFoldM insertS4Function Set.empty rows |>> ignore)
 
+    // S4 Function (level 2)
+    let s4StrategyFunction : S4Strategy = 
+        { TableName = "s4_function"
+          ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
+          GetUniqueKeyForValidRow = 
+            fun row -> 
+                match row.``L2_Floc Code``, row.L2_Function with
+                | Some code, Some _ -> Some code
+                | _ , _  -> None
+          MakeValues = 
+            fun row -> 
+                sprintf "'%s', '%s', '%s', '%s'" 
+                        (Option.defaultValue "impossible" row.``L2_Floc Code``) 
+                        (Option.defaultValue "impossible" row.L2_Function)
+                        (instAibRef row)        // same as site
+                        (Option.defaultValue "" row.L1_Site_Code) 
+        }
+
+
+    // S4 Process Group (level 3)
+    let s4StrategyProcessGroup : S4Strategy = 
+        { TableName = "s4_process_group"
+          ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
+          GetUniqueKeyForValidRow = 
+            fun row -> 
+                match row.``L3_Floc Code``, row.``L3_Process Group`` with
+                | Some code, Some _ -> Some code
+                | _ , _  -> None
+          MakeValues = 
+            fun row -> 
+                sprintf "'%s', '%s', '%s', '%s'" 
+                        (Option.defaultValue "impossible" row.``L3_Floc Code``) 
+                        (Option.defaultValue "impossible" row.``L3_Process Group``)
+                        (emptyIfNone row.ProcessGroupReference)
+                        (Option.defaultValue "" row.``L2_Floc Code``) 
+        }
+
+
+
+    // S4 Process (level 4)
+    let s4StrategyProcess : S4Strategy = 
+        { TableName = "s4_process"
+          ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
+          GetUniqueKeyForValidRow = 
+            fun row -> 
+                match row.``L4_Floc Code``, row.L4_Process with
+                | Some code, Some _ -> Some code
+                | _ , _  -> None
+          MakeValues = 
+            fun row -> 
+                sprintf "'%s', '%s', '%s', '%s'" 
+                        (Option.defaultValue "impossible" row.``L4_Floc Code``) 
+                        (Option.defaultValue "impossible" row.L4_Process)
+                        (emptyIfNone row.ProcessReference)
+                        (Option.defaultValue "" row.``L3_Floc Code``) 
+        }
+
+    // S4 system (level 5)
+    let s4StrategySystem : S4Strategy = 
+        { TableName = "s4_system"
+          ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
+          GetUniqueKeyForValidRow = 
+            fun row -> 
+                match row.``L5_Floc Code``, row.L5_System with
+                | Some code, Some _ -> Some code
+                | _ , _  -> None
+          MakeValues = 
+            fun row -> 
+                sprintf "'%s', '%s', '%s', '%s'" 
+                        (Option.defaultValue "impossible" row.``L5_Floc Code``) 
+                        (Option.defaultValue "impossible" row.L5_System)
+                        (emptyIfNone row.ProcessReference)  // reference to process
+                        (Option.defaultValue "" row.``L4_Floc Code``) 
+        }
+
+    // S4 assembly (level 6)
+    let s4StrategyAssembly : S4Strategy = 
+        { TableName = "s4_assembly"
+          ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
+          GetUniqueKeyForValidRow = 
+            fun row -> 
+                match row.``L6_Floc Code``, row.``L6_Unit Description`` with
+                | Some code, Some _ -> Some code
+                | _ , _  -> None
+          MakeValues = 
+            fun row -> 
+                sprintf "'%s', '%s', '%s', '%s'" 
+                        (Option.defaultValue "impossible" row.``L6_Floc Code``) 
+                        (Option.defaultValue "impossible" row.``L6_Unit Description``)
+                        (emptyIfNone row.PlantReference) 
+                        (Option.defaultValue "" row.``L5_Floc Code``) 
+        }
 
     // Multiple traversal is simpler to think about, but 
     // we can't see to travers multiple times on table.Rows,
     // so we load the file each time.
     let insertS4FlocRecords (csvPath : string) : SqliteConn<unit> = 
-        let getTable () = liftOperation (fun _ -> getS4FlocTable csvPath)
+        let insertRecords (strategy : S4Strategy) = 
+            liftOperation (fun _ -> getS4FlocTable csvPath) >>= 
+            fun table -> insertS4RecordsGeneric strategy table.Rows
         sqliteConn { 
-            do! getTable () >>= fun table -> insertS4InstallationRecords table.Rows
-            do! getTable () >>= fun table -> insertS4FunctionRecords table.Rows
+            do! insertRecords s4StrategySite
+            do! insertRecords s4StrategyFunction
+            do! insertRecords s4StrategyProcessGroup
+            do! insertRecords s4StrategyProcess
+            do! insertRecords s4StrategySystem
+            do! insertRecords s4StrategyAssembly
             return ()
         }
+
+
 
     // ************************************************************************
     // S4 Equipment
@@ -149,7 +255,7 @@ module PopulateAssetsDb =
     let makeS4EquipmentInsert (row : S4EquipmentRow) : string option = 
         match row.``400 S/4 Equip Reference``, row.``Migration Status (Y/N)`` with
         | Some(num), true -> 
-            let line1 = "INSERT INTO s4_equipment (s4_ref, s4_name, aib_pli_code, category, obj_type, obj_class, s4_floc) "
+            let line1 = "INSERT INTO s4_equipment (s4_ref, name, aib_pli_code, category, obj_type, obj_class, s4_floc) "
             let line2 = 
                 sprintf "VALUES(%i, '%s', '%s', '%s', '%s', '%s', '%s');" 
                         num 
