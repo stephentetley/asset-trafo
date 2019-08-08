@@ -32,17 +32,11 @@ open AssetTrafo.SQLiteFacts.PopulateAssetsDb
 
 
 
-
-
-
-
-
 let outputFile (relativePath : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\", relativePath)
 
 let pathToDbTemplate () : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\..\data\", "assets_db_template.sqlite")
-
 
 
 
@@ -71,12 +65,3 @@ let main () : Result<unit, ErrMsg> =
                 return ()
             }
 
-let temp01 ()  = 
-    let longestFloc (acc : int) (row: S4FlocRow) : int = 
-        match row.``L8_Floc Code`` with
-        | None -> acc
-        | Some str -> max acc (str.Length)
-        
-    let s4FlocCsv = @"G:\work\Projects\asset_sync\S4_Floc_Mapping_Site-A-Z_General_Structure_Initial.csv"
-    getS4FlocRows s4FlocCsv 
-        |> Seq.fold longestFloc 0

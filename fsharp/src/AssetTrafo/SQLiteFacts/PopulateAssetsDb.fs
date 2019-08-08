@@ -13,6 +13,7 @@ module PopulateAssetsDb =
     open AssetTrafo.Base.SqliteConn
     open AssetTrafo.Base.DbExportSchema
 
+
     
     let emptyIfNull (source : string) : string = 
         match source with
@@ -23,6 +24,17 @@ module PopulateAssetsDb =
         match source with
         | Some str -> emptyIfNull str
         | None -> ""
+
+
+    let defaultIfNull (defaultValue : string) (source : string) : string = 
+        match source with
+        | null | "NULL" -> defaultValue
+        | _ -> source
+
+    let defaultIfNone (defaultValue : string) (source : string option) : string = 
+        match source with
+        | Some str -> defaultIfNull defaultValue str
+        | None -> defaultValue
 
     // ************************************************************************
     // S4 Flocs
@@ -43,20 +55,30 @@ module PopulateAssetsDb =
     let getS4FlocRows (cvsPath : string) : seq<S4FlocRow> = 
         let table = S4FlocTable.Load(uri = cvsPath) in table.Rows
 
+    let getS4FlocTable (cvsPath : string) : S4FlocTable = 
+        let table = S4FlocTable.Load(uri = cvsPath) in table
 
+
+    // S4 Installation
+
+    let instAibRef (row : S4FlocRow) : string = 
+        match (emptyIfNone row.InstallationReference, emptyIfNone row.SubInstallationReference) with
+        | inst, "" -> inst
+        | _, subInst  -> subInst
 
     let makeS4InstallationInsert (row : S4FlocRow) : string = 
-        let code = Option.defaultValue "impossible" row.L1_Site_Code
-        let line1 = "INSERT INTO s4_installation (s4_floc) "
+        let line1 = "INSERT INTO s4_site (s4_floc, site_name, aib_ref) "
         let line2 = 
-            sprintf "VALUES('%s');" 
-                    code 
+            sprintf "VALUES('%s', '%s', '%s');" 
+                    (Option.defaultValue "impossible" row.L1_Site_Code) 
+                    (Option.defaultValue "impossible" row.``S/4 Hana Floc Description``)
+                    (instAibRef row)
         String.concat "\n" [line1; line2]
     
     let insertS4Installation (encountered : Set<string>) 
                                 (row : S4FlocRow) : SqliteConn<Set<string>> = 
-        match row.L1_Site_Code with
-        | Some code -> 
+        match row.L1_Site_Code, row.``S/4 Hana Floc Description`` with
+        | Some code, Some _ -> 
             if not (encountered.Contains code) then
                 let statement = makeS4InstallationInsert row
                 executeNonQuery statement >>. mreturn (encountered.Add code)
@@ -68,12 +90,45 @@ module PopulateAssetsDb =
     let insertS4InstallationRecords (rows : seq<S4FlocRow>) : SqliteConn<unit> = 
         withTransaction <| 
             (seqFoldM insertS4Installation Set.empty rows |>> ignore)
-        
+    
+    
+    // S4 Function
+    
 
+    let makeS4FunctionInsert (row : S4FlocRow) : string = 
+        let line1 = "INSERT INTO s4_function (s4_floc, function_name, aib_ref, parent_floc) "
+        let line2 = 
+            sprintf "VALUES('%s', '%s', '%s', '%s');" 
+                    (Option.defaultValue "impossible" row.``L2_Floc Code``) 
+                    (Option.defaultValue "impossible" row.L2_Function)
+                    (instAibRef row)        // same as site
+                    (Option.defaultValue "impossible" row.L1_Site_Code) 
+        String.concat "\n" [line1; line2]
+    
+    let insertS4Function (encountered : Set<string>) 
+                                (row : S4FlocRow) : SqliteConn<Set<string>> = 
+        match row.``L2_Floc Code``, row.L2_Function with
+        | Some code, Some _ -> 
+            if not (encountered.Contains code) then
+                let statement = makeS4FunctionInsert row
+                executeNonQuery statement >>. mreturn (encountered.Add code)
+            else
+                mreturn encountered
+        | _ -> mreturn encountered
+
+    let insertS4FunctionRecords (rows : seq<S4FlocRow>) : SqliteConn<unit> = 
+        withTransaction <| 
+            (seqFoldM insertS4Function Set.empty rows |>> ignore)
+
+
+    // Multiple traversal is simpler to think about, but 
+    // we can't see to travers multiple times on table.Rows,
+    // so we load the file each time.
     let insertS4FlocRecords (csvPath : string) : SqliteConn<unit> = 
+        let getTable () = liftOperation (fun _ -> getS4FlocTable csvPath)
         sqliteConn { 
-            let! rows = liftOperation (fun _ -> getS4FlocRows csvPath)
-            do! insertS4InstallationRecords rows
+            do! getTable () >>= fun table -> insertS4InstallationRecords table.Rows
+            do! getTable () >>= fun table -> insertS4FunctionRecords table.Rows
             return ()
         }
 
