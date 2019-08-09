@@ -9,40 +9,9 @@ module ReadCsv =
     open FSharp.Core
     open FSharp.Data
 
+    open AssetTrafo.AideChangeReport.ImportSchema
     open AssetTrafo.AideChangeReport.Syntax
 
-    [<Literal>]
-    let AttributeChangeSchema = 
-        "ChangeRequestId(int64),RequestStatus(string),\
-         Reference(string),AssetName(string),\
-         AssetCommonName(string),\
-         AttributeName(string),AiValue(string option),\
-         AiLookupValue(string option),AiLookupCode(int64 option),\
-         AideValue(string option),AideLookupValue(string option),\
-         AideLookupCode(int64 option),ChangeRequestTime(date)"
-
-
-    [<Literal>]
-    let AttributeChangeSample = 
-        "10000,Submitted,ABC01,ASSET_SHORT_NAME,\
-        ASSET_COMMON_NAME,ATTR_NAME,\
-        VALUE1,100,LOOKUP1,\
-        VALUE2,101,LOOKUP2,2019-05-17T11:57:18.283"
-        
-
-    type AttributeChangeExport = 
-        CsvProvider< Schema = AttributeChangeSchema
-                   , Sample = AttributeChangeSample
-                   , HasHeaders = true >
-
-    type AttributeChangeRow = AttributeChangeExport.Row
-    
-    let readAttributeChangeExport(path:string) : Result<seq<AttributeChangeRow>, string> = 
-        try 
-            let table = AttributeChangeExport.Load(uri = path)
-            table.Rows |> Ok
-        with
-        | ex -> Error ex.Message
 
     let getValueSource (valueCode : int64 option) : ValueSource = 
         match valueCode with
@@ -70,46 +39,7 @@ module ReadCsv =
 
     // ************************************************************************
 
-    [<Literal>]
-    let AssetChangeSchema = 
-        "ChangeRequestId(int64),RequestStatus(string),\
-         ChangeRequestType(string),AssetReference(string),\
-         AiAssetName(string),AiCommonName(string),\
-         AiInstalledFromDate(date),AiManufacturer(string),\
-         AiModel(string),AiHierarchyKey(string),\
-         AiAssetStatus(string),AiLocationReference(string),\
-         AiAssetDeleted(bool),\
-         AideAssetName(string),AideCommonName(string),\
-         AideInstalledFromDate(date),AideManufacturer(string),\
-         AideModel(string),AideHierarchyKey(string),\
-         AideAssetStatus(string),AideLocationReference(string),\
-         AideAssetDeleted(bool),\
-         ChangeRequestTime(date)"        
 
-    [<Literal>]
-    let AssetChangeSample =
-        "10000,Submitted,Attribute,CODE000,\
-         SHORT_NAME,LONG_NAME,1997-01-01T00:00:00,\
-         M1,MM1,XYZ,OPERATIONAL,SE7826004748,\
-         0,\
-         SHORT_NAME,LONG_NAME,1997-01-01T00:00:00,\
-         M1,MM1,XYZ,OPERATIONAL,SE7826004748,\
-         0,\
-         2019-05-17T11:57:18.283"
-    
-    type AssetChangeExport = 
-        CsvProvider< Schema = AssetChangeSchema                              
-                   , Sample = AssetChangeSample
-                   , HasHeaders = true >
-
-    type AssetChangeRow = AssetChangeExport.Row
-    
-    let readAssetChangeExport(path:string) : Result<seq<AssetChangeRow>, string> = 
-        try 
-            let table = AssetChangeExport.Load(uri = path)
-            table.Rows |> Ok
-        with
-        | ex -> Error ex.Message
 
     let readProperties (row : AssetChangeRow) : AssetProperty list = 
         [ { PropertyName    = "Name"
@@ -194,16 +124,20 @@ module ReadCsv =
                                   AssetChanges = xs
                                   AttributeChanges = ys })
         
-
+    /// This is horrible...
     let readChangesSource (sourceFiles : ChangesSourceFiles) : Result<ChangeRequest list , string> = 
         let optRead (readProc : string -> Result<'a seq, string>) (optfile : string option) = 
             match optfile with
             | None -> Ok Seq.empty
             | Some name -> readProc name
-        match optRead readAssetChangeExport sourceFiles.AssetChangesCsv with
+        let readAssetProc path = 
+            Result.map (fun (t1:AssetChangeTable) -> t1.Rows) (readAssetChangeExport path) 
+        match optRead readAssetProc sourceFiles.AssetChangesCsv with
         | Error msg -> Error msg
         | Ok assets -> 
-            match optRead readAttributeChangeExport sourceFiles.AttributeChangesCsv with
+            let readAttrProc path = 
+                Result.map (fun (t1:AttributeChangeTable) -> t1.Rows) (readAttributeChangeExport path) 
+            match optRead readAttrProc sourceFiles.AttributeChangesCsv with
             | Error msg -> Error msg
             | Ok attrs -> 
                 build1 assets attrs |> Ok
