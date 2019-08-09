@@ -7,6 +7,7 @@ namespace AssetTrafo.AideChangeReport
 module ChangeReport =
 
     open System.IO
+    open FSharp.Core
 
     open SLFormat.CommandOptions
 

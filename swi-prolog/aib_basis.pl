@@ -9,6 +9,7 @@
     , is_aib_plant_item/1
     , is_aib_equipment/1
 
+
     ]).
 
 :- use_module(library(db_facts)).
@@ -37,4 +38,15 @@ is_aib_plant_item(Ref) :-
 
 is_aib_equipment(Ref) :- 
     db_holds(assets, aib_equipment([pli_ref=Ref, equipment_name=_])),
+    !.
+
+
+%% aib_funlocs_below (Ref, Kids).
+
+aib_installation(Ref) :- 
+    db_holds(assets, aib_installation([sai_ref=Ref, common_name=_])), 
+    !.
+
+aib_installation_named(Name) :- 
+    db_holds(assets, aib_installation([sai_ref=_, common_name=Name])), 
     !.

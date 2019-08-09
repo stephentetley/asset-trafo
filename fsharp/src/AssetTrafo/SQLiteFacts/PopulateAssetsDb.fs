@@ -10,7 +10,8 @@ module PopulateAssetsDb =
 
     open FSharp.Data
 
-    open AssetTrafo.Base.SqliteConn
+    open SLSqlite.SqliteDb
+
     open AssetTrafo.Base.DbExportSchema
 
 
@@ -86,7 +87,7 @@ module PopulateAssetsDb =
     
     let insertS4Generic (strategy : S4Strategy) 
                         (encountered : Set<string>) 
-                        (row : S4FlocRow) : SqliteConn<Set<string>> = 
+                        (row : S4FlocRow) : SqliteDb<Set<string>> = 
         match strategy.GetUniqueKeyForValidRow row with
         | Some code -> 
             if not (encountered.Contains code) then
@@ -97,7 +98,7 @@ module PopulateAssetsDb =
         | _ -> mreturn encountered
 
     let insertS4RecordsGeneric (strategy : S4Strategy) 
-                                (rows : seq<S4FlocRow>) : SqliteConn<unit> = 
+                                (rows : seq<S4FlocRow>) : SqliteDb<unit> = 
         withTransaction <| 
             (seqFoldM (insertS4Generic strategy) Set.empty rows |>> ignore)
 
@@ -258,11 +259,11 @@ module PopulateAssetsDb =
     // Multiple traversal is simpler to think about, but 
     // we can't see to travers multiple times on table.Rows,
     // so we load the file each time.
-    let insertS4FlocRecords (csvPath : string) : SqliteConn<unit> = 
+    let insertS4FlocRecords (csvPath : string) : SqliteDb<unit> = 
         let insertRecords (strategy : S4Strategy) = 
             liftOperation (fun _ -> getS4FlocTable csvPath) >>= 
             fun table -> insertS4RecordsGeneric strategy table.Rows
-        sqliteConn { 
+        sqliteDb { 
             do! insertRecords s4StrategySite
             do! insertRecords s4StrategyFunction
             do! insertRecords s4StrategyProcessGroup
@@ -307,7 +308,7 @@ module PopulateAssetsDb =
         | _,_ -> None
     
     
-    let insertEquipmentRow (row : S4EquipmentRow) : SqliteConn<unit> = 
+    let insertEquipmentRow (row : S4EquipmentRow) : SqliteDb<unit> = 
         match makeS4EquipmentInsert row with
         | Some statement -> 
             executeNonQuery statement |>> ignore
@@ -315,8 +316,8 @@ module PopulateAssetsDb =
     
     
     
-    let insertS4EquipmentRecords (csvPath : string) : SqliteConn<unit> = 
-        sqliteConn { 
+    let insertS4EquipmentRecords (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
             let! rows = liftOperation (fun _ -> getS4EquipmentRows csvPath)
             return! withTransaction <| forMz rows insertEquipmentRow
         }
@@ -377,15 +378,15 @@ module PopulateAssetsDb =
         | _ -> None
 
 
-    let insertAibFlocRow (row : AibFlocRow) : SqliteConn<unit> = 
+    let insertAibFlocRow (row : AibFlocRow) : SqliteDb<unit> = 
         match makeAibFlocInsert row with
         | Some statement -> 
             executeNonQuery statement |>> ignore
         | None -> mreturn ()
 
 
-    let insertAibFlocRecords (csvPath : string) : SqliteConn<unit> = 
-        sqliteConn { 
+    let insertAibFlocRecords (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
             let! rows = liftOperation (fun _ -> getAibFlocRows csvPath)
             return! withTransaction <| forMz rows insertAibFlocRow
         }
@@ -407,14 +408,14 @@ module PopulateAssetsDb =
                         row.ParentRef
             String.concat "\n" [line1; line2] |> Some
 
-    let insertAibEquipmentRow (row : AibEquipmentRow) : SqliteConn<unit> = 
+    let insertAibEquipmentRow (row : AibEquipmentRow) : SqliteDb<unit> = 
         match makeAibEquipmentInsert row with
         | Some statement -> 
             executeNonQuery statement |>> ignore
         | None -> mreturn ()
 
-    let insertAibEquipmentRecords (csvPath : string) : SqliteConn<unit> = 
-        sqliteConn { 
+    let insertAibEquipmentRecords (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
             let! rows = liftOperation (fun _ -> getAibEquipmentRows csvPath)
             return! withTransaction <| forMz rows insertAibEquipmentRow
         }

@@ -22,12 +22,15 @@ Environment.SetEnvironmentVariable("PATH",
     Environment.GetEnvironmentVariable("PATH") + ";" + SQLiteInterop
     )
 
+#load "..\src\SLSqlite\SqliteDb.fs"
+
+
 #load "..\src\AssetTrafo\Base\Common.fs"
-#load "..\src\AssetTrafo\Base\SqliteConn.fs"
+open SLSqlite.SqliteDb
+
 #load "..\src\AssetTrafo\Base\DbExportSchema.fs"
 #load "..\src\AssetTrafo\SQLiteFacts\PopulateAssetsDb.fs"
 open AssetTrafo.Base.Common
-open AssetTrafo.Base.SqliteConn
 open AssetTrafo.SQLiteFacts.PopulateAssetsDb
 
 
@@ -56,8 +59,8 @@ let main () : Result<unit, ErrMsg> =
     System.IO.File.Copy(sourceFileName = dbTemplate, destFileName = dbActive)
 
     let connParams = sqliteConnParamsVersion3 dbActive
-    runSqliteConnection connParams 
-        <| sqliteConn { 
+    runSqliteDb connParams 
+        <| sqliteDb { 
                 do! insertS4FlocRecords s4FlocCsv
                 do! insertS4EquipmentRecords s4EquipmentCsv
                 do! insertAibFlocRecords aibFlocCsv

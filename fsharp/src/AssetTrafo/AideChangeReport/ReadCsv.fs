@@ -6,6 +6,7 @@ namespace AssetTrafo.AideChangeReport
 
 module ReadCsv =
     
+    open FSharp.Core
     open FSharp.Data
 
     open AssetTrafo.AideChangeReport.Syntax
