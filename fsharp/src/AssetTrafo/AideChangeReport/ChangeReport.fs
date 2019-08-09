@@ -182,7 +182,10 @@ module ChangeReport =
                               (outputHtmlFile : string) : Result<unit, string> = 
         match readChangesSource changesSource with 
         | Ok changes -> 
-            let doc = makeMarkdownReport changes
+            let doc = 
+                changes 
+                    |> List.filter (fun cr -> cr.RequestStatus <> "Committed")
+                    |> makeMarkdownReport
             let mdFileFull = Path.ChangeExtension(outputHtmlFile, "md") 
             let mdFileName = Path.GetFileName(mdFileFull)
             let htmlFileName = Path.GetFileName(outputHtmlFile)

@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="SLSqlite\Utils.fs" />
     <Compile Include="SLSqlite\SqliteDb.fs" />
     <Compile Include="AssetTrafo\Base\Common.fs" />
     <Compile Include="AssetTrafo\Base\FactsCommon.fs" />

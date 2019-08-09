@@ -27,6 +27,7 @@ open MarkdownDoc.Pandoc
 #load "..\src\AssetTrafo\AideChangeReport\ReadCsv.fs"
 #load "..\src\AssetTrafo\AideChangeReport\ChangeReport.fs"
 open AssetTrafo.AideChangeReport.Syntax
+open AssetTrafo.AideChangeReport.ReadCsv
 open AssetTrafo.AideChangeReport.ChangeReport
 
 
@@ -41,18 +42,13 @@ let pandocHtmlOptions () : PandocOptions =
 
 
 
+
+
 let test01 () : Result<unit, string> = 
     generateChangesReport
-        { AssetChangesCsv = Some @"G:\work\Projects\asset_sync\aide_report\asset_change_request_147854.csv"
-          AttributeChangesCsv = Some @"G:\work\Projects\asset_sync\aide_report\attibute_change_request_147854.csv" }
+        { AssetChangesCsv = Some @"G:\work\Projects\asset_sync\aide_report\aide_asset_changes_20190809.csv"
+          AttributeChangesCsv = Some @"G:\work\Projects\asset_sync\aide_report\aide_attribute_changes_20190809.csv" }
         (pandocHtmlOptions ())
-        (getOutputFile "changes_report.html")
+        (getOutputFile "changes_report_20190809.html")
 
-
-let test02 () : Result<unit, string> = 
-    generateChangesReport
-        { AssetChangesCsv = None
-          AttributeChangesCsv = Some @"G:\work\Projects\asset_sync\aide_report\aide_asset_attributes_changes_20190802.csv" }
-        (pandocHtmlOptions ())
-        (getOutputFile "changes_report_20190802.html")
-
+// Note - look at Microsoft.FSharp.Reflection ...

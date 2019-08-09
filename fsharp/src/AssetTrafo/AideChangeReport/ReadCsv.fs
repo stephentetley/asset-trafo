@@ -15,6 +15,7 @@ module ReadCsv =
     let AttributeChangeSchema = 
         "ChangeRequestId(int64),RequestStatus(string),\
          Reference(string),AssetName(string),\
+         AssetCommonName(string),\
          AttributeName(string),AiValue(string option),\
          AiLookupValue(string option),AiLookupCode(int64 option),\
          AideValue(string option),AideLookupValue(string option),\
@@ -23,7 +24,8 @@ module ReadCsv =
 
     [<Literal>]
     let AttributeChangeSample = 
-        "10000,Submitted,ABC01,SHORT_NAME,ATTR_NAME,\
+        "10000,Submitted,ABC01,ASSET_SHORT_NAME,\
+        ASSET_COMMON_NAME,ATTR_NAME,\
         VALUE1,100,LOOKUP1,\
         VALUE2,101,LOOKUP2,2019-05-17T11:57:18.283"
         
@@ -76,10 +78,12 @@ module ReadCsv =
          AiInstalledFromDate(date),AiManufacturer(string),\
          AiModel(string),AiHierarchyKey(string),\
          AiAssetStatus(string),AiLocationReference(string),\
+         AiAssetDeleted(bool),\
          AideAssetName(string),AideCommonName(string),\
          AideInstalledFromDate(date),AideManufacturer(string),\
          AideModel(string),AideHierarchyKey(string),\
          AideAssetStatus(string),AideLocationReference(string),\
+         AideAssetDeleted(bool),\
          ChangeRequestTime(date)"        
 
     [<Literal>]
@@ -87,8 +91,10 @@ module ReadCsv =
         "10000,Submitted,Attribute,CODE000,\
          SHORT_NAME,LONG_NAME,1997-01-01T00:00:00,\
          M1,MM1,XYZ,OPERATIONAL,SE7826004748,\
+         0,\
          SHORT_NAME,LONG_NAME,1997-01-01T00:00:00,\
          M1,MM1,XYZ,OPERATIONAL,SE7826004748,\
+         0,\
          2019-05-17T11:57:18.283"
     
     type AssetChangeExport = 
