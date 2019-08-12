@@ -11,7 +11,7 @@ module Level12FlocMapping =
     open FactX
     open FactX.FactWriter
 
-    open AssetTrafo.Base.FactsCommon
+    open AssetSync.Base.FactsCommon
 
     // ********** DATA SETUP **********
     type SiteMappingTable = 

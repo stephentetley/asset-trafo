@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetTrafo.PrologFacts
+namespace AssetSync.PrologFacts
 
 
 module S4EquipmentExport =
@@ -12,7 +12,7 @@ module S4EquipmentExport =
     open FactX
     open FactX.FactWriter
 
-    open AssetTrafo.Base.FactsCommon
+    open AssetSync.Base.FactsCommon
 
     // ********** DATA SETUP **********
     type S4EquipmentTable = 

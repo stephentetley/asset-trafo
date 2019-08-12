@@ -16,11 +16,11 @@ open FSharp.Data
 #r "FactX"
 
 
-#load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
-#load "..\..\src\AssetTrafo\Base\DbExportSchema.fs"
-#load "..\..\src\AssetTrafo\PrologFacts\XsbAibDbExport.fs"
-open AssetTrafo.Base.DbExportSchema
-open AssetTrafo.PrologFacts.XsbAibDbExport
+#load "..\..\src\AssetSync\Base\FactsCommon.fs"
+#load "..\..\src\AssetSync\Base\DbExportSchema.fs"
+#load "..\..\src\AssetSync\PrologFacts\XsbAibDbExport.fs"
+open AssetSync.Base.DbExportSchema
+open AssetSync.PrologFacts.XsbAibDbExport
 
 
 let outputFile (relativePath : string) = 
@@ -28,7 +28,7 @@ let outputFile (relativePath : string) =
 
 
 let genFlocFacts (csvSource : string) : unit = 
-    let rows = getFlocRows csvSource |> Seq.toList
+    let rows = getAibFlocRows csvSource |> Seq.toList
     generateInstallationFacts rows (outputFile "aib_floc_l1_l2_installation.pl")
     generateProcessGroupFacts rows (outputFile "aib_floc_l3_process_group.pl")
     generateProcessFacts rows (outputFile "aib_floc_l4_process.pl")
@@ -37,7 +37,7 @@ let genFlocFacts (csvSource : string) : unit =
     generateCategoryFacts rows (outputFile "aib_asset_category.pl")
 
 let genEquipmentFacts (csvSource : string) : unit =  
-    let rows = getEquipmentRows csvSource |> Seq.toList
+    let rows = getAibEquipmentRows csvSource |> Seq.toList
     generateEquipmentFacts rows (outputFile "aib_equipment.pl")
 
 let main () = 

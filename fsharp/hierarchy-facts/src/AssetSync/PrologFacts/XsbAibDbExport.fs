@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetTrafo.PrologFacts
+namespace AssetSync.PrologFacts
 
 
 module XsbAibDbExport =
@@ -11,8 +11,8 @@ module XsbAibDbExport =
     open FactX.FactWriter
     
     
-    open AssetTrafo.Base.FactsCommon
-    open AssetTrafo.Base.DbExportSchema
+    open AssetSync.Base.FactsCommon
+    open AssetSync.Base.DbExportSchema
 
 
 

@@ -22,9 +22,9 @@ open FSharp.Interop.Excel
 #r "FactX"
 
 
-#load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
-#load "..\..\src\AssetTrafo\PrologFacts\Level234FlocMapping.fs"
-open AssetTrafo.PrologFacts.Level234FlocMapping
+#load "..\..\src\AssetSync\Base\FactsCommon.fs"
+#load "..\..\src\AssetSync\PrologFacts\Level234FlocMapping.fs"
+open AssetSync.PrologFacts.Level234FlocMapping
 
 
 

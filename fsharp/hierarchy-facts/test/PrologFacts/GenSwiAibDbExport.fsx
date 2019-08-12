@@ -16,11 +16,11 @@ open FSharp.Data
 #r "FactX"
 
 
-#load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
-#load "..\..\src\AssetTrafo\Base\DbExportSchema.fs"
-#load "..\..\src\AssetTrafo\PrologFacts\SwiAibDbExport.fs"
-open AssetTrafo.Base.DbExportSchema
-open AssetTrafo.PrologFacts.SwiAibDbExport
+#load "..\..\src\AssetSync\Base\FactsCommon.fs"
+#load "..\..\src\AssetSync\Base\DbExportSchema.fs"
+#load "..\..\src\AssetSync\PrologFacts\SwiAibDbExport.fs"
+open AssetSync.Base.DbExportSchema
+open AssetSync.PrologFacts.SwiAibDbExport
 
 
 let outputFile (relativePath : string) = 

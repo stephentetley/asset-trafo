@@ -16,9 +16,9 @@ open FSharp.Data
 #r "FactX"
 
 
-#load "..\..\src\AssetTrafo\Base\FactsCommon.fs"
-#load "..\..\src\AssetTrafo\PrologFacts\S4EquipmentExport.fs"
-open AssetTrafo.PrologFacts.S4EquipmentExport
+#load "..\..\src\AssetSync\Base\FactsCommon.fs"
+#load "..\..\src\AssetSync\PrologFacts\S4EquipmentExport.fs"
+open AssetSync.PrologFacts.S4EquipmentExport
 
 
 let outputFile (relativePath : string) = 

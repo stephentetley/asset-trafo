@@ -34,12 +34,10 @@ Environment.SetEnvironmentVariable("PATH",
 #load "..\..\src\SLSqlite\SqliteDb.fs"
 open SLSqlite.SqliteDb
 
-// #load "..\src\AssetTrafo\Base\Common.fs"
 
 #load "..\src\AssetSync\Base\FactsCommon.fs"
 #load "..\src\AssetSync\Base\DbExportSchema.fs"
 #load "..\src\AssetSync\SQLiteFacts\PopulateAssetsDb.fs"
-// open AssetTrafo.Base.Common
 open AssetSync.SQLiteFacts.PopulateAssetsDb
 
 
