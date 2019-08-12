@@ -5,8 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="CreateDb.fs" />
     <None Include="TestAideChangeReport.fsx" />
     <None Include="GenChangesDb.fsx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190721" />
   </ItemGroup>
 
 </Project>

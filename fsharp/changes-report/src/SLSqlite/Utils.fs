@@ -35,3 +35,5 @@ module Utils =
     let fmtInt (i : int) : string = 
         i.ToString()
         
+    let fmtText (str : string) : string = 
+         escapeQuotes str |> sprintf "'%s'"

@@ -11,6 +11,8 @@ module SqliteDb =
     open System.Collections.Generic
 
     open System.Data
+    open System.Transactions
+
     open System.Data.SQLite
     open FSharp.Core
 
@@ -113,6 +115,21 @@ module SqliteDb =
             with
                 | _ -> Error "liftOperation" 
 
+    let liftOperationOption (operation : unit -> 'a option) : SqliteDb<'a> = 
+        SqliteDb <| fun _ -> 
+            try 
+                match operation () with
+                | Some ans -> Ok ans
+                | None -> Error "liftOperationOption"
+            with
+                | _ -> Error "liftOperationOption" 
+
+    let liftOperationResult (operation : unit -> Result<'a, ErrMsg>) : SqliteDb<'a> = 
+        SqliteDb <| fun _ -> 
+            try 
+                operation ()
+            with
+                | _ -> Error "liftOperationResult" 
 
     let liftConn (proc:SQLite.SQLiteConnection -> 'a) : SqliteDb<'a> = 
         SqliteDb <| fun conn -> 

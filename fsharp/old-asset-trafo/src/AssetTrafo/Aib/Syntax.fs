@@ -9,6 +9,7 @@ module Syntax =
     open System.IO
     open FSharp.Data
 
+    open AssetTrafo.Base.Common
     open AssetTrafo.Base.CompilerMonad
     open AssetTrafo.Base.Attributes
     open AssetTrafo.Base.JsonReader

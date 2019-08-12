@@ -13,6 +13,7 @@ open FSharp.Data
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
 
+#load "..\src\AssetTrafo\Base\Common.fs"
 #load "..\src\AssetTrafo\Base\CompilerMonad.fs"
 #load "..\src\AssetTrafo\Base\JsonReader.fs"
 #load "..\src\AssetTrafo\Base\Attributes.fs"

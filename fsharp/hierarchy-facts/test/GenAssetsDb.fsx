@@ -2,6 +2,7 @@
 
 #r "netstandard"
 #r "System.Xml.Linq.dll"
+#r "System.Transactions.dll"
 open System
 open System.IO
 
@@ -30,8 +31,8 @@ Environment.SetEnvironmentVariable("PATH",
 #r "FactX"
 
 
-#load "..\..\src\SLSqlite\Utils.fs"
-#load "..\..\src\SLSqlite\SqliteDb.fs"
+#load "..\..\lib-temp\SLSqlite\Utils.fs"
+#load "..\..\lib-temp\SLSqlite\SqliteDb.fs"
 open SLSqlite.SqliteDb
 
 
