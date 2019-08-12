@@ -22,6 +22,7 @@ Environment.SetEnvironmentVariable("PATH",
     Environment.GetEnvironmentVariable("PATH") + ";" + SQLiteInterop
     )
 
+#load "..\src\SLSqlite\Utils.fs"
 #load "..\src\SLSqlite\SqliteDb.fs"
 
 

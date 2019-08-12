@@ -1,12 +1,11 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetTrafo.AideChangeReport
+namespace AssetSync.ChangesReport
 
 
 module ImportSchema =
     
-    open FSharp.Core
     open FSharp.Data
 
     // ************************************************************************

@@ -22,27 +22,24 @@ open MarkdownDoc.Markdown
 open MarkdownDoc.Pandoc
 
 
-#load "..\src\AssetTrafo\Base\Common.fs"
-#load "..\src\AssetTrafo\AideChangeReport\ImportSchema.fs"
-#load "..\src\AssetTrafo\AideChangeReport\Syntax.fs"
-#load "..\src\AssetTrafo\AideChangeReport\ReadCsv.fs"
-#load "..\src\AssetTrafo\AideChangeReport\ChangeReport.fs"
-open AssetTrafo.AideChangeReport.Syntax
-open AssetTrafo.AideChangeReport.ImportSchema
-open AssetTrafo.AideChangeReport.ChangeReport
+// #load "..\src\AssetTrafo\Base\Common.fs"
+#load "..\src\AssetSync\ChangesReport\ImportSchema.fs"
+#load "..\src\AssetSync\ChangesReport\Syntax.fs"
+#load "..\src\AssetSync\ChangesReport\ReadCsv.fs"
+#load "..\src\AssetSync\ChangesReport\ChangeReport.fs"
+open AssetSync.ChangesReport.Syntax
+open AssetSync.ChangesReport.ImportSchema
+open AssetSync.ChangesReport.ChangeReport
 
 
 let getOutputFile (relFileName : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output", relFileName)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\..\output", relFileName)
 
 
 
 
 let pandocHtmlOptions () : PandocOptions = 
     pandocHtmlDefaults @"..\..\..\libs\markdown-css-master\github.css"
-
-
-
 
 
 let test01 () : Result<unit, string> = 

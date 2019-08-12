@@ -18,7 +18,6 @@
     <None Include="Test02.fsx" />
     <None Include="Test03.fsx" />
     <None Include="ClingoFlocMapping.fsx" />
-    <None Include="TestAideChangeReport.fsx" />
     <None Include="GenProcessDescLookups.fsx" />
     <None Include="GenProcessMapping234.fsx" />
     <None Include="GenSiteMapping12.fsx" />

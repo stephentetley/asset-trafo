@@ -29,3 +29,9 @@ module Utils =
     let escapeQuotes (source: string) : string = 
         source.Replace("'", "''")
  
+    let fmtBigInt (i : int64) : string = 
+        i.ToString()
+    
+    let fmtInt (i : int) : string = 
+        i.ToString()
+        
