@@ -35,8 +35,8 @@ CREATE TABLE attribute_change
     ai_value TEXT,
     ai_lookup_value TEXT,
     ai_lookup_code BIGINT,
-    aide__value TEXT,
-    aide__lookup_value TEXT,
-    aide__lookup_code BIGINT,
+    aide_value TEXT,
+    aide_lookup_value TEXT,
+    aide_lookup_code BIGINT,
     change_request_time TEXT
 );
