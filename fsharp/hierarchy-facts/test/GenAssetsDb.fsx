@@ -22,25 +22,33 @@ Environment.SetEnvironmentVariable("PATH",
     Environment.GetEnvironmentVariable("PATH") + ";" + SQLiteInterop
     )
 
-#load "..\src\SLSqlite\Utils.fs"
-#load "..\src\SLSqlite\SqliteDb.fs"
+// Need SLFormat and FactX even though they aren't directly referenced
+#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
+#r "SLFormat.dll"
+
+#I @"C:\Users\stephen\.nuget\packages\factx\1.0.0-alpha-20190721\lib\netstandard2.0"
+#r "FactX"
 
 
-#load "..\src\AssetTrafo\Base\Common.fs"
+#load "..\..\src\SLSqlite\Utils.fs"
+#load "..\..\src\SLSqlite\SqliteDb.fs"
 open SLSqlite.SqliteDb
 
-#load "..\src\AssetTrafo\Base\DbExportSchema.fs"
-#load "..\src\AssetTrafo\SQLiteFacts\PopulateAssetsDb.fs"
-open AssetTrafo.Base.Common
-open AssetTrafo.SQLiteFacts.PopulateAssetsDb
+// #load "..\src\AssetTrafo\Base\Common.fs"
+
+#load "..\src\AssetSync\Base\FactsCommon.fs"
+#load "..\src\AssetSync\Base\DbExportSchema.fs"
+#load "..\src\AssetSync\SQLiteFacts\PopulateAssetsDb.fs"
+// open AssetTrafo.Base.Common
+open AssetSync.SQLiteFacts.PopulateAssetsDb
 
 
 
 let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\", relativePath)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
 
 let pathToDbTemplate () : string = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\data\", "assets_db_template.sqlite")
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\", "assets_db_template.sqlite")
 
 
 

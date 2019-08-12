@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="AspFacts\EquipmentLP.fsx" />
+    <None Include="AspFacts\DescendantsReport.fsx" />
+    <None Include="AspFacts\AibExportFacts.fsx" />
+    <None Include="PrologFacts\GenLevel12FlocMapping.fsx" />
+    <None Include="PrologFacts\GenLevel234FlocMapping.fsx" />
+    <None Include="PrologFacts\GenXsbAibDbExport.fsx" />
+    <None Include="PrologFacts\GenSwiAibDbExport.fsx" />
+    <None Include="PrologFacts\GenSwiS4Equipment.fsx" />
+    <None Include="ClingoFlocMapping.fsx" />
+    <None Include="GenAssetsDb.fsx" />
+  </ItemGroup>
+
+</Project>

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetTrafo.SQLiteFacts
+namespace AssetSync.SQLiteFacts
 
 
 module PopulateAssetsDb =
@@ -12,7 +12,7 @@ module PopulateAssetsDb =
 
     open SLSqlite.SqliteDb
 
-    open AssetTrafo.Base.DbExportSchema
+    open AssetSync.Base.DbExportSchema
 
 
     

@@ -33,13 +33,11 @@ open AssetSync.ChangesReport.ChangeReport
 
 
 let getOutputFile (relFileName : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\..\output", relFileName)
-
-
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
 
 let pandocHtmlOptions () : PandocOptions = 
-    pandocHtmlDefaults @"..\..\..\libs\markdown-css-master\github.css"
+    pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"
 
 
 let test01 () : Result<unit, string> = 

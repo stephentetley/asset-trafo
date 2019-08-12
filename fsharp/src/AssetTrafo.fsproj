@@ -13,7 +13,6 @@
     <Compile Include="AssetTrafo\Base\JsonReader.fs" />
     <Compile Include="AssetTrafo\Base\JsonWriter.fs" />
     <Compile Include="AssetTrafo\Base\Attributes.fs" />
-    <Compile Include="AssetTrafo\Base\DbExportSchema.fs" />
     <Compile Include="AssetTrafo\Aib\HKey.fs" />
     <Compile Include="AssetTrafo\Aib\Syntax.fs" />
     <Compile Include="AssetTrafo\Aib\TreeDiff.fs" />
@@ -21,14 +20,6 @@
     <Compile Include="AssetTrafo\Aib\StructureRelationsSimple.fs" />
     <Compile Include="AssetTrafo\Aib\MarkdownOutput.fs" />
     <Compile Include="AssetTrafo\S4\S4Types.fs" />
-    <Compile Include="AssetTrafo\AspFacts\AibRuleTable.fs" />
-    <Compile Include="AssetTrafo\AspFacts\AibAssetTypes.fs" />
-    <Compile Include="AssetTrafo\PrologFacts\Level12FlocMapping.fs" />
-    <Compile Include="AssetTrafo\PrologFacts\Level234FlocMapping.fs" />
-    <Compile Include="AssetTrafo\PrologFacts\XsbAibDbExport.fs" />
-    <Compile Include="AssetTrafo\PrologFacts\SwiAibDbExport.fs" />
-    <Compile Include="AssetTrafo\PrologFacts\S4EquipmentExport.fs" />
-    <Compile Include="AssetTrafo\SQLiteFacts\PopulateAssetsDb.fs" />
   </ItemGroup>
 
   <ItemGroup>

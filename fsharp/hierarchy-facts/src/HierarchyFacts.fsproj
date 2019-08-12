@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="AssetSync\Base\FactsCommon.fs" />
+    <Compile Include="AssetSync\Base\DbExportSchema.fs" />
+    <Compile Include="AssetSync\AspFacts\AibRuleTable.fs" />
+    <Compile Include="AssetSync\AspFacts\AibAssetTypes.fs" />
+    <Compile Include="AssetSync\PrologFacts\Level12FlocMapping.fs" />
+    <Compile Include="AssetSync\PrologFacts\Level234FlocMapping.fs" />
+    <Compile Include="AssetSync\PrologFacts\XsbAibDbExport.fs" />
+    <Compile Include="AssetSync\PrologFacts\SwiAibDbExport.fs" />
+    <Compile Include="AssetSync\PrologFacts\S4EquipmentExport.fs" />
+    <Compile Include="AssetSync\SQLiteFacts\PopulateAssetsDb.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ExcelProvider" Version="1.0.1" />
+    <PackageReference Include="FactX" Version="1.0.0-alpha-20190721" />
+    <PackageReference Include="FSharp.Data" Version="3.1.1" />
+    <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190721" />
+  </ItemGroup>
+
+</Project>
