@@ -74,23 +74,4 @@ let main () : Result<unit, ErrMsg> =
                 return ()
             }
 
-//let temp01 () = 
-//    let cwd = workingDirectory ()
-//    let ddl = @"D:\coding\work\asset-trafo\fsharp\changes-report\data\change_request_create_db.sql"
-//    createDb cwd "TEMP_DB.sqlite" ddl
 
-//let temp02 () = 
-//    let cwd = workingDirectory () |> Some
-//    runEchoCmd cwd [literal "hello"] (outputFile "output.txt")
-
-
-//let temp03 () = 
-//    let cwd = workingDirectory () |> Some
-//    runPipeToEcho cwd "\"hello world from f#\"" (outputFile "output2.txt")
-
-//let temp04 () = 
-//    try
-//        let cwd = workingDirectory () |> Some
-//        runPipeDir cwd |> Some
-//    with
-//    | expn -> printfn "%s" expn.Message ; None
