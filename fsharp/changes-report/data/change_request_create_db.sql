@@ -26,12 +26,30 @@ CREATE TABLE asset_change
 
 CREATE TABLE attribute_change
 (
-    attibute_change_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
+    attribute_change_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
     change_request_id BIGINT,
     request_status TEXT,
     reference TEXT,
     asset_name TEXT,
     attribute_name TEXT,
+    ai_value TEXT,
+    ai_lookup_value TEXT,
+    ai_lookup_code BIGINT,
+    aide_value TEXT,
+    aide_lookup_value TEXT,
+    aide_lookup_code BIGINT,
+    change_request_time TEXT
+);
+
+CREATE TABLE repeated_attribute_change
+(
+    repeated_attribute_change_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
+    change_request_id BIGINT,
+    request_status TEXT,
+    reference TEXT,
+    asset_name TEXT,
+    attribute_name TEXT,
+    attribute_set_name TEXT,
     ai_value TEXT,
     ai_lookup_value TEXT,
     ai_lookup_code BIGINT,
