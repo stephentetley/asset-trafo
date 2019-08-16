@@ -7,7 +7,7 @@
   <ItemGroup>
     <None Include="TestAideChangeReport.fsx" />
     <None Include="GenChangesDb.fsx" />
-    <None Include="GenStructRelFactsDb.fsx" />
+    <None Include="GenStructRelationshipsDb.fsx" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,14 @@
 
+-- drop tables
+
+DROP TABLE IF EXISTS asset_change;
+DROP TABLE IF EXISTS attribute_change;
+DROP TABLE IF EXISTS repeated_attribute_change;
+
+-- create tables
+
+
+
 CREATE TABLE asset_change
 (
     change_request_id BIGINT PRIMARY KEY UNIQUE NOT NULL, 

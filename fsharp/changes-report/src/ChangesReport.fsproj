@@ -12,7 +12,7 @@
     <Compile Include="AssetSync\ChangesReport\ReadCsv.fs" />
     <Compile Include="AssetSync\ChangesReport\ChangeReport.fs" />
     <Compile Include="AssetSync\ChangesReport\PopulateChangesDb.fs" />
-    <Compile Include="AssetSync\ChangesReport\StructRelFacts.fs" />
+    <Compile Include="AssetSync\ChangesReport\StructRelationshipsDb.fs" />
   </ItemGroup>
 
   <ItemGroup>
