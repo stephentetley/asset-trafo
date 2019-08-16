@@ -73,7 +73,6 @@ module PopulateChangesDb =
     let insertAssetChangeRow (row : AssetChangeRow) : SqliteDb<unit> = 
         match assetChangeInsert row with
         | Some statement -> 
-            printfn "%s" statement
             executeNonQuery statement |>> ignore
         | None -> mreturn ()
 
@@ -81,8 +80,7 @@ module PopulateChangesDb =
         sqliteDb { 
             let! table = 
                 liftOperationResult (fun _ -> readAssetChangeExport csvPath)
-            let rows = table.Rows |> Seq.toList
-            return! withTransaction <| forMz rows insertAssetChangeRow
+            return! withTransaction <| sforMz table.Rows insertAssetChangeRow
         }
 
     // ************************************************************************
@@ -124,7 +122,6 @@ module PopulateChangesDb =
     let insertAttributeChangeRow (row : AttributeChangeRow) : SqliteDb<unit> = 
         match attributeChangeInsert row with
         | Some statement -> 
-            printfn "%s" statement
             executeNonQuery statement |>> ignore
         | None -> mreturn ()
 
@@ -133,8 +130,7 @@ module PopulateChangesDb =
         sqliteDb { 
             let! table = 
                 liftOperationResult (fun _ -> readAttributeChangeExport csvPath)
-            let rows = table.Rows |> Seq.toList
-            return! withTransaction <| forMz rows insertAttributeChangeRow
+            return! withTransaction <| sforMz table.Rows insertAttributeChangeRow
         }
 
     
@@ -179,7 +175,6 @@ module PopulateChangesDb =
     let insertRepeatedAttributeChangeRow (row : RepeatedAttributeChangeRow) : SqliteDb<unit> = 
         match repeatedAttributeChangeInsert row with
         | Some statement -> 
-            printfn "%s" statement
             executeNonQuery statement |>> ignore
         | None -> mreturn ()
 
@@ -188,8 +183,7 @@ module PopulateChangesDb =
         sqliteDb { 
             let! table = 
                 liftOperationResult (fun _ -> readRepeatedAttributeChangeExport csvPath)
-            let rows = table.Rows |> Seq.toList
-            return! withTransaction <| forMz rows insertRepeatedAttributeChangeRow
+            return! withTransaction <| sforMz table.Rows insertRepeatedAttributeChangeRow
         }
 
     

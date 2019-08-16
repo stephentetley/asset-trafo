@@ -7,10 +7,15 @@
   <ItemGroup>
     <None Include="TestAideChangeReport.fsx" />
     <None Include="GenChangesDb.fsx" />
+    <None Include="GenStructRelFactsDb.fsx" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190721" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\ChangesReport.fsproj" />
   </ItemGroup>
 
 </Project>

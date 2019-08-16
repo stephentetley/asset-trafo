@@ -347,7 +347,7 @@ module SqliteDb =
 
 
 
-    let seqMapM (action : 'a -> SqliteDb<'b>) 
+    let smapM (action : 'a -> SqliteDb<'b>) 
                 (source : seq<'a>) : SqliteDb<seq<'b>> = 
         SqliteDb <| fun conn ->
             let sourceEnumerator = source.GetEnumerator()
@@ -364,8 +364,31 @@ module SqliteDb =
                         sk (seq { yield b1; yield! sx }))
             work (fun msg -> Error msg) (fun ans -> Ok ans)
 
-            
-    let seqFoldM (action : 'state -> 'a -> SqliteDb<'state>) 
+    let sforM (sx : seq<'a>) (fn : 'a -> SqliteDb<'b>) : SqliteDb<seq<'b>> = 
+        smapM fn sx
+    
+    let smapMz (action : 'a -> SqliteDb<'b>) 
+                (source : seq<'a>) : SqliteDb<unit> = 
+        SqliteDb <| fun conn ->
+            let sourceEnumerator = source.GetEnumerator()
+            let rec work (fk : ErrMsg -> Result<unit, ErrMsg>) 
+                            (sk : unit -> Result<unit, ErrMsg>) = 
+                if not (sourceEnumerator.MoveNext()) then 
+                    sk ()
+                else
+                    let a1 = sourceEnumerator.Current
+                    match apply1 (action a1) conn with
+                    | Error msg -> fk msg
+                    | Ok _ -> 
+                        work fk sk
+            work (fun msg -> Error msg) (fun ans -> Ok ans)
+
+    
+    let sforMz (source : seq<'a>) (action : 'a -> SqliteDb<'b>) : SqliteDb<unit> = 
+        smapMz action source
+    
+
+    let sfoldM (action : 'state -> 'a -> SqliteDb<'state>) 
                     (state : 'state)
                     (source : seq<'a>) : SqliteDb<'state> = 
         SqliteDb <| fun conn ->
