@@ -43,29 +43,30 @@ module PopulateChangesDb =
             aide_location_reference, \
             change_request_time) \
             VALUES \
-            (?,?,?, ?,?,?, ?,?,?, ?,?,?, ?,?,?, ?,?,?, ?,?,?)"
+            (:p1, :p2, :p3, :p4, :p5, :p6, :p7, :p8, :p9, :p10, :p11, :p12, :p13, :p14, :p15, :p16, :p17, :p18, :p19, :p20, :p21)"
         let cmd = new SQLiteCommand(commandText = sql)
-        cmd.Parameters.Add(box row.ChangeRequestId) |> ignore
-        cmd.Parameters.Add(box row.RequestStatus) |> ignore
-        cmd.Parameters.Add(box row.ChangeRequestType) |> ignore
-        cmd.Parameters.Add(box row.AssetReference) |> ignore
-        cmd.Parameters.Add(box row.AiAssetName) |> ignore
-        cmd.Parameters.Add(box row.AiCommonName) |> ignore
-        cmd.Parameters.Add(box row.AiInstalledFromDate) |> ignore
-        cmd.Parameters.Add(box row.AiManufacturer) |> ignore
-        cmd.Parameters.Add(box row.AiModel) |> ignore
-        cmd.Parameters.Add(box row.AiHierarchyKey) |> ignore
-        cmd.Parameters.Add(box row.AiAssetStatus) |> ignore
-        cmd.Parameters.Add(box row.AiLocationReference) |> ignore
-        cmd.Parameters.Add(box row.AideAssetName) |> ignore
-        cmd.Parameters.Add(box row.AideCommonName) |> ignore
-        cmd.Parameters.Add(box row.AideInstalledFromDate) |> ignore
-        cmd.Parameters.Add(box row.AideManufacturer) |> ignore
-        cmd.Parameters.Add(box row.AideModel) |> ignore
-        cmd.Parameters.Add(box row.AideHierarchyKey) |> ignore
-        cmd.Parameters.Add(box row.AideAssetStatus) |> ignore
-        cmd.Parameters.Add(box row.AideLocationReference) |> ignore
-        cmd.Parameters.Add(box row.ChangeRequestTime) |> ignore
+        // cmd.Parameters.Add(box row.ChangeRequestId) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p1", value = box row.ChangeRequestId) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p2", value = box row.RequestStatus) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p3", value = box row.ChangeRequestType) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p4", value = box row.AssetReference) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p5", value = box row.AiAssetName) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p6", value = box row.AiCommonName) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p7", value = box row.AiInstalledFromDate) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p8", value = box row.AiManufacturer) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p9", value = box row.AiModel) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p10", value = box row.AiHierarchyKey) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p11", value = box row.AiAssetStatus) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p12", value = box row.AiLocationReference) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p13", value = box row.AideAssetName) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p14", value = box row.AideCommonName) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p15", value = box row.AideInstalledFromDate) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p16", value = box row.AideManufacturer) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p17", value = box row.AideModel) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p18", value = box row.AideHierarchyKey) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p19", value = box row.AideAssetStatus) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p20", value = box row.AideLocationReference) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p21", value = box row.ChangeRequestTime) |> ignore
         cmd |> Some
 
     let insertAssetChangeRow (row : AssetChangeRow) : SqliteDb<unit> = 
@@ -100,21 +101,21 @@ module PopulateChangesDb =
             aide_lookup_value, \
             aide_lookup_code, \
             change_request_time) \
-            VALUES (?,?,?, ?,?,?, ?,?,?, ?,?,?, ?)"
+            VALUES (:p1, :p2, :p3, :p4, :p5, :p6, :p7, :p8, :p9, :p10, :p11, :p12, :p13)"
         let cmd = new SQLiteCommand(commandText = sql)
-        cmd.Parameters.Add(box row.AideAssetAttributeValueId) |> ignore
-        cmd.Parameters.Add(box row.ChangeRequestId) |> ignore
-        cmd.Parameters.Add(box row.RequestStatus) |> ignore
-        cmd.Parameters.Add(box row.Reference) |> ignore
-        cmd.Parameters.Add(box row.AiAssetName) |> ignore
-        cmd.Parameters.Add(box row.AttributeName) |> ignore
-        cmd.Parameters.Add(box row.AiValue) |> ignore
-        cmd.Parameters.Add(box row.AiLookupValue) |> ignore
-        cmd.Parameters.Add(box row.AideLookupCode) |> ignore
-        cmd.Parameters.Add(box row.AideValue) |> ignore
-        cmd.Parameters.Add(box row.AideLookupValue) |> ignore
-        cmd.Parameters.Add(box row.AideLookupCode) |> ignore
-        cmd.Parameters.Add(box row.ChangeRequestTime) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p1", value = box row.AideAssetAttributeValueId) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p2", value = box row.ChangeRequestId) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p3", value = box row.RequestStatus) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p4", value = box row.Reference) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p5", value = box row.AiAssetName) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p6", value = box row.AttributeName) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p7", value = box row.AiValue) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p8", value = box row.AiLookupValue) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p9", value = box row.AideLookupCode) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p10", value = box row.AideValue) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p11", value = box row.AideLookupValue) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p12", value = box row.AideLookupCode) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p13", value = box row.ChangeRequestTime) |> ignore
         cmd |> Some
 
     let insertAttributeChangeRow (row : AttributeChangeRow) : SqliteDb<unit> = 
@@ -152,22 +153,22 @@ module PopulateChangesDb =
             aide_lookup_value, \
             aide_lookup_code, \
             change_request_time) \
-            VALUES (?,?,?, ?,?,?, ?,?,?, ?,?,?, ?,?)"
+            VALUES (:p1, :p2, :p3, :p4, :p5, :p6, :p7, :p8, :p9, :p10, :p11, :p12, :p13, :p14)"
         let cmd = new SQLiteCommand(commandText = sql)
-        cmd.Parameters.Add(row.AideAssetAttributeValueId) |> ignore
-        cmd.Parameters.Add(row.ChangeRequestId) |> ignore
-        cmd.Parameters.Add(row.RequestStatus) |> ignore
-        cmd.Parameters.Add(row.Reference) |> ignore
-        cmd.Parameters.Add(row.AiAssetName) |> ignore
-        cmd.Parameters.Add(row.AttributeName) |> ignore
-        cmd.Parameters.Add(row.AttributeSetName) |> ignore
-        cmd.Parameters.Add(row.AiValue) |> ignore
-        cmd.Parameters.Add(row.AiLookupValue) |> ignore
-        cmd.Parameters.Add(row.AideLookupCode) |> ignore 
-        cmd.Parameters.Add(row.AideValue) |> ignore
-        cmd.Parameters.Add(row.AideLookupValue) |> ignore
-        cmd.Parameters.Add(row.AideLookupCode) |> ignore
-        cmd.Parameters.Add(row.ChangeRequestTime) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p1", value = box row.AideAssetAttributeValueId) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p2", value = box row.ChangeRequestId) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p3", value = box row.RequestStatus) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p4", value = box row.Reference) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p5", value = box row.AiAssetName) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p6", value = box row.AttributeName) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p7", value = box row.AttributeSetName) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p8", value = box row.AiValue) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p9", value = box row.AiLookupValue) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p10", value = box row.AideLookupCode) |> ignore 
+        cmd.Parameters.AddWithValue(parameterName = "p11", value = box row.AideValue) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p12", value = box row.AideLookupValue) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p13", value = box row.AideLookupCode) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "p14", value = box row.ChangeRequestTime) |> ignore
         cmd |> Some
 
     let insertRepeatedAttributeChangeRow (row : RepeatedAttributeChangeRow) : SqliteDb<unit> = 
