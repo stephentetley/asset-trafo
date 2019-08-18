@@ -1,16 +1,24 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace SLSqlite
+namespace AssetSync.ChangesReport
 
 
-module Utils =
+module Addendum =
     
     open System
 
+    // Potential additions to library with unstable APIs 
+    // (sl-sqlite, markdown-doc, ...)
 
+
+    // ************************************************************************
+    // SLSquite
+
+    
     // SQLite has no native date type, represent data times as strings
     // in ISO 8601 format
+
 
     let toIso8601String (dt : DateTime) : string = 
         dt.ToString(format = "yyyy-MM-ddThh:mm:ss")

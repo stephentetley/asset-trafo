@@ -9,15 +9,13 @@ module StructRelationshipsDb =
     open System.IO
     open FSharp.Data
 
+    open System.Data.SQLite
+
     open SLSqlite.Utils
     open SLSqlite.SqliteDb
 
+    open AssetSync.ChangesReport.Addendum
 
-    // Helper
-    let insertStatement (tableName : string) (columnNames : string []) (values : string []) : string =
-        let columns = String.concat ", " columnNames
-        let vals = String.concat ", " values
-        sprintf "INSERT INTO %s (%s)\nVALUES (%s);" tableName columns vals
 
 
     // ************************************************************************
@@ -50,18 +48,15 @@ module StructRelationshipsDb =
 
 
 
-    let makeStructRelInsert (row : AideStructureRelationshipRow) : string option =
-        let columns =
-            [| "structure_relationship_id"
-            ; "parent_id"
-            ; "child_id"
-            |]
-        insertStatement "aide_structure_relationships"
-                        columns
-                        [| row.StructureRelationshipId  |> fmtBigInt
-                         ; row.ParentAideAssetId        |> fmtBigInt
-                         ; row.ChildAideAssetId         |> fmtBigInt
-                        |] |> Some
+    let makeStructRelInsert (row : AideStructureRelationshipRow) : SQLiteCommand option =
+        let sql = 
+            "INSERT INTO aide_structure_relationships (structure_relationship_id, parent_id, child_id) \
+            VALUES (:relid, :parent, :child)"
+        let cmd = new SQLiteCommand(commandText = sql)
+        cmd.Parameters.AddWithValue(parameterName = "relid", value = box row.StructureRelationshipId) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "parent", value = box row.ParentAideAssetId) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "child", value = box row.ChildAideAssetId) |> ignore
+        cmd |> Some
 
 
     let insertAideStructRelationshipRow (row : AideStructureRelationshipRow) : SqliteDb<unit> = 
@@ -84,7 +79,7 @@ module StructRelationshipsDb =
     [<Literal>]
     let AideAssetLookupSchema = 
         "AideAssetId(int64),\
-         AssetId(int64),\
+         AssetId(int64 option),\
          Reference(string),\
          ChangeRequestId(int64 option),\
          AssetName(string),\
@@ -112,26 +107,21 @@ module StructRelationshipsDb =
 
 
 
-    let makeAideAssetLookupInsert (row : AideAssetLookupRow) : string option =
-        let columns =
-            [| "aide_asset_id"
-            ; "asset_id"
-            ; "reference"
-            ; "change_request_id"
-            ; "asset_name"
-            ; "asset_type"
-            ; "asset_category"
-            |]
-        insertStatement "aide_asset_lookups"
-                        columns
-                        [| row.AideAssetId          |> fmtBigInt
-                        ; row.AideAssetId           |> fmtBigInt
-                        ; row.Reference             |> fmtText
-                        ; row.ChangeRequestId       |> Option.defaultValue (-1L)  |> fmtBigInt
-                        ; row.AssetName             |> fmtText
-                        ; row.AssetType             |> fmtText
-                        ; row.AssetCategory         |> fmtText
-                        |] |> Some
+    let makeAideAssetLookupInsert (row : AideAssetLookupRow) : SQLiteCommand option =
+        let sql = 
+            "INSERT INTO aide_asset_lookups \
+            (aide_asset_id, asset_id, reference, change_request_id, asset_name, asset_type, asset_category) \
+            VALUES \
+            (:aideid, :assetid, :reference, :changeid, :aname, :atype, :acat)"
+        let cmd = new SQLiteCommand(commandText = sql)
+        cmd.Parameters.AddWithValue(parameterName = "aideid", value = box row.AideAssetId ) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "assetid", value = box row.AssetId) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "reference", value = box row.Reference) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "changeid", value = box row.ChangeRequestId) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "aname", value = box row.AssetName) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "atype", value = box row.AssetType) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "acat", value = box row.AssetCategory) |> ignore
+        cmd |> Some
 
 
     let insertAideAssetLookupRow (row : AideAssetLookupRow) : SqliteDb<unit> = 

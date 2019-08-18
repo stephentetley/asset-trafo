@@ -5,8 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="SLSqlite\Utils.fs" />
-    <Compile Include="SLSqlite\SqliteDb.fs" />
+    <Compile Include="AssetSync\ChangesReport\Addendum.fs" />
     <Compile Include="AssetSync\ChangesReport\ImportSchema.fs" />
     <Compile Include="AssetSync\ChangesReport\Syntax.fs" />
     <Compile Include="AssetSync\ChangesReport\ReadCsv.fs" />
@@ -18,8 +17,9 @@
   <ItemGroup>
     <PackageReference Include="FactX" Version="1.0.0-alpha-20190721" />
     <PackageReference Include="FSharp.Data" Version="3.1.1" />
-    <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20190721" />
+    <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20190818" />
     <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190721" />
+    <PackageReference Include="SLSqlite" Version="1.0.0-alpha-20190818" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.111" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.111" />
   </ItemGroup>

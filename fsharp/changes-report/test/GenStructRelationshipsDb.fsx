@@ -27,12 +27,12 @@ Environment.SetEnvironmentVariable("PATH",
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
 
-#load "..\src\SLSqlite\Utils.fs"
-#load "..\src\SLSqlite\SqliteDb.fs"
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190818\lib\netstandard2.0"
+#r "SLSqlite.dll"
 
 open SLSqlite.SqliteDb
 
-
+#load "..\src\AssetSync\ChangesReport\Addendum.fs"
 #load "..\src\AssetSync\ChangesReport\StructRelationshipsDb.fs"
 open AssetSync.ChangesReport.StructRelationshipsDb
 

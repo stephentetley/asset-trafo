@@ -27,7 +27,7 @@ module ReadCsv =
 
     let convertAttributeChangeRow (row : AttributeChangeRow) : int64 * AttributeChange = 
         let attrChange = 
-            { AssetName = row.AssetName
+            { AssetName = row.AiAssetName
               Reference = row.Reference
               AttributeName = row.AttributeName
               AiValue = getValue row.AiValue row.AiLookupCode row.AiLookupValue

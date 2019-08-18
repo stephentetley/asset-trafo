@@ -38,7 +38,7 @@ module ChangeReport =
     /// Add to markdown-doc?
     let commaSpaceSep (texts : Text list) : Text = 
         match texts with 
-        | [] -> Text.empty
+        | [] -> emptyText
         | [d1] -> d1
         | d1 :: rest -> List.fold (fun ac d -> ac ^^ character ',' ^+^ d) d1 rest
 
@@ -54,8 +54,8 @@ module ChangeReport =
 
     let valueCell (value : string) : Markdown.Table.TableCell = 
         match value with
-        | null | "NULL" -> "" |> text |> paraText 
-        |_ -> value |> text |> paraText 
+        | null | "NULL" -> "" |> text |> markdownText 
+        |_ -> value |> text |> markdownText 
     
 
 
@@ -63,14 +63,14 @@ module ChangeReport =
     let changeRequestInfosTable (infos : ChangeRequestInfo list) : Markdown = 
         let makeRow (requestId, status, requestTime) = 
             let name = requestId.ToString()
-            [ inlineLink name ("#cr" + name) None |> paraText 
-            ; text status |> paraText
-            ; iso8601DateTimeDoc requestTime |> paraText 
+            [ inlineLink name ("#cr" + name) None |> markdownText 
+            ; text status |> markdownText
+            ; iso8601DateTimeDoc requestTime |> markdownText 
             ]
         let specs = [ alignLeft 70 ; alignLeft 40; alignLeft 40 ]
         let headers = 
             [ "Change Request Id"; "Status"; "Request Time" ] 
-                |> List.map ( paraText << doubleAsterisks << text)
+                |> List.map ( markdownText << doubleAsterisks << text)
         let rows = List.map makeRow infos
         
         match infos with
@@ -81,9 +81,9 @@ module ChangeReport =
     // Make Attribute Changes table
 
     let attributeChangeRow (attrChange : AttributeChange) : Markdown.Table.TableRow = 
-        [ attrChange.Reference          |> text     |> paraText
-        ; attrChange.AssetName          |> text     |> paraText
-        ; attrChange.AttributeName      |> text     |> paraText 
+        [ attrChange.Reference          |> text     |> markdownText
+        ; attrChange.AssetName          |> text     |> markdownText
+        ; attrChange.AttributeName      |> text     |> markdownText 
         ; valueCell attrChange.AiValue 
         ; valueCell attrChange.AideValue
         ]
@@ -96,7 +96,7 @@ module ChangeReport =
         let specs = [ alignLeft 30; alignLeft 40; alignLeft 30; alignLeft 45; alignLeft 45 ]
         
         let headers = [ "Reference"; "Asset"; "Attributes"; "AI Value"; "AIDE Value"] 
-                        |> List.map ( paraText << doubleAsterisks << text)
+                        |> List.map ( markdownText << doubleAsterisks << text)
 
         match attrChanges with
         | [] -> asterisks (text "No attribute changes")  |> h3
@@ -113,11 +113,11 @@ module ChangeReport =
                                (assetName : string) 
                                (assetProperty : AssetProperty) : Markdown.Table.TableRow option = 
         if assetProperty.HasChanged then
-            [ reference                     |> text |> paraText
-            ; assetName                     |> text |> paraText
-            ; assetProperty.PropertyName    |> text |> paraText 
-            ; assetProperty.AiValue         |> text |> paraText 
-            ; assetProperty.AideValue       |> text |> paraText 
+            [ reference                     |> text |> markdownText
+            ; assetName                     |> text |> markdownText
+            ; assetProperty.PropertyName    |> text |> markdownText 
+            ; assetProperty.AiValue         |> text |> markdownText 
+            ; assetProperty.AideValue       |> text |> markdownText 
             ] |> Some
         else None
 
@@ -133,7 +133,7 @@ module ChangeReport =
         let rows = assetPropertyChangeRows assetChanges
         let specs = [ alignLeft 30; alignLeft 35; alignLeft 35; alignLeft 35 ]
         let headers = [ "Asset"; "Name"; "AI2 Value"; "AIDE Value" ] 
-                            |> List.map ( paraText << doubleAsterisks << text)
+                            |> List.map ( markdownText << doubleAsterisks << text)
 
         match rows with
         | [] -> asterisks (text "No asset property changes")  |> h3
@@ -162,7 +162,7 @@ module ChangeReport =
 
         h1 (htmlIdAnchor "top" (text "AIDE Change Requests"))
             ^!!^ changeRequestInfosTable requestInfos
-            ^!!^ Markdown.concatMarkdown (List.map changeRequestSection changeRequests)
+            ^!!^ vcat (List.map changeRequestSection changeRequests)
 
 
     let pandocHtmlDefaults (pathToCss : string) : PandocOptions = 
@@ -186,11 +186,11 @@ module ChangeReport =
                 changes 
                     |> List.filter (fun cr -> cr.RequestStatus <> "Committed")
                     |> makeMarkdownReport
-            let mdFileFull = Path.ChangeExtension(outputHtmlFile, "md") 
-            let mdFileName = Path.GetFileName(mdFileFull)
+            let mdFileAbsPath = Path.ChangeExtension(outputHtmlFile, "md") 
+            let mdFileName = Path.GetFileName(mdFileAbsPath)
             let htmlFileName = Path.GetFileName(outputHtmlFile)
             let outputDirectory = Path.GetDirectoryName(outputHtmlFile)
-            doc.Save(columnWidth = 140, outputPath = mdFileFull)
+            writeMarkdown 140 doc mdFileAbsPath
             let retCode = 
                 runPandocHtml5 
                     true 
