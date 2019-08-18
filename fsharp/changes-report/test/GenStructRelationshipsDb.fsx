@@ -29,7 +29,6 @@ Environment.SetEnvironmentVariable("PATH",
 
 #I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190818\lib\netstandard2.0"
 #r "SLSqlite.dll"
-
 open SLSqlite.SqliteDb
 
 #load "..\src\AssetSync\ChangesReport\Addendum.fs"

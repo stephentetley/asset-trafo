@@ -29,9 +29,9 @@ Environment.SetEnvironmentVariable("PATH",
 open SLFormat.CommandOptions
 open SLFormat.CommandOptions.SimpleInvoke
 
-#load "..\src\SLSqlite\Utils.fs"
-#load "..\src\SLSqlite\SqliteDb.fs"
 
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190818\lib\netstandard2.0"
+#r "SLSqlite.dll"
 open SLSqlite.SqliteDb
 
 

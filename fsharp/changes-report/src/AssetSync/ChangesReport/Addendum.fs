@@ -32,16 +32,3 @@ module Addendum =
         with
         | _ -> None
 
-
-
-    let escapeQuotes (source: string) : string = 
-        source.Replace("'", "''")
- 
-    let fmtBigInt (i : int64) : string = 
-        i.ToString()
-    
-    let fmtInt (i : int) : string = 
-        i.ToString()
-        
-    let fmtText (str : string) : string = 
-         escapeQuotes str |> sprintf "'%s'"

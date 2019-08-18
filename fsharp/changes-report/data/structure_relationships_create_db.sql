@@ -17,7 +17,7 @@ CREATE TABLE aide_structure_relationships
 CREATE TABLE aide_asset_lookups
 (
     aide_asset_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
-    asset_id BIGINT NOT NULL,
+    asset_id BIGINT,
     reference TEXT,
     change_request_id BIGINT,
     asset_name TEXT,
