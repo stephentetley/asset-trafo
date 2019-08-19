@@ -30,7 +30,7 @@ open SLFormat.CommandOptions
 open SLFormat.CommandOptions.SimpleInvoke
 
 
-#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190818\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190819\lib\netstandard2.0"
 #r "SLSqlite.dll"
 open SLSqlite.SqliteDb
 
@@ -55,7 +55,7 @@ type ErrMsg = string
 let main () : Result<unit, ErrMsg> = 
     let assetChangesCsv = @"G:\work\Projects\asset_sync\aide_report\aide_asset_changes_20190809.csv"
     let attributeChangesCsv = @"G:\work\Projects\asset_sync\aide_report\aide_attribute_changes_20190809.csv"
-    // let repeatedAttributeChangesCsv = @"G:\work\Projects\asset_sync\aide_report\aide_repeated_attribute_changes_20190814.csv"
+    let repeatedAttributeChangesCsv = @"G:\work\Projects\asset_sync\aide_report\aide_repeated_attribute_changes_20190814.csv"
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputFile "change_requests.sqlite" |> Path.GetFullPath
     printfn "%s" dbActive
@@ -69,7 +69,7 @@ let main () : Result<unit, ErrMsg> =
         <| sqliteDb { 
                 do! insertAsssetChangeRows assetChangesCsv
                 do! insertAttributeChangeRows attributeChangesCsv
-                // do! insertRepeatedAttributeChangeRows repeatedAttributeChangesCsv
+                do! insertRepeatedAttributeChangeRows repeatedAttributeChangesCsv
                 return ()
             }
 
