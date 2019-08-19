@@ -48,21 +48,22 @@ module StructRelationshipsDb =
 
 
 
-    let makeStructRelInsert (row : AideStructureRelationshipRow) : SQLiteCommand option =
+    let makeStructRelInsert (row : AideStructureRelationshipRow) : KeyedCommand option =
         let sql = 
             "INSERT INTO aide_structure_relationships (structure_relationship_id, parent_id, child_id) \
             VALUES (:relid, :parent, :child)"
-        let cmd = new SQLiteCommand(commandText = sql)
-        cmd.Parameters.AddWithValue(parameterName = "relid", value = box row.StructureRelationshipId) |> ignore
-        cmd.Parameters.AddWithValue(parameterName = "parent", value = box row.ParentAideAssetId) |> ignore
-        cmd.Parameters.AddWithValue(parameterName = "child", value = box row.ChildAideAssetId) |> ignore
+        let cmd = 
+            new KeyedCommand(commandText = sql)
+                |> addNamedParam "relid" (int64Param row.StructureRelationshipId)
+                |> addNamedParam "parent" (int64Param row.ParentAideAssetId)
+                |> addNamedParam "child"(int64Param row.ChildAideAssetId)
         cmd |> Some
 
 
     let insertAideStructRelationshipRow (row : AideStructureRelationshipRow) : SqliteDb<unit> = 
         match makeStructRelInsert row with
         | Some statement -> 
-            executeNonQuery statement |>> ignore
+            executeNonQueryKeyed statement |>> ignore
         | None -> mreturn ()
 
     let insertAideStructRelationshipRows (csvPath : string) : SqliteDb<unit> = 
@@ -107,27 +108,30 @@ module StructRelationshipsDb =
 
 
 
-    let makeAideAssetLookupInsert (row : AideAssetLookupRow) : SQLiteCommand option =
+    let makeAideAssetLookupInsert (row : AideAssetLookupRow) : IndexedCommand option =
         let sql = 
             "INSERT INTO aide_asset_lookups \
-            (aide_asset_id, asset_id, reference, change_request_id, asset_name, asset_type, asset_category) \
+            (aide_asset_id, asset_id, reference, \
+            change_request_id, asset_name, asset_type, \
+            asset_category) \
             VALUES \
-            (:aideid, :assetid, :reference, :changeid, :aname, :atype, :acat)"
-        let cmd = new SQLiteCommand(commandText = sql)
-        cmd.Parameters.AddWithValue(parameterName = "aideid", value = box row.AideAssetId ) |> ignore
-        cmd.Parameters.AddWithValue(parameterName = "assetid", value = box row.AssetId) |> ignore
-        cmd.Parameters.AddWithValue(parameterName = "reference", value = box row.Reference) |> ignore
-        cmd.Parameters.AddWithValue(parameterName = "changeid", value = box row.ChangeRequestId) |> ignore
-        cmd.Parameters.AddWithValue(parameterName = "aname", value = box row.AssetName) |> ignore
-        cmd.Parameters.AddWithValue(parameterName = "atype", value = box row.AssetType) |> ignore
-        cmd.Parameters.AddWithValue(parameterName = "acat", value = box row.AssetCategory) |> ignore
+            (?,?,?,  ?,?,?, ?)"
+        let cmd = 
+            new IndexedCommand (commandText = sql)
+                |> addParam (int64Param row.AideAssetId)
+                |> addParam (optionNull int64Param row.AssetId)
+                |> addParam (stringParam row.Reference)
+                |> addParam (optionNull int64Param row.ChangeRequestId)
+                |> addParam (stringParam row.AssetName)
+                |> addParam (stringParam row.AssetType)
+                |> addParam (stringParam row.AssetCategory)
         cmd |> Some
 
 
     let insertAideAssetLookupRow (row : AideAssetLookupRow) : SqliteDb<unit> = 
         match makeAideAssetLookupInsert row with
         | Some statement -> 
-            executeNonQuery statement |>> ignore
+            executeNonQueryIndexed statement |>> ignore
         | None -> mreturn ()
 
     let insertAideAssetLookupRows (csvPath : string) : SqliteDb<unit> = 
