@@ -27,15 +27,15 @@ Environment.SetEnvironmentVariable("PATH",
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
 
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190819\lib\netstandard2.0"
+#r "SLSqlite.dll"
+open SLSqlite.SqliteDb
+
 #I @"C:\Users\stephen\.nuget\packages\factx\1.0.0-alpha-20190721\lib\netstandard2.0"
 #r "FactX"
 
 
-#load "..\..\lib-temp\SLSqlite\Utils.fs"
-#load "..\..\lib-temp\SLSqlite\SqliteDb.fs"
-open SLSqlite.SqliteDb
-
-
+#load "..\src\AssetSync\Base\Addendum.fs"
 #load "..\src\AssetSync\Base\FactsCommon.fs"
 #load "..\src\AssetSync\Base\DbExportSchema.fs"
 #load "..\src\AssetSync\SQLiteFacts\PopulateAssetsDb.fs"
@@ -69,10 +69,12 @@ let main () : Result<unit, ErrMsg> =
     let connParams = sqliteConnParamsVersion3 dbActive
     runSqliteDb connParams 
         <| sqliteDb { 
-                do! insertS4FlocRecords s4FlocCsv
-                do! insertS4EquipmentRecords s4EquipmentCsv
-                do! insertAibFlocRecords aibFlocCsv
-                do! insertAibEquipmentRecords aibEquipCsv
+                do! insertS4SiteRows s4FlocCsv
+                do! insertS4FunctionRows s4FlocCsv
+                //do! insertS4FlocRecords s4FlocCsv
+                //do! insertS4EquipmentRecords s4EquipmentCsv
+                //do! insertAibFlocRecords aibFlocCsv
+                //do! insertAibEquipmentRecords aibEquipCsv
                 return ()
             }
 
