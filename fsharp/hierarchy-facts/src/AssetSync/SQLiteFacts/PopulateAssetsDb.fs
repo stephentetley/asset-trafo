@@ -90,13 +90,6 @@ module PopulateAssetsDb =
     
 
 
-    let insertS4SiteRows (csvPath : string) : SqliteDb<unit> = 
-        sqliteDb { 
-            let! table = 
-                liftOperationResult (fun _ -> getS4FlocTable csvPath)
-            return! insertS4RecordsGeneric s4SiteInsertStep table.Rows
-        }
-
 
 
     //// S4 Function (level 2)
@@ -116,301 +109,309 @@ module PopulateAssetsDb =
                     |> addParam (optionNull stringParam row.L1_Site_Code)
             Some (flocCode, cmd)
 
-    let insertS4FunctionRows (csvPath : string) : SqliteDb<unit> = 
-        sqliteDb { 
-            let! table = 
-                liftOperationResult (fun _ -> getS4FlocTable csvPath)
-            return! insertS4RecordsGeneric s4FunctionInsertStep table.Rows
-        }
 
-    //    //{ TableName = "s4_function"
-    //    //  ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
-    //    //  GetUniqueKeyForValidRow = 
-    //    //    fun row -> 
-    //    //        match row.``L2_Floc Code``, row.L2_Function with
-    //    //        | Some code, Some _ -> Some code
-    //    //        | _ , _  -> None
-    //    //  MakeValues = 
-    //    //    fun row -> 
-    //    //        sprintf "'%s', '%s', '%s', '%s'" 
-    //    //                (Option.defaultValue "impossible" row.``L2_Floc Code``) 
-    //    //                (Option.defaultValue "impossible" row.L2_Function)
-    //    //                (instAibRef row)        // same as site
-    //    //                (Option.defaultValue "" row.L1_Site_Code) 
-    //    //}
 
 
     //// S4 Process Group (level 3)
-    //let s4StrategyProcessGroup : S4Strategy = 
-    //    { TableName = "s4_process_group"
-    //      ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
-    //      GetUniqueKeyForValidRow = 
-    //        fun row -> 
-    //            match row.``L3_Floc Code``, row.``L3_Process Group`` with
-    //            | Some code, Some _ -> Some code
-    //            | _ , _  -> None
-    //      MakeValues = 
-    //        fun row -> 
-    //            sprintf "'%s', '%s', '%s', '%s'" 
-    //                    (Option.defaultValue "impossible" row.``L3_Floc Code``) 
-    //                    (Option.defaultValue "impossible" row.``L3_Process Group``)
-    //                    (emptyIfNone row.ProcessGroupReference)
-    //                    (Option.defaultValue "" row.``L2_Floc Code``) 
-    //    }
-
-
-
-    //// S4 Process (level 4)
-    //let s4StrategyProcess : S4Strategy = 
-    //    { TableName = "s4_process"
-    //      ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
-    //      GetUniqueKeyForValidRow = 
-    //        fun row -> 
-    //            match row.``L4_Floc Code``, row.L4_Process with
-    //            | Some code, Some _ -> Some code
-    //            | _ , _  -> None
-    //      MakeValues = 
-    //        fun row -> 
-    //            sprintf "'%s', '%s', '%s', '%s'" 
-    //                    (Option.defaultValue "impossible" row.``L4_Floc Code``) 
-    //                    (Option.defaultValue "impossible" row.L4_Process)
-    //                    (emptyIfNone row.ProcessReference)
-    //                    (Option.defaultValue "" row.``L3_Floc Code``) 
-    //    }
-
-    //// S4 system (level 5)
-    //let s4StrategySystem : S4Strategy = 
-    //    { TableName = "s4_system"
-    //      ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
-    //      GetUniqueKeyForValidRow = 
-    //        fun row -> 
-    //            match row.``L5_Floc Code``, row.L5_System with
-    //            | Some code, Some _ -> Some code
-    //            | _ , _  -> None
-    //      MakeValues = 
-    //        fun row -> 
-    //            sprintf "'%s', '%s', '%s', '%s'" 
-    //                    (Option.defaultValue "impossible" row.``L5_Floc Code``) 
-    //                    (Option.defaultValue "impossible" row.L5_System)
-    //                    (emptyIfNone row.ProcessReference)  // reference to process
-    //                    (Option.defaultValue "" row.``L4_Floc Code``) 
-    //    }
-
-    //// S4 assembly (level 6)
-    //let s4StrategyAssembly : S4Strategy = 
-    //    { TableName = "s4_assembly"
-    //      ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
-    //      GetUniqueKeyForValidRow = 
-    //        fun row -> 
-    //            match row.``L6_Floc Code``, row.``L6_Unit Description`` with
-    //            | Some code, Some _ -> Some code
-    //            | _ , _  -> None
-    //      MakeValues = 
-    //        fun row -> 
-    //            sprintf "'%s', '%s', '%s', '%s'" 
-    //                    (Option.defaultValue "impossible" row.``L6_Floc Code``) 
-    //                    (Option.defaultValue "impossible" row.``L6_Unit Description``)
-    //                    (emptyIfNone row.PlantReference) 
-    //                    (Option.defaultValue "" row.``L5_Floc Code``) 
-    //    }
-
-    //// S4 item (level 7)
-    //let s4StrategyItem : S4Strategy = 
-    //    { TableName = "s4_item"
-    //      ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
-    //      GetUniqueKeyForValidRow = 
-    //        fun row -> 
-    //            match row.``L7_Floc Code``, row.``L7_Sub Unit Description`` with
-    //            | Some code, Some _ -> Some code
-    //            | _ , _  -> None
-    //      MakeValues = 
-    //        fun row -> 
-    //            sprintf "'%s', '%s', '%s', '%s'" 
-    //                    (Option.defaultValue "impossible" row.``L7_Floc Code``) 
-    //                    (Option.defaultValue "impossible" row.``L7_Sub Unit Description``)
-    //                    (emptyIfNone row.PlantReference)        // Should this be the same as parent?
-    //                    (Option.defaultValue "" row.``L6_Floc Code``) 
-    //    }
-
-    //// S4 component (level 6)
-    //let s4StrategyComponent : S4Strategy = 
-    //    { TableName = "s4_component"
-    //      ColumnNames = ["s4_floc"; "name"; "aib_ref"; "parent_floc"]
-    //      GetUniqueKeyForValidRow = 
-    //        fun row -> 
-    //            match row.``L8_Floc Code``, row.``L8_Item Description`` with
-    //            | Some code, Some _ -> Some code
-    //            | _ , _  -> None
-    //      MakeValues = 
-    //        fun row -> 
-    //            sprintf "'%s', '%s', '%s', '%s'" 
-    //                    (Option.defaultValue "impossible" row.``L8_Floc Code``) 
-    //                    (Option.defaultValue "impossible" row.``L8_Item Description``)
-    //                    (emptyIfNone row.PlantReference) 
-    //                    (Option.defaultValue "" row.``L7_Floc Code``) 
-    //    }
-
-    //// Multiple traversal is simpler to think about, but 
-    //// we can't see to travers multiple times on table.Rows,
-    //// so we load the file each time.
-    //let insertS4FlocRecords (csvPath : string) : SqliteDb<unit> = 
-    //    let insertRecords (strategy : S4Strategy) = 
-    //        liftOperation (fun _ -> getS4FlocTable csvPath) >>= 
-    //        fun table -> insertS4RecordsGeneric strategy table.Rows
-    //    sqliteDb { 
-    //        do! insertRecords s4StrategySite
-    //        do! insertRecords s4StrategyFunction
-    //        do! insertRecords s4StrategyProcessGroup
-    //        do! insertRecords s4StrategyProcess
-    //        do! insertRecords s4StrategySystem
-    //        do! insertRecords s4StrategyAssembly
-    //        do! insertRecords s4StrategyComponent
-    //        do! insertRecords s4StrategyItem
-    //        return ()
-    //    }
-
-
-
-    //// ************************************************************************
-    //// S4 Equipment
-
-    //type S4EquipmentTable = 
-    //    CsvProvider< Sample = @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
-    //               , PreferOptionals = true >
-    
-    //type S4EquipmentRow = S4EquipmentTable.Row
-
-    //let getS4EquipmentRows (cvsPath : string) : S4EquipmentRow list = 
-    //    let table = S4EquipmentTable.Load(uri = cvsPath) in Seq.toList table.Rows
-
+    let s4ProcessGroupInsertStep (row : S4FlocRow) : (string * IndexedCommand) option = 
+        match row.``L3_Floc Code`` with
+        | None -> None
+        | Some flocCode -> 
+            let sql = 
+                "INSERT INTO s4_process_group \
+                 (s4_floc, name, aib_ref, parent_floc) \
+                 VALUES (?,?,?,?)"
+            let cmd = 
+                new IndexedCommand(commandText = sql)
+                    |> addParam (stringParam flocCode)
+                    |> addParam (optionNull stringParam  row.``L3_Process Group``)
+                    |> addParam (instAibRef row)
+                    |> addParam (optionNull stringParam row.``L2_Floc Code``)
+            Some (flocCode, cmd)
 
     
-    //let makeS4EquipmentInsert (row : S4EquipmentRow) : string option = 
-    //    match row.``400 S/4 Equip Reference``, row.``Migration Status (Y/N)`` with
-    //    | Some(num), true -> 
-    //        let line1 = "INSERT INTO s4_equipment (s4_ref, name, aib_pli_code, category, obj_type, obj_class, s4_floc) "
-    //        let line2 = 
-    //            sprintf "VALUES(%i, '%s', '%s', '%s', '%s', '%s', '%s');" 
-    //                    num 
-    //                    (emptyIfNone row.``Equipment Description``)
-    //                    (emptyIfNull row.``AI2 AIB Reference``)
-    //                    (emptyIfNull row.Category)
-    //                    (emptyIfNone row.``Object Type``)
-    //                    (emptyIfNone row.Class)
-    //                    (emptyIfNull row.``L6_Floc Code``)
-    //        String.concat "\n" [line1; line2] |> Some
-    //    | _,_ -> None
-    
-    
-    //let insertEquipmentRow (row : S4EquipmentRow) : SqliteDb<unit> = 
-    //    match makeS4EquipmentInsert row with
-    //    | Some statement -> 
-    //        executeNonQuery statement |>> ignore
-    //    | None -> mreturn ()
-    
-    
-    
-    //let insertS4EquipmentRecords (csvPath : string) : SqliteDb<unit> = 
-    //    sqliteDb { 
-    //        let! rows = liftOperation (fun _ -> getS4EquipmentRows csvPath)
-    //        return! withTransaction <| forMz rows insertEquipmentRow
-    //    }
+
+
+
+    /// S4 Process (level 4)
+    let s4ProcessInsertStep (row : S4FlocRow) : (string * IndexedCommand) option =
+        match row.``L4_Floc Code`` with
+        | None -> None
+        | Some flocCode -> 
+            let sql = 
+                "INSERT INTO s4_process \
+                 (s4_floc, name, aib_ref, parent_floc) \
+                 VALUES (?,?,?,?)"
+            let cmd = 
+                new IndexedCommand(commandText = sql)
+                    |> addParam (stringParam flocCode)
+                    |> addParam (optionNull stringParam  row.L4_Process)
+                    |> addParam (instAibRef row)
+                    |> addParam (optionNull stringParam row.``L3_Floc Code``)
+            Some (flocCode, cmd)
         
-    //// ************************************************************************
-    //// aib flocs
 
-    //let makeAibFlocInsert (row : AibFlocRow) : string option = 
-    //    match row.Category with 
-    //    | "INSTALLATION" -> 
-    //        let line1 = "INSERT INTO aib_installation (sai_ref, common_name, installation_type) "
-    //        let line2 = 
-    //            sprintf "VALUES('%s', '%s', '%s');" 
-    //                    row.Reference 
-    //                    (stringValue row.AssetName)
-    //                    row.AssetCode
-    //        String.concat "\n" [line1; line2] |> Some
+    /// S4 system (level 5)
+    let s4SystemInsertStep (row : S4FlocRow) : (string * IndexedCommand) option =
+        match row.``L5_Floc Code`` with
+        | None -> None
+        | Some flocCode -> 
+            let sql = 
+                "INSERT INTO s4_system \
+                 (s4_floc, name, aib_ref, parent_floc) \
+                 VALUES (?,?,?,?)"
+            let cmd = 
+                new IndexedCommand(commandText = sql)
+                    |> addParam (stringParam flocCode)
+                    |> addParam (optionNull stringParam  row.L5_System)
+                    |> addParam (instAibRef row)
+                    |> addParam (optionNull stringParam row.``L4_Floc Code``)
+            Some (flocCode, cmd)
 
-    //    | "PROCESS GROUP" ->
-    //        let line1 = "INSERT INTO aib_process_group (sai_ref, asset_name, asset_type, parent_ref) "
-    //        let line2 = 
-    //            sprintf "VALUES('%s', '%s', '%s', '%s');" 
-    //                    row.Reference 
-    //                    (stringValue row.AssetName)
-    //                    row.AssetType
-    //                    row.ParentRef
-    //        String.concat "\n" [line1; line2] |> Some
+    
 
-    //    | "PROCESS" ->
-    //        let line1 = "INSERT INTO aib_process (sai_ref, asset_name, asset_type, parent_ref) "
-    //        let line2 = 
-    //            sprintf "VALUES('%s', '%s', '%s', '%s');" 
-    //                    row.Reference 
-    //                    (stringValue row.AssetName)
-    //                    row.AssetType
-    //                    row.ParentRef
-    //        String.concat "\n" [line1; line2] |> Some
+    // S4 assembly (level 6)
+    let s4AssemblyInsertStep (row : S4FlocRow) : (string * IndexedCommand) option =
+        match row.``L6_Unit Description`` with
+        | None -> None
+        | Some flocCode -> 
+            let sql = 
+                "INSERT INTO s4_assembly \
+                 (s4_floc, name, aib_ref, parent_floc) \
+                 VALUES (?,?,?,?)"
+            let cmd = 
+                new IndexedCommand(commandText = sql)
+                    |> addParam (stringParam flocCode)
+                    |> addParam (optionNull stringParam  row.``L6_Unit Description``)
+                    |> addParam (instAibRef row)
+                    |> addParam (optionNull stringParam row.``L5_Floc Code``)
+            Some (flocCode, cmd)
+    
+
+    /// S4 item (level 7)
+    let s4ItemInsertStep (row : S4FlocRow) : (string * IndexedCommand) option =
+        match row.``L7_Sub Unit Description`` with
+        | None -> None
+        | Some flocCode -> 
+            let sql = 
+                "INSERT INTO s4_item \
+                 (s4_floc, name, aib_ref, parent_floc) \
+                 VALUES (?,?,?,?)"
+            let cmd = 
+                new IndexedCommand(commandText = sql)
+                    |> addParam (stringParam flocCode)
+                    |> addParam (optionNull stringParam  row.``L7_Sub Unit Description``)
+                    |> addParam (instAibRef row)
+                    |> addParam (optionNull stringParam row.``L6_Floc Code``)
+            Some (flocCode, cmd)
+
+    
+
+    /// S4 component (level 6)
+    let s4ComponentInsertStep (row : S4FlocRow) : (string * IndexedCommand) option =
+        match row.``L8_Floc Code`` with
+        | None -> None
+        | Some flocCode -> 
+            let sql = 
+                "INSERT INTO s4_component \
+                 (s4_floc, name, aib_ref, parent_floc) \
+                 VALUES (?,?,?,?)"
+            let cmd = 
+                new IndexedCommand(commandText = sql)
+                    |> addParam (stringParam flocCode)
+                    |> addParam (optionNull stringParam  row.``L8_Item Description``)
+                    |> addParam (instAibRef row)
+                    |> addParam (optionNull stringParam row.``L7_Floc Code``)
+            Some (flocCode, cmd)
+  
+
+    // Multiple traversal is simpler to think about, but 
+    // we can't seem to traverse multiple times on table.Rows,
+    // so we load the file each time.
+    let insertS4FlocRecords (csvPath : string) : SqliteDb<unit> = 
+        let insertTraversal (step : S4FlocRow -> (string * IndexedCommand) option) : SqliteDb<unit> = 
+            sqliteDb { 
+                let! table = 
+                    liftOperationResult (fun _ -> getS4FlocTable csvPath)
+                return! insertS4RecordsGeneric step table.Rows
+            }
+        sqliteDb { 
+            do! insertTraversal s4SiteInsertStep
+            do! insertTraversal s4FunctionInsertStep
+            do! insertTraversal s4ProcessGroupInsertStep
+            do! insertTraversal s4ProcessInsertStep
+            do! insertTraversal s4SystemInsertStep
+            do! insertTraversal s4AssemblyInsertStep
+            do! insertTraversal s4ItemInsertStep
+            do! insertTraversal s4ComponentInsertStep
+            return ()
+        }
+
+    
+
+
+
+    // ************************************************************************
+    // S4 Equipment
+
+    type S4EquipmentTable = 
+        CsvProvider< Sample = @"G:\work\Projects\asset_sync\equipment_migration_s1.csv"
+                   , PreferOptionals = true >
+    
+    type S4EquipmentRow = S4EquipmentTable.Row
+
+    let getS4EquipmentRows (cvsPath : string) : S4EquipmentRow list = 
+        let table = S4EquipmentTable.Load(uri = cvsPath) in Seq.toList table.Rows
+
+
+    
+    let makeS4EquipmentInsert (row : S4EquipmentRow) : IndexedCommand option = 
+        match row.``400 S/4 Equip Reference``, row.``Migration Status (Y/N)`` with
+        | Some(num), true -> 
+            let sql = 
+                "INSERT INTO s4_equipment \
+                (s4_ref, name, aib_pli_code, category, obj_type, obj_class, s4_floc) \
+                VALUES (?,?,?, ?,?,?, ?)"
+            let cmd = 
+                new IndexedCommand(commandText = sql)
+                    |> addParam (int32Param num)
+                    |> addParam (optionNull stringParam row.``Equipment Description``)
+                    |> addParam (stringParam row.``AI2 AIB Reference``)
+                    |> addParam (stringParam row.Category)
+                    |> addParam (optionNull stringParam row.``Object Type``)
+                    |> addParam (optionNull stringParam row.Class)
+                    |> addParam (stringParam row.``L6_Floc Code``)
+            cmd |> Some
+        | _,_ -> None
+    
+    
+    let insertEquipmentRow (row : S4EquipmentRow) : SqliteDb<unit> = 
+        match makeS4EquipmentInsert row with
+        | Some statement -> 
+            executeNonQueryIndexed statement |>> ignore
+        | None -> mreturn ()
+    
+    
+    
+    let insertS4EquipmentRecords (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
+            let! rows = liftOperation (fun _ -> getS4EquipmentRows csvPath)
+            return! withTransaction <| forMz rows insertEquipmentRow
+        }
         
-    //    | "PLANT" ->
-    //        let line1 = "INSERT INTO aib_plant (sai_ref, asset_name, asset_type, parent_ref) "
-    //        let line2 = 
-    //            sprintf "VALUES('%s', '%s', '%s', '%s');" 
-    //                    row.Reference 
-    //                    (stringValue row.AssetName)
-    //                    row.AssetType
-    //                    row.ParentRef
-    //        String.concat "\n" [line1; line2] |> Some
+    // ************************************************************************
+    // aib flocs
 
-    //    | "PLANT ITEM" ->
-    //        let line1 = "INSERT INTO aib_plant_item (sai_ref, asset_name, asset_type, parent_ref) "
-    //        let line2 = 
-    //            sprintf "VALUES('%s', '%s', '%s', '%s');" 
-    //                    row.Reference 
-    //                    (stringValue row.AssetName)
-    //                    row.AssetType
-    //                    row.ParentRef
-    //        String.concat "\n" [line1; line2] |> Some
-    //    | _ -> None
+    let makeAibFlocInsert (row : AibFlocRow) : IndexedCommand option = 
+        match row.Category with 
+        | "INSTALLATION" -> 
+            let sql = 
+                "INSERT INTO aib_installation \
+                (sai_ref, common_name, installation_type) \
+                VALUES (?,?,?)"
+            let cmd = 
+                new IndexedCommand (commandText = sql)
+                    |> addParam (stringParam row.Reference)
+                    |> addParam (stringParam row.AssetName)
+                    |> addParam (stringParam row.AssetCode)
+            cmd |> Some
+
+        | "PROCESS GROUP" ->
+            let sql = 
+                "INSERT INTO aib_process_group \
+                (sai_ref, asset_name, asset_type, parent_ref) \
+                VALUES (?,?,?, ?)"
+            let cmd = 
+                new IndexedCommand (commandText = sql)
+                    |> addParam (stringParam row.Reference)
+                    |> addParam (stringParam row.AssetName)
+                    |> addParam (stringParam row.AssetType)
+                    |> addParam (stringParam row.ParentRef)
+            cmd |> Some
+
+        | "PROCESS" ->
+            let sql = 
+                "INSERT INTO aib_process \
+                (sai_ref, asset_name, asset_type, parent_ref) \
+                VALUES (?,?,?, ?)"
+            let cmd = 
+                 new IndexedCommand (commandText = sql)
+                     |> addParam (stringParam row.Reference)
+                     |> addParam (stringParam row.AssetName)
+                     |> addParam (stringParam row.AssetType)
+                     |> addParam (stringParam row.ParentRef)
+            cmd |> Some
+        
+        | "PLANT" ->
+            let sql = 
+                "INSERT INTO aib_plant \
+                (sai_ref, asset_name, asset_type, parent_ref) \
+                VALUES (?,?,?, ?)"
+            let cmd = 
+                new IndexedCommand (commandText = sql)
+                    |> addParam (stringParam row.Reference)
+                    |> addParam (stringParam row.AssetName)
+                    |> addParam (stringParam row.AssetType)
+                    |> addParam (stringParam row.ParentRef)
+            cmd |> Some
+
+        | "PLANT ITEM" ->
+            let sql = 
+                "INSERT INTO aib_plant_item \
+                (sai_ref, asset_name, asset_type, parent_ref) \
+                VALUES(?,?,?, ?)"
+            let cmd = 
+                new IndexedCommand (commandText = sql)
+                    |> addParam (stringParam row.Reference)
+                    |> addParam (stringParam row.AssetName)
+                    |> addParam (stringParam row.AssetType)
+                    |> addParam (stringParam row.ParentRef)
+            cmd |> Some
+        | _ -> None
 
 
-    //let insertAibFlocRow (row : AibFlocRow) : SqliteDb<unit> = 
-    //    match makeAibFlocInsert row with
-    //    | Some statement -> 
-    //        executeNonQuery statement |>> ignore
-    //    | None -> mreturn ()
+    let insertAibFlocRow (row : AibFlocRow) : SqliteDb<unit> = 
+        match makeAibFlocInsert row with
+        | Some statement -> 
+            executeNonQueryIndexed statement |>> ignore
+        | None -> mreturn ()
 
 
-    //let insertAibFlocRecords (csvPath : string) : SqliteDb<unit> = 
-    //    sqliteDb { 
-    //        let! rows = liftOperation (fun _ -> getAibFlocRows csvPath)
-    //        return! withTransaction <| forMz rows insertAibFlocRow
-    //    }
+    let insertAibFlocRecords (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
+            let! rows = liftOperation (fun _ -> getAibFlocRows csvPath)
+            return! withTransaction <| forMz rows insertAibFlocRow
+        }
 
-    //// ************************************************************************
-    //// aib equipment
+    // ************************************************************************
+    // aib equipment
 
-    //let makeAibEquipmentInsert (row : AibEquipmentRow) : string option = 
-    //    match row.Reference with 
-    //    | null | "" -> None
-    //    | _ -> 
-    //        let line1 = "INSERT INTO aib_equipment (pli_ref, equipment_name, equipment_type, category, parent_ref) "
-    //        let line2 = 
-    //            sprintf "VALUES('%s', '%s', '%s', '%s', '%s');" 
-    //                    row.Reference
-    //                    (stringValue row.AssetName)
-    //                    (stringValue row.AssetType)
-    //                    row.Category
-    //                    row.ParentRef
-    //        String.concat "\n" [line1; line2] |> Some
+    let makeAibEquipmentInsert (row : AibEquipmentRow) : IndexedCommand option = 
+        match row.Reference with 
+        | null | "" -> None
+        | _ -> 
+            let sql = 
+                "INSERT INTO aib_equipment \
+                (pli_ref, equipment_name, equipment_type, category, parent_ref) \
+                VALUES (?,?,?,  ?,?)"
+            let cmd = 
+                new IndexedCommand(commandText = sql)
+                    |> addParam (stringParam row.Reference)
+                    |> addParam (stringParam row.AssetName)
+                    |> addParam (stringParam row.AssetType)
+                    |> addParam (stringParam row.Category)
+                    |> addParam (stringParam row.ParentRef)
+            cmd |> Some
 
-    //let insertAibEquipmentRow (row : AibEquipmentRow) : SqliteDb<unit> = 
-    //    match makeAibEquipmentInsert row with
-    //    | Some statement -> 
-    //        executeNonQuery statement |>> ignore
-    //    | None -> mreturn ()
+    let insertAibEquipmentRow (row : AibEquipmentRow) : SqliteDb<unit> = 
+        match makeAibEquipmentInsert row with
+        | Some statement -> 
+            executeNonQueryIndexed statement |>> ignore
+        | None -> mreturn ()
 
-    //let insertAibEquipmentRecords (csvPath : string) : SqliteDb<unit> = 
-    //    sqliteDb { 
-    //        let! rows = liftOperation (fun _ -> getAibEquipmentRows csvPath)
-    //        return! withTransaction <| forMz rows insertAibEquipmentRow
-    //    }
+    let insertAibEquipmentRecords (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
+            let! rows = liftOperation (fun _ -> getAibEquipmentRows csvPath)
+            return! withTransaction <| forMz rows insertAibEquipmentRow
+        }
 
