@@ -27,7 +27,7 @@ Environment.SetEnvironmentVariable("PATH",
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
 
-#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190819\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190819a\lib\netstandard2.0"
 #r "SLSqlite.dll"
 open SLSqlite.SqliteDb
 
@@ -48,8 +48,11 @@ let pathToDbTemplate () : string =
 type ErrMsg = string
 
 let main () : Result<unit, ErrMsg> = 
-    let aideStructRelationshipsCsv = @"G:\work\Projects\asset_sync\aide_report\aide_structure_relationships_20190816.csv"
-    let aideAssetLookupsCsv = @"G:\work\Projects\asset_sync\aide_report\aide_asset_lookups_20190816.csv"
+    let aideStructRelationshipsCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\aide_structure_relationships_20190816.csv"
+
+    let aideAssetLookupsCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\aide_asset_lookups_20190816.csv"
 
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputFile "structure_relationships.sqlite" |> Path.GetFullPath

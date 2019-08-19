@@ -11,7 +11,7 @@ module StructRelationshipsDb =
 
     open System.Data.SQLite
 
-    open SLSqlite.Utils
+    open SLSqlite.Wrappers
     open SLSqlite.SqliteDb
 
     open AssetSync.ChangesReport.Addendum
@@ -131,7 +131,8 @@ module StructRelationshipsDb =
     let insertAideAssetLookupRow (row : AideAssetLookupRow) : SqliteDb<unit> = 
         match makeAideAssetLookupInsert row with
         | Some statement -> 
-            executeNonQueryIndexed statement |>> ignore
+            attempt (executeNonQueryIndexed statement)
+                    (fun _msg -> throwError (sprintf "Bad Row %O" row)) |>> ignore
         | None -> mreturn ()
 
     let insertAideAssetLookupRows (csvPath : string) : SqliteDb<unit> = 
