@@ -8,8 +8,7 @@ module PopulateChangesDb =
 
     open System.Data.SQLite
 
-    open SLSqlite.Wrappers
-    open SLSqlite.SqliteDb
+    open SLSqlite.Core
 
     open AssetSync.ChangesReport.ImportSchema
 

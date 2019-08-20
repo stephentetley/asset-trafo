@@ -1,13 +1,8 @@
 % translate_floc.pl
 
 :- module(translate_floc,
-    [ atoms_to_floc/2
-    , floc_take/3
-    , floc_prefix/2
-
-    , aib_funloc_below/2
+    [ aib_funloc_below/2
     , aib_equipment_below/2
-
 
     , aib_ref_to_s4_floc/2
     , s4_floc_to_aib_ref/2

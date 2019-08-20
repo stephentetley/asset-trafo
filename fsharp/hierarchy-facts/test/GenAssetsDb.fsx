@@ -27,9 +27,9 @@ Environment.SetEnvironmentVariable("PATH",
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
 
-#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190819\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190820\lib\netstandard2.0"
 #r "SLSqlite.dll"
-open SLSqlite.SqliteDb
+open SLSqlite.Core
 
 #I @"C:\Users\stephen\.nuget\packages\factx\1.0.0-alpha-20190721\lib\netstandard2.0"
 #r "FactX"

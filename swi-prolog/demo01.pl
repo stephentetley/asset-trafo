@@ -3,6 +3,7 @@
 :- use_module(library(prosqlite)).
 :- use_module(library(db_facts)).
 
+:- use_module(s4_basis).
 :- use_module(translate_floc).
 
 %% Before testing the demos at the prompt...

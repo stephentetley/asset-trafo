@@ -11,8 +11,7 @@ module StructRelationshipsDb =
 
     open System.Data.SQLite
 
-    open SLSqlite.Wrappers
-    open SLSqlite.SqliteDb
+    open SLSqlite.Core
 
     open AssetSync.ChangesReport.Addendum
 

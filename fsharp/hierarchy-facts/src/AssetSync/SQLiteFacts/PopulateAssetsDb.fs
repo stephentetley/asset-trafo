@@ -12,10 +12,9 @@ module PopulateAssetsDb =
 
     open System.Data.SQLite
 
-    open SLSqlite.Utils
-    open SLSqlite.SqliteDb
+    open SLSqlite.Core
 
-    open AssetSync.Base.Addendum
+    // open AssetSync.Base.Addendum
     open AssetSync.Base.DbExportSchema
 
 

@@ -13,13 +13,8 @@ module Addendum =
     // Potential additions to library with unstable APIs 
     // (sl-sqlite, markdown-doc, ...)
 
+    let appendum () = "appendum"
 
     // ************************************************************************
     // SLSqlite
 
-    
-    let nullParam () : SQLiteParameter = 
-        let param1 = new SQLiteParameter()
-        param1.IsNullable <- true
-        param1.Value <- null
-        param1

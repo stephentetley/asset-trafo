@@ -30,9 +30,9 @@ open SLFormat.CommandOptions
 open SLFormat.CommandOptions.SimpleInvoke
 
 
-#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190819a\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190820\lib\netstandard2.0"
 #r "SLSqlite.dll"
-open SLSqlite.SqliteDb
+open SLSqlite.Core
 
 
 
