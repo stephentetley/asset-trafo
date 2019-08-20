@@ -6,7 +6,7 @@ namespace AssetSync.ChangesReport
 
 module Addendum =
     
-    open System
+    open MarkdownDoc.Markdown
 
     // Potential additions to library with unstable APIs 
     // (sl-sqlite, markdown-doc, ...)

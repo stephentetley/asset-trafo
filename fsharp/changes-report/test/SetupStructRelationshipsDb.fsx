@@ -32,7 +32,7 @@ Environment.SetEnvironmentVariable("PATH",
 #r "SLSqlite.dll"
 open SLSqlite.Core
 
-#load "..\src\AssetSync\ChangesReport\Addendum.fs"
+
 #load "..\src\AssetSync\ChangesReport\StructRelationshipsDb.fs"
 open AssetSync.ChangesReport.StructRelationshipsDb
 
@@ -97,7 +97,6 @@ let test01 (startId : int64) =
     cmd.Parameters.AddWithValue(parameterName = "start_id", value = box startId) |> ignore
         
     let readRow1 (reader : RowReader) : int64 * string = 
-        reader.GetDataTypeName(0) |> printfn "%s"
         let key = reader.GetInt64(0)
         let path = reader.GetString(1) 
         (key, path)

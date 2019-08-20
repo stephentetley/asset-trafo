@@ -6,8 +6,9 @@
 
   <ItemGroup>
     <None Include="OldAideChangeReport.fsx" />
-    <None Include="GenChangesDb.fsx" />
-    <None Include="GenStructRelationshipsDb.fsx" />
+    <None Include="SetupChangesDb.fsx" />
+    <None Include="SetupStructRelationshipsDb.fsx" />
+    <None Include="ChangeRequestsReport.fsx" />
   </ItemGroup>
 
   <ItemGroup>

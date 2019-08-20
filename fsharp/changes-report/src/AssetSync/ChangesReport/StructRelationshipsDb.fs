@@ -6,16 +6,11 @@ namespace AssetSync.ChangesReport
 
 module StructRelationshipsDb =
 
-    open System.IO
     open FSharp.Data
-
-    open System.Data.SQLite
-
+    
     open SLSqlite.Core
 
-    open AssetSync.ChangesReport.Addendum
-
-
+ 
 
     // ************************************************************************
     // aide_structure_relationships table
