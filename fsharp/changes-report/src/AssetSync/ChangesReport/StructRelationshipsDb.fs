@@ -82,13 +82,14 @@ module StructRelationshipsDb =
          AssetId(int64 option),\
          Reference(string),\
          ChangeRequestId(int64 option),\
+         AssetCommonName(string),\
          AssetName(string),\
          AssetType(string),\
          AssetCategory(string)"    
 
     [<Literal>]
     let AideAssetLookupSample = 
-        "1000,600000,PLI001,NULL,Asset Name, Asset Type, Asset Category"
+        "1000,600000,PLI001,NULL,Asset Common Name,Asset Name, Asset Type, Asset Category"
        
 
     type AideAssetLookupTable = 
@@ -110,17 +111,23 @@ module StructRelationshipsDb =
     let makeAideAssetLookupInsert (row : AideAssetLookupRow) : IndexedCommand option =
         let sql = 
             "INSERT INTO aide_asset_lookups \
-            (aide_asset_id, asset_id, reference, \
-            change_request_id, asset_name, asset_type, \
+            (aide_asset_id, \
+            asset_id, \
+            reference, \
+            change_request_id, \
+            asset_common_name, \
+            asset_name, \
+            asset_type, \
             asset_category) \
             VALUES \
-            (?,?,?,  ?,?,?, ?)"
+            (?,?,?,  ?,?,?, ?,?)"
         let cmd = 
             new IndexedCommand (commandText = sql)
                 |> addParam (int64Param row.AideAssetId)
                 |> addParam (optionNull int64Param row.AssetId)
                 |> addParam (stringParam row.Reference)
-                |> addParam (optionNull int64Param row.ChangeRequestId)
+                |> addParam (optionNull int64Param row.ChangeRequestId)                
+                |> addParam (stringParam row.AssetCommonName)
                 |> addParam (stringParam row.AssetName)
                 |> addParam (stringParam row.AssetType)
                 |> addParam (stringParam row.AssetCategory)

@@ -5,6 +5,7 @@
 #r "System.Transactions.dll"
 open System
 open System.IO
+open System.Data
 
 
 #I @"C:\Users\stephen\.nuget\packages\FSharp.Data\3.0.1\lib\netstandard2.0"
@@ -49,10 +50,10 @@ type ErrMsg = string
 
 let main () : Result<unit, ErrMsg> = 
     let aideStructRelationshipsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\aide_structure_relationships_20190816.csv"
+        @"G:\work\Projects\asset_sync\aide_report\aide_structure_relationships_20190820.csv"
 
     let aideAssetLookupsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\aide_asset_lookups_20190816.csv"
+        @"G:\work\Projects\asset_sync\aide_report\aide_asset_lookups_20190820.csv"
 
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputFile "structure_relationships.sqlite" |> Path.GetFullPath
@@ -69,4 +70,37 @@ let main () : Result<unit, ErrMsg> =
                 do! insertAideStructRelationshipRows aideStructRelationshipsCsv
                 do! insertAideAssetLookupRows aideAssetLookupsCsv
                 return ()
+            }
+
+let test01 () = 
+    let dbActive = outputFile "structure_relationships.sqlite" |> Path.GetFullPath
+    let connParams = sqliteConnParamsVersion3 dbActive
+    let sql = 
+        "WITH RECURSIVE \
+        temp_table(child_id) AS ( \
+            SELECT :start_id \
+                UNION ALL \
+            SELECT aide_structure_relationships.child_id \
+            FROM aide_structure_relationships, temp_table \
+            WHERE aide_structure_relationships.parent_id = temp_table.child_id \
+            ) \
+            SELECT \
+                temp_table.child_id AS [ChildId], \
+                aide_asset_lookups.asset_common_name AS [CommonName] \
+            FROM temp_table \
+            JOIN aide_asset_lookups    ON temp_table.child_id = aide_asset_lookups.aide_asset_id \
+            ORDER BY aide_asset_lookups.asset_common_name"
+
+    let cmd = new SQLiteCommand(commandText = sql)
+    cmd.Parameters.AddWithValue(parameterName = "start_id", value = box 2111881L) |> ignore
+        
+    let readRow1 (reader : RowReader) : int64 * string = 
+        reader.GetDataTypeName(0) |> printfn "%s"
+        let key = reader.GetInt64(0)
+        let path = reader.GetString(1) 
+        (key, path)
+
+    runSqliteDb connParams 
+        <| sqliteDb { 
+                return! executeReader cmd (readerReadAll readRow1)
             }

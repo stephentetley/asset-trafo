@@ -20,6 +20,7 @@ CREATE TABLE aide_asset_lookups
     asset_id BIGINT,
     reference TEXT,
     change_request_id BIGINT,
+    asset_common_name TEXT,
     asset_name TEXT,
     asset_type TEXT,
     asset_category TEXT
