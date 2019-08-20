@@ -26,14 +26,14 @@ module StructRelationshipsDb =
          ParentAideAssetId(int64),\
          ChildAideAssetId(int64)"    
 
-    [<Literal>]
-    let AideStructureRelationshipSample = 
-        "1,150,2500"
+    //[<Literal>]
+    //let AideStructureRelationshipSample = 
+    //    "1,150,2500"
        
 
     type AideStructureRelationshipTable = 
         CsvProvider< Schema = AideStructureRelationshipSchema 
-                   , Sample = AideStructureRelationshipSample
+                   , Sample = AideStructureRelationshipSchema
                    , HasHeaders = true >
 
     type AideStructureRelationshipRow = AideStructureRelationshipTable.Row
@@ -87,14 +87,14 @@ module StructRelationshipsDb =
          AssetType(string),\
          AssetCategory(string)"    
 
-    [<Literal>]
-    let AideAssetLookupSample = 
-        "1000,600000,PLI001,NULL,Asset Common Name,Asset Name, Asset Type, Asset Category"
+    //[<Literal>]
+    //let AideAssetLookupSample = 
+    //    "1000,600000,PLI001,NULL,Asset Common Name,Asset Name, Asset Type, Asset Category"
        
 
     type AideAssetLookupTable = 
         CsvProvider< Schema = AideAssetLookupSchema 
-                   , Sample = AideAssetLookupSample
+                   , Sample = AideAssetLookupSchema
                    , HasHeaders = true >
 
     type AideAssetLookupRow = AideAssetLookupTable.Row

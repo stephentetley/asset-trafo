@@ -23,12 +23,11 @@ open MarkdownDoc.Pandoc
 
 
 // #load "..\src\AssetTrafo\Base\Common.fs"
-#load "..\src\AssetSync\ChangesReport\ImportSchema.fs"
+#load "..\src\AssetSync\ChangesReport\OldImportSchema.fs"
 #load "..\src\AssetSync\ChangesReport\Syntax.fs"
 #load "..\src\AssetSync\ChangesReport\ReadCsv.fs"
 #load "..\src\AssetSync\ChangesReport\ChangeReport.fs"
 open AssetSync.ChangesReport.Syntax
-open AssetSync.ChangesReport.ImportSchema
 open AssetSync.ChangesReport.ChangeReport
 
 

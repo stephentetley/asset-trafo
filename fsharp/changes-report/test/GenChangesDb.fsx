@@ -36,9 +36,9 @@ open SLSqlite.Core
 
 
 
-#load "..\src\AssetSync\ChangesReport\ImportSchema.fs"
+#load "..\src\AssetSync\ChangesReport\ChangeRequestSchema.fs"
 #load "..\src\AssetSync\ChangesReport\PopulateChangesDb.fs"
-// open AssetTrafo.Base.Common
+open AssetSync.ChangesReport.ChangeRequestSchema
 open AssetSync.ChangesReport.PopulateChangesDb
 
 let workingDirectory () = 
@@ -53,9 +53,13 @@ let pathToDbTemplate () : string =
 type ErrMsg = string
 
 let main () : Result<unit, ErrMsg> = 
-    let assetChangesCsv = @"G:\work\Projects\asset_sync\aide_report\aide_asset_changes_20190809.csv"
-    let attributeChangesCsv = @"G:\work\Projects\asset_sync\aide_report\aide_attribute_changes_20190809.csv"
-    let repeatedAttributeChangesCsv = @"G:\work\Projects\asset_sync\aide_report\aide_repeated_attribute_changes_20190814.csv"
+    let assetChangesCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_assets_20190820.csv"
+    let attributeChangesCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_attributes_20190820.csv"
+    let repeatedAttributeChangesCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_repeated_attributes_20190820.csv"
+
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputFile "change_requests.sqlite" |> Path.GetFullPath
     printfn "%s" dbActive
@@ -72,5 +76,4 @@ let main () : Result<unit, ErrMsg> =
                 do! insertRepeatedAttributeChangeRows repeatedAttributeChangesCsv
                 return ()
             }
-
 

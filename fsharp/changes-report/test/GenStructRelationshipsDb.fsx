@@ -72,7 +72,9 @@ let main () : Result<unit, ErrMsg> =
                 return ()
             }
 
-let test01 () = 
+
+// e.g test01 2111881L ;;
+let test01 (startId : int64) = 
     let dbActive = outputFile "structure_relationships.sqlite" |> Path.GetFullPath
     let connParams = sqliteConnParamsVersion3 dbActive
     let sql = 
@@ -92,7 +94,7 @@ let test01 () =
             ORDER BY aide_asset_lookups.asset_common_name"
 
     let cmd = new SQLiteCommand(commandText = sql)
-    cmd.Parameters.AddWithValue(parameterName = "start_id", value = box 2111881L) |> ignore
+    cmd.Parameters.AddWithValue(parameterName = "start_id", value = box startId) |> ignore
         
     let readRow1 (reader : RowReader) : int64 * string = 
         reader.GetDataTypeName(0) |> printfn "%s"
