@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetSync.ChangesReport
+namespace AssetSync.ChangesReport.Old
 
 
 module ChangeReport =
@@ -15,8 +15,8 @@ module ChangeReport =
     open MarkdownDoc.Markdown
     open MarkdownDoc.Pandoc
 
-    open AssetSync.ChangesReport.Syntax
-    open AssetSync.ChangesReport.ReadCsv
+    open AssetSync.ChangesReport.Old.Syntax
+    open AssetSync.ChangesReport.Old.ReadCsv
 
 
 

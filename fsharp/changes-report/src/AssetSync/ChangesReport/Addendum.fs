@@ -13,23 +13,25 @@ module Addendum =
 
 
     // ************************************************************************
-    // SLSquite
+    // For MarkdownDoc
 
-    
-    // SQLite has no native date type, represent data times as strings
-    // in ISO 8601 format
+    let htmlIdAnchor (name : string) (body : Text) : Text = 
+        rawtext (sprintf "<a id=\"%s\">" name) ^^ body ^^ rawtext "</a>"
+
+    /// Print a DataTime. 
+    /// The output uses FSharp's ToString() so it may be printed in 
+    /// exponential notation.
+    let dateTimeDoc (datetime : System.DateTime) (format : string) : Text = 
+        datetime.ToString(format) |> text
+
+    let iso8601DateTimeDoc (datetime : System.DateTime) : Text = 
+        dateTimeDoc datetime "yyyy-MM-dd hh:mm:ss"
 
 
-    let toIso8601String (dt : DateTime) : string = 
-        dt.ToString(format = "yyyy-MM-ddThh:mm:ss")
-
-    let parseIso8601String (source : string) : DateTime = 
-        DateTime.ParseExact(s = source, format = "yyyy-MM-ddThh:mm:ss", provider = Globalization.CultureInfo.InvariantCulture)
-
-    let tryParseIso8601String (source : string) : DateTime option = 
-        try
-            parseIso8601String source |> Some
-        with
-        | _ -> None
-
+    /// Add to markdown-doc?
+    let commaSpaceSep (texts : Text list) : Text = 
+        match texts with 
+        | [] -> emptyText
+        | [d1] -> d1
+        | d1 :: rest -> List.fold (fun ac d -> ac ^^ character ',' ^+^ d) d1 rest
 

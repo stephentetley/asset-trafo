@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetSync.ChangesReport
+namespace AssetSync.ChangesReport.Old
 
 
 module ReadCsv =
@@ -9,8 +9,8 @@ module ReadCsv =
     open FSharp.Core
     open FSharp.Data
 
-    open AssetSync.ChangesReport.ImportSchema
-    open AssetSync.ChangesReport.Syntax
+    open AssetSync.ChangesReport.Old.ImportSchema
+    open AssetSync.ChangesReport.Old.Syntax
 
 
     let getValueSource (valueCode : int64 option) : ValueSource = 

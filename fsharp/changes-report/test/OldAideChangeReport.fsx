@@ -22,13 +22,13 @@ open MarkdownDoc.Markdown
 open MarkdownDoc.Pandoc
 
 
-// #load "..\src\AssetTrafo\Base\Common.fs"
-#load "..\src\AssetSync\ChangesReport\OldImportSchema.fs"
-#load "..\src\AssetSync\ChangesReport\Syntax.fs"
-#load "..\src\AssetSync\ChangesReport\ReadCsv.fs"
-#load "..\src\AssetSync\ChangesReport\ChangeReport.fs"
-open AssetSync.ChangesReport.Syntax
-open AssetSync.ChangesReport.ChangeReport
+
+#load "..\src\AssetSync\ChangesReport\Old\ImportSchema.fs"
+#load "..\src\AssetSync\ChangesReport\Old\Syntax.fs"
+#load "..\src\AssetSync\ChangesReport\Old\ReadCsv.fs"
+#load "..\src\AssetSync\ChangesReport\Old\ChangeReport.fs"
+open AssetSync.ChangesReport.Old.Syntax
+open AssetSync.ChangesReport.Old.ChangeReport
 
 
 let getOutputFile (relFileName : string) = 

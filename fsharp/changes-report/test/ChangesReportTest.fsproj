@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="TestAideChangeReport.fsx" />
+    <None Include="OldAideChangeReport.fsx" />
     <None Include="GenChangesDb.fsx" />
     <None Include="GenStructRelationshipsDb.fsx" />
   </ItemGroup>
