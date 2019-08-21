@@ -35,13 +35,6 @@ module ChangeReport =
         dateTimeDoc datetime "yyyy-MM-dd hh:mm:ss"
 
 
-    /// Add to markdown-doc?
-    let commaSpaceSep (texts : Text list) : Text = 
-        match texts with 
-        | [] -> emptyText
-        | [d1] -> d1
-        | d1 :: rest -> List.fold (fun ac d -> ac ^^ character ',' ^+^ d) d1 rest
-
 
     /// Markdown report 
 
@@ -67,7 +60,7 @@ module ChangeReport =
             ; text status |> markdownText
             ; iso8601DateTimeDoc requestTime |> markdownText 
             ]
-        let specs = [ alignLeft 70 ; alignLeft 40; alignLeft 40 ]
+        let specs = [ alignLeft 32 ; alignLeft 22; alignLeft 22 ]
         let headers = 
             [ "Change Request Id"; "Status"; "Request Time" ] 
                 |> List.map ( markdownText << doubleAsterisks << text)
@@ -148,7 +141,7 @@ module ChangeReport =
 
         let title = 
             let refname = sprintf "cr%i" requestId
-            htmlIdAnchor refname (text "Change request" ^+^ int64Doc requestId)
+            htmlIdAnchor refname (text "Change request" ^+^ int64Md requestId)
 
         h2 title
         ^!!^ markdownText (text "Request status:" ^+^ text changeRequest.RequestStatus)
@@ -162,7 +155,7 @@ module ChangeReport =
 
         h1 (htmlIdAnchor "top" (text "AIDE Change Requests"))
             ^!!^ changeRequestInfosTable requestInfos
-            ^!!^ vcat (List.map changeRequestSection changeRequests)
+            ^!!^ vsep (List.map changeRequestSection changeRequests)
 
 
     let pandocHtmlDefaults (pathToCss : string) : PandocOptions = 

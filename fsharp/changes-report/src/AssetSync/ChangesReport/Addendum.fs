@@ -15,23 +15,6 @@ module Addendum =
     // ************************************************************************
     // For MarkdownDoc
 
-    let htmlIdAnchor (name : string) (body : Text) : Text = 
-        rawtext (sprintf "<a id=\"%s\">" name) ^^ body ^^ rawtext "</a>"
-
-    /// Print a DataTime. 
-    /// The output uses FSharp's ToString() so it may be printed in 
-    /// exponential notation.
-    let dateTimeDoc (datetime : System.DateTime) (format : string) : Text = 
-        datetime.ToString(format) |> text
-
-    let iso8601DateTimeDoc (datetime : System.DateTime) : Text = 
-        dateTimeDoc datetime "yyyy-MM-dd hh:mm:ss"
-
-
     /// Add to markdown-doc?
     let commaSpaceSep (texts : Text list) : Text = 
-        match texts with 
-        | [] -> emptyText
-        | [d1] -> d1
-        | d1 :: rest -> List.fold (fun ac d -> ac ^^ character ',' ^+^ d) d1 rest
-
+        textPunctuate (rawtext ", ") texts

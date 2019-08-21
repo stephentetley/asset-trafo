@@ -5,11 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="AssetSync\ChangesReport\Addendum.fs" />
     <Compile Include="AssetSync\ChangesReport\Old\ImportSchema.fs" />
     <Compile Include="AssetSync\ChangesReport\Old\Syntax.fs" />
     <Compile Include="AssetSync\ChangesReport\Old\ReadCsv.fs" />
     <Compile Include="AssetSync\ChangesReport\Old\ChangeReport.fs" />
-    <Compile Include="AssetSync\ChangesReport\Addendum.fs" />
     <Compile Include="AssetSync\ChangesReport\ChangeRequestSchema.fs" />
     <Compile Include="AssetSync\ChangesReport\PopulateChangesDb.fs" />
     <Compile Include="AssetSync\ChangesReport\StructRelationshipsDb.fs" />
@@ -18,7 +18,7 @@
   <ItemGroup>
     <PackageReference Include="FactX" Version="1.0.0-alpha-20190721" />
     <PackageReference Include="FSharp.Data" Version="3.1.1" />
-    <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20190818" />
+    <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20190821a" />
     <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190721" />
     <PackageReference Include="SLSqlite" Version="1.0.0-alpha-20190820" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.111" />
