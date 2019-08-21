@@ -118,3 +118,35 @@ module BuildReport =
                    
            
         executeReader cmd (readerReadAll readRow1)
+
+    // ************************************************************************
+    // Change Request Info
+
+    let getChangeRequestInfo (chreqid : int64) : SqliteDb<ChangeRequestInfo option> =
+        let sql = 
+            """
+            SELECT 
+                    chreq.change_request_id        AS [change_request_id],
+                    chreq.change_request_type      AS [request_type],
+                    chreq.change_request_status    AS [request_status],
+                    chreq.change_request_comments  AS [comment],
+                    chreq.change_request_time      AS [request_time]
+            FROM    change_request AS chreq
+            WHERE
+                    chreq.change_request_id = :chreqid
+            ;
+            """
+        let cmd = new SQLiteCommand(commandText = sql)
+        cmd.Parameters.AddWithValue(parameterName = "chreqid", value = box chreqid) |> ignore
+                   
+        let readRow1 (reader : RowReader) : ChangeRequestInfo = 
+            { ChangeRequestId = reader.GetInt64(0)
+            ; RequestType = reader.GetString(1)
+            ; Status = reader.GetString(2)
+            ; Comment = reader.GetString(3)
+            ; RequestTime = reader.GetDateTime(4)
+            }
+                   
+           
+        executeReader cmd (readerReadAll readRow1) |>> List.tryHead
+

@@ -59,6 +59,7 @@ module Datatypes =
 
     type ChangeRequestInfo = 
         { ChangeRequestId : int64
+          RequestType : string
           Status : string
           Comment: string
           RequestTime : System.DateTime
