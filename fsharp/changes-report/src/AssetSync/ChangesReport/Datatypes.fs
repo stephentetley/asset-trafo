@@ -19,3 +19,26 @@ module Datatypes =
           AideValue : string
         }
         member x.HasChanged with get () : bool = x.AideValue <> x.AiValue
+
+
+    type AttributeValue = 
+        | Literal of string
+        | Lookup of resolved : string
+        member x.Value 
+            with get() : string = 
+                match x with
+                | Literal s -> s
+                | Lookup s -> s
+
+        
+    /// This represents a change on an attribute.
+    /// The report on the system that we use for input only 
+    /// shows changes. If an attribute is unchanged there will 
+    /// be no record.
+    type AttributeChange = 
+        { AssetName : string
+          Reference : string
+          AttributeName : string
+          AiValue : AttributeValue
+          AideValue : AttributeValue
+        }

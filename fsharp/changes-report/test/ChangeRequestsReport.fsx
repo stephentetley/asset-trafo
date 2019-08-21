@@ -38,27 +38,18 @@ open MarkdownDoc.Pandoc
 
 #load "..\src\AssetSync\ChangesReport\Addendum.fs"
 #load "..\src\AssetSync\ChangesReport\Datatypes.fs"
+#load "..\src\AssetSync\ChangesReport\BuildReport.fs"
+#load "..\src\AssetSync\ChangesReport\PrintReport.fs"
 open AssetSync.ChangesReport.Addendum
 open AssetSync.ChangesReport.Datatypes
-
+open AssetSync.ChangesReport.BuildReport
+open AssetSync.ChangesReport.PrintReport
 
 let outputFile (relFileName : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
-let getAssetPropertyChange (answerRow : RowReader) 
-                            (propertyDescription : string)
-                            (leftField : string) 
-                            (rightField : string) : AssetProperty option = 
-    let name1 = getString answerRow leftField
-    let name2 = getString answerRow rightField
-    if name1 <> name2 then
-        { PropertyName = propertyDescription
-        ; AiValue = name1
-        ; AideValue = name2
-        } |> Some
-    else None
 
-let test01 () = 
+let test01 (chreqid : int64) = 
     let dbActive = outputFile "change_requests.sqlite" |> Path.GetFullPath
     let connParams = sqliteConnParamsVersion3 dbActive
     
@@ -68,17 +59,16 @@ let test01 () =
                 cr_asset.* \
         FROM        change_request_asset AS cr_asset \
         WHERE \
-                cr_asset.change_request_id = 148395 \
+                cr_asset.change_request_id = :chreqid \
         ;"
 
     let cmd = new SQLiteCommand(commandText = sql)
-    //cmd.Parameters.AddWithValue(parameterName = "start_id", value = box startId) |> ignore
+    cmd.Parameters.AddWithValue(parameterName = "chreqid", value = box chreqid) |> ignore
         
     let readRow1 (reader : RowReader)   = 
         let key = reader.GetInt64(0)
-        let change1 = getAssetPropertyChange reader "Common Name" "ai_common_name" "aide_common_name"
-        let change2 = getAssetPropertyChange reader "Manufacturer" "ai_manufacturer" "aide_manufacturer"
-        (key, [change1; change2])
+        let changes = getAssetPropertyChanges reader
+        (key, changes)
 
     runSqliteDb connParams 
         <| sqliteDb { 
