@@ -81,7 +81,7 @@ module BuildReport =
     // Attribute changes
 
 
-    let getAttributeChanges (chreqid : int64) : SqliteDb<AttributeChange list> =
+    let getAttributeChanges (chreqId : int64) : SqliteDb<AttributeChange list> =
         let sql = 
             """
             SELECT 
@@ -98,7 +98,7 @@ module BuildReport =
             ;
             """
         let cmd = new SQLiteCommand(commandText = sql)
-        cmd.Parameters.AddWithValue(parameterName = "chreqid", value = box chreqid) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "chreqid", value = box chreqId) |> ignore
                    
         let readRow1 (reader : RowReader) : AttributeChange = 
             let aiValue = 
@@ -122,7 +122,7 @@ module BuildReport =
     // ************************************************************************
     // Change Request Info
 
-    let getChangeRequestInfo (chreqid : int64) : SqliteDb<ChangeRequestInfo option> =
+    let getChangeRequestInfo (chreqId : int64) : SqliteDb<ChangeRequestInfo option> =
         let sql = 
             """
             SELECT 
@@ -137,7 +137,7 @@ module BuildReport =
             ;
             """
         let cmd = new SQLiteCommand(commandText = sql)
-        cmd.Parameters.AddWithValue(parameterName = "chreqid", value = box chreqid) |> ignore
+        cmd.Parameters.AddWithValue(parameterName = "chreqid", value = box chreqId) |> ignore
                    
         let readRow1 (reader : RowReader) : ChangeRequestInfo = 
             { ChangeRequestId = reader.GetInt64(0)
@@ -149,4 +149,20 @@ module BuildReport =
                    
            
         executeReader cmd (readerReadAll readRow1) |>> List.tryHead
+
+    
+    let buildChangeRequest  (chreqId : int64) : SqliteDb<ChangeRequest option> =
+        sqliteDb { 
+            match! getChangeRequestInfo chreqId with
+            | None -> return None
+            | Some info ->
+                let! xs = getAssetChanges chreqId
+                let! ys = getAttributeChanges chreqId 
+                let ans = 
+                    { Info = info
+                      AssetChanges = xs
+                      AttributeChanges = ys
+                    }
+                return (Some ans)
+        }
 

@@ -55,8 +55,5 @@ let test01 (chreqId : int64) =
 
     runSqliteDb connParams 
         <| sqliteDb { 
-                let! info = getChangeRequestInfo chreqId
-                let! xs = getAssetChanges chreqId
-                let! ys = getAttributeChanges chreqId
-                return (info, xs, ys)
+                return! buildChangeRequest chreqId 
             }

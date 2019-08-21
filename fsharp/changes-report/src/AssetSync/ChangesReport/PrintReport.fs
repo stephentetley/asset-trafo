@@ -19,6 +19,34 @@ module PrintReport =
     // ************************************************************************
     // Attribute changes
 
+    /// Change Request Table
+    let changeRequestInfosTable (infos : ChangeRequestInfo list) : Markdown option = 
+        let headings =
+            [ alignLeft 30 (headingTitle "Change Request Id")
+            ; alignLeft 28 (headingTitle "Status")
+            ; alignLeft 28 (headingTitle "Request Time")
+            
+            ; alignLeft 32 (headingTitle "Comment")
+            ]
+
+        let makeRow (info : ChangeRequestInfo) : TableRow= 
+            let name = info.ChangeRequestId.ToString()
+            [ inlineLink name ("#cr" + name) None   |> markdownText 
+            ; text info.Status                      |> markdownText
+            ; iso8601DateTimeMd info.RequestTime    |> markdownText 
+            ; info.Comment      |> text             |> markdownText 
+            ]
+        
+        let rows = infos |> List.map makeRow 
+    
+        match infos with
+        | [] -> None
+        | _ -> makeTableWithHeadings headings rows |> gridTable |> Some
+
+
+    // ************************************************************************
+    // Attribute changes
+
     let attributeValue (attrValue : AttributeValue) : Text = 
         text attrValue.Value
    
