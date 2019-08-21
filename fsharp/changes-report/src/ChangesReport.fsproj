@@ -10,7 +10,8 @@
     <Compile Include="AssetSync\ChangesReport\Old\Syntax.fs" />
     <Compile Include="AssetSync\ChangesReport\Old\ReadCsv.fs" />
     <Compile Include="AssetSync\ChangesReport\Old\ChangeReport.fs" />
-    <Compile Include="AssetSync\ChangesReport\ChangeRequestSchema.fs" />
+    <Compile Include="AssetSync\ChangesReport\ImportSchema.fs" />
+    <Compile Include="AssetSync\ChangesReport\Datatypes.fs" />
     <Compile Include="AssetSync\ChangesReport\PopulateChangesDb.fs" />
     <Compile Include="AssetSync\ChangesReport\StructRelationshipsDb.fs" />
   </ItemGroup>

@@ -4,7 +4,7 @@
 namespace AssetSync.ChangesReport
 
 
-module ChangeRequestSchema =
+module ImportSchema =
     
     open FSharp.Data
 

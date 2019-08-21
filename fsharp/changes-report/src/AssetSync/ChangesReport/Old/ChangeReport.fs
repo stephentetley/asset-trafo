@@ -20,19 +20,6 @@ module ChangeReport =
 
 
 
-    /// For MarkdownDoc
-
-    let htmlIdAnchor (name : string) (body : Text) : Text = 
-        rawtext (sprintf "<a id=\"%s\">" name) ^^ body ^^ rawtext "</a>"
-
-    /// Print a DataTime. 
-    /// The output uses FSharp's ToString() so it may be printed in 
-    /// exponential notation.
-    let dateTimeDoc (datetime : System.DateTime) (format : string) : Text = 
-        datetime.ToString(format) |> text
-
-    let iso8601DateTimeDoc (datetime : System.DateTime) : Text = 
-        dateTimeDoc datetime "yyyy-MM-dd hh:mm:ss"
 
 
 
@@ -58,7 +45,7 @@ module ChangeReport =
             let name = requestId.ToString()
             [ inlineLink name ("#cr" + name) None |> markdownText 
             ; text status |> markdownText
-            ; iso8601DateTimeDoc requestTime |> markdownText 
+            ; iso8601DateTimeMd requestTime |> markdownText 
             ]
         let specs = [ alignLeft 32 ; alignLeft 22; alignLeft 22 ]
         let headers = 
@@ -124,8 +111,8 @@ module ChangeReport =
 
     let assetPropertyChangesTable (assetChanges : AssetChange list) : Markdown = 
         let rows = assetPropertyChangeRows assetChanges
-        let specs = [ alignLeft 30; alignLeft 35; alignLeft 35; alignLeft 35 ]
-        let headers = [ "Asset"; "Name"; "AI2 Value"; "AIDE Value" ] 
+        let specs = [ alignLeft 30; alignLeft 35; alignLeft 35; alignLeft 35; alignLeft 35 ]
+        let headers = [ "Asset"; "Name"; "Property"; "AI2 Value"; "AIDE Value" ] 
                             |> List.map ( markdownText << doubleAsterisks << text)
 
         match rows with
@@ -145,7 +132,7 @@ module ChangeReport =
 
         h2 title
         ^!!^ markdownText (text "Request status:" ^+^ text changeRequest.RequestStatus)
-        ^!!^ markdownText (text "Request time:" ^+^ iso8601DateTimeDoc changeRequest.RequestTime)
+        ^!!^ markdownText (text "Request time:" ^+^ iso8601DateTimeMd changeRequest.RequestTime)
         ^!!^ assetPropertyChangesTable changeRequest.AssetChanges
         ^!!^ attributeChangesTable changeRequest.AttributeChanges
         ^!!^ linkToTop ()

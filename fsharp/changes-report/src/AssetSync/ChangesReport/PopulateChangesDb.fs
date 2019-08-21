@@ -10,7 +10,7 @@ module PopulateChangesDb =
 
     open SLSqlite.Core
 
-    open AssetSync.ChangesReport.ChangeRequestSchema
+    open AssetSync.ChangesReport.ImportSchema
 
 
         

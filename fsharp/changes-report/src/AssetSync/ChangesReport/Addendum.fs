@@ -6,10 +6,20 @@ namespace AssetSync.ChangesReport
 
 module Addendum =
     
+    open SLSqlite.Core
     open MarkdownDoc.Markdown
+
 
     // Potential additions to library with unstable APIs 
     // (sl-sqlite, markdown-doc, ...)
+
+    // ************************************************************************
+    // For sl-sqlite
+
+
+    let getString (reader : RowReader) (field : string) : string = 
+        let ix = reader.GetOrdinal(field)
+        reader.GetString(ix)
 
 
     // ************************************************************************
