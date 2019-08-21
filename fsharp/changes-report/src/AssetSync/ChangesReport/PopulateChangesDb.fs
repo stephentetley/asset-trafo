@@ -12,20 +12,50 @@ module PopulateChangesDb =
 
     open AssetSync.ChangesReport.ImportSchema
 
+    // ************************************************************************
+    // Table: change_request
+
+    let changeRequestInsert (row : ChangeRequestsRow) : IndexedCommand option =
+        let sql =
+            "INSERT INTO change_request \
+            (change_request_id, \
+            change_request_time, \
+            change_request_type, \
+            change_request_status, \
+            change_request_comments) \
+            VALUES \
+            (?,?,?,  ?,?)"
+        let cmd = 
+            new IndexedCommand(commandText = sql)
+                |> addParam (int64Param row.ChangeRequestId)
+                |> addParam (dateTimeParam row.ChangeRequestTime)
+                |> addParam (stringParam row.ChangeRequestType)
+                |> addParam (stringParam row.ChangeRequestStatus)
+                |> addParam (stringParam row.ChangeRequestComments)
+        cmd |> Some
+
+    let insertChangeRequestRow (row : ChangeRequestsRow) : SqliteDb<unit> = 
+        match changeRequestInsert row with
+        | Some statement -> 
+            executeNonQueryIndexed statement |>> ignore
+        | None -> mreturn ()
+
+    let insertChangeRequestRows (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
+            let! table = 
+                liftOperationResult (fun _ -> readChangeRequestsExport csvPath)
+            return! withTransaction <| sforMz table.Rows insertChangeRequestRow
+        }
 
         
     // ************************************************************************
-    // Table: asset_change
+    // Table: change_request_asset
 
     let assetChangeInsert (row : ChangeReqAssetsRow) : IndexedCommand option =
         let sql =
             "INSERT INTO change_request_asset \
             (aide_asset_id, \
             change_request_id, \
-            change_request_time, \
-            change_request_type, \
-            change_request_status, \
-            change_request_comments, \
             ai_asset_reference, \
             aide_asset_reference, \
             ai_asset_name, \
@@ -47,15 +77,11 @@ module PopulateChangesDb =
             aide_location_reference, \
             aide_asset_deleted) \
             VALUES \
-            (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?, ?,?,?,  ?,?,?,  ?,?)"
+            (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?, ?,?,?,  ?)"
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AideAssetId)
                 |> addParam (int64Param row.ChangeRequestId)
-                |> addParam (dateTimeParam row.ChangeRequestTime)
-                |> addParam (stringParam row.ChangeRequestType)
-                |> addParam (stringParam row.ChangeRequestStatus)
-                |> addParam (stringParam row.ChangeRequestComments)
                 |> addParam (stringParam row.AiAssetReference)
                 |> addParam (stringParam row.AideAssetReference)
                 |> addParam (stringParam row.AiAssetName)
@@ -92,17 +118,13 @@ module PopulateChangesDb =
         }
 
     // ************************************************************************
-    // Table: attribute_change
+    // Table: change_request_attribute
 
     let attributeChangeInsert (row : ChangeReqAttributesRow) : IndexedCommand option =
         let sql =
             "INSERT INTO change_request_attribute \
             (aide_asset_attr_value_id, \
             change_request_id, \
-            change_request_time, \
-            change_request_type, \
-            change_request_status, \
-            change_request_comments, \
             asset_reference, \
             asset_common_name, \
             attribute_name, \
@@ -110,15 +132,11 @@ module PopulateChangesDb =
             ai_lookup_value, \
             aide_value, \
             aide_lookup_value) \
-            VALUES (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?, ?)"
+            VALUES (?,?,?,  ?,?,?,  ?,?,?)"
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AssetAttrValueId)
                 |> addParam (int64Param row.ChangeRequestId)
-                |> addParam (dateTimeParam row.ChangeRequestTime)
-                |> addParam (stringParam row.ChangeRequestType)
-                |> addParam (stringParam row.ChangeRequestStatus)
-                |> addParam (stringParam row.ChangeRequestComments)
                 |> addParam (stringParam row.AssetReference)
                 |> addParam (stringParam row.AssetCommonName)
                 |> addParam (stringParam row.AttributeName)
@@ -144,17 +162,13 @@ module PopulateChangesDb =
 
     
     // ************************************************************************
-    // Table: attribute_change
+    // Table: change_request_repeated_attribute
 
     let repeatedAttributeChangeInsert (row : ChangeReqRepeatedAttributesRow) : IndexedCommand option =
         let sql =        
             "INSERT INTO change_request_repeated_attribute \
             (aide_asset_attr_repeating_value_id, \
             change_request_id, \
-            change_request_time, \
-            change_request_type, \
-            change_request_status, \
-            change_request_comments, \
             asset_reference, \
             asset_common_name, \
             attribute_name, \
@@ -163,15 +177,11 @@ module PopulateChangesDb =
             ai_lookup_value, \
             aide_value, \
             aide_lookup_value) \
-            VALUES (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?)"
+            VALUES (?,?,?,  ?,?,?,  ?,?,?,  ?)"
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AssetAttrRepeatingValueId)
                 |> addParam (int64Param row.ChangeRequestId)
-                |> addParam (dateTimeParam row.ChangeRequestTime)
-                |> addParam (stringParam row.ChangeRequestType)
-                |> addParam (stringParam row.ChangeRequestStatus)
-                |> addParam (stringParam row.ChangeRequestComments)
                 |> addParam (stringParam row.AssetReference)
                 |> addParam (stringParam row.AssetCommonName)
                 |> addParam (stringParam row.AttributeName)

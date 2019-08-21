@@ -1,22 +1,25 @@
 
 -- drop tables
-
+DROP TABLE IF EXISTS change_request;
 DROP TABLE IF EXISTS change_request_asset;
 DROP TABLE IF EXISTS change_request_attribute;
 DROP TABLE IF EXISTS change_request_repeated_attribute;
 
 -- create tables
 
-
+CREATE TABLE change_request
+(
+    change_request_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
+    change_request_time TEXT,
+    change_request_type TEXT,
+    change_request_status TEXT,
+    change_request_comments TEXT
+);
 
 CREATE TABLE change_request_asset
 (
     aide_asset_id BIGINT PRIMARY KEY UNIQUE NOT NULL, 
     change_request_id BIGINT,
-    change_request_time TEXT,
-    change_request_type TEXT,
-    change_request_status TEXT,
-    change_request_comments TEXT,
     ai_asset_reference TEXT,
     aide_asset_reference TEXT,
     ai_asset_name TEXT,
@@ -43,10 +46,6 @@ CREATE TABLE change_request_attribute
 (
     aide_asset_attr_value_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
     change_request_id BIGINT,
-    change_request_time TEXT,
-    change_request_type TEXT,
-    change_request_status TEXT,
-    change_request_comments TEXT,
     asset_reference TEXT,
     asset_common_name TEXT,
     attribute_name TEXT,
@@ -60,10 +59,6 @@ CREATE TABLE change_request_repeated_attribute
 (
     aide_asset_attr_repeating_value_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
     change_request_id BIGINT,
-    change_request_time TEXT,
-    change_request_type TEXT,
-    change_request_status TEXT,
-    change_request_comments TEXT,
     asset_reference TEXT,
     asset_common_name TEXT,
     attribute_name TEXT,

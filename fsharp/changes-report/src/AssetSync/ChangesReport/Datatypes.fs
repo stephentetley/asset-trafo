@@ -6,19 +6,8 @@ namespace AssetSync.ChangesReport
 
 module Datatypes =
     
-    /// Assets have "properties" { name, common name, grid ref... }
-    /// that are stored inline with the "Asset record". 
-    /// Because they are stored inline, "properties" are diffferent
-    /// to attributes that are stored in a separate table with a foreign
-    /// key back to the asset.
-    /// The input report lists both AIDE an AI property values regardless
-    /// of whether the value has changed in AIDE.
-    type AssetProperty = 
-        { PropertyName : string
-          AiValue : string
-          AideValue : string
-        }
-        member x.HasChanged with get () : bool = x.AideValue <> x.AiValue
+    
+    
 
 
     type AttributeValue = 
@@ -41,4 +30,43 @@ module Datatypes =
           AttributeName : string
           AiValue : AttributeValue
           AideValue : AttributeValue
+        }
+
+    /// Assets have "properties" { name, common name, manufacturer, 
+    /// grid ref... } that are stored inline with the "Asset record". 
+    /// Because they are stored inline, "properties" are diffferent
+    /// to attributes that are stored in a separate table with a foreign
+    /// key back to the asset.
+    /// The input report lists both AI and AIDE property values regardless
+    /// of whether the value has changed in AIDE.
+    type AssetProperty = 
+        { PropertyName : string
+          AiValue : string
+          AideValue : string
+        }
+        member x.HasChanged with get () : bool = x.AideValue <> x.AiValue
+
+    type AssetChange = 
+        { Reference : string
+          AiAssetName : string
+          AiCommonName : string
+          AssetProperties : AssetProperty list
+        }
+        member x.HasChangedProperties 
+            with get () : bool = 
+                x.AssetProperties |> List.exists (fun prop -> prop.HasChanged)
+
+
+    type ChangeRequestInfo = 
+        { ChangeRequestId : int64
+          Status : string
+          Comment: string
+          RequestTime : System.DateTime
+        }
+
+
+    type ChangeRequest = 
+        { Info : ChangeRequestInfo
+          AssetChanges : AssetChange list
+          AttributeChanges : AttributeChange list
         }

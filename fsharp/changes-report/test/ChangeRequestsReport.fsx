@@ -49,28 +49,13 @@ let outputFile (relFileName : string) =
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
 
-let test01 (chreqid : int64) = 
+let test01 (chreqId : int64) = 
     let dbActive = outputFile "change_requests.sqlite" |> Path.GetFullPath
     let connParams = sqliteConnParamsVersion3 dbActive
-    
-    let sql = 
-        "SELECT \
-                cr_asset.change_request_id     AS chreq_id, \
-                cr_asset.* \
-        FROM        change_request_asset AS cr_asset \
-        WHERE \
-                cr_asset.change_request_id = :chreqid \
-        ;"
-
-    let cmd = new SQLiteCommand(commandText = sql)
-    cmd.Parameters.AddWithValue(parameterName = "chreqid", value = box chreqid) |> ignore
-        
-    let readRow1 (reader : RowReader)   = 
-        let key = reader.GetInt64(0)
-        let changes = getAssetPropertyChanges reader
-        (key, changes)
 
     runSqliteDb connParams 
         <| sqliteDb { 
-                return! executeReader cmd (readerReadAll readRow1)
+                let! xs = getAssetChanges chreqId
+                let! ys = getAttributeChanges chreqId
+                return (xs,ys)
             }

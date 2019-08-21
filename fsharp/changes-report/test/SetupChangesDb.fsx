@@ -53,12 +53,14 @@ let pathToDbTemplate () : string =
 type ErrMsg = string
 
 let main () : Result<unit, ErrMsg> = 
+    let changeRequestsCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_change_reqs_20190821.csv"
     let assetChangesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_assets_20190820.csv"
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_assets_20190821.csv"
     let attributeChangesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_attributes_20190820.csv"
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_attributes_20190821.csv"
     let repeatedAttributeChangesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_repeated_attributes_20190820.csv"
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_repeated_attributes_20190821.csv"
 
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputFile "change_requests.sqlite" |> Path.GetFullPath
@@ -71,6 +73,7 @@ let main () : Result<unit, ErrMsg> =
     let connParams = sqliteConnParamsVersion3 dbActive
     runSqliteDb connParams 
         <| sqliteDb { 
+                do! insertChangeRequestRows changeRequestsCsv
                 do! insertAsssetChangeRows assetChangesCsv
                 do! insertAttributeChangeRows attributeChangesCsv
                 do! insertRepeatedAttributeChangeRows repeatedAttributeChangesCsv
