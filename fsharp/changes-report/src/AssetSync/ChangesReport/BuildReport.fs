@@ -120,6 +120,49 @@ module BuildReport =
         executeReader cmd (readerReadAll readRow1)
 
     // ************************************************************************
+    // Repeated Attribute changes
+
+
+    let getRepeatedAttributeChanges (chreqId : int64) : SqliteDb<RepeatedAttributeChange list> =
+        let sql = 
+            """
+            SELECT 
+                    cr_rep_attr.asset_name           AS [asset_name],
+                    cr_rep_attr.asset_reference      AS [reference],
+                    cr_rep_attr.attribute_name       AS [attibute_name],
+                    cr_rep_attr.attribute_set_name   AS [attibute_set_name],
+                    cr_rep_attr.ai_value             AS [ai_value],
+                    cr_rep_attr.ai_lookup_value      AS [ai_lookup_value],
+                    cr_rep_attr.aide_value           AS [aide_value],
+                    cr_rep_attr.aide_lookup_value    AS [aide_lookup_value]
+            FROM    change_request_repeated_attribute AS cr_rep_attr
+            WHERE
+                    cr_rep_attr.change_request_id = :chreqid
+            ;
+            """
+        let cmd = new SQLiteCommand(commandText = sql)
+        cmd.Parameters.AddWithValue(parameterName = "chreqid", value = box chreqId) |> ignore
+                       
+        let readRow1 (reader : RowReader) : RepeatedAttributeChange = 
+            let aiValue = 
+                match reader.TryGetString(5) with
+                | None -> reader.TryGetString(4) |> Option.defaultValue "" |> Lookup
+                | Some value -> printfn "%s" value; value |> Literal
+            let aideValue = 
+                match reader.TryGetString(7) with
+                | None -> reader.TryGetString(6) |> Option.defaultValue "" |> Lookup
+                | Some value -> value |> Literal
+            { AssetName = reader.GetString(0)
+            ; Reference = reader.GetString(1)
+            ; RepeatedAttributeName = reader.GetString(2)
+            ; AttributeSetName = reader.GetString(3)
+            ; AiValue = aiValue
+            ; AideValue = aideValue
+            }
+                       
+        executeReader cmd (readerReadAll readRow1)
+
+    // ************************************************************************
     // Change Request Info
 
     let getChangeRequestInfo (chreqId : int64) : SqliteDb<ChangeRequestInfo option> =
@@ -158,10 +201,12 @@ module BuildReport =
             | Some info ->
                 let! xs = getAssetChanges chreqId
                 let! ys = getAttributeChanges chreqId 
+                let! zs = getRepeatedAttributeChanges chreqId
                 let ans = 
                     { Info = info
-                      AssetChanges = xs
-                      AttributeChanges = ys
+                    ; AssetChanges = xs
+                    ; AttributeChanges = ys
+                    ; RepeatedAttributeChanges = zs
                     }
                 return (Some ans)
         }

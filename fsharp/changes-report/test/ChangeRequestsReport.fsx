@@ -64,21 +64,8 @@ let runReport (chreqIds : int64 list)
         generateChangesReport changes pandocOpts outputHtmlFile
 
 let test01 () =
-    let changeRequests = [ 148364L; 148365L; 148366L; 148367L; 148372L; 148374L ]
+    let changeRequests = [ 15742L; 148364L; 148365L; 148366L; 148367L; 148372L; 148374L ]
     let htmlOutput = outputFile "change_request_report_20190822.html"
     runReport changeRequests htmlOutput
     
 
-
-let demo10 () = 
-    let dbActive = outputFile "change_requests.sqlite" |> Path.GetFullPath
-    let connParams = sqliteConnParamsVersion3 dbActive
-    let cmd = new SQLiteCommand "SELECT NULL AS name, NULL AS country;" 
-    
-    let readRow1 (reader : RowReader) : string option * string option = 
-        reader.TryGetString(0), reader.TryGetString(1)
-
-    runSqliteDb connParams 
-        <| sqliteDb { 
-                return! executeReader cmd (readerReadAll readRow1)
-            }

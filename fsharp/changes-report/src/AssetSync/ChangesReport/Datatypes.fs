@@ -32,6 +32,15 @@ module Datatypes =
           AideValue : AttributeValue
         }
 
+    type RepeatedAttributeChange = 
+        { AssetName : string
+          Reference : string
+          RepeatedAttributeName : string
+          AttributeSetName : string
+          AiValue : AttributeValue
+          AideValue : AttributeValue
+        } 
+
     /// Assets have "properties" { name, common name, manufacturer, 
     /// grid ref... } that are stored inline with the "Asset record". 
     /// Because they are stored inline, "properties" are diffferent
@@ -70,4 +79,5 @@ module Datatypes =
         { Info : ChangeRequestInfo
           AssetChanges : AssetChange list
           AttributeChanges : AttributeChange list
+          RepeatedAttributeChanges : RepeatedAttributeChange list
         }

@@ -109,6 +109,39 @@ module PrintReport =
             h3 (text "Attribute Changes" )
                 ^!!^ table
 
+    // ************************************************************************
+    // Attribute changes
+
+   
+    let repeatedAttributeChangeRow (repAttrChange : RepeatedAttributeChange) : Table.TableRow = 
+        [ repAttrChange.Reference               |> text     |> markdownText
+        ; repAttrChange.AssetName               |> text     |> markdownText
+        ; repAttrChange.AttributeSetName        |> text     |> markdownText 
+        ; repAttrChange.RepeatedAttributeName   |> text     |> markdownText 
+        ; attributeValue repAttrChange.AiValue              |> markdownText 
+        ; attributeValue repAttrChange.AideValue            |> markdownText 
+        ]
+
+    let repeatedAttributeChangesTable (repAttrChanges : RepeatedAttributeChange list) : Markdown option = 
+        let headings =
+            [ alignLeft 30 (headingTitle "Asset Reference")
+            ; alignLeft 40 (headingTitle "Asset Name")
+            ; alignLeft 40 (headingTitle "Attribute Set Name")
+            ; alignLeft 40 (headingTitle "Attribute Name")
+            ; alignLeft 30 (headingTitle "AI Value")
+            ; alignLeft 30 (headingTitle "AIDE Value")
+            ]
+        let (rows : TableRow list) = repAttrChanges |> List.map repeatedAttributeChangeRow 
+        match rows with
+        | [] -> None
+        | _ -> makeTableWithHeadings headings rows |> gridTable |> Some
+    
+    let repeatedAttributeChangesSection (repeatedAttributeChanges : RepeatedAttributeChange list) : Markdown = 
+        match repeatedAttributeChangesTable repeatedAttributeChanges with
+        | None -> asterisks (text "No repeated attribute changes")  |> h3
+        | Some table -> 
+            h3 (text "Repeated Attribute Changes" )
+                ^!!^ table
 
     // ************************************************************************
     // Asset "property" changes
@@ -158,6 +191,7 @@ module PrintReport =
         changeRequestSectionHeader (changeRequest.Info)
             ^!!^ assetPropertyChangesSection changeRequest.AssetChanges
             ^!!^ attributeChangesSection changeRequest.AttributeChanges
+            ^!!^ repeatedAttributeChangesSection changeRequest.RepeatedAttributeChanges
             ^!!^ linkToTop
 
     let makeMarkdownReport (changeRequests : ChangeRequest list) : Markdown = 
