@@ -74,9 +74,9 @@ let main () : Result<unit, ErrMsg> =
     let connParams = sqliteConnParamsVersion3 dbActive
     runSqliteDb connParams 
         <| sqliteDb { 
-                do! insertAideStructRelationshipRows aideStructRelationshipsCsv
-                do! insertAideAssetLookupRows aideAssetLookupsCsv
                 do! insertAiStructRelationshipRows aiStructRelationshipsCsv
                 do! insertAiAssetLookupRows aiAssetLookupsCsv
+                do! insertAideStructRelationshipRows aideStructRelationshipsCsv
+                do! insertAideAssetLookupRows aideAssetLookupsCsv
                 return ()
             }

@@ -39,22 +39,25 @@ module PopulateDb =
 
 
 
-    let makeAideStructRelInsert (row : AideStructureRelationshipRow) : KeyedCommand option =
+    let makeAideStructRelInsert (row : AideStructureRelationshipRow) : IndexedCommand option =
         let sql = 
-            "INSERT INTO aide_structure_relationships (structure_relationship_id, parent_id, child_id) \
-            VALUES (:relid, :parent, :child)"
+            """
+            INSERT INTO aide_structure_relationships 
+            (structure_relationship_id, parent_id, child_id)
+            VALUES (?, ?,?);
+            """
         let cmd = 
-            new KeyedCommand(commandText = sql)
-                |> addNamedParam "relid" (int64Param row.StructureRelationshipId)
-                |> addNamedParam "parent" (int64Param row.ParentAideAssetId)
-                |> addNamedParam "child"(int64Param row.ChildAideAssetId)
+            new IndexedCommand(commandText = sql)
+                |> addParam (int64Param row.StructureRelationshipId)
+                |> addParam (int64Param row.ParentAideAssetId)
+                |> addParam (int64Param row.ChildAideAssetId)
         cmd |> Some
 
 
     let insertAideStructRelationshipRow (row : AideStructureRelationshipRow) : SqliteDb<unit> = 
         match makeAideStructRelInsert row with
         | Some statement -> 
-            executeNonQueryKeyed statement |>> ignore
+            executeNonQueryIndexed statement |>> ignore
         | None -> mreturn ()
 
     let insertAideStructRelationshipRows (csvPath : string) : SqliteDb<unit> = 
@@ -99,17 +102,13 @@ module PopulateDb =
 
     let makeAideAssetLookupInsert (row : AideAssetLookupRow) : IndexedCommand option =
         let sql = 
-            "INSERT INTO aide_asset_lookups \
-            (aide_asset_id, \
-            change_request_id, \
-            asset_id, \
-            reference, \
-            asset_common_name, \
-            asset_name, \
-            asset_type, \
-            asset_category) \
-            VALUES \
-            (?,?,?,  ?,?,?, ?,?)"
+            """
+            INSERT INTO aide_asset_lookups
+            (aide_asset_id, change_request_id, asset_id,
+            reference, asset_common_name, asset_name,
+            asset_type, asset_category)
+            VALUES (?,?,?,  ?,?,?, ?,?);
+            """
         let cmd = 
             new IndexedCommand (commandText = sql)
                 |> addParam (int64Param row.AideAssetId)
@@ -164,22 +163,25 @@ module PopulateDb =
 
 
 
-    let makeAiStructRelInsert (row : AiStructureRelationshipRow) : KeyedCommand option =
+    let makeAiStructRelInsert (row : AiStructureRelationshipRow) : IndexedCommand option =
         let sql = 
-            "INSERT INTO ai_structure_relationships (structure_relationship_id, parent_id, child_id) \
-            VALUES (:relid, :parent, :child)"
+            """
+            INSERT INTO ai_structure_relationships 
+            (structure_relationship_id, parent_id, child_id)
+            VALUES (?,?,?);
+            """
         let cmd = 
-            new KeyedCommand(commandText = sql)
-                |> addNamedParam "relid" (int64Param row.StructureRelationshipId)
-                |> addNamedParam "parent" (int64Param row.ParentAssetId)
-                |> addNamedParam "child"(int64Param row.ChildAssetId)
+            new IndexedCommand(commandText = sql)
+                |> addParam (int64Param row.StructureRelationshipId)
+                |> addParam (int64Param row.ParentAssetId)
+                |> addParam (int64Param row.ChildAssetId)
         cmd |> Some
 
 
     let insertAiStructRelationshipRow (row : AiStructureRelationshipRow) : SqliteDb<unit> = 
         match makeAiStructRelInsert row with
         | Some statement -> 
-            executeNonQueryKeyed statement |>> ignore
+            executeNonQueryIndexed statement |>> ignore
         | None -> mreturn ()
 
     let insertAiStructRelationshipRows (csvPath : string) : SqliteDb<unit> = 
@@ -195,7 +197,7 @@ module PopulateDb =
 
     [<Literal>]
     let AiAssetLookupSchema = 
-         "AssetId(int64 option),\
+         "AssetId(int64),\
          Reference(string),\
          AssetCommonName(string),\
          AssetName(string),\
@@ -222,18 +224,15 @@ module PopulateDb =
 
     let makeAiAssetLookupInsert (row : AiAssetLookupRow) : IndexedCommand option =
         let sql = 
-            "INSERT INTO aide_asset_lookups \
-            (asset_id, \
-            reference, \
-            asset_common_name, \
-            asset_name, \
-            asset_type, \
-            asset_category) \
-            VALUES \
-            (?,?,?,  ?,?,?, ?,?)"
+            """
+            INSERT INTO ai_asset_lookups
+            (asset_id, reference, asset_common_name, 
+             asset_name, asset_type, asset_category)
+            VALUES (?,?,?,  ?,?,?);
+            """
         let cmd = 
             new IndexedCommand (commandText = sql)
-                |> addParam (optionNull int64Param row.AssetId)
+                |> addParam (int64Param row.AssetId)
                 |> addParam (stringParam row.Reference)              
                 |> addParam (stringParam row.AssetCommonName)
                 |> addParam (stringParam row.AssetName)
