@@ -5,9 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="SetupChangesDb.fsx" />
-    <None Include="ChangeRequestsReport.fsx" />
-    <None Include="SetupStructRelationshipsDb.fsx" />
+    <None Include="ChangesReport\SetupChangesDb.fsx" />
+    <None Include="ChangesReport\ChangeRequestsReport.fsx" />
+    <None Include="StructureRelationships\SetupDb.fsx" />
+    <None Include="StructureRelationships\Test01.fsx" />
   </ItemGroup>
 
   <ItemGroup>

@@ -36,17 +36,17 @@ open SLFormat.CommandOptions.CommandOptions
 open MarkdownDoc.Markdown
 open MarkdownDoc.Pandoc
 
-#load "..\src\AssetSync\Base\Addendum.fs"
-#load "..\src\AssetSync\ChangesReport\Datatypes.fs"
-#load "..\src\AssetSync\ChangesReport\BuildReport.fs"
-#load "..\src\AssetSync\ChangesReport\PrintReport.fs"
+#load "..\..\src\AssetSync\Base\Addendum.fs"
+#load "..\..\src\AssetSync\ChangesReport\Datatypes.fs"
+#load "..\..\src\AssetSync\ChangesReport\BuildReport.fs"
+#load "..\..\src\AssetSync\ChangesReport\PrintReport.fs"
 open AssetSync.Base.Addendum
 open AssetSync.ChangesReport.Datatypes
 open AssetSync.ChangesReport.BuildReport
 open AssetSync.ChangesReport.PrintReport
 
 let outputFile (relFileName : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output", relFileName)
 
 let pandocHtmlOptions () : PandocOptions = 
     pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"

@@ -36,18 +36,18 @@ open SLSqlite.Core
 
 
 
-#load "..\src\AssetSync\ChangesReport\ImportSchema.fs"
-#load "..\src\AssetSync\ChangesReport\PopulateChangesDb.fs"
+#load "..\..\src\AssetSync\ChangesReport\ImportSchema.fs"
+#load "..\..\src\AssetSync\ChangesReport\PopulateChangesDb.fs"
 open AssetSync.ChangesReport.PopulateChangesDb
 
 let workingDirectory () = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\output\")
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\")
 
 let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\", relativePath)
 
 let pathToDbTemplate () : string = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\", "change_request.sqlite")
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\data\", "change_request.sqlite")
 
 type ErrMsg = string
 

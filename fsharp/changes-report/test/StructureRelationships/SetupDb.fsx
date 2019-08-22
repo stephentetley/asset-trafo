@@ -33,27 +33,27 @@ Environment.SetEnvironmentVariable("PATH",
 open SLSqlite.Core
 
 
-#load "..\src\AssetSync\StructureRelationships\PopulateDb.fs"
+#load "..\..\src\AssetSync\StructureRelationships\PopulateDb.fs"
 open AssetSync.StructureRelationships.PopulateDb
 
 let workingDirectory () = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\output\")
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\")
 
 let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\", relativePath)
 
 let pathToDbTemplate () : string = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\", "structure_relationships.sqlite")
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\data\", "structure_relationships.sqlite")
 
 
 type ErrMsg = string
 
 let main () : Result<unit, ErrMsg> = 
     let aideStructRelationshipsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\aide_structure_relationships_20190820.csv"
+        @"G:\work\Projects\asset_sync\aide_report\structure_relationships_aide_20190822.csv"
 
     let aideAssetLookupsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\aide_asset_lookups_20190820.csv"
+        @"G:\work\Projects\asset_sync\aide_report\structure_relationships_aide_lookups_20190822.csv"
 
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputFile "structure_relationships.sqlite" |> Path.GetFullPath
@@ -70,38 +70,4 @@ let main () : Result<unit, ErrMsg> =
                 do! insertAideStructRelationshipRows aideStructRelationshipsCsv
                 do! insertAideAssetLookupRows aideAssetLookupsCsv
                 return ()
-            }
-
-
-// e.g test01 2111881L ;;
-let test01 (startId : int64) = 
-    let dbActive = outputFile "structure_relationships.sqlite" |> Path.GetFullPath
-    let connParams = sqliteConnParamsVersion3 dbActive
-    let sql = 
-        "WITH RECURSIVE \
-        temp_table(child_id) AS ( \
-            SELECT :start_id \
-                UNION ALL \
-            SELECT aide_structure_relationships.child_id \
-            FROM aide_structure_relationships, temp_table \
-            WHERE aide_structure_relationships.parent_id = temp_table.child_id \
-            ) \
-            SELECT \
-                temp_table.child_id AS [ChildId], \
-                aide_asset_lookups.asset_common_name AS [CommonName] \
-            FROM temp_table \
-            JOIN aide_asset_lookups    ON temp_table.child_id = aide_asset_lookups.aide_asset_id \
-            ORDER BY aide_asset_lookups.asset_common_name"
-
-    let cmd = new SQLiteCommand(commandText = sql)
-    cmd.Parameters.AddWithValue(parameterName = "start_id", value = box startId) |> ignore
-        
-    let readRow1 (reader : RowReader) : int64 * string = 
-        let key = reader.GetInt64(0)
-        let path = reader.GetString(1) 
-        (key, path)
-
-    runSqliteDb connParams 
-        <| sqliteDb { 
-                return! executeReader cmd (readerReadAll readRow1)
             }
