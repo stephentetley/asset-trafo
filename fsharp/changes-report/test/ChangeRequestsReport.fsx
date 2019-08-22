@@ -31,7 +31,7 @@ open SLSqlite.Core
 #r "SLFormat.dll"
 open SLFormat.CommandOptions.CommandOptions
 
-#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190821a\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190822\lib\netstandard2.0"
 #r "MarkdownDoc.dll"
 open MarkdownDoc.Markdown
 open MarkdownDoc.Pandoc
@@ -48,12 +48,24 @@ open AssetSync.ChangesReport.PrintReport
 let outputFile (relFileName : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
+let pandocHtmlOptions () : PandocOptions = 
+    pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"
 
-let test01 (chreqId : int64) = 
+let runReport (chreqIds : int64 list) 
+              (outputHtmlFile : string) : Result<unit, ErrMsg> = 
     let dbActive = outputFile "change_requests.sqlite" |> Path.GetFullPath
     let connParams = sqliteConnParamsVersion3 dbActive
+    let pandocOpts = pandocHtmlOptions ()
 
-    runSqliteDb connParams 
-        <| sqliteDb { 
-                return! buildChangeRequest chreqId 
-            }
+    match runSqliteDb connParams (mapM buildChangeRequest chreqIds) with
+    | Error msg -> printfn "Fail: %s" msg ; Error "Bad"
+    | Ok ochanges -> 
+        let changes = List.choose id ochanges
+        generateChangesReport changes pandocOpts outputHtmlFile
+
+let test01 () =
+    let changeRequests = [ 148364L; 148365L; 148366L; 148367L; 148372L; 148374L ]
+    let htmlOutput = outputFile "chage_request_report_20190822.html"
+    runReport changeRequests htmlOutput
+    
+
