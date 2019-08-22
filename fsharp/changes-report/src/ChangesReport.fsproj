@@ -5,17 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="AssetSync\ChangesReport\Addendum.fs" />
-    <Compile Include="AssetSync\ChangesReport\Old\ImportSchema.fs" />
-    <Compile Include="AssetSync\ChangesReport\Old\Syntax.fs" />
-    <Compile Include="AssetSync\ChangesReport\Old\ReadCsv.fs" />
-    <Compile Include="AssetSync\ChangesReport\Old\ChangeReport.fs" />
+    <Compile Include="AssetSync\Base\Addendum.fs" />
     <Compile Include="AssetSync\ChangesReport\ImportSchema.fs" />
     <Compile Include="AssetSync\ChangesReport\PopulateChangesDb.fs" />
-    <Compile Include="AssetSync\ChangesReport\StructRelationshipsDb.fs" />
     <Compile Include="AssetSync\ChangesReport\Datatypes.fs" />
     <Compile Include="AssetSync\ChangesReport\BuildReport.fs" />
     <Compile Include="AssetSync\ChangesReport\PrintReport.fs" />
+    <Compile Include="AssetSync\StructureRelationships\PopulateDb.fs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -33,8 +33,8 @@ Environment.SetEnvironmentVariable("PATH",
 open SLSqlite.Core
 
 
-#load "..\src\AssetSync\ChangesReport\StructRelationshipsDb.fs"
-open AssetSync.ChangesReport.StructRelationshipsDb
+#load "..\src\AssetSync\StructureRelationships\PopulateDb.fs"
+open AssetSync.StructureRelationships.PopulateDb
 
 let workingDirectory () = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output\")

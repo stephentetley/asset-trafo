@@ -38,7 +38,6 @@ open SLSqlite.Core
 
 #load "..\src\AssetSync\ChangesReport\ImportSchema.fs"
 #load "..\src\AssetSync\ChangesReport\PopulateChangesDb.fs"
-open AssetSync.ChangesReport.ImportSchema
 open AssetSync.ChangesReport.PopulateChangesDb
 
 let workingDirectory () = 

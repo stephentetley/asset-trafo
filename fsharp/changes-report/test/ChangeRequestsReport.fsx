@@ -36,11 +36,11 @@ open SLFormat.CommandOptions.CommandOptions
 open MarkdownDoc.Markdown
 open MarkdownDoc.Pandoc
 
-#load "..\src\AssetSync\ChangesReport\Addendum.fs"
+#load "..\src\AssetSync\Base\Addendum.fs"
 #load "..\src\AssetSync\ChangesReport\Datatypes.fs"
 #load "..\src\AssetSync\ChangesReport\BuildReport.fs"
 #load "..\src\AssetSync\ChangesReport\PrintReport.fs"
-open AssetSync.ChangesReport.Addendum
+open AssetSync.Base.Addendum
 open AssetSync.ChangesReport.Datatypes
 open AssetSync.ChangesReport.BuildReport
 open AssetSync.ChangesReport.PrintReport

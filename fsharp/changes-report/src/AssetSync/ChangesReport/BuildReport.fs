@@ -10,7 +10,7 @@ module BuildReport =
 
     open SLSqlite.Core
 
-    open AssetSync.ChangesReport.Addendum
+    open AssetSync.Base.Addendum
     open AssetSync.ChangesReport.Datatypes
 
 

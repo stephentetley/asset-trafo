@@ -16,7 +16,7 @@ module PrintReport =
     open MarkdownDoc.Pandoc
     
 
-    open AssetSync.ChangesReport.Addendum
+    open AssetSync.Base.Addendum
     open AssetSync.ChangesReport.Datatypes
 
 
