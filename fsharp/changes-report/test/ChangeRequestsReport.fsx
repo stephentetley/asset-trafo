@@ -23,7 +23,7 @@ Environment.SetEnvironmentVariable("PATH",
     Environment.GetEnvironmentVariable("PATH") + ";" + SQLiteInterop
     )
 
-#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190820\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190822\lib\netstandard2.0"
 #r "SLSqlite.dll"
 open SLSqlite.Core
 
@@ -65,7 +65,20 @@ let runReport (chreqIds : int64 list)
 
 let test01 () =
     let changeRequests = [ 148364L; 148365L; 148366L; 148367L; 148372L; 148374L ]
-    let htmlOutput = outputFile "chage_request_report_20190822.html"
+    let htmlOutput = outputFile "change_request_report_20190822.html"
     runReport changeRequests htmlOutput
     
 
+
+let demo10 () = 
+    let dbActive = outputFile "change_requests.sqlite" |> Path.GetFullPath
+    let connParams = sqliteConnParamsVersion3 dbActive
+    let cmd = new SQLiteCommand "SELECT NULL AS name, NULL AS country;" 
+    
+    let readRow1 (reader : RowReader) : string option * string option = 
+        reader.TryGetString(0), reader.TryGetString(1)
+
+    runSqliteDb connParams 
+        <| sqliteDb { 
+                return! executeReader cmd (readerReadAll readRow1)
+            }

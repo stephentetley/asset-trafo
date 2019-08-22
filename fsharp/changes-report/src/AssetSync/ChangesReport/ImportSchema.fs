@@ -87,6 +87,7 @@ module ImportSchema =
         "AssetAttrValueId(int64),\
         ChangeRequestId(int64),\
         AssetReference(string),\
+        AssetName(string),\
         AssetCommonName(string),\
         AttributeName(string),\
         AiValue(string option),\
@@ -120,6 +121,7 @@ module ImportSchema =
         "AssetAttrRepeatingValueId(int64),\
          ChangeRequestId(int64),\
          AssetReference(string),\
+         AssetName(string),\
          AssetCommonName(string),\
          AttributeName(string),\
          AttributeSetName(string option),\

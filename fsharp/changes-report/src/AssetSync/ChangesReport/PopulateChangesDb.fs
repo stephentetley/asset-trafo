@@ -12,6 +12,18 @@ module PopulateChangesDb =
 
     open AssetSync.ChangesReport.ImportSchema
 
+
+    // FSharp.Data.CsvReader appears to read csv "NULL" 
+    // as the literal string "NULL".
+    // Making the column value type `string option` doesn't
+    // seem to change this so provide an explicit work around
+    let stringParamAux (source : string) : SQLiteParameter =
+        match source with
+        | null | "NULL" | "null" -> nullParam ()
+        | _ -> stringParam source
+
+
+
     // ************************************************************************
     // Table: change_request
 
@@ -126,24 +138,26 @@ module PopulateChangesDb =
             (aide_asset_attr_value_id, \
             change_request_id, \
             asset_reference, \
+            asset_name, \
             asset_common_name, \
             attribute_name, \
             ai_value, \
             ai_lookup_value, \
             aide_value, \
             aide_lookup_value) \
-            VALUES (?,?,?,  ?,?,?,  ?,?,?)"
+            VALUES (?,?,?,  ?,?,?,  ?,?,?, ?)"
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AssetAttrValueId)
                 |> addParam (int64Param row.ChangeRequestId)
                 |> addParam (stringParam row.AssetReference)
+                |> addParam (stringParam row.AssetName)
                 |> addParam (stringParam row.AssetCommonName)
                 |> addParam (stringParam row.AttributeName)
-                |> addParam (optionNull stringParam row.AiValue)
-                |> addParam (optionNull stringParam row.AiLookupValue)
-                |> addParam (optionNull stringParam row.AideValue)
-                |> addParam (optionNull stringParam row.AideLookupValue)
+                |> addParam (optionNull stringParamAux row.AiValue)
+                |> addParam (optionNull stringParamAux row.AiLookupValue)
+                |> addParam (optionNull stringParamAux row.AideValue)
+                |> addParam (optionNull stringParamAux row.AideLookupValue)
         cmd |> Some
 
     let insertAttributeChangeRow (row : ChangeReqAttributesRow) : SqliteDb<unit> = 
@@ -170,6 +184,7 @@ module PopulateChangesDb =
             (aide_asset_attr_repeating_value_id, \
             change_request_id, \
             asset_reference, \
+            asset_name, \
             asset_common_name, \
             attribute_name, \
             attribute_set_name, \
@@ -177,19 +192,20 @@ module PopulateChangesDb =
             ai_lookup_value, \
             aide_value, \
             aide_lookup_value) \
-            VALUES (?,?,?,  ?,?,?,  ?,?,?,  ?)"
+            VALUES (?,?,?,  ?,?,?,  ?,?,?,  ?,?)"
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AssetAttrRepeatingValueId)
                 |> addParam (int64Param row.ChangeRequestId)
                 |> addParam (stringParam row.AssetReference)
+                |> addParam (stringParam row.AssetName)
                 |> addParam (stringParam row.AssetCommonName)
                 |> addParam (stringParam row.AttributeName)
-                |> addParam (optionNull stringParam row.AttributeSetName)
-                |> addParam (optionNull stringParam row.AiValue)
-                |> addParam (optionNull stringParam row.AiLookupValue)
-                |> addParam (optionNull stringParam row.AideValue)
-                |> addParam (optionNull stringParam row.AideLookupValue)
+                |> addParam (optionNull stringParamAux row.AttributeSetName)
+                |> addParam (optionNull stringParamAux row.AiValue)
+                |> addParam (optionNull stringParamAux row.AiLookupValue)
+                |> addParam (optionNull stringParamAux row.AideValue)
+                |> addParam (optionNull stringParamAux row.AideLookupValue)
         cmd |> Some
 
     let insertRepeatedAttributeChangeRow (row : ChangeReqRepeatedAttributesRow) : SqliteDb<unit> = 

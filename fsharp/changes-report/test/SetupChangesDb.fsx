@@ -30,7 +30,7 @@ open SLFormat.CommandOptions
 open SLFormat.CommandOptions.SimpleInvoke
 
 
-#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190820\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190822\lib\netstandard2.0"
 #r "SLSqlite.dll"
 open SLSqlite.Core
 
@@ -54,13 +54,13 @@ type ErrMsg = string
 
 let main () : Result<unit, ErrMsg> = 
     let changeRequestsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_change_reqs_20190821.csv"
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_change_reqs_20190822.csv"
     let assetChangesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_assets_20190821.csv"
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_assets_20190822.csv"
     let attributeChangesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_attributes_20190821.csv"
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_attributes_20190822.csv"
     let repeatedAttributeChangesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_repeated_attributes_20190821.csv"
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_repeated_attributes_20190822.csv"
 
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputFile "change_requests.sqlite" |> Path.GetFullPath

@@ -13,6 +13,7 @@ module BuildReport =
     open AssetSync.ChangesReport.Addendum
     open AssetSync.ChangesReport.Datatypes
 
+
     // ************************************************************************
     // Asset 'Property' changes
 
@@ -85,7 +86,7 @@ module BuildReport =
         let sql = 
             """
             SELECT 
-                    cr_attrib.asset_common_name    AS [common_name],
+                    cr_attrib.asset_name           AS [asset_name],
                     cr_attrib.asset_reference      AS [reference],
                     cr_attrib.attribute_name       AS [attibute_name],
                     cr_attrib.ai_value             AS [ai_value],
@@ -103,11 +104,11 @@ module BuildReport =
         let readRow1 (reader : RowReader) : AttributeChange = 
             let aiValue = 
                 match reader.TryGetString(4) with
-                | None -> reader.GetString(3) |> Lookup
-                | Some value -> value |> Literal
+                | None -> reader.TryGetString(3) |> Option.defaultValue "" |> Lookup
+                | Some value -> printfn "%s" value; value |> Literal
             let aideValue = 
                 match reader.TryGetString(6) with
-                | None -> reader.GetString(5) |> Lookup
+                | None -> reader.TryGetString(5) |> Option.defaultValue "" |> Lookup
                 | Some value -> value |> Literal
             { AssetName = reader.GetString(0)
             ; Reference = reader.GetString(1)
@@ -116,7 +117,6 @@ module BuildReport =
             ; AideValue = aideValue
             }
                    
-           
         executeReader cmd (readerReadAll readRow1)
 
     // ************************************************************************
