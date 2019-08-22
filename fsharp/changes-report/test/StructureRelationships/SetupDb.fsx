@@ -55,6 +55,13 @@ let main () : Result<unit, ErrMsg> =
     let aideAssetLookupsCsv = 
         @"G:\work\Projects\asset_sync\aide_report\structure_relationships_aide_lookups_20190822.csv"
 
+    let aiStructRelationshipsCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\structure_relationships_ai_20190822.csv"
+
+    let aiAssetLookupsCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\structure_relationships_ai_lookups_20190822.csv"
+
+
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputFile "structure_relationships.sqlite" |> Path.GetFullPath
 
@@ -69,5 +76,7 @@ let main () : Result<unit, ErrMsg> =
         <| sqliteDb { 
                 do! insertAideStructRelationshipRows aideStructRelationshipsCsv
                 do! insertAideAssetLookupRows aideAssetLookupsCsv
+                do! insertAiStructRelationshipRows aiStructRelationshipsCsv
+                do! insertAiAssetLookupRows aiAssetLookupsCsv
                 return ()
             }

@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="ChangesReport\SetupChangesDb.fsx" />
-    <None Include="ChangesReport\ChangeRequestsReport.fsx" />
+    <None Include="ChangesReport\SetupDb.fsx" />
+    <None Include="ChangesReport\Test01.fsx" />
     <None Include="StructureRelationships\SetupDb.fsx" />
     <None Include="StructureRelationships\Test01.fsx" />
   </ItemGroup>
