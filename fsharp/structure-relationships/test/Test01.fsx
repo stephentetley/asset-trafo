@@ -46,44 +46,24 @@ let getConnParams () : SqliteConnParams =
     let dbActive = dbFile "structure_relationships.sqlite" |> Path.GetFullPath
     sqliteConnParamsVersion3 dbActive
 
+
+
 // e.g test01 2111881L ;;
 let test01 (startId : int64) = 
-    
-    let sql = 
-        """
-        WITH RECURSIVE
-        temp_table(child_id) AS (
-            SELECT :start_id
-                UNION ALL
-            SELECT aide_structure_relationships.child_id
-            FROM aide_structure_relationships, temp_table
-            WHERE aide_structure_relationships.parent_id = temp_table.child_id
-            )
-            SELECT
-                temp_table.child_id AS [ChildId],
-                aide_asset_lookups.asset_common_name AS [CommonName]
-            FROM temp_table
-            JOIN aide_asset_lookups    ON temp_table.child_id = aide_asset_lookups.aide_asset_id
-            ORDER BY aide_asset_lookups.asset_common_name
-            ;
-        """
-
-    let cmd = new SQLiteCommand(commandText = sql)
-    cmd.Parameters.AddWithValue(parameterName = "start_id", value = box startId) |> ignore
-        
-    let readRow1 (reader : ResultItem) : int64 * string = 
-        let key = reader.GetInt64(0)
-        let path = reader.GetString(1) 
-        (key, path)
-    
     let connParams = getConnParams ()
     runSqliteDb connParams
         <| sqliteDb { 
-                return! executeReader cmd (readerReadAll readRow1)
+                return! findAideDescendants startId
+            }
+
+// e.g test02 "SAI00001460" ;;
+let test02 (sairef : string) = 
+    let connParams = getConnParams ()
+    runSqliteDb connParams
+        <| sqliteDb { 
+                match! findAiAssetId sairef with
+                | None -> return []
+                | Some key -> return! findAiDescendants key
             }
 
 
-let test02 () = 
-    let connParams = getConnParams ()
-    runSqliteDb connParams
-        <| queryFindId "SAI00001460"
