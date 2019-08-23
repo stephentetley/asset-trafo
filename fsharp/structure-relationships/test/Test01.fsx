@@ -61,9 +61,20 @@ let test02 (sairef : string) =
     let connParams = getConnParams ()
     runSqliteDb connParams
         <| sqliteDb { 
-                match! findAiAssetId sairef with
+                match! findAiAssetIndex sairef with
                 | None -> return []
                 | Some key -> return! findAiDescendants key
             }
+
+// e.g test03 141913L "SAI00001460" ;;
+let test03 (changeReqId : int64) (sairef : string) = 
+    let connParams = getConnParams ()
+    runSqliteDb connParams
+        <| sqliteDb { 
+                match! findAideAssetIndex changeReqId sairef with
+                | None -> return []
+                | Some key -> return! findAideDescendants key
+            }
+
 
 

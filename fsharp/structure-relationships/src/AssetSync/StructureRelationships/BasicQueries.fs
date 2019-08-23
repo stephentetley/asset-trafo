@@ -15,8 +15,8 @@ module BasicQueries =
     // ************************************************************************
     // Find (numeric) id from SAI reference
 
-
-    let findAiAssetId (reference : string) : SqliteDb<int64 option> = 
+    /// Assumption - at most one index for a key
+    let findAiAssetIndex (reference : string) : SqliteDb<int64 option> = 
         let sql = 
             """
             SELECT 
@@ -67,8 +67,34 @@ module BasicQueries =
 
         queryKeyed cmd (Strategy.ReadAll readRow1) 
     
+
     // ************************************************************************
-    // Find kids (AI)
+    // Find (numeric) id from SAI reference
+
+    /// Assumption - at most one index for the pair (change_request_id * key)
+    let findAideAssetIndex (changeRequestId : int64) 
+                           (reference : string) : SqliteDb<int64 option> = 
+        let sql = 
+            """
+            SELECT 
+                    aide_assets.aide_asset_id   AS [AideAssetId]
+            FROM    aide_asset_lookups          AS aide_assets
+            WHERE
+                    aide_assets.reference = :sairef
+            AND     aide_assets.change_request_id = :chreq 
+            ;
+            """
+        let cmd = 
+            new KeyedCommand (commandText = sql)
+                |> addNamedParam "sairef" (stringParam reference)
+                |> addNamedParam "chreq" (int64Param changeRequestId)
+        
+        let readRow1 (result : ResultItem) : int64 = result.GetInt64(0)
+
+        queryKeyed cmd (Strategy.Head readRow1) |> optional
+
+    // ************************************************************************
+    // Find kids (AIDE)
             
     let findAideDescendants (startId : int64) : SqliteDb<(string * string) list> =
         let sql = 
