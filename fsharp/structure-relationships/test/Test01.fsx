@@ -33,17 +33,17 @@ Environment.SetEnvironmentVariable("PATH",
 open SLSqlite.Core
 
 
-#load "..\..\src\AssetSync\StructureRelationships\PopulateDb.fs"
+#load "..\src\AssetSync\StructureRelationships\PopulateDb.fs"
 open AssetSync.StructureRelationships.PopulateDb
 
 
+let dbFile (relativePath : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
 
-let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\", relativePath)
 
 // e.g test01 2111881L ;;
 let test01 (startId : int64) = 
-    let dbActive = outputFile "structure_relationships.sqlite" |> Path.GetFullPath
+    let dbActive = dbFile "structure_relationships.sqlite" |> Path.GetFullPath
     let connParams = sqliteConnParamsVersion3 dbActive
     let sql = 
         """

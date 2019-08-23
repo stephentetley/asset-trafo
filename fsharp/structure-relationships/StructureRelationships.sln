@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29215.179
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "StructureRelationships", "src\StructureRelationships.fsproj", "{5075EFEB-6D84-4202-A118-3FCF6D87181F}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "StructureRelationshipsTest", "test\StructureRelationshipsTest.fsproj", "{5CDC3167-143E-4C3D-969F-C35D501CDAD3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5075EFEB-6D84-4202-A118-3FCF6D87181F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5075EFEB-6D84-4202-A118-3FCF6D87181F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5075EFEB-6D84-4202-A118-3FCF6D87181F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5075EFEB-6D84-4202-A118-3FCF6D87181F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CDC3167-143E-4C3D-969F-C35D501CDAD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CDC3167-143E-4C3D-969F-C35D501CDAD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CDC3167-143E-4C3D-969F-C35D501CDAD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CDC3167-143E-4C3D-969F-C35D501CDAD3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7ED2AB18-20FC-4566-BD5A-A9E02D61691C}
+	EndGlobalSection
+EndGlobal

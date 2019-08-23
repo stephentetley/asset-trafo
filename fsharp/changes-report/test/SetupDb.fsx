@@ -5,7 +5,6 @@
 #r "System.Transactions.dll"
 open System
 open System.IO
-open System.Data
 
 
 #I @"C:\Users\stephen\.nuget\packages\FSharp.Data\3.0.1\lib\netstandard2.0"
@@ -27,44 +26,42 @@ Environment.SetEnvironmentVariable("PATH",
 
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
+open SLFormat.CommandOptions
+open SLFormat.CommandOptions.SimpleInvoke
+
 
 #I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190822\lib\netstandard2.0"
 #r "SLSqlite.dll"
 open SLSqlite.Core
 
 
-#load "..\..\src\AssetSync\StructureRelationships\PopulateDb.fs"
-open AssetSync.StructureRelationships.PopulateDb
 
-let workingDirectory () = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\")
+#load "..\src\AssetSync\ChangesReport\ImportSchema.fs"
+#load "..\src\AssetSync\ChangesReport\PopulateChangesDb.fs"
+open AssetSync.ChangesReport.PopulateChangesDb
+
+
 
 let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\output\", relativePath)
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
 
 let pathToDbTemplate () : string = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\data\", "structure_relationships.sqlite")
-
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\change_request.sqlite")
 
 type ErrMsg = string
 
 let main () : Result<unit, ErrMsg> = 
-    let aideStructRelationshipsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\structure_relationships_aide_20190822.csv"
-
-    let aideAssetLookupsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\structure_relationships_aide_lookups_20190822.csv"
-
-    let aiStructRelationshipsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\structure_relationships_ai_20190822.csv"
-
-    let aiAssetLookupsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\structure_relationships_ai_lookups_20190822.csv"
-
+    let changeRequestsCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_change_reqs_20190822.csv"
+    let assetChangesCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_assets_20190822.csv"
+    let attributeChangesCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_attributes_20190822.csv"
+    let repeatedAttributeChangesCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_repeated_attributes_20190822.csv"
 
     let dbTemplate = pathToDbTemplate ()
-    let dbActive = outputFile "structure_relationships.sqlite" |> Path.GetFullPath
-
+    let dbActive = outputFile "change_requests.sqlite" |> Path.GetFullPath
     printfn "%s" dbActive
     if File.Exists(dbActive) then
         System.IO.File.Delete dbActive
@@ -74,9 +71,10 @@ let main () : Result<unit, ErrMsg> =
     let connParams = sqliteConnParamsVersion3 dbActive
     runSqliteDb connParams 
         <| sqliteDb { 
-                do! insertAiStructRelationshipRows aiStructRelationshipsCsv
-                do! insertAiAssetLookupRows aiAssetLookupsCsv
-                do! insertAideStructRelationshipRows aideStructRelationshipsCsv
-                do! insertAideAssetLookupRows aideAssetLookupsCsv
+                do! insertChangeRequestRows changeRequestsCsv
+                do! insertAsssetChangeRows assetChangesCsv
+                do! insertAttributeChangeRows attributeChangesCsv
+                do! insertRepeatedAttributeChangeRows repeatedAttributeChangesCsv
                 return ()
             }
+

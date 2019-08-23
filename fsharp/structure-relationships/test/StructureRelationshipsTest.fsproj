@@ -9,12 +9,4 @@
     <None Include="Test01.fsx" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190721" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\src\ChangesReport.fsproj" />
-  </ItemGroup>
-
 </Project>
