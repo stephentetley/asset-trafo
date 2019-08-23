@@ -23,7 +23,7 @@ Environment.SetEnvironmentVariable("PATH",
     Environment.GetEnvironmentVariable("PATH") + ";" + SQLiteInterop
     )
 
-#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190822\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190823\lib\netstandard2.0"
 #r "SLSqlite.dll"
 open SLSqlite.Core
 

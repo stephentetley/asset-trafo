@@ -20,7 +20,7 @@ module BuildReport =
     /// Note - the field might not have type=string
     /// But it looks like we can naturally show any object
     /// we find with ToString().
-    let getAssetPropertyChange (answerRow : RowReader) 
+    let getAssetPropertyChange (answerRow : ResultItem) 
                                 (propertyDescription : string)
                                 (leftField : string) 
                                 (rightField : string) : AssetProperty option = 
@@ -34,7 +34,7 @@ module BuildReport =
         else None
 
 
-    let extractAssetPropertyChanges (answerRow : RowReader) : AssetProperty list = 
+    let extractAssetPropertyChanges (answerRow : ResultItem) : AssetProperty list = 
         let properties = 
             [ ("Asset Name", "ai_asset_name","aide_asset_name")
             ; ("Common Name", "ai_common_name","aide_common_name")
@@ -51,7 +51,7 @@ module BuildReport =
             |> List.choose id 
 
 
-    let getAssetChanges (chreqid : int64) : SqliteDb<AssetChange list> =         
+    let getAssetChanges (chreqId : int64) : SqliteDb<AssetChange list> =         
         let sql : string = 
             """ 
             SELECT
@@ -61,8 +61,11 @@ module BuildReport =
                     cr_asset.change_request_id = :chreqid
             ;
             """
-        
-        let readRow1 (answerRow : RowReader) : AssetChange = 
+        let cmd = 
+            new KeyedCommand(commandText = sql)
+                |> addNamedParam "chreqid" (int64Param chreqId)   
+
+        let readRow1 (answerRow : ResultItem) : AssetChange = 
             let propChanges = extractAssetPropertyChanges answerRow
             { Reference = (valueByName answerRow "ai_asset_reference").ToString()
             ; AiAssetName = (valueByName answerRow "ai_asset_name").ToString()
@@ -70,13 +73,7 @@ module BuildReport =
             ; AssetProperties = propChanges
             }
 
-        let cmd = new SQLiteCommand(commandText = sql)
-        cmd.Parameters.AddWithValue(parameterName = "chreqid", value = box chreqid) |> ignore
-            
-        
-            
-    
-        executeReader cmd (readerReadAll readRow1)
+        queryKeyed cmd (Strategy.ReadAll readRow1)
         
     // ************************************************************************
     // Attribute changes
@@ -98,10 +95,11 @@ module BuildReport =
                     cr_attrib.change_request_id = :chreqid
             ;
             """
-        let cmd = new SQLiteCommand(commandText = sql)
-        cmd.Parameters.AddWithValue(parameterName = "chreqid", value = box chreqId) |> ignore
+        let cmd = 
+            new KeyedCommand(commandText = sql)
+                |> addNamedParam "chreqid" (int64Param chreqId) 
                    
-        let readRow1 (reader : RowReader) : AttributeChange = 
+        let readRow1 (reader : ResultItem) : AttributeChange = 
             let aiValue = 
                 match reader.TryGetString(4) with
                 | None -> reader.TryGetString(3) |> Option.defaultValue "" |> Lookup
@@ -117,7 +115,7 @@ module BuildReport =
             ; AideValue = aideValue
             }
                    
-        executeReader cmd (readerReadAll readRow1)
+        queryKeyed cmd (Strategy.ReadAll readRow1)
 
     // ************************************************************************
     // Repeated Attribute changes
@@ -140,10 +138,11 @@ module BuildReport =
                     cr_rep_attr.change_request_id = :chreqid
             ;
             """
-        let cmd = new SQLiteCommand(commandText = sql)
-        cmd.Parameters.AddWithValue(parameterName = "chreqid", value = box chreqId) |> ignore
-                       
-        let readRow1 (reader : RowReader) : RepeatedAttributeChange = 
+        let cmd = 
+            new KeyedCommand(commandText = sql)
+                |> addNamedParam "chreqid" (int64Param chreqId) 
+            
+        let readRow1 (reader : ResultItem) : RepeatedAttributeChange = 
             let aiValue = 
                 match reader.TryGetString(5) with
                 | None -> reader.TryGetString(4) |> Option.defaultValue "" |> Lookup
@@ -160,7 +159,7 @@ module BuildReport =
             ; AideValue = aideValue
             }
                        
-        executeReader cmd (readerReadAll readRow1)
+        queryKeyed cmd (Strategy.ReadAll readRow1)
 
     // ************************************************************************
     // Change Request Info
@@ -179,19 +178,19 @@ module BuildReport =
                     chreq.change_request_id = :chreqid
             ;
             """
-        let cmd = new SQLiteCommand(commandText = sql)
-        cmd.Parameters.AddWithValue(parameterName = "chreqid", value = box chreqId) |> ignore
+        let cmd = 
+            new KeyedCommand(commandText = sql)
+                |> addNamedParam "chreqid" (int64Param chreqId) 
                    
-        let readRow1 (reader : RowReader) : ChangeRequestInfo = 
+        let readRow1 (reader : ResultItem) : ChangeRequestInfo = 
             { ChangeRequestId = reader.GetInt64(0)
             ; RequestType = reader.GetString(1)
             ; Status = reader.GetString(2)
             ; Comment = reader.GetString(3)
             ; RequestTime = reader.GetDateTime(4)
             }
-                   
-           
-        executeReader cmd (readerReadAll readRow1) |>> List.tryHead
+
+        queryKeyed cmd (Strategy.ReadAll readRow1) |>> List.tryHead
 
     
     let buildChangeRequest  (chreqId : int64) : SqliteDb<ChangeRequest option> =

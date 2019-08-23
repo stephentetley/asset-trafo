@@ -14,13 +14,13 @@ module Addendum =
     // (sl-sqlite, markdown-doc, ...)
 
     // ************************************************************************
-    // For sl-sqlite
+    // For sl-sqlite ?
 
-    let valueByName (reader : RowReader) (field : string) : obj = 
+    let valueByName (reader : ResultItem) (field : string) : obj = 
         let ix = reader.GetOrdinal(field)
         reader.GetValue(ix)
 
-    let getString (reader : RowReader) (field : string) : string = 
+    let getString (reader : ResultItem) (field : string) : string = 
         let ix = reader.GetOrdinal(field)
         reader.GetString(ix)
 
