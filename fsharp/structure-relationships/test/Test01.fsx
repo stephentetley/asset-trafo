@@ -34,10 +34,12 @@ open SLSqlite.Core
 
 
 #load "..\src\AssetSync\Base\Addendum.fs"
+#load "..\src\AssetSync\StructureRelationships\Datatypes.fs"
 #load "..\src\AssetSync\StructureRelationships\BasicQueries.fs"
 open AssetSync.StructureRelationships.BasicQueries
 
-
+let outputFile (relativePath : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
 
 let dbFile (relativePath : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
@@ -75,6 +77,24 @@ let test03 (changeReqId : int64) (sairef : string) =
                 | None -> return []
                 | Some key -> return! findAideDescendants key
             }
+
+
+// e.g test04 141913L "SAI00001460" ;;
+let test04 (changeReqId : int64) (sairef : string) = 
+    let connParams = getConnParams ()
+    let action = 
+        sqliteDb { 
+            let! ai = findAiHierarchy sairef
+            let! aide = findAideHierarchy changeReqId sairef
+            return (ai.CommonNames, aide.CommonNames)
+        }
+    match runSqliteDb connParams action with
+    | Error msg -> printfn "%s" msg
+    | Ok (xs,ys) -> 
+        let aiFile = outputFile "ai.csv"
+        IO.File.WriteAllLines(path = aiFile, contents = xs)
+        let aideFile = outputFile "aide.csv"
+        IO.File.WriteAllLines(path = aideFile, contents = ys)
 
 
 

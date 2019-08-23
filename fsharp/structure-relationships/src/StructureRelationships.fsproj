@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="AssetSync\Base\Addendum.fs" />
+    <Compile Include="AssetSync\StructureRelationships\Datatypes.fs" />
     <Compile Include="AssetSync\StructureRelationships\PopulateDb.fs" />
     <Compile Include="AssetSync\StructureRelationships\BasicQueries.fs" />
   </ItemGroup>

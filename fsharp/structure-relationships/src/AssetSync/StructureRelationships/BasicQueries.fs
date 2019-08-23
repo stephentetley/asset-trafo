@@ -6,11 +6,11 @@ namespace AssetSync.StructureRelationships
 
 module BasicQueries =
 
-    open FSharp.Data
     
     open SLSqlite.Core
 
-    open AssetSync.Base.Addendum        
+    open AssetSync.Base.Addendum
+    open AssetSync.StructureRelationships.Datatypes
 
     // ************************************************************************
     // Find (numeric) id from SAI reference
@@ -38,7 +38,7 @@ module BasicQueries =
     // ************************************************************************
     // Find kids (AI)
             
-    let findAiDescendants (startId : int64) : SqliteDb<(string * string) list> =
+    let findAiDescendants (startId : int64) : SqliteDb<StructureItem list> =
         let sql = 
             """
             WITH RECURSIVE
@@ -62,8 +62,10 @@ module BasicQueries =
             new KeyedCommand (commandText = sql)
                 |> addNamedParam "startid" (int64Param startId)
         
-        let readRow1 (result : ResultItem) : string * string= 
-            result.GetString(1), result.GetString(2)
+        let readRow1 (result : ResultItem) : StructureItem = 
+            { Reference = result.GetString(1)
+            ; CommonName = result.GetString(2)
+            }
 
         queryKeyed cmd (Strategy.ReadAll readRow1) 
     
@@ -96,7 +98,7 @@ module BasicQueries =
     // ************************************************************************
     // Find kids (AIDE)
             
-    let findAideDescendants (startId : int64) : SqliteDb<(string * string) list> =
+    let findAideDescendants (startId : int64) : SqliteDb<StructureItem list> =
         let sql = 
             """
             WITH RECURSIVE
@@ -120,9 +122,29 @@ module BasicQueries =
             new KeyedCommand (commandText = sql)
                 |> addNamedParam "startid" (int64Param startId)
         
-        let readRow1 (result : ResultItem) : string * string= 
-            result.GetString(1), result.GetString(2)
+        let readRow1 (result : ResultItem) : StructureItem = 
+            { Reference = result.GetString(1)
+            ; CommonName = result.GetString(2)
+            }
 
         queryKeyed cmd (Strategy.ReadAll readRow1) 
+
+
+
+    let findAiHierarchy (reference : string) : SqliteDb<Hierarchy> =
+        sqliteDb { 
+            match! findAiAssetIndex reference with
+            | None -> return (Hierarchy [])
+            | Some key -> return! findAiDescendants key |>> Hierarchy
+        }
+
+
+    let findAideHierarchy (changeRequestId : int64) 
+                              (reference : string) : SqliteDb<Hierarchy> =
+        sqliteDb { 
+            match! findAideAssetIndex changeRequestId reference with
+            | None -> return (Hierarchy [])
+            | Some key -> return! findAideDescendants key |>> Hierarchy
+        }
 
 
