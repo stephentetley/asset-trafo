@@ -28,23 +28,27 @@ Environment.SetEnvironmentVariable("PATH",
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
 
-#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190822\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190823\lib\netstandard2.0"
 #r "SLSqlite.dll"
 open SLSqlite.Core
 
 
-#load "..\src\AssetSync\StructureRelationships\PopulateDb.fs"
-open AssetSync.StructureRelationships.PopulateDb
+#load "..\src\AssetSync\Base\Addendum.fs"
+#load "..\src\AssetSync\StructureRelationships\BasicQueries.fs"
+open AssetSync.StructureRelationships.BasicQueries
+
 
 
 let dbFile (relativePath : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
 
+let getConnParams () : SqliteConnParams = 
+    let dbActive = dbFile "structure_relationships.sqlite" |> Path.GetFullPath
+    sqliteConnParamsVersion3 dbActive
 
 // e.g test01 2111881L ;;
 let test01 (startId : int64) = 
-    let dbActive = dbFile "structure_relationships.sqlite" |> Path.GetFullPath
-    let connParams = sqliteConnParamsVersion3 dbActive
+    
     let sql = 
         """
         WITH RECURSIVE
@@ -67,12 +71,19 @@ let test01 (startId : int64) =
     let cmd = new SQLiteCommand(commandText = sql)
     cmd.Parameters.AddWithValue(parameterName = "start_id", value = box startId) |> ignore
         
-    let readRow1 (reader : RowReader) : int64 * string = 
+    let readRow1 (reader : ResultItem) : int64 * string = 
         let key = reader.GetInt64(0)
         let path = reader.GetString(1) 
         (key, path)
-
-    runSqliteDb connParams 
+    
+    let connParams = getConnParams ()
+    runSqliteDb connParams
         <| sqliteDb { 
                 return! executeReader cmd (readerReadAll readRow1)
             }
+
+
+let test02 () = 
+    let connParams = getConnParams ()
+    runSqliteDb connParams
+        <| queryFindId "SAI00001460"
