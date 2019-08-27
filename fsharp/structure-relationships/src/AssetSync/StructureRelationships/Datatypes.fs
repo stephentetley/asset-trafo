@@ -26,6 +26,9 @@ module Datatypes =
             with get () : int = x.StructureItems.Length
 
 
+        member x.Items 
+            with get () : StructureItem list = x.StructureItems
+
         member x.CommonNames 
             with get () : string list = 
                 x.StructureItems |> List.map (fun x -> x.CommonName)

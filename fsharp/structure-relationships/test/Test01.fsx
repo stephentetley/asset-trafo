@@ -98,16 +98,17 @@ let test04 (changeReqId : int64) (sairef : string) =
             |> fun x -> File.WriteAllText(path = tempFile, contents = x)
 
 
-// e.g test05 141913L "SAI00001460" ;;  // This has a single diff
-// or  test05 141013L "SAI00001460" ;;  // This has quite good diffs
+// e.g test05 141913L "SAI00001460" ;;  // Single name change
+// or  test05 141013L "SAI00001460" ;;  // Single name change
 let test05 (changeReqId : int64) (sairef : string) = 
     let connParams = getConnParams ()
     let action = 
         nameChanges changeReqId sairef
     match runSqliteDb connParams action with
     | Error msg -> printfn "%s" msg
-    | Ok diffs -> 
-        List.iter (printfn "%O") diffs
+    | Ok [] -> printfn "No changes identified"
+    | Ok changes -> 
+        List.iter (printfn "%O") changes
 
 
 
