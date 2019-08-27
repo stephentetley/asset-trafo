@@ -42,11 +42,11 @@ open AssetSync.ChangesReport.PopulateChangesDb
 
 
 
-let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
+let outputDbFile () = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\db\change_requests.sqlite")
 
 let pathToDbTemplate () : string = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\change_request.sqlite")
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\ddl\change_requests.sqlite")
 
 type ErrMsg = string
 
@@ -61,7 +61,7 @@ let main () : Result<unit, ErrMsg> =
         @"G:\work\Projects\asset_sync\aide_report\change_requests_repeated_attributes_20190822.csv"
 
     let dbTemplate = pathToDbTemplate ()
-    let dbActive = outputFile "change_requests.sqlite" |> Path.GetFullPath
+    let dbActive = outputDbFile () |> Path.GetFullPath
     printfn "%s" dbActive
     if File.Exists(dbActive) then
         System.IO.File.Delete dbActive

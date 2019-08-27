@@ -48,12 +48,16 @@ open AssetSync.ChangesReport.PrintReport
 let outputFile (relFileName : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
+let pathToDb () : string = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\db\change_requests.sqlite")
+
+
 let pandocHtmlOptions () : PandocOptions = 
     pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"
 
 let runReport (chreqIds : int64 list) 
               (outputHtmlFile : string) : Result<unit, ErrMsg> = 
-    let dbActive = outputFile "change_requests.sqlite" |> Path.GetFullPath
+    let dbActive = pathToDb () |> Path.GetFullPath
     let connParams = sqliteConnParamsVersion3 dbActive
     let pandocOpts = pandocHtmlOptions ()
 
@@ -65,7 +69,7 @@ let runReport (chreqIds : int64 list)
 
 let test01 () =
     let changeRequests = [ 15742L; 148364L; 148365L; 148366L; 148367L; 148372L; 148374L ]
-    let htmlOutput = outputFile "change_request_report_20190822.html"
+    let htmlOutput = outputFile "change_request_report_20190827.html"
     runReport changeRequests htmlOutput
     
 
