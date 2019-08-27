@@ -34,7 +34,7 @@ module PopulateChangesDb =
             change_request_time, \
             change_request_type, \
             change_request_status, \
-            change_request_comments) \
+            comments) \
             VALUES \
             (?,?,?,  ?,?)"
         let cmd = 
@@ -68,6 +68,7 @@ module PopulateChangesDb =
             "INSERT INTO change_request_asset \
             (aide_asset_id, \
             change_request_id, \
+            scheme_id, \
             ai_asset_reference, \
             aide_asset_reference, \
             ai_asset_name, \
@@ -89,11 +90,12 @@ module PopulateChangesDb =
             aide_location_reference, \
             aide_asset_deleted) \
             VALUES \
-            (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?, ?,?,?,  ?)"
+            (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?, ?,?,?,  ?,?)"
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AideAssetId)
                 |> addParam (int64Param row.ChangeRequestId)
+                |> addParam (optionNull int64Param row.SchemeId)
                 |> addParam (stringParam row.AiAssetReference)
                 |> addParam (stringParam row.AideAssetReference)
                 |> addParam (stringParam row.AiAssetName)
@@ -223,8 +225,42 @@ module PopulateChangesDb =
         }
 
     
+    // ************************************************************************
+    // Table: work_scheme
+
+    let WorkSchemeInsert (row : WorkSchemeRow) : IndexedCommand option =
+        let sql =        
+            "INSERT INTO work_scheme \
+            (scheme_id, \
+            scheme_code, \
+            scheme_name, \
+            description, \
+            solution_provider) \
+            VALUES (?,?,?,  ?,?)"
+        let cmd = 
+            new IndexedCommand(commandText = sql)
+                |> addParam (int64Param row.SchemeId)
+                |> addParam (stringParam row.SchemeCode)
+                |> addParam (stringParam row.SchemeName)
+                |> addParam (stringParam row.Description)
+                |> addParam (stringParam row.SolutionProvider)
+        cmd |> Some
+
+    let insertWorkSchemeRow (row : WorkSchemeRow) : SqliteDb<unit> = 
+        match WorkSchemeInsert row with
+        | Some statement -> 
+            executeNonQueryIndexed statement |>> ignore
+        | None -> mreturn ()
+
+
+    let insertWorkSchemeRows (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
+            let! table = 
+                liftOperationResult (fun _ -> readWorkSchemeExport csvPath)
+            return! withTransaction <| sforMz table.Rows insertWorkSchemeRow
+        }
+
     
 
 
 
-    // Structure relationship changes?

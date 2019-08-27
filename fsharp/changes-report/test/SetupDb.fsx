@@ -52,14 +52,15 @@ type ErrMsg = string
 
 let main () : Result<unit, ErrMsg> = 
     let changeRequestsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_change_reqs_20190822.csv"
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_change_reqs_20190827.csv"
     let assetChangesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_assets_20190822.csv"
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_assets_20190827.csv"
     let attributeChangesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_attributes_20190822.csv"
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_attributes_20190827.csv"
     let repeatedAttributeChangesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_repeated_attributes_20190822.csv"
-
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_repeated_attributes_20190827.csv"
+    let workSchemeCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\change_requests_schemes_20190827.csv"
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputDbFile () |> Path.GetFullPath
     printfn "%s" dbActive
@@ -75,6 +76,7 @@ let main () : Result<unit, ErrMsg> =
                 do! insertAsssetChangeRows assetChangesCsv
                 do! insertAttributeChangeRows attributeChangesCsv
                 do! insertRepeatedAttributeChangeRows repeatedAttributeChangesCsv
+                do! insertWorkSchemeRows workSchemeCsv
                 return ()
             }
 

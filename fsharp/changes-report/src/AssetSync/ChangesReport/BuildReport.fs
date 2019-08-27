@@ -171,7 +171,7 @@ module BuildReport =
                     chreq.change_request_id        AS [change_request_id],
                     chreq.change_request_type      AS [request_type],
                     chreq.change_request_status    AS [request_status],
-                    chreq.change_request_comments  AS [comment],
+                    chreq.comments                 AS [comment],
                     chreq.change_request_time      AS [request_time]
             FROM    change_request AS chreq
             WHERE

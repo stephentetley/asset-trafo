@@ -1,5 +1,6 @@
 
 -- drop tables
+DROP TABLE IF EXISTS work_scheme;
 DROP TABLE IF EXISTS change_request;
 DROP TABLE IF EXISTS change_request_asset;
 DROP TABLE IF EXISTS change_request_attribute;
@@ -7,19 +8,29 @@ DROP TABLE IF EXISTS change_request_repeated_attribute;
 
 -- create tables
 
+CREATE TABLE work_scheme
+(
+    scheme_id BIGINT PRIMARY KEY UNIQUE NOT NULL, 
+    scheme_code TEXT,
+    scheme_name TEXT,
+    description TEXT,
+    solution_provider TEXT
+);
+
 CREATE TABLE change_request
 (
     change_request_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
     change_request_time TEXT,
     change_request_type TEXT,
     change_request_status TEXT,
-    change_request_comments TEXT
+    comments TEXT
 );
 
 CREATE TABLE change_request_asset
 (
     aide_asset_id BIGINT PRIMARY KEY UNIQUE NOT NULL, 
     change_request_id BIGINT,
+    scheme_id BIGINT,
     ai_asset_reference TEXT,
     aide_asset_reference TEXT,
     ai_asset_name TEXT,

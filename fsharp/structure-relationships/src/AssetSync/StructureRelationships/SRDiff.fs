@@ -14,8 +14,8 @@ module SRDiff =
 
 
 
-    let sturctureRelationshipsDiff (changeReqId : int64) 
-                                   (sairef : string) : SqliteDb<Differences<string>>= 
+    let commonNamesDiff (changeReqId : int64) 
+                         (sairef : string) : SqliteDb<Differences<string>>= 
         sqliteDb { 
             let! ai = findAiHierarchy sairef
             let! aide = findAideHierarchy changeReqId sairef
@@ -66,8 +66,8 @@ module SRDiff =
         diffLists helper hleft.Items hright.Items
 
 
-    let referencesDiff (changeReqId : int64) 
-                        (sairef : string) : SqliteDb<Differences<StructureItem>>= 
+    let sturctureRelationshipsDiff (changeReqId : int64) 
+                                   (sairef : string) : SqliteDb<Differences<StructureItem>>= 
         sqliteDb { 
             let! ai = findAiHierarchy sairef
             let! aide = findAideHierarchy changeReqId sairef

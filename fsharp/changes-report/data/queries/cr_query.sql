@@ -3,7 +3,7 @@ SELECT
         chreq.change_request_time      AS [request_time],
         chreq.change_request_type      AS [request_type],
         chreq.change_request_status    AS [request_status],
-        chreq.change_request_comments  AS [comments]
+        chreq.comments  AS [comments]
 FROM    change_request AS chreq
 WHERE
         chreq.change_request_id = 148640

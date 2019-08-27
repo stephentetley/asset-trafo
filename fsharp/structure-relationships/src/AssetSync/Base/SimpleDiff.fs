@@ -15,6 +15,8 @@ module SimpleDiff =
     // simple alternative relaying on the fact that our input
     // is ordered.
 
+    // TODO - metrics (number of changes, edits, deletes, additions...)
+
     type Diff1<'a> = 
         | InLeft of 'a
         | Match of 'a
@@ -42,7 +44,11 @@ module SimpleDiff =
                  member __.ValueEquals s1 s2 = s1 = s2 }
 
 
-    /// Note - the inputs will be sorted.
+    /// Note - the inputs will be sorted before the differences
+    /// are calculated. 
+    /// We rely on the inputs being ordered for the algorithm 
+    /// to work - figuratively a pointer is running through each 
+    /// list, and one will pause if it gets ahead of the other.
     let diffLists (helper:IDiffComparer<'a, 'Key>) 
                   (leftList : 'a list) 
                   (rightList : 'a list) : Differences<'a> = 

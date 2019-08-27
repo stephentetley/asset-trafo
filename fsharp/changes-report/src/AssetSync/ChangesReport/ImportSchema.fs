@@ -42,6 +42,7 @@ module ImportSchema =
     let ChangeReqAssetsSchema = 
         "AideAssetId(int64),\
         ChangeRequestId(int64),\
+        SchemeId(int64 option),\
         AiAssetReference(string),\
         AideAssetReference(string),\
         AiAssetName(string),\
@@ -147,4 +148,28 @@ module ImportSchema =
         | ex -> Error ex.Message
 
 
+    // ************************************************************************
+    // Table : work_scheme
+
+
+    [<Literal>]
+    let WorkSchemeSchema = 
+        "SchemeId(int64),\
+         SchemeCode(string),\
+         SchemeName(string),\
+         Description(string),\
+         SolutionProvider(string)"
+        
+
+    type WorkSchemeTable = 
+        CsvProvider< Schema = WorkSchemeSchema
+                   , Sample = WorkSchemeSchema
+                   , HasHeaders = true >
+
+    type WorkSchemeRow = WorkSchemeTable.Row
     
+    let readWorkSchemeExport(path:string) : Result<WorkSchemeTable, string> = 
+        try 
+            WorkSchemeTable.Load(uri = path) |> Ok
+        with
+        | ex -> Error ex.Message

@@ -83,7 +83,7 @@ let test03 (changeReqId : int64) (sairef : string) =
             }
 
 
-// e.g test04 141913L "SAI00001460" ;;  // This has a single diff
+// e.g test04 141913L "SAI00001460" ;;  // This has a couple of diffs (one is a delete and add back)
 // or  test04 141013L "SAI00001460" ;;  // This has quite good diffs
 let test04 (changeReqId : int64) (sairef : string) = 
     let connParams = getConnParams ()
@@ -94,22 +94,10 @@ let test04 (changeReqId : int64) (sairef : string) =
     | Ok diffs -> 
         let tempFile = outputFile "diff_temp.txt"
         diffs 
-            |> showDiffs id
-            |> fun x -> File.WriteAllText(path = tempFile, contents = x)
-
-// e.g test04b 141913L "SAI00001460" ;;  // This has a single diff
-// or  test04b 141013L "SAI00001460" ;;  // This has quite good diffs
-let test04b (changeReqId : int64) (sairef : string) = 
-    let connParams = getConnParams ()
-    let action = 
-        referencesDiff changeReqId sairef
-    match runSqliteDb connParams action with
-    | Error msg -> printfn "%s" msg
-    | Ok diffs -> 
-        let tempFile = outputFile "diff_refs.txt"
-        diffs 
             |> showDiffs (fun o -> sprintf "%s - %s" o.Reference o.CommonName)
             |> fun x -> File.WriteAllText(path = tempFile, contents = x)
+
+
 
 
 // e.g test05 141913L "SAI00001460" ;;  // Single name change
