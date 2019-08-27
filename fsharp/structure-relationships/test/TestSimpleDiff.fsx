@@ -12,10 +12,12 @@ let outputFile (relativePath : string) =
 let test01 () = 
     let contents1 = File.ReadAllLines(outputFile "ai2.csv") |> Array.toList
     let contents2 = File.ReadAllLines(outputFile "ai2.csv") |> Array.toList
-    diffLists contents1 contents2
+    diffLists stringHelper contents1 contents2
 
 
 let test02 () = 
     let contents1 = ["apple"; "banana"; "grapefruit"; "orange"; "pear"]
     let contents2 = ["banana"; "grapefruit"; "lime"; "lemon"; "pear"]
-    diffLists contents1 contents2 |> showDiffs |> printfn "%s"
+    diffLists stringHelper contents1 contents2 
+        |> showDiffs id 
+        |> printfn "%s"

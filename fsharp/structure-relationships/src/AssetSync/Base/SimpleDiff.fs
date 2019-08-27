@@ -15,24 +15,50 @@ module SimpleDiff =
     // simple alternative relaying on the fact that our input
     // is ordered.
 
-    type Diff1 = 
-        | InLeft of string
-        | LineMatch of string
-        | InRight of string
+    type Diff1<'a> = 
+        | InLeft of 'a
+        | Match of 'a
+        | Difference of left:'a * right:'a
+        | InRight of 'a
 
-    type Differences = Diff1 list
+        member v.SortKey 
+            with get() : 'a = 
+                match v with
+                | InLeft s -> s
+                | Match s -> s
+                | Difference (s1,_) -> s1
+                | InRight s -> s
 
-    /// Relies on the inputs being ordered.
-    let diffLists (leftList : string list) (rightList : string list) : Diff1 list = 
+    type Differences<'a> = Diff1<'a> list
+
+    /// F# design guidelines say favour object-interfaces rather than records of functions...
+    type IDiffComparer<'a, 'Key> = 
+        abstract member GetKey : 'a -> 'Key
+        abstract member ValueEquals: 'a -> 'a -> bool
+
+    let stringHelper : IDiffComparer<string, string> = 
+        { new IDiffComparer<string, string>
+            with member __.GetKey s = s
+                 member __.ValueEquals s1 s2 = s1 = s2 }
+
+
+    /// Note - the inputs will be sorted.
+    let diffLists (helper:IDiffComparer<'a, 'Key>) 
+                  (leftList : 'a list) 
+                  (rightList : 'a list) : Differences<'a> = 
         let rec work lefts rights cont = 
             match lefts,rights with
             | xs, [] -> cont (List.map InLeft xs)
             | [], ys -> cont (List.map InRight ys)
-            | (x::xs, y::ys) -> 
-                match compare x y with
+            | (x::xs, y::ys) ->                 
+                match compare (helper.GetKey x) (helper.GetKey y) with
                 | i when i = 0 -> 
                     work xs ys (fun ac -> 
-                    cont (LineMatch x :: ac))
+                    if helper.ValueEquals x y then 
+                        cont (Match x :: ac)
+                    else
+                        cont (Difference(x,y) :: ac))
+
                 | i when i < 0 -> 
                     // x is not in (y::ys)                 
                     work xs rights (fun ac -> 
@@ -42,14 +68,18 @@ module SimpleDiff =
                     work lefts ys (fun ac -> 
                     cont (InRight y :: ac))
                 | i -> failwithf "differenceL - Weird (impossible) pattern failure: %i" i
-        work leftList rightList (fun x -> x)
+        work (List.sortBy helper.GetKey leftList) (List.sortBy helper.GetKey rightList) (fun x -> x)
+            |> List.sortBy (fun x -> x.SortKey)
 
-    let showDiffs (diffs : Diff1 list) : string = 
+    let showDiffs (printer :'a -> string) (diffs : Diff1<'a> list) : string = 
         let sb = new StringBuilder ()
-        let write1 (diff : Diff1) : unit = 
+        let write1 (diff : Diff1<'a>) : unit = 
             match diff with
-            | InLeft s -> sb.AppendLine ("-" + s) |> ignore
-            | InRight s -> sb.AppendLine ("+" + s) |> ignore
-            | LineMatch s -> sb.AppendLine (" " + s) |> ignore
+            | InLeft s -> sb.AppendLine ("-" + printer s) |> ignore
+            | InRight s -> sb.AppendLine ("+" + printer s) |> ignore
+            | Match s -> sb.AppendLine (" " + printer s) |> ignore
+            
+            | Difference(s1,s2) -> 
+                sb.AppendLine (sprintf "*[%s]=>%s" (printer s1) (printer s2)) |> ignore
         List.iter write1 diffs
         sb.ToString()

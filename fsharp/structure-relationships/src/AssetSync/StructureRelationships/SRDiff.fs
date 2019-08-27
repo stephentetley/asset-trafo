@@ -12,12 +12,14 @@ module SRDiff =
     open AssetSync.StructureRelationships.Datatypes
     open AssetSync.StructureRelationships.BasicQueries
 
+
+
     let sturctureRelationshipsDiff (changeReqId : int64) 
-                                   (sairef : string) : SqliteDb<Differences>= 
+                                   (sairef : string) : SqliteDb<Differences<string>>= 
         sqliteDb { 
             let! ai = findAiHierarchy sairef
             let! aide = findAideHierarchy changeReqId sairef
-            return (diffLists ai.CommonNames aide.CommonNames)
+            return (diffLists stringHelper ai.CommonNames aide.CommonNames)
         }
 
 
@@ -43,8 +45,6 @@ module SRDiff =
                          ; OldName = item.CommonName
                          ; NewName = name2 }
                 else None
-
-
         List.choose chooser lefts
 
 
@@ -56,3 +56,20 @@ module SRDiff =
             return (nameChanges1 ai.Items aide.Items)
         }
         
+    
+    let internal referencesDiffAux (hleft : Hierarchy) (hright : Hierarchy) = 
+        let helper : IDiffComparer<StructureItem, string> = 
+            { new IDiffComparer<StructureItem, string>
+                with member __.GetKey s = s.Reference
+                     member __.ValueEquals s1 s2 = s1.CommonName = s2.CommonName }
+   
+        diffLists helper hleft.Items hright.Items
+
+
+    let referencesDiff (changeReqId : int64) 
+                        (sairef : string) : SqliteDb<Differences<StructureItem>>= 
+        sqliteDb { 
+            let! ai = findAiHierarchy sairef
+            let! aide = findAideHierarchy changeReqId sairef
+            return (referencesDiffAux ai aide)
+        }
