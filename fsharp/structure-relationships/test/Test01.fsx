@@ -34,8 +34,10 @@ open SLSqlite.Core
 
 
 #load "..\src\AssetSync\Base\Addendum.fs"
+#load "..\src\AssetSync\Base\SimpleDiff.fs"
 #load "..\src\AssetSync\StructureRelationships\Datatypes.fs"
 #load "..\src\AssetSync\StructureRelationships\BasicQueries.fs"
+open AssetSync.Base.SimpleDiff
 open AssetSync.StructureRelationships.BasicQueries
 
 let outputFile (relativePath : string) = 
@@ -79,7 +81,8 @@ let test03 (changeReqId : int64) (sairef : string) =
             }
 
 
-// e.g test04 141913L "SAI00001460" ;;
+// e.g test04 141913L "SAI00001460" ;;  // This has a single diff
+// or  test04 141013L "SAI00001460" ;;  // This has quite good diffs
 let test04 (changeReqId : int64) (sairef : string) = 
     let connParams = getConnParams ()
     let action = 
@@ -91,10 +94,10 @@ let test04 (changeReqId : int64) (sairef : string) =
     match runSqliteDb connParams action with
     | Error msg -> printfn "%s" msg
     | Ok (xs,ys) -> 
-        let aiFile = outputFile "ai.csv"
+        let aiFile = outputFile "ai2.csv"
         IO.File.WriteAllLines(path = aiFile, contents = xs)
-        let aideFile = outputFile "aide.csv"
+        let aideFile = outputFile "aide2.csv"
         IO.File.WriteAllLines(path = aideFile, contents = ys)
-
+        diffLists xs ys |> showDiffs |> printfn "%s"
 
 
