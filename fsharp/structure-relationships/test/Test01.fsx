@@ -37,8 +37,10 @@ open SLSqlite.Core
 #load "..\src\AssetSync\Base\SimpleDiff.fs"
 #load "..\src\AssetSync\StructureRelationships\Datatypes.fs"
 #load "..\src\AssetSync\StructureRelationships\BasicQueries.fs"
+#load "..\src\AssetSync\StructureRelationships\SRDiff.fs"
 open AssetSync.Base.SimpleDiff
 open AssetSync.StructureRelationships.BasicQueries
+open AssetSync.StructureRelationships.SRDiff
 
 let outputFile (relativePath : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
@@ -86,18 +88,26 @@ let test03 (changeReqId : int64) (sairef : string) =
 let test04 (changeReqId : int64) (sairef : string) = 
     let connParams = getConnParams ()
     let action = 
-        sqliteDb { 
-            let! ai = findAiHierarchy sairef
-            let! aide = findAideHierarchy changeReqId sairef
-            return (ai.CommonNames, aide.CommonNames)
-        }
+        sturctureRelationshipsDiff changeReqId sairef
     match runSqliteDb connParams action with
     | Error msg -> printfn "%s" msg
-    | Ok (xs,ys) -> 
+    | Ok diffs -> 
         let tempFile = outputFile "diff_temp.txt"
-        diffLists xs ys 
+        diffs 
             |> showDiffs 
             |> fun x -> File.WriteAllText(path = tempFile, contents = x)
+
+
+// e.g test05 141913L "SAI00001460" ;;  // This has a single diff
+// or  test05 141013L "SAI00001460" ;;  // This has quite good diffs
+let test05 (changeReqId : int64) (sairef : string) = 
+    let connParams = getConnParams ()
+    let action = 
+        nameChanges changeReqId sairef
+    match runSqliteDb connParams action with
+    | Error msg -> printfn "%s" msg
+    | Ok diffs -> 
+        List.iter (printfn "%O") diffs
 
 
 

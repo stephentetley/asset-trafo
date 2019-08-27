@@ -10,6 +10,7 @@
     <Compile Include="AssetSync\StructureRelationships\Datatypes.fs" />
     <Compile Include="AssetSync\StructureRelationships\PopulateDb.fs" />
     <Compile Include="AssetSync\StructureRelationships\BasicQueries.fs" />
+    <Compile Include="AssetSync\StructureRelationships\SRDiff.fs" />
   </ItemGroup>
   
   <ItemGroup>

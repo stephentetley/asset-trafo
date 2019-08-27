@@ -20,6 +20,8 @@ module SimpleDiff =
         | LineMatch of string
         | InRight of string
 
+    type Differences = Diff1 list
+
     /// Relies on the inputs being ordered.
     let diffLists (leftList : string list) (rightList : string list) : Diff1 list = 
         let rec work lefts rights cont = 
