@@ -37,11 +37,11 @@ open SLSqlite.Core
 open AssetSync.StructureRelationships.PopulateDb
 
 
-let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
+let outputDbFile (relativePath : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\db\", relativePath)
 
 let pathToDbTemplate () : string = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\structure_relationships.sqlite")
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\ddl\structure_relationships.sqlite")
 
 
 type ErrMsg = string
@@ -61,7 +61,7 @@ let main () : Result<unit, ErrMsg> =
 
 
     let dbTemplate = pathToDbTemplate ()
-    let dbActive = outputFile "structure_relationships.sqlite" |> Path.GetFullPath
+    let dbActive = outputDbFile "structure_relationships.sqlite" |> Path.GetFullPath
 
     printfn "%s" dbActive
     if File.Exists(dbActive) then

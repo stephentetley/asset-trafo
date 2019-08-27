@@ -43,11 +43,11 @@ open AssetSync.StructureRelationships.BasicQueries
 let outputFile (relativePath : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
 
-let dbFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
+let dbFile () = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\db\structure_relationships.sqlite")
 
 let getConnParams () : SqliteConnParams = 
-    let dbActive = dbFile "structure_relationships.sqlite" |> Path.GetFullPath
+    let dbActive = dbFile () |> Path.GetFullPath
     sqliteConnParamsVersion3 dbActive
 
 
@@ -94,10 +94,11 @@ let test04 (changeReqId : int64) (sairef : string) =
     match runSqliteDb connParams action with
     | Error msg -> printfn "%s" msg
     | Ok (xs,ys) -> 
-        let aiFile = outputFile "ai2.csv"
-        IO.File.WriteAllLines(path = aiFile, contents = xs)
-        let aideFile = outputFile "aide2.csv"
-        IO.File.WriteAllLines(path = aideFile, contents = ys)
-        diffLists xs ys |> showDiffs |> printfn "%s"
+        let tempFile = outputFile "diff_temp.txt"
+        diffLists xs ys 
+            |> showDiffs 
+            |> fun x -> File.WriteAllText(path = tempFile, contents = x)
+
+
 
 
