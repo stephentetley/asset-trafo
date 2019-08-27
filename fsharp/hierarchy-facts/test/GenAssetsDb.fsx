@@ -43,11 +43,11 @@ open AssetSync.SQLiteFacts.PopulateAssetsDb
 
 
 
-let outputFile (relativePath : string) = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\output\", relativePath)
+let outputDbFile () = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\ddl\assets.sqlite")
 
 let pathToDbTemplate () : string = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\", "assets_db_template.sqlite")
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\ddl\assets_template.sqlite")
 
 
 
@@ -59,7 +59,7 @@ let main () : Result<unit, ErrMsg> =
 
     // Copy template
     let dbTemplate = pathToDbTemplate ()
-    let dbActive = outputFile "assets.sqlite" |> Path.GetFullPath
+    let dbActive = outputDbFile () |> Path.GetFullPath
     printfn "%s" dbActive
     if File.Exists(dbActive) then
         System.IO.File.Delete dbActive
