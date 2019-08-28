@@ -26,6 +26,27 @@ module PrintReport =
     let linkToTop : Markdown = 
         inlineLink "Back to top" "#top" None |> markdownText
 
+
+    // ************************************************************************
+    // Change scheme
+
+    /// Change Scheme Table 
+    let changeSchemeInfoTable (info : ChangeSchemeInfo) : Markdown =
+        let specs = 
+            [ { ColumnSpec.Width = 20 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            ; { ColumnSpec.Width = 40 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            ]
+        let makeRow (name : string) (value : Text) : TableRow = 
+            [ doubleAsterisks (name |> text) |> markdownText ; value |> markdownText ]
+        let rows : TableRow list= 
+            [ makeRow "Scheme Code"         (text info.Code)
+            ; makeRow "Scheme Id"           (int64Md info.SchemeId)
+            ; makeRow "Scheme Name"         (text info.Name)
+            ; makeRow "Solution Provider"   (text info.SolutionProvider)
+            ]
+        makeTableWithoutHeadings specs rows |> gridTable
+
+
     // ************************************************************************
     // Changes request
 
@@ -194,13 +215,20 @@ module PrintReport =
             ^!!^ repeatedAttributeChangesSection changeRequest.RepeatedAttributeChanges
             ^!!^ linkToTop
 
-    let makeMarkdownReport (changeRequests : ChangeRequest list) : Markdown = 
+    let makeChangeRequestsReport (changeRequests : ChangeRequest list) : Markdown = 
         let requestInfos = changeRequests |> List.map (fun x -> x.Info)
 
         h1 (htmlIdAnchor "top" (text "AIDE Change Requests"))
             ^!!^ changeRequestInfosSection requestInfos
             ^!!^ vsep (List.map makeChangeRequest1 changeRequests)
       
+    let makeChangeSchemeReport (changeScheme : ChangeScheme) : Markdown = 
+        let requestInfos = changeScheme.ChangeRequests |> List.map (fun x -> x.Info)
+
+        h1 (htmlIdAnchor "top" (text "AIDE Change Scheme"))
+            ^!!^ changeSchemeInfoTable changeScheme.Info
+            ^!!^ changeRequestInfosSection requestInfos
+            ^!!^ vsep (List.map makeChangeRequest1 changeScheme.ChangeRequests)
 
     // ************************************************************************
     // Invoking Pandoc
@@ -217,10 +245,11 @@ module PrintReport =
           OtherOptions = [ css; highlightStyle; selfContained ]  }
 
 
-    let generateChangesReport (changeRequests : ChangeRequest list) 
-                              (pandocOpts : PandocOptions)
-                              (outputHtmlFile : string) : Result<unit, string> = 
-        let doc = makeMarkdownReport changeRequests
+    let writeMarkdownReport (doc : Markdown) 
+                            (pageTitle : string)
+                            (pandocOpts : PandocOptions)
+                            (outputHtmlFile : string) : Result<unit, string> = 
+        
         let mdFileAbsPath = Path.ChangeExtension(outputHtmlFile, "md") 
         let mdFileName = Path.GetFileName(mdFileAbsPath)
         let htmlFileName = Path.GetFileName(outputHtmlFile)
@@ -232,11 +261,21 @@ module PrintReport =
                 outputDirectory 
                 mdFileName
                 htmlFileName
-                (Some "Aide Changes Report")
+                (Some pageTitle)
                 pandocOpts
         match retCode with
         | Ok i -> printfn "Return code: %i" i ; Ok ()
         | Error msg -> Error msg
 
         
+    let writeChangeRequestsReport (changeRequests : ChangeRequest list) 
+                                  (pandocOpts : PandocOptions)
+                                  (outputHtmlFile : string) : Result<unit, string> = 
+        let doc = makeChangeRequestsReport changeRequests
+        writeMarkdownReport doc "Aide Change Requests Report" pandocOpts outputHtmlFile
     
+    let writeChangeSchemeReport (changeScheme : ChangeScheme) 
+                                (pandocOpts : PandocOptions)
+                                (outputHtmlFile : string) : Result<unit, string> = 
+        let doc = makeChangeSchemeReport changeScheme
+        writeMarkdownReport doc "Aide Change Scheme Report" pandocOpts outputHtmlFile

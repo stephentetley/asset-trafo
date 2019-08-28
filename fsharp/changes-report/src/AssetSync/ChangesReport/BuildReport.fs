@@ -210,3 +210,65 @@ module BuildReport =
                 return (Some ans)
         }
 
+    // ************************************************************************
+    // Change Scheme Info
+
+    let getChangeSchemeInfo (schemeCode: string) : SqliteDb<ChangeSchemeInfo option> =
+        let sql = 
+            """
+            SELECT 
+                        scheme.scheme_id            AS [scheme_id],
+                        scheme.scheme_code          AS [scheme_code],
+                        scheme.scheme_name          AS [scheme_name],
+                        scheme.solution_provider    AS [solution_provider]
+            FROM work_scheme    AS scheme
+            WHERE scheme.scheme_code = :schemecode
+            ;
+            """
+        let cmd = 
+            new KeyedCommand(commandText = sql)
+                |> addNamedParam "schemecode" (stringParam schemeCode) 
+                   
+        let readRow1 (reader : ResultItem) : ChangeSchemeInfo = 
+            { SchemeId = reader.GetInt64(0)
+            ; Code = reader.GetString(1)
+            ; Name = reader.GetString(2)
+            ; SolutionProvider = reader.GetString(3)
+            }
+
+        queryKeyed cmd (Strategy.ReadAll readRow1) |>> List.tryHead
+
+    let getSchemeChangeRequestIds (schemeCode: string) : SqliteDb<int64 list> =
+        let sql = 
+            """
+            SELECT 
+                    changes.change_request_id       AS [change_request_id]
+            FROM    view_scheme_change_requests     AS changes
+            JOIN    work_scheme    AS scheme    ON changes.scheme_id = scheme.scheme_id
+            WHERE 
+                    scheme.scheme_code = :schemecode
+            ;
+            """
+        let cmd = 
+            new KeyedCommand(commandText = sql)
+                |> addNamedParam "schemecode" (stringParam schemeCode) 
+                   
+        let readRow1 (reader : ResultItem) : int64 = 
+            reader.GetInt64(0)
+            
+        queryKeyed cmd (Strategy.ReadAll readRow1)
+
+
+    let buildChangeScheme  (schemeCode : string) : SqliteDb<ChangeScheme option> =
+        sqliteDb { 
+            match! getChangeSchemeInfo schemeCode with
+            | None -> return None
+            | Some info ->
+                let! crids = getSchemeChangeRequestIds schemeCode
+                let! crs = mapM buildChangeRequest crids |>> List.choose id 
+                let ans = 
+                    { Info = info
+                    ; ChangeRequests = crs
+                    }
+                return (Some ans)
+        }

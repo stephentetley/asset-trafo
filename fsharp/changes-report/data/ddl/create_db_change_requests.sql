@@ -1,5 +1,6 @@
 
 -- drop tables
+DROP VIEW IF EXISTS view_scheme_change_requests;
 DROP TABLE IF EXISTS work_scheme;
 DROP TABLE IF EXISTS change_request;
 DROP TABLE IF EXISTS change_request_asset;
@@ -81,3 +82,13 @@ CREATE TABLE change_request_repeated_attribute
     aide_value TEXT,
     aide_lookup_value TEXT
 );
+
+CREATE VIEW view_scheme_change_requests 
+AS 
+SELECT 
+        asset.scheme_id             AS [scheme_id],
+        asset.change_request_id     AS [change_request_id]
+FROM 
+    change_request_asset AS asset 
+ORDER BY asset.scheme_id, asset.change_request_id
+;

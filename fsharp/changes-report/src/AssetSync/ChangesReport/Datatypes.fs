@@ -81,3 +81,16 @@ module Datatypes =
           AttributeChanges : AttributeChange list
           RepeatedAttributeChanges : RepeatedAttributeChange list
         }
+
+
+    type ChangeSchemeInfo = 
+        { SchemeId : int64
+          Code : string
+          Name : string
+          SolutionProvider : string
+        }
+
+    type ChangeScheme = 
+        { Info : ChangeSchemeInfo
+          ChangeRequests : ChangeRequest list
+        }

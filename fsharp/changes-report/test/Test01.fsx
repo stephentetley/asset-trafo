@@ -55,8 +55,8 @@ let pathToDb () : string =
 let pandocHtmlOptions () : PandocOptions = 
     pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"
 
-let runReport (chreqIds : int64 list) 
-              (outputHtmlFile : string) : Result<unit, ErrMsg> = 
+let runChangeRequestsReport (chreqIds : int64 list) 
+                            (outputHtmlFile : string) : Result<unit, ErrMsg> = 
     let dbActive = pathToDb () |> Path.GetFullPath
     let connParams = sqliteConnParamsVersion3 dbActive
     let pandocOpts = pandocHtmlOptions ()
@@ -65,11 +65,31 @@ let runReport (chreqIds : int64 list)
     | Error msg -> printfn "Fail: %s" msg ; Error "Bad"
     | Ok ochanges -> 
         let changes = List.choose id ochanges
-        generateChangesReport changes pandocOpts outputHtmlFile
+        writeChangeRequestsReport changes pandocOpts outputHtmlFile
+
 
 let test01 () =
     let changeRequests = [ 15742L; 148364L; 148365L; 148366L; 148367L; 148372L; 148374L ]
     let htmlOutput = outputFile "change_request_report_20190827.html"
-    runReport changeRequests htmlOutput
-    
+    runChangeRequestsReport changeRequests htmlOutput
+
+
+let runChangeSchemeReport (schemeCode : string) 
+                            (outputHtmlFile : string) : Result<unit, ErrMsg> = 
+    let dbActive = pathToDb () |> Path.GetFullPath
+    let connParams = sqliteConnParamsVersion3 dbActive
+    let pandocOpts = pandocHtmlOptions ()
+
+    match runSqliteDb connParams (buildChangeScheme schemeCode ) with
+    | Error msg -> printfn "Fail: %s" msg ; Error "Bad"
+    | Ok None -> Error (sprintf "Could not find scheme matching '%s'" schemeCode)
+    | Ok (Some scheme) -> 
+        writeChangeSchemeReport scheme pandocOpts outputHtmlFile
+
+
+let test02 () =
+    let changeScheme = "PCL 70"
+    let htmlOutput = outputFile "change_scheme_report_20190828.html"
+    runChangeSchemeReport changeScheme htmlOutput
+
 
