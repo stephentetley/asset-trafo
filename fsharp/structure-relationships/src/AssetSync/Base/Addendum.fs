@@ -12,6 +12,9 @@ module Addendum =
     // Potential additions to library with unstable APIs 
     // (sl-sqlite, markdown-doc, ...)
 
+
+    // Markdown Doc needs custom unordered list marker characters
+
     // ************************************************************************
     // For sl-sqlite
 
@@ -21,3 +24,5 @@ module Addendum =
 
     let optional (action : SqliteDb<'a>) : SqliteDb<'a option> = 
         attempt (action |>> Some) (fun _ -> mreturn None)
+
+    

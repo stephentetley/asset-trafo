@@ -34,11 +34,11 @@ open SLSqlite.Core
 
 
 #load "..\src\AssetSync\Base\Addendum.fs"
-#load "..\src\AssetSync\Base\SimpleDiff.fs"
 #load "..\src\AssetSync\StructureRelationships\Datatypes.fs"
+#load "..\src\AssetSync\StructureRelationships\StructureItemDiff.fs"
 #load "..\src\AssetSync\StructureRelationships\BasicQueries.fs"
 #load "..\src\AssetSync\StructureRelationships\SRDiff.fs"
-open AssetSync.Base.SimpleDiff
+open AssetSync.StructureRelationships.StructureItemDiff
 open AssetSync.StructureRelationships.BasicQueries
 open AssetSync.StructureRelationships.SRDiff
 
@@ -85,6 +85,7 @@ let test03 (changeReqId : int64) (sairef : string) =
 
 // e.g test04 141913L "SAI00001460" ;;  // This has a couple of diffs (one is a delete and add back)
 // or  test04 141013L "SAI00001460" ;;  // This has quite good diffs
+// or  test04 148575L "SAI00584748" ;;  // simple additions
 let test04 (changeReqId : int64) (sairef : string) = 
     let connParams = getConnParams ()
     let action = 
