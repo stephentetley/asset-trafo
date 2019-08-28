@@ -7,7 +7,6 @@
   <ItemGroup>
     <None Include="SetupDb.fsx" />
     <None Include="Test01.fsx" />
-    <None Include="TestSimpleDiff.fsx" />
   </ItemGroup>
 
 </Project>

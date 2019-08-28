@@ -13,8 +13,6 @@ module Addendum =
     // (sl-sqlite, markdown-doc, ...)
 
 
-    // Markdown Doc needs custom unordered list marker characters
-
     // ************************************************************************
     // For sl-sqlite
 

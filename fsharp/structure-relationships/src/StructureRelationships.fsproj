@@ -6,8 +6,8 @@
 
   <ItemGroup>
     <Compile Include="AssetSync\Base\Addendum.fs" />
-    <Compile Include="AssetSync\Base\SimpleDiff.fs" />
     <Compile Include="AssetSync\StructureRelationships\Datatypes.fs" />
+    <Compile Include="AssetSync\StructureRelationships\StructureItemDiff.fs" />
     <Compile Include="AssetSync\StructureRelationships\PopulateDb.fs" />
     <Compile Include="AssetSync\StructureRelationships\BasicQueries.fs" />
     <Compile Include="AssetSync\StructureRelationships\SRDiff.fs" />
@@ -15,6 +15,7 @@
   
   <ItemGroup>
     <PackageReference Include="FSharp.Data" Version="3.1.1" />
+    <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20190828" />
     <PackageReference Include="SLSqlite" Version="1.0.0-alpha-20190823" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.111" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.111" />

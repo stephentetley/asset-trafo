@@ -6,6 +6,8 @@ namespace AssetSync.StructureRelationships
 
 module SRDiff =
 
+    
+
     open SLSqlite.Core
 
     open AssetSync.StructureRelationships.Datatypes

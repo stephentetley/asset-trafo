@@ -33,9 +33,4 @@ module Addendum =
         textPunctuate (rawtext ", ") texts
 
 
-    let makeTableWithoutHeadings (columnSpecs : ColumnSpec list)
-                                 (rows : TableRow list) : Table = 
-        { ColumnSpecs = columnSpecs
-          ColumnHeadings = None
-          Rows = rows
-        }
+    

@@ -28,6 +28,11 @@ Environment.SetEnvironmentVariable("PATH",
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
 
+
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190828\lib\netstandard2.0"
+#r "MarkdownDoc.dll"
+open MarkdownDoc.Markdown
+
 #I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190823\lib\netstandard2.0"
 #r "SLSqlite.dll"
 open SLSqlite.Core
@@ -112,6 +117,22 @@ let test05 (changeReqId : int64) (sairef : string) =
     | Ok [] -> printfn "No changes identified"
     | Ok changes -> 
         List.iter (printfn "%O") changes
+
+
+// e.g test06 141913L "SAI00001460" ;;  // This has a couple of diffs (one is a delete and add back)
+// or  test06 141013L "SAI00001460" ;;  // This has quite good diffs
+// or  test06 148575L "SAI00584748" ;;  // simple additions
+let test06 (changeReqId : int64) (sairef : string) = 
+    let connParams = getConnParams ()
+    let action = 
+        sturctureRelationshipsDiff changeReqId sairef
+    match runSqliteDb connParams action with
+    | Error msg -> printfn "%s" msg
+    | Ok diffs -> 
+        let tempFile = outputFile "diff_temp.txt"
+        diffs 
+            |> drawStructure 
+            |> testRender 180
 
 
 
