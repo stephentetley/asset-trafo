@@ -27,11 +27,12 @@ Environment.SetEnvironmentVariable("PATH",
 
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
+open SLFormat.CommandOptions
 
-
-#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190828\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190829\lib\netstandard2.0"
 #r "MarkdownDoc.dll"
 open MarkdownDoc.Markdown
+open MarkdownDoc.Pandoc
 
 #I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190823\lib\netstandard2.0"
 #r "SLSqlite.dll"
@@ -119,20 +120,56 @@ let test05 (changeReqId : int64) (sairef : string) =
         List.iter (printfn "%O") changes
 
 
+let pandocHtmlDefaults (pathToCss : string) : PandocOptions = 
+    let highlightStyle = argument "--highlight-style" &= argValue "tango"
+    let selfContained = argument "--self-contained"
+    /// Github style is nicer for tables than Tufte
+    /// Note - body width has been changed on both stylesheets
+    let css = argument "--css" &= doubleQuote pathToCss
+    { Standalone = true
+      InputExtensions = []
+      OutputExtensions = []
+      OtherOptions = [ css; highlightStyle; selfContained ]  }
+
+
+let writeMarkdownReport (doc : Markdown) 
+                        (pageTitle : string)
+                        (pandocOpts : PandocOptions)
+                        (outputHtmlFile : string) : Result<unit, string> = 
+    
+    let mdFileAbsPath = Path.ChangeExtension(outputHtmlFile, "md") 
+    let mdFileName = Path.GetFileName(mdFileAbsPath)
+    let htmlFileName = Path.GetFileName(outputHtmlFile)
+    let outputDirectory = Path.GetDirectoryName(outputHtmlFile)
+    writeMarkdown 360 doc mdFileAbsPath
+    let retCode = 
+        runPandocHtml5 
+            true 
+            outputDirectory 
+            mdFileName
+            htmlFileName
+            (Some pageTitle)
+            pandocOpts
+    match retCode with
+    | Ok i -> printfn "Return code: %i" i ; Ok ()
+    | Error msg -> Error msg
+
 // e.g test06 141913L "SAI00001460" ;;  // This has a couple of diffs (one is a delete and add back)
 // or  test06 141013L "SAI00001460" ;;  // This has quite good diffs
 // or  test06 148575L "SAI00584748" ;;  // simple additions
 let test06 (changeReqId : int64) (sairef : string) = 
+    let opts = pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"
     let connParams = getConnParams ()
     let action = 
         sturctureRelationshipsDiff changeReqId sairef
     match runSqliteDb connParams action with
-    | Error msg -> printfn "%s" msg
+    | Error msg -> printfn "%s" msg ; Error msg
     | Ok diffs -> 
-        let tempFile = outputFile "diff_temp.txt"
+        let tempFile = outputFile "diff_temp.html"
         diffs 
-            |> drawStructure 
-            |> testRender 180
+            |> drawStructure |> fun doc -> (h1 (text "Structure Changes") ^!!^ doc )
+            |> fun doc -> writeMarkdownReport doc "Structure Changes" opts tempFile
+            
 
 
 

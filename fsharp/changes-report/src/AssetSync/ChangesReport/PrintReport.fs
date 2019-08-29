@@ -13,6 +13,7 @@ module PrintReport =
     open SLFormat.CommandOptions
 
     open MarkdownDoc.Markdown
+    open MarkdownDoc.Markdown.InlineHtml
     open MarkdownDoc.Pandoc
     
 

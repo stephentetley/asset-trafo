@@ -52,6 +52,7 @@ module BasicQueries =
                 SELECT 
                     temp_table.child_id AS [ChildId],
                     ai_asset_lookups.reference AS [Reference],
+                    ai_asset_lookups.asset_name AS [Name],
                     ai_asset_lookups.asset_common_name AS [CommonName]
                 FROM temp_table
                 JOIN ai_asset_lookups    ON temp_table.child_id = ai_asset_lookups.asset_id
@@ -64,7 +65,8 @@ module BasicQueries =
         
         let readRow1 (result : ResultItem) : StructureItem = 
             { Reference = result.GetString(1)
-            ; CommonName = result.GetString(2)
+            ; Name = result.GetString(2)
+            ; CommonName = result.GetString(3)
             }
 
         queryKeyed cmd (Strategy.ReadAll readRow1) 
@@ -112,6 +114,7 @@ module BasicQueries =
             SELECT 
                 temp_table.child_id AS [ChildId],
                 aide_asset_lookups.reference AS [Reference],
+                aide_asset_lookups.asset_name AS [Name],
                 aide_asset_lookups.asset_common_name AS [CommonName]
             FROM temp_table
             JOIN aide_asset_lookups    ON temp_table.child_id = aide_asset_lookups.aide_asset_id
@@ -124,7 +127,8 @@ module BasicQueries =
         
         let readRow1 (result : ResultItem) : StructureItem = 
             { Reference = result.GetString(1)
-            ; CommonName = result.GetString(2)
+            ; Name = result.GetString(2)
+            ; CommonName = result.GetString(3)
             }
 
         queryKeyed cmd (Strategy.ReadAll readRow1) 

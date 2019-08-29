@@ -9,8 +9,10 @@ module StructureItemDiff =
     open System.Text
 
     open MarkdownDoc.Markdown
+    open MarkdownDoc.Markdown.InlineHtml
     open MarkdownDoc.Markdown.RoseTree
 
+    open AssetSync.Base.Addendum
     open AssetSync.StructureRelationships.Datatypes
 
     // StructureItem has quite a complicated diffing 
@@ -100,7 +102,6 @@ module StructureItemDiff =
         | x -> x
         
     let isDirectChildPath (parent : string) (child : string) = 
-        printfn "isDirectChildPath: %s >>> %s" parent child
         child.StartsWith(parent) && pathLength child = pathLength parent + 1
         
 
@@ -137,15 +138,17 @@ module StructureItemDiff =
         | root :: rest -> 
             List.fold (fun st a -> addNode a st) (makeNode root) rest |> Some
 
-
+    
+    let span (colourName : string) (body : Text) : Text = 
+        htmlSpan [attrStyle [backgroundColor colourName]] body
 
     let drawStructure (diffs : Differences) : Markdown = 
         let markdownLabel (item : TreeItem) : Markdown = 
             match item.Difference with
-            | InLeft s -> text "DEL>>>" ^+^ text s.CommonName |> markdownText
-            | Match s -> text s.CommonName |> markdownText
-            | Difference (_,s2) -> text "MOD>>>" ^+^ text s2.CommonName |> markdownText
-            | InRight s -> text "NEW>>>" ^+^ text s.CommonName |> markdownText
+            | InLeft s -> span lightcoral (text s.Name) |> markdownText
+            | Match s -> text s.Name |> markdownText
+            | Difference (_,s2) -> span gold (text s2.Name) |> markdownText
+            | InRight s -> span palegreen (text s.Name) |> markdownText
 
         match buildStructureTree diffs with
         | None -> emptyMarkdown

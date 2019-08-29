@@ -10,7 +10,8 @@ module Datatypes =
 
     
     type StructureItem = 
-        { CommonName : string 
+        { Name: string 
+          CommonName : string 
           Reference : string
         }
 

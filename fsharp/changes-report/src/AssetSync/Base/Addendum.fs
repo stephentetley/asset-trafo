@@ -8,7 +8,7 @@ module Addendum =
     
     open SLSqlite.Core
     open MarkdownDoc.Markdown
-
+    open MarkdownDoc.Markdown.InlineHtml
 
     // Potential additions to library with unstable APIs 
     // (sl-sqlite, markdown-doc, ...)
@@ -32,5 +32,3 @@ module Addendum =
     let commaSpaceSep (texts : Text list) : Text = 
         textPunctuate (rawtext ", ") texts
 
-
-    
