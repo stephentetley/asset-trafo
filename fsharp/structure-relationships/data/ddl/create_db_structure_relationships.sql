@@ -9,14 +9,14 @@ DROP TABLE IF EXISTS aide_asset_lookups;
 
 CREATE TABLE ai_structure_relationships
 (
-    structure_relationship_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
-    parent_id BIGINT,
-    child_id BIGINT
+    structure_relationship_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
+    parent_id INTEGER,
+    child_id INTEGER
 );
 
 CREATE TABLE ai_asset_lookups
 (
-    asset_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
+    asset_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
     reference TEXT,
     asset_common_name TEXT,
     asset_name TEXT,
@@ -26,16 +26,16 @@ CREATE TABLE ai_asset_lookups
 
 CREATE TABLE aide_structure_relationships
 (
-    structure_relationship_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
-    parent_id BIGINT,
-    child_id BIGINT
+    structure_relationship_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
+    parent_id INTEGER,
+    child_id INTEGER
 );
 
 CREATE TABLE aide_asset_lookups
 (
-    aide_asset_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
-    change_request_id BIGINT,
-    asset_id BIGINT,
+    aide_asset_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
+    change_request_id INTEGER,
+    asset_id INTEGER,
     reference TEXT,
     asset_common_name TEXT,
     asset_name TEXT,

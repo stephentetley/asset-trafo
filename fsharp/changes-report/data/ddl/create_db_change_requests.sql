@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS change_request_repeated_attribute;
 
 CREATE TABLE work_scheme
 (
-    scheme_id BIGINT PRIMARY KEY UNIQUE NOT NULL, 
+    scheme_id INTEGER PRIMARY KEY UNIQUE NOT NULL, 
     scheme_code TEXT,
     scheme_name TEXT,
     description TEXT,
@@ -20,7 +20,7 @@ CREATE TABLE work_scheme
 
 CREATE TABLE change_request
 (
-    change_request_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
+    change_request_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
     change_request_time TEXT,
     change_request_type TEXT,
     change_request_status TEXT,
@@ -29,9 +29,9 @@ CREATE TABLE change_request
 
 CREATE TABLE change_request_asset
 (
-    aide_asset_id BIGINT PRIMARY KEY UNIQUE NOT NULL, 
-    change_request_id BIGINT,
-    scheme_id BIGINT,
+    aide_asset_id INTEGER PRIMARY KEY UNIQUE NOT NULL, 
+    change_request_id INTEGER,
+    scheme_id INTEGER,
     ai_asset_reference TEXT,
     aide_asset_reference TEXT,
     ai_asset_name TEXT,
@@ -56,8 +56,8 @@ CREATE TABLE change_request_asset
 
 CREATE TABLE change_request_attribute
 (
-    aide_asset_attr_value_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
-    change_request_id BIGINT,
+    aide_asset_attr_value_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
+    change_request_id INTEGER,
     asset_reference TEXT,
     asset_name TEXT,
     asset_common_name TEXT,
@@ -70,8 +70,8 @@ CREATE TABLE change_request_attribute
 
 CREATE TABLE change_request_repeated_attribute
 (
-    aide_asset_attr_repeating_value_id BIGINT PRIMARY KEY UNIQUE NOT NULL,
-    change_request_id BIGINT,
+    aide_asset_attr_repeating_value_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
+    change_request_id INTEGER,
     asset_reference TEXT,
     asset_name TEXT,
     asset_common_name TEXT,

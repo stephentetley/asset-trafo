@@ -19,6 +19,7 @@ module PrintReport =
 
     open AssetSync.Base.Addendum
     open AssetSync.ChangesReport.Datatypes
+    open AssetSync.ChangesReport.Metrics
 
 
     let headingTitle : string -> Markdown = 
@@ -28,11 +29,23 @@ module PrintReport =
         inlineLink "Back to top" "#top" None |> markdownText
 
 
+
+    let span (colour : ColorName) (body : Text) : Markdown = 
+        htmlSpan [ attrStyle [backgroundColor colour] ] body |> markdownText
+
+    let valueChanges (aiValue :string) (aideValue : string) : Markdown * Markdown = 
+        let maketext str = str |> text |> markdownText
+        match aiValue, aideValue with 
+        | "", s2 -> emptyMarkdown, span palegreen (text s2) 
+        | s1, "" -> span lightcoral (text s1), emptyMarkdown
+        | s1, s2 -> text s1 |> strikeout |> markdownText, span gold (text s2) 
+
+
     // ************************************************************************
     // Change scheme
 
     /// Change Scheme Table 
-    let changeSchemeInfoTable (info : ChangeSchemeInfo) : Markdown =
+    let changeSchemeSummaryTable (scheme : ChangeScheme) : Markdown =
         let specs = 
             [ { ColumnSpec.Width = 20 ; ColumnSpec.Alignment = Alignment.AlignLeft }
             ; { ColumnSpec.Width = 40 ; ColumnSpec.Alignment = Alignment.AlignLeft }
@@ -40,10 +53,13 @@ module PrintReport =
         let makeRow (name : string) (value : Text) : TableRow = 
             [ doubleAsterisks (name |> text) |> markdownText ; value |> markdownText ]
         let rows : TableRow list= 
-            [ makeRow "Scheme Code"         (text info.Code)
-            ; makeRow "Scheme Id"           (int64Md info.SchemeId)
-            ; makeRow "Scheme Name"         (text info.Name)
-            ; makeRow "Solution Provider"   (text info.SolutionProvider)
+            [ makeRow "Scheme Code"         (text scheme.Info.Code)
+            ; makeRow "Scheme Id"           (int64Md scheme.Info.SchemeId)
+            ; makeRow "Scheme Name"         (text scheme.Info.Name)
+            ; makeRow "Solution Provider"   (text scheme.Info.SolutionProvider)
+            ; makeRow "No. of Change Requests" (numberOfChangeRequests scheme |> int32Md)
+            ; makeRow "Total Property Changes" (numberOfPropertyChanges scheme |> int32Md)
+            ; makeRow "Total Attribute Changes (inluding repeated attributes)" (numberOfAttributeChangesAll scheme |> int32Md)
             ]
         makeTableWithoutHeadings specs rows |> gridTable
 
@@ -100,15 +116,19 @@ module PrintReport =
     // ************************************************************************
     // Attribute changes
 
-    let attributeValue (attrValue : AttributeValue) : Text = 
-        text attrValue.Value
+    //let attributeValue (attrValue : AttributeValue) : Text = 
+    //    text attrValue.Value
    
+    
+
     let attributeChangeRow (attrChange : AttributeChange) : Table.TableRow = 
+        let aiValue,aideValue = 
+            valueChanges attrChange.AiValue.Value attrChange.AideValue.Value
         [ attrChange.Reference          |> text     |> markdownText
         ; attrChange.AssetName          |> text     |> markdownText
         ; attrChange.AttributeName      |> text     |> markdownText 
-        ; attributeValue attrChange.AiValue         |> markdownText 
-        ; attributeValue attrChange.AideValue       |> markdownText 
+        ; aiValue
+        ; aideValue
         ]
 
     let attributeChangesTable (attrChanges : AttributeChange list) : Markdown option = 
@@ -116,8 +136,8 @@ module PrintReport =
             [ alignLeft 30 (headingTitle "Asset Reference")
             ; alignLeft 40 (headingTitle "Asset Name")
             ; alignLeft 30 (headingTitle "Attribute Name")
-            ; alignLeft 45 (headingTitle "AI Value")
-            ; alignLeft 45 (headingTitle "AIDE Value")
+            ; alignLeft 50 (headingTitle "AI Value")
+            ; alignLeft 50 (headingTitle "AIDE Value")
             ]
         let (rows : TableRow list) = attrChanges |> List.map attributeChangeRow 
         match rows with
@@ -136,12 +156,14 @@ module PrintReport =
 
    
     let repeatedAttributeChangeRow (repAttrChange : RepeatedAttributeChange) : Table.TableRow = 
+        let aiValue,aideValue = 
+            valueChanges repAttrChange.AiValue.Value repAttrChange.AideValue.Value
         [ repAttrChange.Reference               |> text     |> markdownText
         ; repAttrChange.AssetName               |> text     |> markdownText
         ; repAttrChange.AttributeSetName        |> text     |> markdownText 
         ; repAttrChange.RepeatedAttributeName   |> text     |> markdownText 
-        ; attributeValue repAttrChange.AiValue              |> markdownText 
-        ; attributeValue repAttrChange.AideValue            |> markdownText 
+        ; aiValue 
+        ; aideValue
         ]
 
     let repeatedAttributeChangesTable (repAttrChanges : RepeatedAttributeChange list) : Markdown option = 
@@ -169,14 +191,18 @@ module PrintReport =
     // Asset "property" changes
 
 
+    
+
+
     let assetPropertyChangeRow (reference : string) 
                                 (assetName : string) 
                                 (assetProperty : AssetProperty) : Table.TableRow = 
+        let aiValue,aideValue = valueChanges assetProperty.AiValue assetProperty.AideValue
         [ reference                     |> text |> markdownText
         ; assetName                     |> text |> markdownText
         ; assetProperty.PropertyName    |> text |> markdownText 
-        ; assetProperty.AiValue         |> text |> markdownText 
-        ; assetProperty.AideValue       |> text |> markdownText 
+        ; aiValue
+        ; aideValue
         ]
 
     let assetPropertyChangesTable (assetChanges : AssetChange list) : Markdown option = 
@@ -227,7 +253,7 @@ module PrintReport =
         let requestInfos = changeScheme.ChangeRequests |> List.map (fun x -> x.Info)
 
         h1 (htmlIdAnchor "top" (text "AIDE Change Scheme"))
-            ^!!^ changeSchemeInfoTable changeScheme.Info
+            ^!!^ changeSchemeSummaryTable changeScheme
             ^!!^ changeRequestInfosSection requestInfos
             ^!!^ vsep (List.map makeChangeRequest1 changeScheme.ChangeRequests)
 

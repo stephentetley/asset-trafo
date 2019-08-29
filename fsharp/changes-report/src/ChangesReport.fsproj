@@ -9,6 +9,7 @@
     <Compile Include="AssetSync\ChangesReport\ImportSchema.fs" />
     <Compile Include="AssetSync\ChangesReport\PopulateChangesDb.fs" />
     <Compile Include="AssetSync\ChangesReport\Datatypes.fs" />
+    <Compile Include="AssetSync\ChangesReport\Metrics.fs" />
     <Compile Include="AssetSync\ChangesReport\BuildReport.fs" />
     <Compile Include="AssetSync\ChangesReport\PrintReport.fs" />
   </ItemGroup>

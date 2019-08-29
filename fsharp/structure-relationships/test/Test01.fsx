@@ -157,6 +157,8 @@ let writeMarkdownReport (doc : Markdown)
 // e.g test06 141913L "SAI00001460" ;;  // This has a couple of diffs (one is a delete and add back)
 // or  test06 141013L "SAI00001460" ;;  // This has quite good diffs
 // or  test06 148575L "SAI00584748" ;;  // simple additions
+
+// test06 148562L
 let test06 (changeReqId : int64) (sairef : string) = 
     let opts = pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"
     let connParams = getConnParams ()

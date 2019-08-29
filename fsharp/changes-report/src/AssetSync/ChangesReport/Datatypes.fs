@@ -31,6 +31,9 @@ module Datatypes =
           AiValue : AttributeValue
           AideValue : AttributeValue
         }
+        /// Note this should always be true as we only extract changed 
+        /// records from the master database
+        member x.HasChanged with get () : bool = x.AideValue <> x.AiValue
 
     type RepeatedAttributeChange = 
         { AssetName : string
@@ -40,6 +43,9 @@ module Datatypes =
           AiValue : AttributeValue
           AideValue : AttributeValue
         } 
+        /// Note this should always be true as we only extract changed 
+        /// records from the master database
+        member x.HasChanged with get () : bool = x.AideValue <> x.AiValue
 
     /// Assets have "properties" { name, common name, manufacturer, 
     /// grid ref... } that are stored inline with the "Asset record". 

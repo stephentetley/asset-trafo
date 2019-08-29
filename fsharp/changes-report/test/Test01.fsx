@@ -38,6 +38,7 @@ open MarkdownDoc.Pandoc
 
 #load "..\src\AssetSync\Base\Addendum.fs"
 #load "..\src\AssetSync\ChangesReport\Datatypes.fs"
+#load "..\src\AssetSync\ChangesReport\Metrics.fs"
 #load "..\src\AssetSync\ChangesReport\BuildReport.fs"
 #load "..\src\AssetSync\ChangesReport\PrintReport.fs"
 open AssetSync.Base.Addendum
