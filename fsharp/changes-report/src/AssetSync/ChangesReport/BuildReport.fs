@@ -55,10 +55,10 @@ module BuildReport =
         let sql : string = 
             """ 
             SELECT
-                cr_asset.*
+                        cr_asset.*
             FROM        change_request_asset AS cr_asset
             WHERE
-                    cr_asset.change_request_id = :chreqid
+                        cr_asset.change_request_id = :chreqid
             ;
             """
         let cmd = 
