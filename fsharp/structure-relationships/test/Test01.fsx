@@ -29,7 +29,7 @@ Environment.SetEnvironmentVariable("PATH",
 #r "SLFormat.dll"
 open SLFormat.CommandOptions
 
-#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190829\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190830a\lib\netstandard2.0"
 #r "MarkdownDoc.dll"
 open MarkdownDoc.Markdown
 open MarkdownDoc.Pandoc
@@ -158,7 +158,6 @@ let writeMarkdownReport (doc : Markdown)
 // or  test06 141013L "SAI00001460" ;;  // This has quite good diffs
 // or  test06 148575L "SAI00584748" ;;  // simple additions
 
-// test06 148562L
 let test06 (changeReqId : int64) (sairef : string) = 
     let opts = pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"
     let connParams = getConnParams ()

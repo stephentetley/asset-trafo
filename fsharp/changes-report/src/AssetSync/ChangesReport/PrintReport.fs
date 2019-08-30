@@ -14,6 +14,7 @@ module PrintReport =
 
     open MarkdownDoc.Markdown
     open MarkdownDoc.Markdown.InlineHtml
+    open MarkdownDoc.Markdown.CssColors
     open MarkdownDoc.Pandoc
     
 
@@ -36,8 +37,8 @@ module PrintReport =
     let valueChanges (aiValue :string) (aideValue : string) : Markdown * Markdown = 
         let maketext str = str |> text |> markdownText
         match aiValue, aideValue with 
-        | "", s2 -> emptyMarkdown, span palegreen (text s2) 
-        | s1, "" -> span lightcoral (text s1), emptyMarkdown
+        | "", s2 -> emptyMarkdown, span paleGreen (text s2) 
+        | s1, "" -> span lightCoral (text s1), emptyMarkdown
         | s1, s2 -> text s1 |> strikeout |> markdownText, span gold (text s2) 
 
 
@@ -104,7 +105,7 @@ module PrintReport =
 
         let title = 
             let refname = sprintf "cr%i" requestId
-            htmlIdAnchor refname (text "Change request" ^+^ int64Md requestId)
+            htmlAnchorId refname (text "Change request" ^+^ int64Md requestId)
 
         h2 title
             ^!!^ markdownText (text "Request status:" ^+^ text changeRequestInfo.Status)
@@ -245,14 +246,14 @@ module PrintReport =
     let makeChangeRequestsReport (changeRequests : ChangeRequest list) : Markdown = 
         let requestInfos = changeRequests |> List.map (fun x -> x.Info)
 
-        h1 (htmlIdAnchor "top" (text "AIDE Change Requests"))
+        h1 (htmlAnchorId "top" (text "AIDE Change Requests"))
             ^!!^ changeRequestInfosSection requestInfos
             ^!!^ vsep (List.map makeChangeRequest1 changeRequests)
       
     let makeChangeSchemeReport (changeScheme : ChangeScheme) : Markdown = 
         let requestInfos = changeScheme.ChangeRequests |> List.map (fun x -> x.Info)
 
-        h1 (htmlIdAnchor "top" (text "AIDE Change Scheme"))
+        h1 (htmlAnchorId "top" (text "AIDE Change Scheme"))
             ^!!^ changeSchemeSummaryTable changeScheme
             ^!!^ changeRequestInfosSection requestInfos
             ^!!^ vsep (List.map makeChangeRequest1 changeScheme.ChangeRequests)

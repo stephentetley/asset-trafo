@@ -10,6 +10,7 @@ module StructureItemDiff =
 
     open MarkdownDoc.Markdown
     open MarkdownDoc.Markdown.InlineHtml
+    open MarkdownDoc.Markdown.CssColors
     open MarkdownDoc.Markdown.RoseTree
 
     open AssetSync.Base.Addendum
@@ -139,16 +140,22 @@ module StructureItemDiff =
             List.fold (fun st a -> addNode a st) (makeNode root) rest |> Some
 
     
-    let span (colourName : string) (body : Text) : Text = 
-        htmlSpan [attrStyle [backgroundColor colourName]] body
+    let span (colourName : string) (extraAttrs : HtmlAttrs) (body : Text) : Text = 
+        htmlSpan (attrStyle [backgroundColor colourName] :: extraAttrs) body
 
     let drawStructure (diffs : Differences) : Markdown = 
         let markdownLabel (item : TreeItem) : Markdown = 
             match item.Difference with
-            | InLeft s -> span lightcoral (text s.Name) |> markdownText
+            | InLeft s -> 
+                let title = HtmlAttr("title", sprintf "Delete '%s'" s.CommonName)
+                span lightCoral [title] (text s.Name) |> markdownText
             | Match s -> text s.Name |> markdownText
-            | Difference (_,s2) -> span gold (text s2.Name) |> markdownText
-            | InRight s -> span palegreen (text s.Name) |> markdownText
+            | Difference (s1,s2) -> 
+                let title = HtmlAttr("title", sprintf "Rename '%s' to '%s'" s1.CommonName s2.CommonName)
+                span gold [title] (text s2.Name)  |> markdownText
+            | InRight s -> 
+                let title = HtmlAttr("title", sprintf "Add '%s'" s.CommonName)
+                span paleGreen [title] (text s.Name) |> markdownText
 
         match buildStructureTree diffs with
         | None -> emptyMarkdown

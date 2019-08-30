@@ -29,20 +29,20 @@ module Addendum =
     // For markdown-doc
 
 
-    /// Span is wrong in MarkdownDoc
-    let htmlSpan (attrs : HtmlAttrs) (body : Text) : Text = 
-        htmlElement "span" attrs body
+    ///// Span is wrong in MarkdownDoc
+    //let htmlSpan (attrs : HtmlAttrs) (body : Text) : Text = 
+    //    htmlElement "span" attrs body
 
 
-    let backgroundColor (value : string) : StyleDecl = 
-        StyleDecl("background-color", value)
+    //let backgroundColor (value : string) : StyleDecl = 
+    //    StyleDecl("background-color", value)
 
-    type ColourName = string
+    //type ColourName = string
 
-    let bisque : ColourName = "bisque"
-    let gold : ColourName = "gold"
-    let lightcoral : ColourName = "lightcoral"
-    let palegreen : ColourName = "palegreen"
+    //let bisque : ColourName = "bisque"
+    //let gold : ColourName = "gold"
+    //let lightcoral : ColourName = "lightcoral"
+    //let palegreen : ColourName = "palegreen"
 
 
 

@@ -31,7 +31,7 @@ open SLSqlite.Core
 #r "SLFormat.dll"
 open SLFormat.CommandOptions.CommandOptions
 
-#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190829\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190830a\lib\netstandard2.0"
 #r "MarkdownDoc.dll"
 open MarkdownDoc.Markdown
 open MarkdownDoc.Pandoc
