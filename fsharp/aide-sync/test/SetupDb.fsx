@@ -66,7 +66,11 @@ let main () : Result<unit, ErrMsg> =
         @"G:\work\Projects\asset_sync\aide_report\no_change_req_new_aide_assets_20190830.csv"
     let newAttributesCsv = 
         @"G:\work\Projects\asset_sync\aide_report\no_change_req_new_aide_attribute_values_20190830.csv"
-    
+    let aideStructRelationshipsCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\structure_relationships_aide_20190822.csv"
+    let aiStructRelationshipsCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\structure_relationships_ai_20190822.csv"
+
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputDbFile () |> Path.GetFullPath
     printfn "%s" dbActive
@@ -79,12 +83,14 @@ let main () : Result<unit, ErrMsg> =
     runSqliteDb connParams 
         <| sqliteDb { 
                 do! insertChangeRequestRows changeRequestsCsv
-                //do! insertAssetChangeRows assetChangesCsv
-                //do! insertNewAssetRows newAssetsCsv
-                //do! insertNewAttributeRows newAttributesCsv
-                //do! insertAttributeChangeRows attributeChangesCsv
-                //do! insertRepeatedAttributeChangeRows repeatedAttributeChangesCsv
-                //do! insertWorkSchemeRows workSchemeCsv
+                do! insertAssetChangeRows assetChangesCsv
+                do! insertAssetNewRows newAssetsCsv
+                do! insertAttributeChangeRows attributeChangesCsv
+                do! insertAttributeNewRows newAttributesCsv
+                do! insertRepeatedAttributeChangeRows repeatedAttributeChangesCsv
+                do! insertWorkSchemeRows workSchemeCsv
+                do! insertAideStructRelationshipRows aideStructRelationshipsCsv
+                do! insertAiStructRelationshipRows aiStructRelationshipsCsv
                 return ()
             }
 
