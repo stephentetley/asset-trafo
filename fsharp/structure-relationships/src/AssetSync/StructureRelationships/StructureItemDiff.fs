@@ -61,7 +61,13 @@ module StructureItemDiff =
                 match compare (x.Reference) (y.Reference) with
                 | i when i = 0 -> 
                     work xs ys (fun ac -> 
-                    if x = y then 
+
+                    // It is possible to have nonproper a name change that
+                    // tries to change the prefix path to the current node
+                    // but don't change the names of the nodes above it.
+                    // This reults in the leaf being highlighted even though 
+                    // the "change" is above it.
+                    if x.CommonName = y.CommonName then 
                         cont (Match x :: ac)
                     else
                         cont (Difference(x,y) :: ac))
@@ -151,7 +157,11 @@ module StructureItemDiff =
                 span lightCoral [title] (text s.Name) |> markdownText
             | Match s -> text s.Name |> markdownText
             | Difference (s1,s2) -> 
-                let title = HtmlAttr("title", sprintf "Rename '%s' to '%s'" s1.CommonName s2.CommonName)
+                let title = 
+                    if s1.Name <> s2.Name then 
+                        HtmlAttr("title", sprintf "Rename '%s' to '%s'" s1.Name s2.Name)
+                    else
+                        HtmlAttr("title", sprintf "Non-proper name change (floc path editted):&#013;'%s'&#013;to&#013;'%s'" s1.CommonName s2.CommonName)
                 span gold [title] (text s2.Name)  |> markdownText
             | InRight s -> 
                 let title = HtmlAttr("title", sprintf "Add '%s'" s.CommonName)

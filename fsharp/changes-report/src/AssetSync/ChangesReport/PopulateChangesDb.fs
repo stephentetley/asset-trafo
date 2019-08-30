@@ -36,7 +36,7 @@ module PopulateChangesDb =
             change_request_status, \
             comments) \
             VALUES \
-            (?,?,?,  ?,?)"
+            (?,?,?,  ?,?);"
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.ChangeRequestId)
@@ -90,7 +90,7 @@ module PopulateChangesDb =
             aide_location_reference, \
             aide_asset_deleted) \
             VALUES \
-            (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?, ?,?,?,  ?,?)"
+            (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?, ?,?,?,  ?,?);"
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AideAssetId)
@@ -124,7 +124,7 @@ module PopulateChangesDb =
             executeNonQueryIndexed statement |>> ignore
         | None -> mreturn ()
 
-    let insertAsssetChangeRows (csvPath : string) : SqliteDb<unit> = 
+    let insertAssetChangeRows (csvPath : string) : SqliteDb<unit> = 
         sqliteDb { 
             let! table = 
                 liftOperationResult (fun _ -> readChangeReqAssetsExport csvPath)
@@ -147,7 +147,7 @@ module PopulateChangesDb =
             ai_lookup_value, \
             aide_value, \
             aide_lookup_value) \
-            VALUES (?,?,?,  ?,?,?,  ?,?,?, ?)"
+            VALUES (?,?,?,  ?,?,?,  ?,?,?, ?);"
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AssetAttrValueId)
@@ -194,7 +194,7 @@ module PopulateChangesDb =
             ai_lookup_value, \
             aide_value, \
             aide_lookup_value) \
-            VALUES (?,?,?,  ?,?,?,  ?,?,?,  ?,?)"
+            VALUES (?,?,?,  ?,?,?,  ?,?,?,  ?,?);"
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AssetAttrRepeatingValueId)
@@ -236,7 +236,7 @@ module PopulateChangesDb =
             scheme_name, \
             description, \
             solution_provider) \
-            VALUES (?,?,?,  ?,?)"
+            VALUES (?,?,?,  ?,?);"
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.SchemeId)
@@ -261,6 +261,89 @@ module PopulateChangesDb =
         }
 
     
+    // ************************************************************************
+    // Table: change_request_asset : new assets
+
+    let newAssetInsert (row : NoChangeReqNewAssetsRow) : IndexedCommand option =
+        let sql =
+            "INSERT INTO change_request_asset \
+            (aide_asset_id, \
+            aide_asset_reference, \
+            aide_asset_name, \
+            aide_common_name, \
+            aide_installed_from_date, \
+            aide_manufacturer, \
+            aide_model, \
+            aide_hierarchy_key, \
+            aide_asset_status, \
+            aide_location_reference, \
+            aide_asset_deleted) \
+            VALUES \
+            (?,?,?,  ?,?,?,  ?,?,?,  ?,?);"
+        let cmd = 
+            new IndexedCommand(commandText = sql)
+                |> addParam (int64Param row.AideAssetId)
+                |> addParam (stringParam row.AideAssetReference)
+                |> addParam (stringParam row.AideAssetName)
+                |> addParam (stringParam row.AideCommonName)
+                |> addParam (dateTimeParam row.AideInstalledFromDate)
+                |> addParam (optionNull stringParam row.AideManufacturer)
+                |> addParam (optionNull stringParam row.AideModel)
+                |> addParam (stringParam row.AideHierarchyKey)
+                |> addParam (stringParam row.AideAssetStatus)
+                |> addParam (stringParam row.AideLocationReference)
+                |> addParam (int32Param row.AideAssetDeleted)
+        cmd |> Some
+
+    let insertNewAssetRow (row : NoChangeReqNewAssetsRow) : SqliteDb<unit> = 
+        match newAssetInsert row with
+        | Some statement -> 
+            executeNonQueryIndexed statement |>> ignore
+        | None -> mreturn ()
+
+    let insertNewAssetRows (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
+            let! table = 
+                liftOperationResult (fun _ -> readNoChangeReqNewAssetsExport csvPath)
+            return! withTransaction <| sforMz table.Rows insertNewAssetRow
+        }
 
 
+    // ************************************************************************
+    // Table: change_request_attribute : new attributes
 
+    let newAttributeInsert (row : NoChangeReqNewAttributesRow) : IndexedCommand option =
+        let sql =
+            "INSERT INTO change_request_attribute \
+            (aide_asset_attr_value_id, \
+            asset_reference, \
+            asset_name, \
+            asset_common_name, \
+            attribute_name, \
+            aide_value, \
+            aide_lookup_value) \
+            VALUES (?,?,?,  ?,?,?,  ?);"
+        let cmd = 
+            new IndexedCommand(commandText = sql)
+                |> addParam (int64Param row.AssetAttrValueId)
+                |> addParam (stringParam row.AssetReference)
+                |> addParam (stringParam row.AssetName)
+                |> addParam (stringParam row.AssetCommonName)
+                |> addParam (stringParam row.AttributeName)
+                |> addParam (optionNull stringParamAux row.AideValue)
+                |> addParam (optionNull stringParamAux row.AideLookupValue)
+        cmd |> Some
+
+    let insertNewAttributeRow (row : NoChangeReqNewAttributesRow) : SqliteDb<unit> = 
+        match newAttributeInsert row with
+        | Some statement -> 
+            executeNonQueryIndexed statement |>> ignore
+        | None -> mreturn ()
+
+
+    let insertNewAttributeRows (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
+            let! table = 
+                liftOperationResult (fun _ -> readNoChangeReqNewAttributesExport csvPath)
+            return! withTransaction <| sforMz table.Rows insertNewAttributeRow
+        }

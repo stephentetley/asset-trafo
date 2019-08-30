@@ -61,6 +61,10 @@ let main () : Result<unit, ErrMsg> =
         @"G:\work\Projects\asset_sync\aide_report\change_requests_repeated_attributes_20190827.csv"
     let workSchemeCsv = 
         @"G:\work\Projects\asset_sync\aide_report\change_requests_schemes_20190827.csv"
+    let newAssetsCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\no_change_req_new_aide_assets_20190830.csv"
+    let newAttributesCsv = 
+        @"G:\work\Projects\asset_sync\aide_report\no_change_req_new_aide_attribute_values_20190830.csv"
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputDbFile () |> Path.GetFullPath
     printfn "%s" dbActive
@@ -73,7 +77,9 @@ let main () : Result<unit, ErrMsg> =
     runSqliteDb connParams 
         <| sqliteDb { 
                 do! insertChangeRequestRows changeRequestsCsv
-                do! insertAsssetChangeRows assetChangesCsv
+                do! insertAssetChangeRows assetChangesCsv
+                do! insertNewAssetRows newAssetsCsv
+                do! insertNewAttributeRows newAttributesCsv
                 do! insertAttributeChangeRows attributeChangesCsv
                 do! insertRepeatedAttributeChangeRows repeatedAttributeChangesCsv
                 do! insertWorkSchemeRows workSchemeCsv

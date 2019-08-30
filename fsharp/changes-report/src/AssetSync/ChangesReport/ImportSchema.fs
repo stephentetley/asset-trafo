@@ -173,3 +173,63 @@ module ImportSchema =
             WorkSchemeTable.Load(uri = path) |> Ok
         with
         | ex -> Error ex.Message
+
+    // ************************************************************************
+    // Table : asset_change : new asset
+
+    [<Literal>]
+    let NoChangeReqNewAssetsSchema = 
+        "AideAssetId(int64),\
+        AideAssetReference(string),\
+        AideAssetName(string),\
+        AideCommonName(string),\
+        AideInstalledFromDate(date),\
+        AideManufacturer(string option),\
+        AideModel(string option),\
+        AideHierarchyKey(string),\
+        AideAssetStatus(string),\
+        AideLocationReference(string),\
+        AideAssetDeleted(int)"
+        
+
+    
+    type NoChangeReqNewAssetsTable = 
+        CsvProvider< Schema = NoChangeReqNewAssetsSchema                              
+                   , Sample = NoChangeReqNewAssetsSchema
+                   , HasHeaders = true >
+
+    type NoChangeReqNewAssetsRow = NoChangeReqNewAssetsTable.Row
+    
+    let readNoChangeReqNewAssetsExport(path:string) : Result<NoChangeReqNewAssetsTable, string> = 
+        try 
+            NoChangeReqNewAssetsTable.Load(uri = path) |> Ok
+        with
+        | ex -> Error ex.Message
+
+
+    // ************************************************************************
+    // Table : attribute_change : new attribute
+    
+    [<Literal>]
+    let NoChangeReqNewAttributesSchema = 
+        "AssetAttrValueId(int64),\
+        AssetReference(string),\
+        AssetName(string),\
+        AssetCommonName(string),\
+        AttributeName(string),\
+        AideValue(string option),\
+        AideLookupValue(string option)"
+
+
+    type NoChangeReqNewAttributesTable = 
+        CsvProvider< Schema = NoChangeReqNewAttributesSchema
+                   , Sample = NoChangeReqNewAttributesSchema
+                   , HasHeaders = true >
+
+    type NoChangeReqNewAttributesRow = NoChangeReqNewAttributesTable.Row
+    
+    let readNoChangeReqNewAttributesExport(path:string) : Result<NoChangeReqNewAttributesTable, string> = 
+        try 
+            NoChangeReqNewAttributesTable.Load(uri = path) |> Ok
+        with
+        | ex -> Error ex.Message

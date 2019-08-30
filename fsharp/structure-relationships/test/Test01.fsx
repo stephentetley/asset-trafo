@@ -154,10 +154,10 @@ let writeMarkdownReport (doc : Markdown)
     | Ok i -> printfn "Return code: %i" i ; Ok ()
     | Error msg -> Error msg
 
-// e.g test06 141913L "SAI00001460" ;;  // This has a couple of diffs (one is a delete and add back)
-// or  test06 141013L "SAI00001460" ;;  // This has quite good diffs
-// or  test06 148575L "SAI00584748" ;;  // simple additions
-
+// e.g  test06 141913L "SAI00001460" ;;  // This has a couple of diffs (one is a delete and add back, the other a name change)
+// or   test06 141013L "SAI00001460" ;;  // This has quite good diffs
+// or   test06 148575L "SAI00584748" ;;  // simple additions
+//      test06 148574L "SAI00093850" ;;
 let test06 (changeReqId : int64) (sairef : string) = 
     let opts = pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"
     let connParams = getConnParams ()
@@ -166,7 +166,7 @@ let test06 (changeReqId : int64) (sairef : string) =
     match runSqliteDb connParams action with
     | Error msg -> printfn "%s" msg ; Error msg
     | Ok diffs -> 
-        let tempFile = outputFile "diff_temp.html"
+        let tempFile = outputFile "diff_pcl70_148574.html"
         diffs 
             |> drawStructure |> fun doc -> (h1 (text "Structure Changes") ^!!^ doc )
             |> fun doc -> writeMarkdownReport doc "Structure Changes" opts tempFile
