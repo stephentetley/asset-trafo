@@ -6,12 +6,18 @@
 
   <ItemGroup>
     <Compile Include="AideSync\Base\Addendum.fs" />
+    <Compile Include="AideSync\Datatypes.fs" />
     <Compile Include="AideSync\ImportSchema.fs" />
     <Compile Include="AideSync\PopulateDb.fs" />
+    <Compile Include="AideSync\Metrics.fs" />
+    <Compile Include="AideSync\BuildReport.fs" />
+    <Compile Include="AideSync\PrintReport.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FSharp.Data" Version="3.1.1" />
+    <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20190830a" />
+    <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190721" />
     <PackageReference Include="SLSqlite" Version="1.0.0-alpha-20190823" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.111" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.111" />

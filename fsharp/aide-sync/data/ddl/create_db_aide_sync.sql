@@ -8,7 +8,7 @@ DROP TABLE IF EXISTS asset_attribute;
 DROP TABLE IF EXISTS asset_repeated_attribute;
 DROP TABLE IF EXISTS aide_structure_relationships;
 DROP TABLE IF EXISTS ai_structure_relationships;
-
+DROP VIEW  IF EXISTS view_scheme_change_requests;
 
 -- create tables
 
@@ -99,3 +99,15 @@ CREATE TABLE ai_structure_relationships
     parent_id INTEGER,
     child_id INTEGER
 );
+
+
+
+CREATE VIEW view_scheme_change_requests 
+AS 
+SELECT 
+        asset.scheme_id             AS [scheme_id],
+        asset.change_request_id     AS [change_request_id]
+FROM 
+    asset AS asset 
+ORDER BY asset.scheme_id, asset.change_request_id
+;

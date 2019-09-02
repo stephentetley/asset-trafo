@@ -1,0 +1,96 @@
+﻿// Copyright (c) Stephen Tetley 2019
+// License: BSD 3 Clause
+
+#r "netstandard"
+#r "System.Xml.Linq.dll"
+open System
+open System.IO
+
+
+#I @"C:\Users\stephen\.nuget\packages\FSharp.Data\3.1.1\lib\netstandard2.0"
+#r "FSharp.Data.dll"
+open FSharp.Data
+
+#I @"C:\Users\stephen\.nuget\packages\System.Data.SQLite.Core\1.0.111\lib\netstandard2.0"
+#r "System.Data.SQLite.dll"
+open System.Data.SQLite
+
+// A hack to get over Dll loading error due to the native dll `SQLite.Interop.dll`
+[<Literal>] 
+let SQLiteInterop = @"C:\Users\stephen\.nuget\packages\System.Data.SQLite.Core\1.0.111\runtimes\win-x64\native\netstandard2.0"
+
+Environment.SetEnvironmentVariable("PATH", 
+    Environment.GetEnvironmentVariable("PATH") + ";" + SQLiteInterop
+    )
+
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190823\lib\netstandard2.0"
+#r "SLSqlite.dll"
+open SLSqlite.Core
+
+#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
+#r "SLFormat.dll"
+open SLFormat.CommandOptions.CommandOptions
+
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190830a\lib\netstandard2.0"
+#r "MarkdownDoc.dll"
+open MarkdownDoc.Markdown
+open MarkdownDoc.Pandoc
+
+#load "..\src\AideSync\Base\Addendum.fs"
+#load "..\src\AideSync\Datatypes.fs"
+#load "..\src\AideSync\Metrics.fs"
+#load "..\src\AideSync\BuildReport.fs"
+#load "..\src\AideSync\PrintReport.fs"
+open AideSync.Base.Addendum
+open AideSync.Datatypes
+open AideSync.BuildReport
+open AideSync.PrintReport
+
+let outputFile (relFileName : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
+
+let pathToDb () : string = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\db\aide_sync_active.sqlite")
+
+
+let pandocHtmlOptions () : PandocOptions = 
+    pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"
+
+let runChangeRequestsReport (chreqIds : int64 list) 
+                            (outputHtmlFile : string) : Result<unit, ErrMsg> = 
+    let dbActive = pathToDb () |> Path.GetFullPath
+    let connParams = sqliteConnParamsVersion3 dbActive
+    let pandocOpts = pandocHtmlOptions ()
+
+    match runSqliteDb connParams (mapM buildChangeRequest chreqIds) with
+    | Error msg -> printfn "Fail: %s" msg ; Error "Bad"
+    | Ok ochanges -> 
+        let changes = List.choose id ochanges
+        writeChangeRequestsReport changes pandocOpts outputHtmlFile
+
+
+let test01 () =
+    let changeRequests = [ 15742L; 148364L; 148365L; 148366L; 148367L; 148372L; 148374L ]
+    let htmlOutput = outputFile "change_request_report_20190827.html"
+    runChangeRequestsReport changeRequests htmlOutput
+
+
+let runChangeSchemeReport (schemeCode : string) 
+                            (outputHtmlFile : string) : Result<unit, ErrMsg> = 
+    let dbActive = pathToDb () |> Path.GetFullPath
+    let connParams = sqliteConnParamsVersion3 dbActive
+    let pandocOpts = pandocHtmlOptions ()
+
+    match runSqliteDb connParams (buildChangeScheme schemeCode ) with
+    | Error msg -> printfn "Fail: %s" msg ; Error "Bad"
+    | Ok None -> Error (sprintf "Could not find scheme matching '%s'" schemeCode)
+    | Ok (Some scheme) -> 
+        writeChangeSchemeReport scheme pandocOpts outputHtmlFile
+
+
+let test02 () =
+    let changeScheme = "PCL 70"
+    let htmlOutput = outputFile "change_scheme_report_20190828.html"
+    runChangeSchemeReport changeScheme htmlOutput
+
+

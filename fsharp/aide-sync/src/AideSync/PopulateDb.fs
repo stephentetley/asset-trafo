@@ -262,7 +262,7 @@ module PopulateDb =
 
     
     // ************************************************************************
-    // Table: change_request_asset : new assets
+    // Table: asset : new assets
 
     let assetNewInsert (row : AssetNewRow) : IndexedCommand option =
         let sql =
