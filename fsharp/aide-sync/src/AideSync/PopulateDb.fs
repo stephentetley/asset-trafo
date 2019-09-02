@@ -22,21 +22,142 @@ module PopulateDb =
         | null | "NULL" | "null" -> nullParam ()
         | _ -> stringParam source
 
+    // ************************************************************************
+    // Table: work_scheme
 
+    let WorkSchemeInsert (row : WorkSchemeRow) : IndexedCommand option =
+        let sql =        
+            """
+            INSERT INTO work_scheme
+            (scheme_id, 
+            scheme_code, 
+            scheme_name, 
+            description, 
+            solution_provider) 
+            VALUES (?,?,?,  ?,?);
+            """
+        let cmd = 
+            new IndexedCommand(commandText = sql)
+                |> addParam (int64Param row.SchemeId)
+                |> addParam (stringParam row.SchemeCode)
+                |> addParam (stringParam row.SchemeName)
+                |> addParam (stringParam row.Description)
+                |> addParam (stringParam row.SolutionProvider)
+        cmd |> Some
+
+    let insertWorkSchemeRow (row : WorkSchemeRow) : SqliteDb<unit> = 
+        match WorkSchemeInsert row with
+        | Some statement -> 
+            executeNonQueryIndexed statement |>> ignore
+        | None -> mreturn ()
+
+
+    let insertWorkSchemeRows (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
+            let! table = 
+                liftOperationResult (fun _ -> readWorkSchemeExport csvPath)
+            return! withTransaction <| sforMz table.Rows insertWorkSchemeRow
+        }
+
+    // ************************************************************************
+    // Table: ai_asset
+
+    let makeAiAssetInsert (row : AiAssetRow) : IndexedCommand option =
+        let sql = 
+            """
+            INSERT INTO ai_asset
+            (asset_id,
+            reference,
+            asset_common_name,
+            asset_name,
+            asset_type,
+            asset_category)
+            VALUES (?,?,?,  ?,?,?);
+            """
+        let cmd = 
+            new IndexedCommand (commandText = sql)
+                |> addParam (int64Param row.AssetId)
+                |> addParam (stringParam row.Reference)              
+                |> addParam (stringParam row.AssetCommonName)
+                |> addParam (stringParam row.AssetName)
+                |> addParam (stringParam row.AssetType)
+                |> addParam (stringParam row.AssetCategory)
+        cmd |> Some
+
+
+    let insertAiAssetRow (row : AiAssetRow) : SqliteDb<unit> = 
+        match makeAiAssetInsert row with
+        | Some statement -> 
+            attempt (executeNonQueryIndexed statement)
+                    (fun msg -> throwError (sprintf "AI Bad Row %O\n%s" row msg)) |>> ignore
+        | None -> mreturn ()
+
+    let insertAiAssetRows (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
+            let! table = 
+                liftOperationResult (fun _ -> readAiAssetExport csvPath)
+            return! withTransaction <| sforMz table.Rows insertAiAssetRow
+        }
+
+
+    // ************************************************************************
+    // Table: aide_asset
+
+    let makeAideAssetInsert (row : AideAssetRow) : IndexedCommand option =
+        let sql = 
+            """
+            INSERT INTO aide_asset
+            (aide_asset_id, 
+            change_request_id, 
+            asset_id,
+            reference, 
+            asset_common_name, 
+            asset_name,
+            asset_type, 
+            asset_category)
+            VALUES (?,?,?,  ?,?,?, ?,?);
+            """
+        let cmd = 
+            new IndexedCommand (commandText = sql)
+                |> addParam (int64Param row.AideAssetId)
+                |> addParam (optionNull int64Param row.ChangeRequestId)
+                |> addParam (optionNull int64Param row.AssetId)
+                |> addParam (stringParam row.Reference)                
+                |> addParam (stringParam row.AssetCommonName)
+                |> addParam (stringParam row.AssetName)
+                |> addParam (stringParam row.AssetType)
+                |> addParam (stringParam row.AssetCategory)
+        cmd |> Some
+
+
+    let insertAideAssetRow (row : AideAssetRow) : SqliteDb<unit> = 
+        match makeAideAssetInsert row with
+        | Some statement -> 
+            attempt (executeNonQueryIndexed statement)
+                    (fun _msg -> throwError (sprintf "Bad Row %O" row)) |>> ignore
+        | None -> mreturn ()
+
+    let insertAideAssetRows (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
+            let! table = 
+                liftOperationResult (fun _ -> readAideAssetExport csvPath)
+            return! withTransaction <| sforMz table.Rows insertAideAssetRow
+        }
 
     // ************************************************************************
     // Table: change_request
 
     let changeRequestInsert (row : ChangeRequestRow) : IndexedCommand option =
         let sql =
-            "INSERT INTO change_request \
-            (change_request_id, \
-            change_request_time, \
-            change_request_type, \
-            change_request_status, \
-            comments) \
-            VALUES \
-            (?,?,?,  ?,?);"
+            """
+            INSERT INTO change_request
+            (change_request_id, 
+            change_request_time, 
+            change_request_type, 
+            change_request_status, 
+            comments) 
+            VALUES (?,?,?,  ?,?);
+            """
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.ChangeRequestId)
@@ -61,37 +182,39 @@ module PopulateDb =
 
         
     // ************************************************************************
-    // Table: asset
+    // Table: asset_change
 
     let assetChangeInsert (row : AssetChangeRow) : IndexedCommand option =
         let sql =
-            "INSERT INTO asset \
-            (aide_asset_id, \
-            ai_asset_id, \
-            change_request_id, \
-            scheme_id, \
-            ai_asset_reference, \
-            aide_asset_reference, \
-            ai_asset_name, \
-            ai_common_name, \
-            ai_installed_from_date, \
-            ai_manufacturer, \
-            ai_model, \
-            ai_hierarchy_key, \
-            ai_asset_status, \
-            ai_location_reference, \
-            ai_asset_deleted, \
-            aide_asset_name, \
-            aide_common_name, \
-            aide_installed_from_date, \
-            aide_manufacturer, \
-            aide_model, \
-            aide_hierarchy_key, \
-            aide_asset_status, \
-            aide_location_reference, \
-            aide_asset_deleted) \
-            VALUES \
-            (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?, ?,?,?,  ?,?,?);"
+            """
+            INSERT INTO asset_change
+            (aide_asset_id, 
+            ai_asset_id, 
+            change_request_id, 
+            scheme_id, 
+            ai_asset_reference, 
+            aide_asset_reference, 
+            ai_asset_name, 
+            ai_common_name, 
+            ai_installed_from_date, 
+            ai_manufacturer, 
+            ai_model, 
+            ai_hierarchy_key, 
+            ai_asset_status, 
+            ai_location_reference, 
+            ai_asset_deleted, 
+            aide_asset_name, 
+            aide_common_name, 
+            aide_installed_from_date, 
+            aide_manufacturer, 
+            aide_model, 
+            aide_hierarchy_key, 
+            aide_asset_status, 
+            aide_location_reference, 
+            aide_asset_deleted) 
+            VALUES 
+            (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?, ?,?,?,  ?,?,?);
+            """
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AideAssetId)
@@ -134,22 +257,24 @@ module PopulateDb =
         }
 
     // ************************************************************************
-    // Table: change_request_attribute
+    // Table: asset_attribute_change
 
     let attributeChangeInsert (row : AttributeChangeRow) : IndexedCommand option =
         let sql =
-            "INSERT INTO asset_attribute \
-            (aide_asset_attr_value_id, \
-            change_request_id, \
-            asset_reference, \
-            asset_name, \
-            asset_common_name, \
-            attribute_name, \
-            ai_value, \
-            ai_lookup_value, \
-            aide_value, \
-            aide_lookup_value) \
-            VALUES (?,?,?,  ?,?,?,  ?,?,?, ?);"
+            """
+            INSERT INTO asset_attribute_change
+            (aide_asset_attr_value_id,
+            change_request_id, 
+            asset_reference, 
+            asset_name, 
+            asset_common_name, 
+            attribute_name, 
+            ai_value, 
+            ai_lookup_value, 
+            aide_value, 
+            aide_lookup_value) 
+            VALUES (?,?,?,  ?,?,?,  ?,?,?, ?);
+            """
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AssetAttrValueId)
@@ -180,23 +305,25 @@ module PopulateDb =
 
     
     // ************************************************************************
-    // Table: change_request_repeated_attribute
+    // Table: asset_repeated_attribute_change
 
     let repeatedAttributeChangeInsert (row : RepeatedAttributeChangeRow) : IndexedCommand option =
         let sql =        
-            "INSERT INTO asset_repeated_attribute \
-            (aide_asset_attr_repeating_value_id, \
-            change_request_id, \
-            asset_reference, \
-            asset_name, \
-            asset_common_name, \
-            attribute_name, \
-            attribute_set_name, \
-            ai_value, \
-            ai_lookup_value, \
-            aide_value, \
-            aide_lookup_value) \
-            VALUES (?,?,?,  ?,?,?,  ?,?,?,  ?,?);"
+            """
+            INSERT INTO asset_repeated_attribute_change 
+            (aide_asset_attr_repeating_value_id, 
+            change_request_id, 
+            asset_reference, 
+            asset_name, 
+            asset_common_name, 
+            attribute_name, 
+            attribute_set_name, 
+            ai_value, 
+            ai_lookup_value, 
+            aide_value, 
+            aide_lookup_value) 
+            VALUES (?,?,?,  ?,?,?,  ?,?,?,  ?,?);
+            """
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AssetAttrRepeatingValueId)
@@ -227,40 +354,7 @@ module PopulateDb =
         }
 
     
-    // ************************************************************************
-    // Table: work_scheme
-
-    let WorkSchemeInsert (row : WorkSchemeRow) : IndexedCommand option =
-        let sql =        
-            "INSERT INTO work_scheme \
-            (scheme_id, \
-            scheme_code, \
-            scheme_name, \
-            description, \
-            solution_provider) \
-            VALUES (?,?,?,  ?,?);"
-        let cmd = 
-            new IndexedCommand(commandText = sql)
-                |> addParam (int64Param row.SchemeId)
-                |> addParam (stringParam row.SchemeCode)
-                |> addParam (stringParam row.SchemeName)
-                |> addParam (stringParam row.Description)
-                |> addParam (stringParam row.SolutionProvider)
-        cmd |> Some
-
-    let insertWorkSchemeRow (row : WorkSchemeRow) : SqliteDb<unit> = 
-        match WorkSchemeInsert row with
-        | Some statement -> 
-            executeNonQueryIndexed statement |>> ignore
-        | None -> mreturn ()
-
-
-    let insertWorkSchemeRows (csvPath : string) : SqliteDb<unit> = 
-        sqliteDb { 
-            let! table = 
-                liftOperationResult (fun _ -> readWorkSchemeExport csvPath)
-            return! withTransaction <| sforMz table.Rows insertWorkSchemeRow
-        }
+    
 
     
     // ************************************************************************
@@ -268,20 +362,22 @@ module PopulateDb =
 
     let assetNewInsert (row : AssetNewRow) : IndexedCommand option =
         let sql =
-            "INSERT INTO asset \
-            (aide_asset_id, \
-            aide_asset_reference, \
-            aide_asset_name, \
-            aide_common_name, \
-            aide_installed_from_date, \
-            aide_manufacturer, \
-            aide_model, \
-            aide_hierarchy_key, \
-            aide_asset_status, \
-            aide_location_reference, \
-            aide_asset_deleted) \
-            VALUES \
-            (?,?,?,  ?,?,?,  ?,?,?,  ?,?);"
+            """
+            INSERT INTO asset_change 
+            (aide_asset_id, 
+            aide_asset_reference, 
+            aide_asset_name, 
+            aide_common_name, 
+            aide_installed_from_date, 
+            aide_manufacturer, 
+            aide_model, 
+            aide_hierarchy_key, 
+            aide_asset_status, 
+            aide_location_reference, 
+            aide_asset_deleted) 
+            VALUES 
+            (?,?,?,  ?,?,?,  ?,?,?,  ?,?);
+            """
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AideAssetId)
@@ -316,15 +412,17 @@ module PopulateDb =
 
     let attributeNewInsert (row : AttributeNewRow) : IndexedCommand option =
         let sql =
-            "INSERT INTO asset_attribute \
-            (aide_asset_attr_value_id, \
-            asset_reference, \
-            asset_name, \
-            asset_common_name, \
-            attribute_name, \
-            aide_value, \
-            aide_lookup_value) \
-            VALUES (?,?,?,  ?,?,?,  ?);"
+            """
+            INSERT INTO asset_attribute_change
+            (aide_asset_attr_value_id, 
+            asset_reference, 
+            asset_name, 
+            asset_common_name, 
+            attribute_name, 
+            aide_value, 
+            aide_lookup_value) 
+            VALUES (?,?,?,  ?,?,?,  ?);
+            """
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AssetAttrValueId)
@@ -357,8 +455,10 @@ module PopulateDb =
     let makeAideStructRelInsert (row : AideStructureRelationshipRow) : IndexedCommand option =
         let sql = 
             """
-            INSERT INTO aide_structure_relationships 
-            (structure_relationship_id, parent_id, child_id)
+            INSERT INTO aide_structure_relationships
+            (structure_relationship_id, 
+            parent_id, 
+            child_id)
             VALUES (?, ?,?);
             """
         let cmd = 
@@ -390,7 +490,9 @@ module PopulateDb =
         let sql = 
             """
             INSERT INTO ai_structure_relationships 
-            (structure_relationship_id, parent_id, child_id)
+            (structure_relationship_id, 
+            parent_id, 
+            child_id)
             VALUES (?,?,?);
             """
         let cmd = 

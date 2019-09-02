@@ -20,7 +20,7 @@ module BasicQueries =
         let sql = 
             """
             SELECT 
-                    asset.asset_id        AS [AssetId]
+                    asset.ai_asset_id        AS [AssetId]
             FROM    asset       AS asset
             WHERE
                     asset.reference = :sairef
@@ -30,9 +30,9 @@ module BasicQueries =
             new KeyedCommand (commandText = sql)
                 |> addNamedParam "sairef" (stringParam reference)
         
-        let readRow1 (result : ResultItem) : int64 = result.GetInt64(0)
+        let readRow1 (result : ResultItem) : int64 option = result.TryGetInt64(0)
 
-        queryKeyed cmd (Strategy.Head readRow1) |> optional
+        queryKeyed cmd (Strategy.Head readRow1) 
 
     
     // ************************************************************************
@@ -81,11 +81,11 @@ module BasicQueries =
         let sql = 
             """
             SELECT 
-                    aide_assets.aide_asset_id   AS [AideAssetId]
-            FROM    aide_asset_lookups          AS aide_assets
+                    asset.aide_asset_id         AS [AideAssetId]
+            FROM    asset          AS asset
             WHERE
-                    aide_assets.reference = :sairef
-            AND     aide_assets.change_request_id = :chreq 
+                    asset.aide_asset_reference = :sairef
+            AND     asset.change_request_id = :chreq 
             ;
             """
         let cmd = 

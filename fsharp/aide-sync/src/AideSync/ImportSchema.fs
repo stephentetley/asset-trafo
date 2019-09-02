@@ -36,9 +36,67 @@ module ImportSchema =
         with
         | ex -> Error ex.Message
 
+    
+    
+    // ************************************************************************
+    // ai_asset table
+
+    [<Literal>]
+    let AiAssetSchema = 
+         "AssetId(int64),\
+         Reference(string),\
+         AssetCommonName(string),\
+         AssetName(string),\
+         AssetType(string),\
+         AssetCategory(string)"    
+
+
+
+    type AiAssetTable = 
+        CsvProvider< Schema = AiAssetSchema 
+                   , Sample = AiAssetSchema
+                   , HasHeaders = true >
+
+    type AiAssetRow = AiAssetTable.Row
+
+    let readAiAssetExport(path:string) : Result<AiAssetTable, string> = 
+        try 
+            AiAssetTable.Load(uri = path) |> Ok
+        with
+        | ex -> Error ex.Message
 
     // ************************************************************************
-    // Table : asset_change
+    // aide_asset table
+
+    [<Literal>]
+    let AideAssetSchema = 
+        "AideAssetId(int64),\
+         ChangeRequestId(int64 option),\
+         AssetId(int64 option),\
+         Reference(string),\
+         AssetCommonName(string),\
+         AssetName(string),\
+         AssetType(string),\
+         AssetCategory(string)"    
+
+
+
+    type AideAssetTable = 
+        CsvProvider< Schema = AideAssetSchema 
+                   , Sample = AideAssetSchema
+                   , HasHeaders = true >
+
+    type AideAssetRow = AideAssetTable.Row
+
+    let readAideAssetExport(path:string) : Result<AideAssetTable, string> = 
+        try 
+            AideAssetTable.Load(uri = path) |> Ok
+        with
+        | ex -> Error ex.Message
+
+
+    // ************************************************************************
+    // Table : asset_change_change
 
     [<Literal>]
     let AssetChangeSchema = 
@@ -84,7 +142,7 @@ module ImportSchema =
 
 
     // ************************************************************************
-    // Table : asset_attribute
+    // Table : asset_attribute_change
     
     [<Literal>]
     let AttributeChangeSchema = 
@@ -117,7 +175,7 @@ module ImportSchema =
 
 
     // ************************************************************************
-    // Table : asset_repeated_attribute
+    // Table : asset_repeated_attribute_change
 
 
     [<Literal>]

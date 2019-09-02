@@ -99,10 +99,12 @@ let test02 () =
     let htmlOutput = outputFile "change_scheme_report_20190828.html"
     runChangeSchemeReport changeScheme htmlOutput
 
-// e.g test03 2111881L ;;
-let test03 (startId : int64) = 
+// e.g test03 141913L "SAI00001460" ;;
+let test03 (changeReqId : int64) (sairef : string) = 
     let connParams = getConnParams ()
     runSqliteDb connParams
         <| sqliteDb { 
-                return! findAideDescendants startId
+                match! findAideAssetIndex changeReqId sairef with
+                | None -> return []
+                | Some key -> return! findAideDescendants key
             }

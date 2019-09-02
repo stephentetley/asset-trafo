@@ -3,9 +3,11 @@
 DROP VIEW IF EXISTS view_scheme_change_requests;
 DROP TABLE IF EXISTS work_scheme;
 DROP TABLE IF EXISTS change_request;
-DROP TABLE IF EXISTS asset;
-DROP TABLE IF EXISTS asset_attribute;
-DROP TABLE IF EXISTS asset_repeated_attribute;
+DROP TABLE IF EXISTS ai_asset;
+DROP TABLE IF EXISTS aide_asset;
+DROP TABLE IF EXISTS asset_change;
+DROP TABLE IF EXISTS asset_attribute_change;
+DROP TABLE IF EXISTS asset_repeated_attribute_change;
 DROP TABLE IF EXISTS aide_structure_relationships;
 DROP TABLE IF EXISTS ai_structure_relationships;
 DROP VIEW  IF EXISTS view_scheme_change_requests;
@@ -30,7 +32,30 @@ CREATE TABLE change_request
     comments TEXT
 );
 
-CREATE TABLE asset
+CREATE TABLE ai_asset 
+(
+    asset_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
+    reference TEXT,
+    asset_common_name TEXT,
+    asset_name TEXT,
+    asset_type TEXT,
+    asset_category TEXT
+);
+
+CREATE TABLE aide_asset
+(
+    aide_asset_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
+    change_request_id INTEGER,
+    asset_id INTEGER,
+    reference TEXT,
+    asset_common_name TEXT,
+    asset_name TEXT,
+    asset_type TEXT,
+    asset_category TEXT
+);
+
+
+CREATE TABLE asset_change
 (
     aide_asset_id INTEGER PRIMARY KEY UNIQUE NOT NULL, 
     ai_asset_id INTEGER,
@@ -58,7 +83,7 @@ CREATE TABLE asset
     aide_asset_deleted TINYINT
 );
 
-CREATE TABLE asset_attribute
+CREATE TABLE asset_attribute_change
 (
     aide_asset_attr_value_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
     change_request_id INTEGER,
@@ -72,7 +97,7 @@ CREATE TABLE asset_attribute
     aide_lookup_value TEXT
 );
 
-CREATE TABLE asset_repeated_attribute
+CREATE TABLE asset_repeated_attribute_change
 (
     aide_asset_attr_repeating_value_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
     change_request_id INTEGER,
@@ -106,9 +131,9 @@ CREATE TABLE ai_structure_relationships
 CREATE VIEW view_scheme_change_requests 
 AS 
 SELECT 
-        asset.scheme_id             AS [scheme_id],
-        asset.change_request_id     AS [change_request_id]
+        asset_change.scheme_id             AS [scheme_id],
+        asset_change.change_request_id     AS [change_request_id]
 FROM 
-    asset AS asset 
-ORDER BY asset.scheme_id, asset.change_request_id
+    asset_change AS asset_change
+ORDER BY asset_change.scheme_id, asset_change.change_request_id
 ;

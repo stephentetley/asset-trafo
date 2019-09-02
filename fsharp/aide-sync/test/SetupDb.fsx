@@ -53,15 +53,17 @@ let outputDbFile () =
 type ErrMsg = string
 
 let main () : Result<unit, ErrMsg> = 
-    let changeRequestsCsv =     sourceCsv "change_requests_change_reqs_20190902.csv"
-    let assetChangesCsv =       sourceCsv "change_requests_assets_20190902.csv"
-    let attrChangesCsv =        sourceCsv "change_requests_attributes_20190902.csv"
-    let repAttrChangesCsv =     sourceCsv "change_requests_repeated_attributes_20190902.csv"
-    let workSchemeCsv =         sourceCsv "change_requests_schemes_20190902.csv"
-    let newAssetsCsv =          sourceCsv "no_change_req_new_aide_assets_20190902.csv"
-    let newAttributesCsv =      sourceCsv "no_change_req_new_aide_attribute_values_20190902.csv"
-    let aideStructRelsCsv =     sourceCsv "structure_relationships_aide_20190902.csv"
-    let aiStructRelsCsv =       sourceCsv "structure_relationships_ai_20190902.csv"
+    let workSchemeCsv       = sourceCsv "change_requests_schemes_20190902.csv"
+    let changeRequestsCsv   = sourceCsv "change_requests_change_reqs_20190902.csv"
+    let aiAssetsCsv         = sourceCsv "ai_asset_20190902.csv"
+    let aideAssetsCsv       = sourceCsv "aide_asset_20190902.csv"
+    let assetChangesCsv     = sourceCsv "change_requests_assets_20190902.csv"
+    let attrChangesCsv      = sourceCsv "change_requests_attributes_20190902.csv"
+    let repAttrChangesCsv   = sourceCsv "change_requests_repeated_attributes_20190902.csv"
+    let newAssetsCsv        = sourceCsv "no_change_req_new_aide_assets_20190902.csv"
+    let newAttributesCsv    = sourceCsv "no_change_req_new_aide_attribute_values_20190902.csv"
+    let aideStructRelsCsv   = sourceCsv "structure_relationships_aide_20190902.csv"
+    let aiStructRelsCsv     = sourceCsv "structure_relationships_ai_20190902.csv"
 
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputDbFile () |> Path.GetFullPath
@@ -74,13 +76,15 @@ let main () : Result<unit, ErrMsg> =
     let connParams = sqliteConnParamsVersion3 dbActive
     runSqliteDb connParams 
         <| sqliteDb { 
+                do! insertWorkSchemeRows workSchemeCsv
                 do! insertChangeRequestRows changeRequestsCsv
+                do! insertAiAssetRows aiAssetsCsv
+                do! insertAideAssetRows aideAssetsCsv
                 do! insertAssetChangeRows assetChangesCsv
                 do! insertAssetNewRows newAssetsCsv
                 do! insertAttributeChangeRows attrChangesCsv
                 do! insertAttributeNewRows newAttributesCsv
                 do! insertRepeatedAttributeChangeRows repAttrChangesCsv
-                do! insertWorkSchemeRows workSchemeCsv
                 do! insertAideStructRelationshipRows aideStructRelsCsv
                 do! insertAiStructRelationshipRows aiStructRelsCsv
                 return ()
