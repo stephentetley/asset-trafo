@@ -8,6 +8,43 @@ module Datatypes =
     
     
     
+    
+    type StructureItem = 
+        { Name: string 
+          CommonName : string 
+          Reference : string
+        }
+        // We want to be able to sort top down (priority go down, 
+        // rather than go next).
+        // The simplest way to do this is hack the key so '/' has 
+        // priority over ' '.
+        member v.PathKey 
+            with get() : string  = 
+                v.CommonName.Replace(' ', '?')
+ 
+    type Hierarchy = 
+        val private StructureItems : StructureItem list
+
+        new (items : StructureItem list) = 
+            let fn (s1 : StructureItem) = s1.CommonName
+            { StructureItems = List.sortBy fn items }
+
+        member x.Size 
+            with get () : int = x.StructureItems.Length
+
+
+        member x.Items 
+            with get () : StructureItem list = x.StructureItems
+
+        member x.CommonNames 
+            with get () : string list = 
+                x.StructureItems |> List.map (fun x -> x.CommonName)
+
+        member x.References 
+            with get () : string list = 
+                x.StructureItems |> List.map (fun x -> x.Reference)
+
+
 
 
     type AttributeValue = 

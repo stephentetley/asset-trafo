@@ -15,6 +15,13 @@ module Addendum =
     // ************************************************************************
     // For sl-sqlite ?
 
+    // TryHead will be a useful strategy 
+    // If the resultset is expected to have 1+ results Head makes sense
+    // but if it is expected to have 0 or 1 then TryHead is ueful.
+
+    let optional (action : SqliteDb<'a>) : SqliteDb<'a option> = 
+        attempt (action |>> Some) (fun _ -> mreturn None)
+
     let valueByName (reader : ResultItem) (field : string) : obj = 
         let ix = reader.GetOrdinal(field)
         reader.GetValue(ix)

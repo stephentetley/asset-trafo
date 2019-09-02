@@ -67,6 +67,7 @@ module PopulateDb =
         let sql =
             "INSERT INTO asset \
             (aide_asset_id, \
+            ai_asset_id, \
             change_request_id, \
             scheme_id, \
             ai_asset_reference, \
@@ -90,10 +91,11 @@ module PopulateDb =
             aide_location_reference, \
             aide_asset_deleted) \
             VALUES \
-            (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?, ?,?,?,  ?,?);"
+            (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?,  ?,?,?, ?,?,?,  ?,?,?);"
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AideAssetId)
+                |> addParam (optionNull int64Param row.AiAssetId)
                 |> addParam (int64Param row.ChangeRequestId)
                 |> addParam (optionNull int64Param row.SchemeId)
                 |> addParam (stringParam row.AiAssetReference)

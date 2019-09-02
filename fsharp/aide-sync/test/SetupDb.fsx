@@ -40,7 +40,8 @@ open SLSqlite.Core
 #load "..\src\AideSync\PopulateDb.fs"
 open AideSync.PopulateDb
 
-
+let sourceCsv (fileName : string) : string = 
+    Path.Combine(@"G:\work\Projects\asset_sync\aide_report", fileName)
 
 let pathToDbTemplate () : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\data\ddl\aide_sync.sqlite")
@@ -52,24 +53,15 @@ let outputDbFile () =
 type ErrMsg = string
 
 let main () : Result<unit, ErrMsg> = 
-    let changeRequestsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_change_reqs_20190827.csv"
-    let assetChangesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_assets_20190827.csv"
-    let attributeChangesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_attributes_20190827.csv"
-    let repeatedAttributeChangesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_repeated_attributes_20190827.csv"
-    let workSchemeCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\change_requests_schemes_20190827.csv"
-    let newAssetsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\no_change_req_new_aide_assets_20190830.csv"
-    let newAttributesCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\no_change_req_new_aide_attribute_values_20190830.csv"
-    let aideStructRelationshipsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\structure_relationships_aide_20190822.csv"
-    let aiStructRelationshipsCsv = 
-        @"G:\work\Projects\asset_sync\aide_report\structure_relationships_ai_20190822.csv"
+    let changeRequestsCsv =     sourceCsv "change_requests_change_reqs_20190902.csv"
+    let assetChangesCsv =       sourceCsv "change_requests_assets_20190902.csv"
+    let attrChangesCsv =        sourceCsv "change_requests_attributes_20190902.csv"
+    let repAttrChangesCsv =     sourceCsv "change_requests_repeated_attributes_20190902.csv"
+    let workSchemeCsv =         sourceCsv "change_requests_schemes_20190902.csv"
+    let newAssetsCsv =          sourceCsv "no_change_req_new_aide_assets_20190902.csv"
+    let newAttributesCsv =      sourceCsv "no_change_req_new_aide_attribute_values_20190902.csv"
+    let aideStructRelsCsv =     sourceCsv "structure_relationships_aide_20190902.csv"
+    let aiStructRelsCsv =       sourceCsv "structure_relationships_ai_20190902.csv"
 
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputDbFile () |> Path.GetFullPath
@@ -85,12 +77,12 @@ let main () : Result<unit, ErrMsg> =
                 do! insertChangeRequestRows changeRequestsCsv
                 do! insertAssetChangeRows assetChangesCsv
                 do! insertAssetNewRows newAssetsCsv
-                do! insertAttributeChangeRows attributeChangesCsv
+                do! insertAttributeChangeRows attrChangesCsv
                 do! insertAttributeNewRows newAttributesCsv
-                do! insertRepeatedAttributeChangeRows repeatedAttributeChangesCsv
+                do! insertRepeatedAttributeChangeRows repAttrChangesCsv
                 do! insertWorkSchemeRows workSchemeCsv
-                do! insertAideStructRelationshipRows aideStructRelationshipsCsv
-                do! insertAiStructRelationshipRows aiStructRelationshipsCsv
+                do! insertAideStructRelationshipRows aideStructRelsCsv
+                do! insertAiStructRelationshipRows aiStructRelsCsv
                 return ()
             }
 

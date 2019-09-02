@@ -33,6 +33,7 @@ CREATE TABLE change_request
 CREATE TABLE asset
 (
     aide_asset_id INTEGER PRIMARY KEY UNIQUE NOT NULL, 
+    ai_asset_id INTEGER,
     change_request_id INTEGER,
     scheme_id INTEGER,
     ai_asset_reference TEXT,

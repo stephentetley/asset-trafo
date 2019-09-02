@@ -38,12 +38,15 @@ open MarkdownDoc.Pandoc
 
 #load "..\src\AideSync\Base\Addendum.fs"
 #load "..\src\AideSync\Datatypes.fs"
+#load "..\src\AideSync\BasicQueries.fs"
+#load "..\src\AideSync\DiffImplementation.fs"
 #load "..\src\AideSync\Metrics.fs"
 #load "..\src\AideSync\BuildReport.fs"
+#load "..\src\AideSync\BuildSRDiff.fs"
 #load "..\src\AideSync\PrintReport.fs"
-open AideSync.Base.Addendum
-open AideSync.Datatypes
+open AideSync.BasicQueries
 open AideSync.BuildReport
+open AideSync.BuildSRDiff
 open AideSync.PrintReport
 
 let outputFile (relFileName : string) = 
@@ -51,6 +54,10 @@ let outputFile (relFileName : string) =
 
 let pathToDb () : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\data\db\aide_sync_active.sqlite")
+
+let getConnParams () : SqliteConnParams = 
+    let dbActive = pathToDb () |> Path.GetFullPath
+    sqliteConnParamsVersion3 dbActive
 
 
 let pandocHtmlOptions () : PandocOptions = 
@@ -77,8 +84,7 @@ let test01 () =
 
 let runChangeSchemeReport (schemeCode : string) 
                             (outputHtmlFile : string) : Result<unit, ErrMsg> = 
-    let dbActive = pathToDb () |> Path.GetFullPath
-    let connParams = sqliteConnParamsVersion3 dbActive
+    let connParams = getConnParams ()
     let pandocOpts = pandocHtmlOptions ()
 
     match runSqliteDb connParams (buildChangeScheme schemeCode ) with
@@ -93,4 +99,10 @@ let test02 () =
     let htmlOutput = outputFile "change_scheme_report_20190828.html"
     runChangeSchemeReport changeScheme htmlOutput
 
-
+// e.g test03 2111881L ;;
+let test03 (startId : int64) = 
+    let connParams = getConnParams ()
+    runSqliteDb connParams
+        <| sqliteDb { 
+                return! findAideDescendants startId
+            }

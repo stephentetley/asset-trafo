@@ -43,6 +43,7 @@ module ImportSchema =
     [<Literal>]
     let AssetChangeSchema = 
         "AideAssetId(int64),\
+        AiAssetId(int64 option),\
         ChangeRequestId(int64),\
         SchemeId(int64 option),\
         AiAssetReference(string),\
