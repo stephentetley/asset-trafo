@@ -232,6 +232,39 @@ module PrintReport =
         | Some table -> 
             h3 (text "Asset Property Changes" )
                 ^!!^ table
+    
+    // ************************************************************************
+    // Structure changes
+    
+    let structureItemDiff (diff : StructureItemDiff) : Markdown = 
+        match diff with
+        | InLeft s -> text "Delete:" ^+^ text s.Reference |> markdownText
+        | InRight s -> text "Add:" ^+^ text s.Reference |> markdownText
+        | Match s -> text "Id:" ^+^ text s.Reference |> markdownText
+        | Difference(s1,s2) -> text "Diff:" ^+^ text s1.Reference |> markdownText
+
+    let positiveDifferences (diffs : StructureItemDiff list) : Markdown = 
+        let select1 (sd : StructureItemDiff) : StructureItemDiff option = 
+            match sd with
+            | Match _ -> None
+            | _ -> Some sd
+        diffs 
+            |> List.choose select1
+            |> List.map structureItemDiff
+            |> vcat
+
+    let structureChange (structChange : AssetStructureChange) : Markdown = 
+        let headline = 
+            text structChange.AssetReference 
+                ^+^ (numberOfDifferences structChange.StructureChanges |> int32Md)
+                ^+^ text "Structure changes"
+                |> markdownText
+        headline
+            ^!!^ positiveDifferences structChange.StructureChanges
+
+
+    let structureChangesSection (structureChanges : AssetStructureChange list) : Markdown = 
+        vcat (List.map structureChange structureChanges)
 
     // ************************************************************************
     // Build the document
@@ -241,6 +274,7 @@ module PrintReport =
             ^!!^ assetPropertyChangesSection changeRequest.AssetChanges
             ^!!^ attributeChangesSection changeRequest.AttributeChanges
             ^!!^ repeatedAttributeChangesSection changeRequest.RepeatedAttributeChanges
+            ^!!^ structureChangesSection changeRequest.StructureRelationshipChanges
             ^!!^ linkToTop
 
     let makeChangeRequestsReport (changeRequests : ChangeRequest list) : Markdown = 

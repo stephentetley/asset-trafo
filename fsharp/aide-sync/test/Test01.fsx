@@ -44,6 +44,7 @@ open MarkdownDoc.Pandoc
 #load "..\src\AideSync\BuildReport.fs"
 #load "..\src\AideSync\BuildSRDiff.fs"
 #load "..\src\AideSync\PrintReport.fs"
+open AideSync.Datatypes
 open AideSync.BasicQueries
 open AideSync.DiffImplementation
 open AideSync.BuildReport
@@ -78,7 +79,8 @@ let runChangeRequestsReport (chreqIds : int64 list)
 
 
 let test01 () =
-    let changeRequests = [ 15742L; 148364L; 148365L; 148366L; 148367L; 148372L; 148374L ]
+    // let changeRequests = [ 15742L; 148364L; 148365L; 148366L; 148367L; 148372L; 148374L ]
+    let changeRequests = [148574L]
     let htmlOutput = outputFile "change_request_report_20190827.html"
     runChangeRequestsReport changeRequests htmlOutput
 
@@ -135,8 +137,8 @@ let test05 (changeReqId : int64) (sairef : string) =
 // or  test06 148575L "SAI00584748" ;;  // simple additions
 let test06 (changeReqId : int64) (sairef : string) = 
     let connParams = getConnParams ()
-    let action = 
-        sturctureRelationshipsDiff changeReqId sairef
+    let action : SqliteDb<Differences> = 
+        structureRelationshipsDiff changeReqId sairef
     match runSqliteDb connParams action with
     | Error msg -> printfn "%s" msg
     | Ok diffs -> 
@@ -199,11 +201,12 @@ let writeMarkdownReport (doc : Markdown)
 // or   test08 141013L "SAI00001460" ;;  // This has quite good diffs
 // or   test08 148575L "SAI00584748" ;;  // simple additions
 //      test08 148574L "SAI00093850" ;;
+
 let test08 (changeReqId : int64) (sairef : string) = 
     let opts = pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"
     let connParams = getConnParams ()
     let action = 
-        sturctureRelationshipsDiff changeReqId sairef
+        structureRelationshipsDiff changeReqId sairef
     match runSqliteDb connParams action with
     | Error msg -> printfn "%s" msg ; Error msg
     | Ok diffs -> 

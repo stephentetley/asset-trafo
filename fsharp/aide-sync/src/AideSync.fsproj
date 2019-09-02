@@ -7,13 +7,13 @@
   <ItemGroup>
     <Compile Include="AideSync\Base\Addendum.fs" />
     <Compile Include="AideSync\Datatypes.fs" />
+    <Compile Include="AideSync\DiffImplementation.fs" />
     <Compile Include="AideSync\ImportSchema.fs" />
     <Compile Include="AideSync\PopulateDb.fs" />
     <Compile Include="AideSync\BasicQueries.fs" />
-    <Compile Include="AideSync\DiffImplementation.fs" />
     <Compile Include="AideSync\Metrics.fs" />
-    <Compile Include="AideSync\BuildReport.fs" />
     <Compile Include="AideSync\BuildSRDiff.fs" />
+    <Compile Include="AideSync\BuildReport.fs" />
     <Compile Include="AideSync\PrintReport.fs" />
   </ItemGroup>
 

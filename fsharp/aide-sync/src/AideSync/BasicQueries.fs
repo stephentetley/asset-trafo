@@ -34,7 +34,29 @@ module BasicQueries =
 
         queryKeyed cmd (Strategy.Head readRow1) 
 
-    
+    // ************************************************************************
+    // Find SAI references for a change request
+
+    /// Assumption - at most one index for a key
+    let findChangeAideSairefs (changeRequestId : int64) : SqliteDb<string list> = 
+        let sql = 
+            """
+            SELECT 
+                    change.aide_asset_reference    AS [AssetId]
+            FROM    asset_change       AS change
+            WHERE
+                    change.change_request_id = :chreq
+            ;
+            """
+        let cmd = 
+            new KeyedCommand (commandText = sql)
+                |> addNamedParam "chreq" (int64Param changeRequestId)
+        
+        let readRow1 (result : ResultItem) : string = result.GetString(0)
+
+        queryKeyed cmd (Strategy.ReadAll readRow1) 
+
+
     // ************************************************************************
     // Find kids (AI)
             

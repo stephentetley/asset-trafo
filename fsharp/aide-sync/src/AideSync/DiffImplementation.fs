@@ -16,27 +16,9 @@ module DiffImplementation =
     open AideSync.Base.Addendum
     open AideSync.Datatypes
 
-    // StructureItem has quite a complicated diffing 
-    // To find name changes we have to traverse the list ordered by SAI / PLI
-    // To output we want an almost lexigraphical order but with '/' favoured over ' '
+    
 
 
-    type Diff1 = 
-        | InLeft of StructureItem
-        | Match of StructureItem
-        | Difference of left:StructureItem * right:StructureItem
-        | InRight of StructureItem
-
-        member v.PathKey 
-            with get() : string  = 
-                match v with
-                | InLeft s -> s.PathKey
-                | Match s -> s.PathKey
-                | Difference (s1,_) -> s1.PathKey
-                | InRight s -> s.PathKey
-
-
-    type Differences = Diff1 list
 
     /// F# design guidelines say favour object-interfaces rather than records of functions..
 
@@ -50,7 +32,7 @@ module DiffImplementation =
         let refSort (xs : StructureItem list) = 
             xs |> List.sortBy (fun x -> x.Reference)
 
-        let pathSort (xs : Diff1 list) = 
+        let pathSort (xs : StructureItemDiff list) = 
             xs |> List.sortBy (fun x -> x.PathKey)
 
         let rec work lefts rights cont = 
@@ -86,7 +68,7 @@ module DiffImplementation =
 
     let showDiffs (printer :StructureItem -> string) (diffs : Differences) : string = 
         let sb = new StringBuilder ()
-        let write1 (diff : Diff1) : unit = 
+        let write1 (diff : StructureItemDiff) : unit = 
             match diff with
             | InLeft s -> sb.AppendLine ("-" + printer s) |> ignore
             | InRight s -> sb.AppendLine ("+" + printer s) |> ignore
@@ -100,7 +82,7 @@ module DiffImplementation =
     // ************************************************************************
     // Render to Markdown 
 
-    type TreeItem = { Path : string ; Difference : Diff1}
+    type TreeItem = { Path : string ; Difference : StructureItemDiff}
 
 
     let pathLength (path : string) : int = 
@@ -113,13 +95,14 @@ module DiffImplementation =
         
 
 
-    let buildStructureTree (diffs : Diff1 list) : RoseTree<TreeItem> option = 
+    let buildStructureTree (diffs : StructureItemDiff list) : RoseTree<TreeItem> option = 
         printfn "Length of diffs = %i" diffs.Length
-        let makeNode (d1 : Diff1) : RoseTree<TreeItem> = 
+        let makeNode (d1 : StructureItemDiff) : RoseTree<TreeItem> = 
             makeLeaf { Path = d1.PathKey; Difference = d1} 
 
         /// Parent exists!
-        let addNode (d1 : Diff1) (tree1 : RoseTree<TreeItem>) : RoseTree<TreeItem> =
+        let addNode (d1 : StructureItemDiff) 
+                    (tree1 : RoseTree<TreeItem>) : RoseTree<TreeItem> =
             let rec work (t1 : RoseTree<TreeItem>) cont =
                 match t1 with
                 | Node(label,kids) -> 

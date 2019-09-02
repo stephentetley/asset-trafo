@@ -54,10 +54,3 @@ module BuildSRDiff =
 
 
 
-    let sturctureRelationshipsDiff (changeReqId : int64) 
-                                   (sairef : string) : SqliteDb<Differences>= 
-        sqliteDb { 
-            let! ai = findAiHierarchy sairef
-            let! aide = findAideHierarchy changeReqId sairef
-            return (diffLists ai.Items aide.Items)
-        }

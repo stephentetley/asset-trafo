@@ -9,7 +9,12 @@ module Metrics =
     
     open AideSync.Datatypes
 
-
+    let numberOfDifferences (diffs : Differences) : int = 
+        let count1 (sd : StructureItemDiff) : int = 
+            match sd with
+            | Match _ -> 0
+            | _ -> 1
+        List.sumBy count1 diffs
 
     let numberOfChangeRequests (scheme : ChangeScheme) : int = 
         scheme.ChangeRequests.Length

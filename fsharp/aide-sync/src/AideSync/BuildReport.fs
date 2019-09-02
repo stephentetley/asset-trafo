@@ -12,6 +12,8 @@ module BuildReport =
 
     open AideSync.Base.Addendum
     open AideSync.Datatypes
+    open AideSync.DiffImplementation      
+    open AideSync.BasicQueries
 
 
     // ************************************************************************
@@ -56,7 +58,7 @@ module BuildReport =
             """ 
             SELECT
                         asset.*
-            FROM        asset AS asset
+            FROM        asset_change AS asset
             WHERE
                         asset.change_request_id = :chreqid
             ;
@@ -90,7 +92,7 @@ module BuildReport =
                     attr.ai_lookup_value      AS [ai_lookup_value],
                     attr.aide_value           AS [aide_value],
                     attr.aide_lookup_value    AS [aide_lookup_value]
-            FROM    asset_attribute AS attr
+            FROM    asset_attribute_change AS attr
             WHERE
                     attr.change_request_id = :chreqid
             ;
@@ -133,7 +135,7 @@ module BuildReport =
                     rep_attr.ai_lookup_value      AS [ai_lookup_value],
                     rep_attr.aide_value           AS [aide_value],
                     rep_attr.aide_lookup_value    AS [aide_lookup_value]
-            FROM    asset_repeated_attribute AS rep_attr
+            FROM    asset_repeated_attribute_change AS rep_attr
             WHERE
                     rep_attr.change_request_id = :chreqid
             ;
@@ -192,20 +194,42 @@ module BuildReport =
 
         queryKeyed cmd (Strategy.ReadAll readRow1) |>> List.tryHead
 
-    
-    let buildChangeRequest  (chreqId : int64) : SqliteDb<ChangeRequest option> =
+
+
+    let structureRelationshipsDiff (changeReqId : int64) 
+                                   (sairef : string) : SqliteDb<Differences>= 
+        sqliteDb { 
+            let! ai = findAiHierarchy sairef
+            let! aide = findAideHierarchy changeReqId sairef
+            return diffLists ai.Items aide.Items
+        }
+
+    let assetStructureChange (changeReqId : int64) 
+                             (sairef : string) : SqliteDb<AssetStructureChange>= 
+        sqliteDb { 
+            let! diffs = structureRelationshipsDiff changeReqId sairef
+            return { AssetReference = sairef 
+                   ; StructureChanges = diffs }
+        }
+
+    let buildChangeRequest (chreqId : int64) : SqliteDb<ChangeRequest option> =
         sqliteDb { 
             match! getChangeRequestInfo chreqId with
             | None -> return None
             | Some info ->
-                let! xs = getAssetChanges chreqId
-                let! ys = getAttributeChanges chreqId 
-                let! zs = getRepeatedAttributeChanges chreqId
+                let! assetChanges = getAssetChanges chreqId
+                let! attrChanges = getAttributeChanges chreqId 
+                let! repAttrChanges = getRepeatedAttributeChanges chreqId
+                let! sairefs = findChangeAideSairefs chreqId
+                printfn "%O" sairefs
+                let! structureChanges = 
+                    mapM (assetStructureChange chreqId) sairefs
                 let ans = 
                     { Info = info
-                    ; AssetChanges = xs
-                    ; AttributeChanges = ys
-                    ; RepeatedAttributeChanges = zs
+                    ; AssetChanges = assetChanges
+                    ; AttributeChanges = attrChanges
+                    ; RepeatedAttributeChanges = repAttrChanges
+                    ; StructureRelationshipChanges = structureChanges
                     }
                 return (Some ans)
         }
@@ -259,7 +283,9 @@ module BuildReport =
         queryKeyed cmd (Strategy.ReadAll readRow1)
 
 
-    let buildChangeScheme  (schemeCode : string) : SqliteDb<ChangeScheme option> =
+
+
+    let buildChangeScheme (schemeCode : string) : SqliteDb<ChangeScheme option> =
         sqliteDb { 
             match! getChangeSchemeInfo schemeCode with
             | None -> return None

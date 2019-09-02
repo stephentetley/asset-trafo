@@ -21,6 +21,29 @@ module Datatypes =
         member v.PathKey 
             with get() : string  = 
                 v.CommonName.Replace(' ', '?')
+
+
+    /// A StructureItemDiff is a difference between the item in the Ai and Aide 
+    /// hierarchies.
+    type StructureItemDiff = 
+        | InLeft of StructureItem
+        | Match of StructureItem
+        | Difference of left:StructureItem * right:StructureItem
+        | InRight of StructureItem
+
+        /// To output we want an almost lexigraphical order but 
+        /// with '/' favoured over ' '
+        member v.PathKey 
+            with get() : string  = 
+                match v with
+                | InLeft s -> s.PathKey
+                | Match s -> s.PathKey
+                | Difference (s1,_) -> s1.PathKey
+                | InRight s -> s.PathKey
+
+
+    type Differences = StructureItemDiff list
+
  
     type Hierarchy = 
         val private StructureItems : StructureItem list
@@ -118,11 +141,17 @@ module Datatypes =
         }
 
 
+    type AssetStructureChange = 
+        { AssetReference : string 
+          StructureChanges : Differences
+        }
+
     type ChangeRequest = 
         { Info : ChangeRequestInfo
           AssetChanges : AssetChange list
           AttributeChanges : AttributeChange list
           RepeatedAttributeChanges : RepeatedAttributeChange list
+          StructureRelationshipChanges : AssetStructureChange list
         }
 
 
