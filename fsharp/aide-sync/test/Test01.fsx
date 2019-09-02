@@ -45,6 +45,7 @@ open MarkdownDoc.Pandoc
 #load "..\src\AideSync\BuildSRDiff.fs"
 #load "..\src\AideSync\PrintReport.fs"
 open AideSync.BasicQueries
+open AideSync.DiffImplementation
 open AideSync.BuildReport
 open AideSync.BuildSRDiff
 open AideSync.PrintReport
@@ -99,8 +100,27 @@ let test02 () =
     let htmlOutput = outputFile "change_scheme_report_20190828.html"
     runChangeSchemeReport changeScheme htmlOutput
 
-// e.g test03 141913L "SAI00001460" ;;
-let test03 (changeReqId : int64) (sairef : string) = 
+// e.g test03 2111881L ;;
+let test03 (startId : int64) = 
+    let connParams = getConnParams ()
+    runSqliteDb connParams
+        <| sqliteDb { 
+                return! findAideDescendants startId
+            }
+    
+// e.g test04 "SAI00001460" ;;
+let test04 (sairef : string) = 
+    let connParams = getConnParams ()
+    runSqliteDb connParams
+        <| sqliteDb { 
+                match! findAiAssetIndex sairef with
+                | None -> return []
+                | Some key -> return! findAiDescendants key
+            }
+
+
+// e.g test05 141913L "SAI00001460" ;;
+let test05 (changeReqId : int64) (sairef : string) = 
     let connParams = getConnParams ()
     runSqliteDb connParams
         <| sqliteDb { 
@@ -108,3 +128,86 @@ let test03 (changeReqId : int64) (sairef : string) =
                 | None -> return []
                 | Some key -> return! findAideDescendants key
             }
+
+
+// e.g test06 141913L "SAI00001460" ;;  // This has a couple of diffs (one is a delete and add back)
+// or  test06 141013L "SAI00001460" ;;  // This has quite good diffs
+// or  test06 148575L "SAI00584748" ;;  // simple additions
+let test06 (changeReqId : int64) (sairef : string) = 
+    let connParams = getConnParams ()
+    let action = 
+        sturctureRelationshipsDiff changeReqId sairef
+    match runSqliteDb connParams action with
+    | Error msg -> printfn "%s" msg
+    | Ok diffs -> 
+        let tempFile = outputFile "diff_temp.txt"
+        diffs 
+            |> showDiffs (fun o -> sprintf "%s - %s" o.Reference o.CommonName)
+            |> fun x -> File.WriteAllText(path = tempFile, contents = x)
+
+
+
+
+// e.g test07 141913L "SAI00001460" ;;  // Single name change
+// or  test07 141013L "SAI00001460" ;;  // Single name change
+let test07 (changeReqId : int64) (sairef : string) = 
+    let connParams = getConnParams ()
+    let action = 
+        nameChanges changeReqId sairef
+    match runSqliteDb connParams action with
+    | Error msg -> printfn "%s" msg
+    | Ok [] -> printfn "No changes identified"
+    | Ok changes -> 
+        List.iter (printfn "%O") changes
+
+
+let pandocHtmlDefaults (pathToCss : string) : PandocOptions = 
+    let highlightStyle = argument "--highlight-style" &= argValue "tango"
+    let selfContained = argument "--self-contained"
+    /// Github style is nicer for tables than Tufte
+    /// Note - body width has been changed on both stylesheets
+    let css = argument "--css" &= doubleQuote pathToCss
+    { Standalone = true
+      InputExtensions = []
+      OutputExtensions = []
+      OtherOptions = [ css; highlightStyle; selfContained ]  }
+
+
+let writeMarkdownReport (doc : Markdown) 
+                        (pageTitle : string)
+                        (pandocOpts : PandocOptions)
+                        (outputHtmlFile : string) : Result<unit, string> = 
+    
+    let mdFileAbsPath = Path.ChangeExtension(outputHtmlFile, "md") 
+    let mdFileName = Path.GetFileName(mdFileAbsPath)
+    let htmlFileName = Path.GetFileName(outputHtmlFile)
+    let outputDirectory = Path.GetDirectoryName(outputHtmlFile)
+    writeMarkdown 360 doc mdFileAbsPath
+    let retCode = 
+        runPandocHtml5 
+            true 
+            outputDirectory 
+            mdFileName
+            htmlFileName
+            (Some pageTitle)
+            pandocOpts
+    match retCode with
+    | Ok i -> printfn "Return code: %i" i ; Ok ()
+    | Error msg -> Error msg
+
+// e.g  test08 141913L "SAI00001460" ;;  // This has a couple of diffs (one is a delete and add back, the other a name change)
+// or   test08 141013L "SAI00001460" ;;  // This has quite good diffs
+// or   test08 148575L "SAI00584748" ;;  // simple additions
+//      test08 148574L "SAI00093850" ;;
+let test08 (changeReqId : int64) (sairef : string) = 
+    let opts = pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"
+    let connParams = getConnParams ()
+    let action = 
+        sturctureRelationshipsDiff changeReqId sairef
+    match runSqliteDb connParams action with
+    | Error msg -> printfn "%s" msg ; Error msg
+    | Ok diffs -> 
+        let tempFile = outputFile "diff_pcl70_148574.html"
+        diffs 
+            |> drawStructure |> fun doc -> (h1 (text "Structure Changes") ^!!^ doc )
+            |> fun doc -> writeMarkdownReport doc "Structure Changes" opts tempFile
