@@ -34,7 +34,7 @@ CREATE TABLE change_request
 
 CREATE TABLE ai_asset 
 (
-    asset_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
+    ai_asset_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
     reference TEXT,
     asset_common_name TEXT,
     asset_name TEXT,
@@ -112,19 +112,20 @@ CREATE TABLE asset_repeated_attribute_change
     aide_lookup_value TEXT
 );
 
-CREATE TABLE aide_structure_relationships
+CREATE TABLE ai_structure_relationships
 (
-    structure_relationship_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
+    ai_structure_relationship_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
     parent_id INTEGER,
     child_id INTEGER
 );
 
-CREATE TABLE ai_structure_relationships
+CREATE TABLE aide_structure_relationships
 (
-    structure_relationship_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
+    aide_structure_relationship_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
     parent_id INTEGER,
     child_id INTEGER
 );
+
 
 
 

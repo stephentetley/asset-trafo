@@ -66,7 +66,7 @@ module PopulateDb =
         let sql = 
             """
             INSERT INTO ai_asset
-            (asset_id,
+            (ai_asset_id,
             reference,
             asset_common_name,
             asset_name,
@@ -448,6 +448,40 @@ module PopulateDb =
             return! withTransaction <| sforMz table.Rows insertAttributeNewRow
         }
 
+    // ************************************************************************
+    // Table: ai_structure_relationships
+
+
+    let makeAiStructRelInsert (row : AiStructureRelationshipRow) : IndexedCommand option =
+        let sql = 
+            """
+            INSERT INTO ai_structure_relationships 
+            (ai_structure_relationship_id, 
+            parent_id, 
+            child_id)
+            VALUES (?,?,?);
+            """
+        let cmd = 
+            new IndexedCommand(commandText = sql)
+                |> addParam (int64Param row.StructureRelationshipId)
+                |> addParam (int64Param row.ParentAssetId)
+                |> addParam (int64Param row.ChildAssetId)
+        cmd |> Some
+
+
+    let insertAiStructRelationshipRow (row : AiStructureRelationshipRow) : SqliteDb<unit> = 
+        match makeAiStructRelInsert row with
+        | Some statement -> 
+            executeNonQueryIndexed statement |>> ignore
+        | None -> mreturn ()
+
+    let insertAiStructRelationshipRows (csvPath : string) : SqliteDb<unit> = 
+        sqliteDb { 
+            let! rows = 
+                liftOperationResult (fun _ -> getAiStructureRelationshipRows csvPath)
+            return! withTransaction <| sforMz rows insertAiStructRelationshipRow
+        }
+
 
     // ************************************************************************
     // Table: aide_structure_relationships
@@ -456,7 +490,7 @@ module PopulateDb =
         let sql = 
             """
             INSERT INTO aide_structure_relationships
-            (structure_relationship_id, 
+            (aide_structure_relationship_id, 
             parent_id, 
             child_id)
             VALUES (?, ?,?);
@@ -482,36 +516,4 @@ module PopulateDb =
             return! withTransaction <| sforMz rows insertAideStructRelationshipRow
         }
 
-    // ************************************************************************
-    // Table: ai_structure_relationships
-
-
-    let makeAiStructRelInsert (row : AiStructureRelationshipRow) : IndexedCommand option =
-        let sql = 
-            """
-            INSERT INTO ai_structure_relationships 
-            (structure_relationship_id, 
-            parent_id, 
-            child_id)
-            VALUES (?,?,?);
-            """
-        let cmd = 
-            new IndexedCommand(commandText = sql)
-                |> addParam (int64Param row.StructureRelationshipId)
-                |> addParam (int64Param row.ParentAssetId)
-                |> addParam (int64Param row.ChildAssetId)
-        cmd |> Some
-
-
-    let insertAiStructRelationshipRow (row : AiStructureRelationshipRow) : SqliteDb<unit> = 
-        match makeAiStructRelInsert row with
-        | Some statement -> 
-            executeNonQueryIndexed statement |>> ignore
-        | None -> mreturn ()
-
-    let insertAiStructRelationshipRows (csvPath : string) : SqliteDb<unit> = 
-        sqliteDb { 
-            let! rows = 
-                liftOperationResult (fun _ -> getAiStructureRelationshipRows csvPath)
-            return! withTransaction <| sforMz rows insertAiStructRelationshipRow
-        }
+    
