@@ -93,7 +93,7 @@ module DiffImplementation =
     let isDirectChildPath (parent : string) (child : string) = 
         child.StartsWith(parent) && pathLength child = pathLength parent + 1
         
-
+    
 
     let buildStructureTree (diffs : StructureItemDiff list) : RoseTree<TreeItem> option = 
         printfn "Length of diffs = %i" diffs.Length
@@ -132,24 +132,76 @@ module DiffImplementation =
     let span (colourName : string) (extraAttrs : HtmlAttrs) (body : Text) : Text = 
         htmlSpan (attrStyle [backgroundColor colourName] :: extraAttrs) body
 
-    let drawStructure (diffs : Differences) : Markdown = 
-        let markdownLabel (item : TreeItem) : Markdown = 
-            match item.Difference with
-            | InLeft s -> 
-                let title = HtmlAttr("title", sprintf "Delete '%s'" s.CommonName)
-                span lightCoral [title] (text s.Name) |> markdownText
-            | Match s -> text s.Name |> markdownText
-            | Difference (s1,s2) -> 
-                let title = 
-                    if s1.Name <> s2.Name then 
-                        HtmlAttr("title", sprintf "Rename '%s' to '%s'" s1.Name s2.Name)
-                    else
-                        HtmlAttr("title", sprintf "Non-proper name change (floc path editted):&#013;'%s'&#013;to&#013;'%s'" s1.CommonName s2.CommonName)
-                span gold [title] (text s2.Name)  |> markdownText
-            | InRight s -> 
-                let title = HtmlAttr("title", sprintf "Add '%s'" s.CommonName)
-                span paleGreen [title] (text s.Name) |> markdownText
+    let drawLabel (item : TreeItem) : Markdown = 
+        match item.Difference with
+        | InLeft s -> 
+            let title = HtmlAttr("title", sprintf "Delete '%s'" s.CommonName)
+            span lightCoral [title] (text s.Name) |> markdownText
+        | Match s -> text s.Name |> markdownText
+        | Difference (s1,s2) -> 
+            let title = 
+                if s1.Name <> s2.Name then 
+                    HtmlAttr("title", sprintf "Rename '%s' to '%s'" s1.Name s2.Name)
+                else
+                    HtmlAttr("title", sprintf "Non-proper name change (floc path editted):&#013;'%s'&#013;to&#013;'%s'" s1.CommonName s2.CommonName)
+            span gold [title] (text s2.Name)  |> markdownText
+        | InRight s -> 
+            let title = HtmlAttr("title", sprintf "Add '%s'" s.CommonName)
+            span paleGreen [title] (text s.Name) |> markdownText
 
+    let drawStructure (diffs : Differences) : Markdown = 
         match buildStructureTree diffs with
         | None -> emptyMarkdown
-        | Some tree -> mapTree markdownLabel tree |> drawTree
+        | Some tree -> mapTree drawLabel tree |> drawTree
+
+    // ************************************************************************
+    // Prune tree
+
+
+    let pruneTree (source : RoseTree<TreeItem>) : RoseTree<TreeItem> option = 
+        let rec hasDiff (Node(label,kids):RoseTree<TreeItem>) cont = 
+            if label.Difference.HasDiff then 
+                cont true
+            else
+                listHasDiff kids cont
+        and listHasDiff kids cont = 
+            match kids with
+            | [] -> cont false
+            | x :: xs -> 
+                hasDiff x (fun v1 ->
+                if v1 then 
+                    cont v1 
+                else
+                    listHasDiff xs cont)
+
+
+        let rec work (Node(label,kids):RoseTree<TreeItem>) cont = 
+            workList kids (fun (vs : RoseTree<TreeItem> list) -> 
+            if (not <| vs.IsEmpty) || label.Difference.HasDiff then 
+                cont (Some (Node(label,vs)))
+            else
+                cont None)              
+
+        and workList kids cont = 
+            match kids with
+            | [] -> cont []
+            | x :: xs -> 
+                work x ( fun v1 -> 
+                workList xs (fun vs -> 
+                let results = 
+                    match v1 with
+                    | None -> vs
+                    | Some v -> v :: vs
+                cont results ))
+
+
+        work source (fun x -> x)
+
+
+    let drawPrunedStructure (diffs : Differences) : Markdown = 
+        match buildStructureTree diffs with
+        | None -> emptyMarkdown
+        | Some tree -> 
+            match tree |> pruneTree with
+            | None -> text "No changes" |> doubleAsterisks |> markdownText
+            | Some tree -> tree |> mapTree drawLabel |> drawTree

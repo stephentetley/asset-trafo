@@ -20,6 +20,7 @@ module PrintReport =
 
     open AideSync.Base.Addendum
     open AideSync.Datatypes
+    open AideSync.DiffImplementation
     open AideSync.Metrics
 
 
@@ -261,6 +262,7 @@ module PrintReport =
                 |> markdownText
         headline
             ^!!^ positiveDifferences structChange.StructureChanges
+            ^!!^ drawPrunedStructure structChange.StructureChanges
 
 
     let structureChangesSection (structureChanges : AssetStructureChange list) : Markdown = 
@@ -277,6 +279,7 @@ module PrintReport =
             markdownText t1
         | AideChange(_, structureChanges) -> 
             structureChangesSection structureChanges
+
         | AttributeChange(_,xs,ys,zs) -> 
             assetPropertyChangesSection xs
             ^!!^ attributeChangesSection ys

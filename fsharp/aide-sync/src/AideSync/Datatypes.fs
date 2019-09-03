@@ -31,6 +31,12 @@ module Datatypes =
         | Difference of left:StructureItem * right:StructureItem
         | InRight of StructureItem
 
+        member v.HasDiff 
+            with get () : bool =
+                match v with
+                | Match _ -> false
+                | _ -> true
+
         /// To output we want an almost lexigraphical order but 
         /// with '/' favoured over ' '
         member v.PathKey 
