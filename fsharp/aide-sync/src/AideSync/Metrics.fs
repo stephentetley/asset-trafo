@@ -19,21 +19,26 @@ module Metrics =
     let numberOfChangeRequests (scheme : ChangeScheme) : int = 
         scheme.ChangeRequests.Length
 
-    let crNumberOfPropertyChanges (scheme : ChangeRequest) : int = 
+    let crNumberOfPropertyChanges (request : ChangeRequest) : int = 
         let step (change : AssetChange) = 
             change.AssetProperties |> List.filter (fun x -> x.HasChanged) |> List.length
-        List.sumBy step scheme.AssetChanges
+        match request with
+        | AttributeChange(_,changes,_,_) -> List.sumBy step changes
+        | _ -> 0
 
-    let crNumberOfAttributeChanges (scheme : ChangeRequest) : int = 
+    let crNumberOfAttributeChanges (request : ChangeRequest) : int = 
         let step (change : AttributeChange) = 
             if change.HasChanged then 1 else 0
-        List.sumBy step scheme.AttributeChanges
+        match request with
+        | AttributeChange(_,_,changes,_) -> List.sumBy step changes
+        | _ -> 0
 
-    let crNumberOfRepeatedAttributeChanges (scheme : ChangeRequest) : int = 
+    let crNumberOfRepeatedAttributeChanges (request : ChangeRequest) : int = 
         let step (change : RepeatedAttributeChange) = 
             if change.HasChanged then 1 else 0
-        List.sumBy step scheme.RepeatedAttributeChanges
-
+        match request with
+        | AttributeChange(_,_,_,changes) -> List.sumBy step changes
+        | _ -> 0
 
     let numberOfPropertyChanges (scheme : ChangeScheme) : int = 
         scheme.ChangeRequests |> List.sumBy crNumberOfPropertyChanges

@@ -269,12 +269,23 @@ module PrintReport =
     // ************************************************************************
     // Build the document
 
+    let changeRequestBody (changeRequest : ChangeRequest) : Markdown = 
+        match changeRequest with
+        | UnhandledChangeRequest info -> 
+            let t1 = text "Unhandled change request type" 
+                        ^+^ doubleAsterisks (text info.RequestType)
+            markdownText t1
+        | AideChange(_, structureChanges) -> 
+            structureChangesSection structureChanges
+        | AttributeChange(_,xs,ys,zs) -> 
+            assetPropertyChangesSection xs
+            ^!!^ attributeChangesSection ys
+            ^!!^ repeatedAttributeChangesSection zs
+
+
     let makeChangeRequest1 (changeRequest : ChangeRequest) : Markdown = 
         changeRequestSectionHeader (changeRequest.Info)
-            ^!!^ assetPropertyChangesSection changeRequest.AssetChanges
-            ^!!^ attributeChangesSection changeRequest.AttributeChanges
-            ^!!^ repeatedAttributeChangesSection changeRequest.RepeatedAttributeChanges
-            ^!!^ structureChangesSection changeRequest.StructureRelationshipChanges
+            ^!!^ changeRequestBody changeRequest
             ^!!^ linkToTop
 
     let makeChangeRequestsReport (changeRequests : ChangeRequest list) : Markdown = 

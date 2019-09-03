@@ -79,8 +79,8 @@ let runChangeRequestsReport (chreqIds : int64 list)
 
 
 let test01 () =
-    // let changeRequests = [ 15742L; 148364L; 148365L; 148366L; 148367L; 148372L; 148374L ]
-    let changeRequests = [148574L]
+    let changeRequests = [ 15742L; 148364L; 148365L; 148366L; 148367L; 148372L; 148374L ]
+    // let changeRequests = [148574L]
     let htmlOutput = outputFile "change_request_report_20190827.html"
     runChangeRequestsReport changeRequests htmlOutput
 
@@ -97,18 +97,18 @@ let runChangeSchemeReport (schemeCode : string)
         writeChangeSchemeReport scheme pandocOpts outputHtmlFile
 
 
-let test02 () =
-    let changeScheme = "PCL 70"
+// test02 "PCL 70" ;;   // Structure changes
+let test02 (changeScheme : string) =
     let htmlOutput = outputFile "change_scheme_report_20190828.html"
     runChangeSchemeReport changeScheme htmlOutput
+
 
 // e.g test03 2111881L ;;
 let test03 (startId : int64) = 
     let connParams = getConnParams ()
     runSqliteDb connParams
-        <| sqliteDb { 
-                return! findAideDescendants startId
-            }
+        <| findAideDescendants startId
+           
     
 // e.g test04 "SAI00001460" ;;
 let test04 (sairef : string) = 
@@ -151,7 +151,6 @@ let test06 (changeReqId : int64) (sairef : string) =
 
 
 // e.g test07 141913L "SAI00001460" ;;  // Single name change
-// or  test07 141013L "SAI00001460" ;;  // Single name change
 let test07 (changeReqId : int64) (sairef : string) = 
     let connParams = getConnParams ()
     let action = 
@@ -200,7 +199,7 @@ let writeMarkdownReport (doc : Markdown)
 // e.g  test08 141913L "SAI00001460" ;;  // This has a couple of diffs (one is a delete and add back, the other a name change)
 // or   test08 141013L "SAI00001460" ;;  // This has quite good diffs
 // or   test08 148575L "SAI00584748" ;;  // simple additions
-//      test08 148574L "SAI00093850" ;;
+//      test08 148574L "SAI00093850" ;;  // structure changes
 
 let test08 (changeReqId : int64) (sairef : string) = 
     let opts = pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"

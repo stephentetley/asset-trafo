@@ -216,22 +216,18 @@ module BuildReport =
         sqliteDb { 
             match! getChangeRequestInfo chreqId with
             | None -> return None
-            | Some info ->
-                let! assetChanges = getAssetChanges chreqId
-                let! attrChanges = getAttributeChanges chreqId 
-                let! repAttrChanges = getRepeatedAttributeChanges chreqId
+            | Some info when info.RequestType = "Attribute" ->
+                let! xs = getAssetChanges chreqId
+                let! ys = getAttributeChanges chreqId 
+                let! zs = getRepeatedAttributeChanges chreqId
+                return Some (AttributeChange(info, xs, ys, zs))
+            | Some info when info.RequestType = "AIDE" ->
                 let! sairefs = findChangeAideSairefs chreqId
                 printfn "%O" sairefs
-                let! structureChanges = 
-                    mapM (assetStructureChange chreqId) sairefs
-                let ans = 
-                    { Info = info
-                    ; AssetChanges = assetChanges
-                    ; AttributeChanges = attrChanges
-                    ; RepeatedAttributeChanges = repAttrChanges
-                    ; StructureRelationshipChanges = structureChanges
-                    }
-                return (Some ans)
+                let! xs = mapM (assetStructureChange chreqId) sairefs
+                return Some (AideChange(info, xs))
+            | Some info ->
+                return Some (UnhandledChangeRequest(info))
         }
 
     // ************************************************************************

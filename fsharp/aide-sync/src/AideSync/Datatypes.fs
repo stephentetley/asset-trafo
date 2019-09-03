@@ -147,13 +147,21 @@ module Datatypes =
         }
 
     type ChangeRequest = 
-        { Info : ChangeRequestInfo
-          AssetChanges : AssetChange list
-          AttributeChanges : AttributeChange list
-          RepeatedAttributeChanges : RepeatedAttributeChange list
-          StructureRelationshipChanges : AssetStructureChange list
-        }
+        | AttributeChange of info : ChangeRequestInfo 
+                            * assetChanges : AssetChange list  
+                            * attrChanges : AttributeChange list
+                            * repeatedAttrChanges : RepeatedAttributeChange list
+        | AideChange of info: ChangeRequestInfo 
+                        * structureChanges : AssetStructureChange list
 
+        | UnhandledChangeRequest of info : ChangeRequestInfo
+
+        member v.Info 
+            with get () : ChangeRequestInfo = 
+                match v with
+                | AttributeChange(info,_,_,_) -> info
+                | AideChange(info,_) -> info
+                | UnhandledChangeRequest info -> info
 
     type ChangeSchemeInfo = 
         { SchemeId : int64

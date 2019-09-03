@@ -16,4 +16,4 @@ JOIN ai_asset    AS asset ON temp_table.child_id = asset.ai_asset_id
 ORDER BY asset.asset_common_name
 ;
 
-SELECT asset.* FROM ai_asset AS asset WHERE asset.ai_asset_id = 	826367;
+SELECT asset.* FROM ai_asset AS asset WHERE asset.ai_asset_id = 826367;
