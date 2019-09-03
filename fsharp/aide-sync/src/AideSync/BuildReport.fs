@@ -208,7 +208,9 @@ module BuildReport =
                              (sairef : string) : SqliteDb<AssetStructureChange>= 
         sqliteDb { 
             let! diffs = structureRelationshipsDiff changeReqId sairef
+            let! commonName = findAiCommonName sairef |>> Option.defaultValue ""
             return { AssetReference = sairef 
+                   ; CommonName = commonName
                    ; StructureChanges = diffs }
         }
 

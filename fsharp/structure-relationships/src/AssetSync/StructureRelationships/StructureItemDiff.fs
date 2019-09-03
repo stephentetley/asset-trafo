@@ -153,18 +153,18 @@ module StructureItemDiff =
         let markdownLabel (item : TreeItem) : Markdown = 
             match item.Difference with
             | InLeft s -> 
-                let title = HtmlAttr("title", sprintf "Delete '%s'" s.CommonName)
+                let title = htmlAttr "title" (sprintf "Delete '%s'" s.CommonName)
                 span lightCoral [title] (text s.Name) |> markdownText
             | Match s -> text s.Name |> markdownText
             | Difference (s1,s2) -> 
                 let title = 
                     if s1.Name <> s2.Name then 
-                        HtmlAttr("title", sprintf "Rename '%s' to '%s'" s1.Name s2.Name)
+                        htmlAttr "title" (sprintf "Rename '%s' to '%s'" s1.Name s2.Name)
                     else
-                        HtmlAttr("title", sprintf "Non-proper name change (floc path editted):&#013;'%s'&#013;to&#013;'%s'" s1.CommonName s2.CommonName)
+                        htmlAttr "title" (sprintf "Non-proper name change (floc path editted):&#013;'%s'&#013;to&#013;'%s'" s1.CommonName s2.CommonName)
                 span gold [title] (text s2.Name)  |> markdownText
             | InRight s -> 
-                let title = HtmlAttr("title", sprintf "Add '%s'" s.CommonName)
+                let title = htmlAttr "title" (sprintf "Add '%s'" s.CommonName)
                 span paleGreen [title] (text s.Name) |> markdownText
 
         match buildStructureTree diffs with

@@ -132,27 +132,34 @@ module DiffImplementation =
     let span (colourName : string) (extraAttrs : HtmlAttrs) (body : Text) : Text = 
         htmlSpan (attrStyle [backgroundColor colourName] :: extraAttrs) body
 
-    let drawLabel (item : TreeItem) : Markdown = 
+    let drawLabel (isRoot : bool) (item : TreeItem)  : Markdown = 
+        let makeLabel (item : StructureItem) : Text = 
+            if isRoot then 
+                text item.CommonName
+            else
+                text item.Name 
+
         match item.Difference with
         | InLeft s -> 
-            let title = HtmlAttr("title", sprintf "Delete '%s'" s.CommonName)
-            span lightCoral [title] (text s.Name) |> markdownText
-        | Match s -> text s.Name |> markdownText
+            let title = htmlAttr "title" (sprintf "Delete '%s'" s.CommonName)
+            span lightCoral [title] (makeLabel s) |> markdownText
+        | Match s -> makeLabel s |> markdownText
         | Difference (s1,s2) -> 
             let title = 
                 if s1.Name <> s2.Name then 
-                    HtmlAttr("title", sprintf "Rename '%s' to '%s'" s1.Name s2.Name)
+                    htmlAttr "title" (sprintf "Rename '%s' to '%s'" s1.Name s2.Name)
                 else
-                    HtmlAttr("title", sprintf "Non-proper name change (floc path editted):&#013;'%s'&#013;to&#013;'%s'" s1.CommonName s2.CommonName)
-            span gold [title] (text s2.Name)  |> markdownText
+                    htmlAttr "title" (sprintf "Non-proper name change (floc path editted):&#013;'%s'&#013;to&#013;'%s'" s1.CommonName s2.CommonName)
+            span gold [title] (makeLabel s2)  |> markdownText
         | InRight s -> 
-            let title = HtmlAttr("title", sprintf "Add '%s'" s.CommonName)
-            span paleGreen [title] (text s.Name) |> markdownText
+            let title = htmlAttr "title" (sprintf "Add '%s'" s.CommonName)
+            span paleGreen [title] (makeLabel s) |> markdownText
 
     let drawStructure (diffs : Differences) : Markdown = 
         match buildStructureTree diffs with
         | None -> emptyMarkdown
-        | Some tree -> mapTree drawLabel tree |> drawTree
+        | Some tree -> 
+            mapTree2 (drawLabel true) (drawLabel false) tree |> drawTree
 
     // ************************************************************************
     // Prune tree
@@ -193,8 +200,6 @@ module DiffImplementation =
                     | None -> vs
                     | Some v -> v :: vs
                 cont results ))
-
-
         work source (fun x -> x)
 
 
@@ -204,4 +209,5 @@ module DiffImplementation =
         | Some tree -> 
             match tree |> pruneTree with
             | None -> text "No changes" |> doubleAsterisks |> markdownText
-            | Some tree -> tree |> mapTree drawLabel |> drawTree
+            | Some tree -> 
+                tree |> mapTree2 (drawLabel true) (drawLabel false) |> drawTree

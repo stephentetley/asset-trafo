@@ -35,6 +35,29 @@ module BasicQueries =
         queryKeyed cmd (Strategy.Head readRow1) 
 
     // ************************************************************************
+    // Find CommonName from SAI reference
+
+    /// Assumption - at most CommonName for a key
+    let findAiCommonName (reference : string) : SqliteDb<string option> = 
+        let sql = 
+            """
+            SELECT 
+                    asset.asset_common_name        AS [CommonName]
+            FROM    ai_asset       AS asset
+            WHERE
+                    asset.reference = :sairef
+            ;
+            """
+        let cmd = 
+            new KeyedCommand (commandText = sql)
+                |> addNamedParam "sairef" (stringParam reference)
+        
+        let readRow1 (result : ResultItem) : string option = result.TryGetString(0)
+
+        queryKeyed cmd (Strategy.Head readRow1) 
+
+
+    // ************************************************************************
     // Find SAI references for a change request
 
     /// Assumption - at most one index for a key

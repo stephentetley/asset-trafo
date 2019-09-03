@@ -149,6 +149,7 @@ module Datatypes =
 
     type AssetStructureChange = 
         { AssetReference : string 
+          CommonName : string
           StructureChanges : Differences
         }
 

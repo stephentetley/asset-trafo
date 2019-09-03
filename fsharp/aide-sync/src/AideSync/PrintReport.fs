@@ -252,15 +252,19 @@ module PrintReport =
         diffs 
             |> List.choose select1
             |> List.map structureItemDiff
-            |> vcat
+            |> vsep
 
     let structureChange (structChange : AssetStructureChange) : Markdown = 
         let headline = 
-            text structChange.AssetReference 
-                ^+^ (numberOfDifferences structChange.StructureChanges |> int32Md)
-                ^+^ text "Structure changes"
+            text structChange.AssetReference ^+^ text structChange.CommonName 
+                |> doubleAsterisks 
+                |> markdownText
+        let summary = 
+                (numberOfDifferences structChange.StructureChanges |> int32Md)
+                    ^+^ text "Structure changes"
                 |> markdownText
         headline
+            ^!!^ summary
             ^!!^ positiveDifferences structChange.StructureChanges
             ^!!^ drawPrunedStructure structChange.StructureChanges
 

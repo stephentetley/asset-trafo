@@ -29,7 +29,7 @@ Environment.SetEnvironmentVariable("PATH",
 #r "SLFormat.dll"
 open SLFormat.CommandOptions
 
-#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190830a\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190903\lib\netstandard2.0"
 #r "MarkdownDoc.dll"
 open MarkdownDoc.Markdown
 open MarkdownDoc.Pandoc
