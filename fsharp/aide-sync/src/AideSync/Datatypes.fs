@@ -8,9 +8,9 @@ module Datatypes =
     
     
     
-    
     type StructureItem = 
-        { Name: string 
+        { AideAssetId : int64
+          Name: string 
           CommonName : string 
           Reference : string
         }

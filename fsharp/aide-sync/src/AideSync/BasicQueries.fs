@@ -110,7 +110,8 @@ module BasicQueries =
                 |> addNamedParam "startid" (int64Param startId)
         
         let readRow1 (result : ResultItem) : StructureItem = 
-            { Reference = result.GetString(1)
+            { AideAssetId = result.GetInt64(0)
+              Reference = result.GetString(1)
             ; Name = result.GetString(2)
             ; CommonName = result.GetString(3)
             }
@@ -172,7 +173,8 @@ module BasicQueries =
                 |> addNamedParam "startid" (int64Param startId)
         
         let readRow1 (result : ResultItem) : StructureItem = 
-            { Reference = result.GetString(1)
+            { AideAssetId = result.GetInt64(0)
+            ; Reference = result.GetString(1)
             ; Name = result.GetString(2)
             ; CommonName = result.GetString(3)
             }

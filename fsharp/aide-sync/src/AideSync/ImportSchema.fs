@@ -148,6 +148,7 @@ module ImportSchema =
     let AttributeChangeSchema = 
         "AssetAttrValueId(int64),\
         ChangeRequestId(int64),\
+        AssetId(int64),\
         AssetReference(string),\
         AssetName(string),\
         AssetCommonName(string),\

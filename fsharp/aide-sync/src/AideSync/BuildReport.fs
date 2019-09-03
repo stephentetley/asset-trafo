@@ -57,10 +57,10 @@ module BuildReport =
         let sql : string = 
             """ 
             SELECT
-                        asset.*
-            FROM        asset_change AS asset
+                        asset_change.*
+            FROM        asset_change AS asset_change
             WHERE
-                        asset.change_request_id = :chreqid
+                        asset_change.change_request_id = :chreqid
             ;
             """
         let cmd = 
@@ -77,6 +77,7 @@ module BuildReport =
 
         queryKeyed cmd (Strategy.ReadAll readRow1)
         
+
     // ************************************************************************
     // Attribute changes
 
