@@ -239,6 +239,21 @@ module PrintReport =
             h3 (text "Asset Property Changes" )
                 ^!!^ table
     
+
+
+    // ************************************************************************
+    // Asset changes
+
+    let assetChange (info : AssetInfo) (changes : AssetChangeset) : Markdown = 
+        let title = 
+            text info.AssetReference  ^+^ text "Asset Changes" 
+        h3 title
+            ^!!^ (text info.CommonName |> doubleAsterisks |> markdownText)
+            ^!!^ assetPropertyChangesSection info changes.AssetProperties
+            ^!!^ attributeChangesSection info changes.AttrChanges
+            ^!!^ repeatedAttributeChangesSection info changes.RepeatedAttrChanges
+
+
     // ************************************************************************
     // Structure changes
     
@@ -272,6 +287,7 @@ module PrintReport =
             ^!!^ summary
             ^!!^ positiveDifferences structChange.StructureChanges
             ^!!^ drawPrunedStructure structChange.StructureChanges
+            // ^!!^ assetChange structChange.AssetInfo structChange.KidsChanges
 
 
     let structureChangesSection (structureChanges : AssetStructureChange list) : Markdown = 
@@ -280,14 +296,6 @@ module PrintReport =
     // ************************************************************************
     // Build the document
 
-    let assetChange (info : AssetInfo) (changes : AssetChangeset) : Markdown = 
-        let title = 
-            text info.AssetReference  ^+^ text "Asset Changes" 
-        h3 title
-            ^!!^ (text info.CommonName |> doubleAsterisks |> markdownText)
-            ^!!^ assetPropertyChangesSection info changes.AssetProperties
-            ^!!^ attributeChangesSection info changes.AttrChanges
-            ^!!^ repeatedAttributeChangesSection info changes.RepeatedAttrChanges
 
     let changeRequestBody (changeRequest : ChangeRequest) : Markdown = 
         match changeRequest with
@@ -303,10 +311,6 @@ module PrintReport =
             changes 
                 |> List.map (fun x -> assetChange x.AssetInfo x.AssetChanges) 
                 |> vcat
-
-            // assetPropertyChangesSection changes
-            //^!!^ attributeChangesSection info changes
-            //^!!^ repeatedAttributeChangesSection zs
 
 
     let makeChangeRequest1 (changeRequest : ChangeRequest) : Markdown = 

@@ -269,10 +269,14 @@ module BuildReport =
             match! getAssetInfo assetId with
             | None -> return None
             | Some info -> 
-                let! diffs = getDifferences chreqId assetId            
+                let! diffs = getDifferences chreqId assetId
+                let! uids = findChangeRequestAssetIds chreqId
+                let! kids = 
+                    mapM (getAssetChangeset chreqId) uids 
+                        |>> List.filter (fun x -> x.HasChanged)
                 return (Some { AssetInfo = info 
                              ; StructureChanges = diffs
-                             ; KidsChanges = [] })
+                             ; KidsChanges = kids })
         }
 
     let buildChangeRequest (chreqId : int64) : SqliteDb<ChangeRequest option> =

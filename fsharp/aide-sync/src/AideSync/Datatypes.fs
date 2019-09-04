@@ -135,10 +135,11 @@ module Datatypes =
           AttrChanges : AttributeDelta list
           RepeatedAttrChanges : RepeatedAttributeDelta list
         }
-        member x.HasChangedProperties 
+        member x.HasChanged 
             with get () : bool = 
-                x.AssetProperties |> List.exists (fun prop -> prop.HasChanged)
-
+                x.AssetProperties |> List.exists (fun prop -> prop.HasChanged) 
+                    || x.AttrChanges |> List.exists (fun attr -> attr.HasChanged) 
+                    || x.RepeatedAttrChanges |> List.exists (fun attr -> attr.HasChanged) 
 
     type AssetChange = 
         { AssetInfo : AssetInfo
