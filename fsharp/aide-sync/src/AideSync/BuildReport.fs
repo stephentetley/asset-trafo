@@ -60,10 +60,10 @@ module BuildReport =
             """ 
             SELECT
                         asset_change.*
-            FROM        asset_change AS asset_change
+            FROM        asset_change       AS asset_change
             WHERE
                         asset_change.change_request_id = :chreqId
-                        asset_change.ai_asset_id = : assetid
+            AND         asset_change.ai_asset_id = :assetid
             ;
             """
         let cmd = 
@@ -141,7 +141,7 @@ module BuildReport =
             FROM    asset_repeated_attribute_change AS rep_attr
             WHERE
                     rep_attr.change_request_id = :chreqid
-            AND     rep_attr.asset_id = : assetid
+            AND     rep_attr.asset_id = :assetid
             ;
             """
         let cmd = 

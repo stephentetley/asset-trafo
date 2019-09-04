@@ -94,7 +94,7 @@ let runChangeSchemeReport (schemeCode : string)
     | Error msg -> printfn "Fail: %s" msg ; Error "Bad"
     | Ok None -> Error (sprintf "Could not find scheme matching '%s'" schemeCode)
     | Ok (Some scheme) -> 
-        writeChangeSchemeReport scheme pandocOpts outputHtmlFile
+        writeFullReport scheme pandocOpts outputHtmlFile
 
 
 // test02 "PCL 70" ;;   // Structure changes

@@ -213,8 +213,9 @@ module PrintReport =
         ; aideValue
         ]
 
-    let assetPropertyChangesTable (assetChanges : AssetChange list) : Markdown option = 
-        
+
+    let assetPropertyChangesTable (assetInfo : AssetInfo)
+                                    (changes : AssetPropertyDelta list) : Markdown option =         
         let headings = 
             [ alignLeft 30 (headingTitle "Asset Reference")
             ; alignLeft 40 (headingTitle "Asset Name")
@@ -222,19 +223,17 @@ module PrintReport =
             ; alignLeft 35 (headingTitle "AI2 Value")
             ; alignLeft 35 (headingTitle "AIDE Value")
             ]
-        
-        let makeRows1 (assetChange : AssetChange)  = 
-            assetChange.AssetChanges.AssetProperties
-                |> List.map (assetPropertyChangeRow assetChange.AssetInfo)
+       
 
-        let rows = assetChanges |> List.map makeRows1 |> List.concat
+        let rows = changes |> List.map (assetPropertyChangeRow assetInfo)
         match rows with
         | [] -> None
         | _ -> makeTableWithHeadings headings rows |> gridTable |> Some
 
 
-    let assetPropertyChangesSection (assetChanges : AssetChange list) : Markdown =
-        match assetPropertyChangesTable assetChanges with
+    let assetPropertyChangesSection (assetInfo : AssetInfo)
+                                    (changes : AssetPropertyDelta list) : Markdown =
+        match assetPropertyChangesTable assetInfo changes with
         | None -> asterisks (text "No asset property changes")  |> h3
         | Some table -> 
             h3 (text "Asset Property Changes" )
@@ -281,17 +280,31 @@ module PrintReport =
     // ************************************************************************
     // Build the document
 
+    let assetChange (info : AssetInfo) (changes : AssetChangeset) : Markdown = 
+        let title = 
+            text info.AssetReference  ^+^ text "Asset Changes" 
+        h3 title
+            ^!!^ (text info.CommonName |> doubleAsterisks |> markdownText)
+            ^!!^ assetPropertyChangesSection info changes.AssetProperties
+            ^!!^ attributeChangesSection info changes.AttrChanges
+            ^!!^ repeatedAttributeChangesSection info changes.RepeatedAttrChanges
+
     let changeRequestBody (changeRequest : ChangeRequest) : Markdown = 
         match changeRequest with
         | UnhandledChangeRequest info -> 
             let t1 = text "Unhandled change request type" 
                         ^+^ doubleAsterisks (text info.RequestType)
             markdownText t1
+
         | AideChange(_, structureChanges) -> 
             structureChangesSection structureChanges
 
-        | AttributeChange(info, changes) -> 
-            assetPropertyChangesSection changes
+        | AttributeChange(_, changes) -> 
+            changes 
+                |> List.map (fun x -> assetChange x.AssetInfo x.AssetChanges) 
+                |> vcat
+
+            // assetPropertyChangesSection changes
             //^!!^ attributeChangesSection info changes
             //^!!^ repeatedAttributeChangesSection zs
 
@@ -301,20 +314,25 @@ module PrintReport =
             ^!!^ changeRequestBody changeRequest
             ^!!^ linkToTop
 
-    let makeChangeRequestsReport (changeRequests : ChangeRequest list) : Markdown = 
-        let requestInfos = changeRequests |> List.map (fun x -> x.Info)
 
-        h1 (htmlAnchorId "top" (text "AIDE Change Requests"))
-            ^!!^ changeRequestInfosSection requestInfos
-            ^!!^ vsep (List.map makeChangeRequest1 changeRequests)
       
-    let makeChangeSchemeReport (changeScheme : ChangeScheme) : Markdown = 
+
+
+    let makeFullReport (changeScheme : ChangeScheme) : Markdown = 
         let requestInfos = changeScheme.ChangeRequests |> List.map (fun x -> x.Info)
 
         h1 (htmlAnchorId "top" (text "AIDE Change Scheme"))
             ^!!^ changeSchemeSummaryTable changeScheme
             ^!!^ changeRequestInfosSection requestInfos
             ^!!^ vsep (List.map makeChangeRequest1 changeScheme.ChangeRequests)
+
+
+    let temporaryChangeRequestsReport (changeRequests : ChangeRequest list) : Markdown = 
+        let requestInfos = changeRequests |> List.map (fun x -> x.Info)
+
+        h1 (htmlAnchorId "top" (text "AIDE Change Requests"))
+            ^!!^ changeRequestInfosSection requestInfos
+            ^!!^ vsep (List.map makeChangeRequest1 changeRequests)
 
     // ************************************************************************
     // Invoking Pandoc
@@ -357,11 +375,12 @@ module PrintReport =
     let writeChangeRequestsReport (changeRequests : ChangeRequest list) 
                                   (pandocOpts : PandocOptions)
                                   (outputHtmlFile : string) : Result<unit, string> = 
-        let doc = makeChangeRequestsReport changeRequests
+        let doc = temporaryChangeRequestsReport changeRequests
         writeMarkdownReport doc "Aide Change Requests Report" pandocOpts outputHtmlFile
     
-    let writeChangeSchemeReport (changeScheme : ChangeScheme) 
+
+    let writeFullReport (changeScheme : ChangeScheme) 
                                 (pandocOpts : PandocOptions)
                                 (outputHtmlFile : string) : Result<unit, string> = 
-        let doc = makeChangeSchemeReport changeScheme
+        let doc = makeFullReport changeScheme
         writeMarkdownReport doc "Aide Change Scheme Report" pandocOpts outputHtmlFile
