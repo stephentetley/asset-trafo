@@ -315,6 +315,7 @@ module PopulateDb =
             INSERT INTO asset_repeated_attribute_change 
             (aide_asset_attr_repeating_value_id, 
             change_request_id, 
+            asset_id,
             asset_reference, 
             asset_name, 
             asset_common_name, 
@@ -324,12 +325,13 @@ module PopulateDb =
             ai_lookup_value, 
             aide_value, 
             aide_lookup_value) 
-            VALUES (?,?,?,  ?,?,?,  ?,?,?,  ?,?);
+            VALUES (?,?,?,  ?,?,?,  ?,?,?,  ?,?,?);
             """
         let cmd = 
             new IndexedCommand(commandText = sql)
                 |> addParam (int64Param row.AssetAttrRepeatingValueId)
                 |> addParam (int64Param row.ChangeRequestId)
+                |> addParam (int64Param row.AssetId)
                 |> addParam (stringParam row.AssetReference)
                 |> addParam (stringParam row.AssetName)
                 |> addParam (stringParam row.AssetCommonName)
