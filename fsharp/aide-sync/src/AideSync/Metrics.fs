@@ -21,23 +21,26 @@ module Metrics =
 
     let crNumberOfPropertyChanges (request : ChangeRequest) : int = 
         let step (change : AssetChange) = 
-            change.AssetProperties |> List.filter (fun x -> x.HasChanged) |> List.length
+            change.AssetChanges.AssetProperties 
+                |> List.filter (fun x -> x.HasChanged) |> List.length
         match request with
-        | AttributeChange(_,changes,_,_) -> List.sumBy step changes
+        | AttributeChange(_,changes) -> List.sumBy step changes
         | _ -> 0
 
     let crNumberOfAttributeChanges (request : ChangeRequest) : int = 
-        let step (change : AttributeChange) = 
-            if change.HasChanged then 1 else 0
+        let step (change : AssetChange) = 
+            change.AssetChanges.AttrChanges
+                |> List.filter (fun x -> x.HasChanged) |> List.length
         match request with
-        | AttributeChange(_,_,changes,_) -> List.sumBy step changes
+        | AttributeChange(_,changes) -> List.sumBy step changes
         | _ -> 0
 
     let crNumberOfRepeatedAttributeChanges (request : ChangeRequest) : int = 
-        let step (change : RepeatedAttributeChange) = 
-            if change.HasChanged then 1 else 0
+        let step (change : AssetChange) = 
+            change.AssetChanges.RepeatedAttrChanges
+                |> List.filter (fun x -> x.HasChanged) |> List.length
         match request with
-        | AttributeChange(_,_,_,changes) -> List.sumBy step changes
+        | AttributeChange(_,changes) -> List.sumBy step changes
         | _ -> 0
 
     let numberOfPropertyChanges (scheme : ChangeScheme) : int = 

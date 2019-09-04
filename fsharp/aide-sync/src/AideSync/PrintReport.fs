@@ -123,17 +123,19 @@ module PrintReport =
    
     
 
-    let attributeChangeRow (attrChange : AttributeChange) : Table.TableRow = 
+    let attributeDeltaRow (assetInfo : AssetInfo) 
+                          (attrDelta : AttributeDelta) : Table.TableRow = 
         let aiValue,aideValue = 
-            valueChanges attrChange.AiValue.Value attrChange.AideValue.Value
-        [ attrChange.Reference          |> text     |> markdownText
-        ; attrChange.AssetName          |> text     |> markdownText
-        ; attrChange.AttributeName      |> text     |> markdownText 
+            valueChanges attrDelta.AiValue.Value attrDelta.AideValue.Value
+        [ assetInfo.AssetReference      |> text     |> markdownText
+        ; assetInfo.AssetName           |> text     |> markdownText
+        ; attrDelta.AttributeName       |> text     |> markdownText 
         ; aiValue
         ; aideValue
         ]
 
-    let attributeChangesTable (attrChanges : AttributeChange list) : Markdown option = 
+    let attributeChangesTable (assetInfo : AssetInfo) 
+                              (attrChanges : AttributeDelta list) : Markdown option = 
         let headings =
             [ alignLeft 30 (headingTitle "Asset Reference")
             ; alignLeft 40 (headingTitle "Asset Name")
@@ -141,13 +143,14 @@ module PrintReport =
             ; alignLeft 50 (headingTitle "AI Value")
             ; alignLeft 50 (headingTitle "AIDE Value")
             ]
-        let (rows : TableRow list) = attrChanges |> List.map attributeChangeRow 
+        let (rows : TableRow list) = 
+            attrChanges |> List.map (attributeDeltaRow assetInfo)
         match rows with
         | [] -> None
         | _ -> makeTableWithHeadings headings rows |> gridTable |> Some
     
-    let attributeChangesSection (attributeChanges : AttributeChange list) : Markdown = 
-        match attributeChangesTable attributeChanges with
+    let attributeChangesSection (assetInfo : AssetInfo) (attributeChanges : AttributeDelta list) : Markdown = 
+        match attributeChangesTable assetInfo attributeChanges with
         | None -> asterisks (text "No attribute changes")  |> h3
         | Some table -> 
             h3 (text "Attribute Changes" )
@@ -157,18 +160,20 @@ module PrintReport =
     // Attribute changes
 
    
-    let repeatedAttributeChangeRow (repAttrChange : RepeatedAttributeChange) : Table.TableRow = 
+    let repeatedAttributeChangeRow (assetInfo : AssetInfo) 
+                                    (repAttrChange : RepeatedAttributeDelta) : Table.TableRow = 
         let aiValue,aideValue = 
             valueChanges repAttrChange.AiValue.Value repAttrChange.AideValue.Value
-        [ repAttrChange.Reference               |> text     |> markdownText
-        ; repAttrChange.AssetName               |> text     |> markdownText
+        [ assetInfo.AssetReference              |> text     |> markdownText
+        ; assetInfo.AssetName                   |> text     |> markdownText
         ; repAttrChange.AttributeSetName        |> text     |> markdownText 
         ; repAttrChange.RepeatedAttributeName   |> text     |> markdownText 
         ; aiValue 
         ; aideValue
         ]
 
-    let repeatedAttributeChangesTable (repAttrChanges : RepeatedAttributeChange list) : Markdown option = 
+    let repeatedAttributeChangesTable (assetInfo : AssetInfo) 
+                (repAttrChanges : RepeatedAttributeDelta list) : Markdown option = 
         let headings =
             [ alignLeft 30 (headingTitle "Asset Reference")
             ; alignLeft 40 (headingTitle "Asset Name")
@@ -177,13 +182,15 @@ module PrintReport =
             ; alignLeft 30 (headingTitle "AI Value")
             ; alignLeft 30 (headingTitle "AIDE Value")
             ]
-        let (rows : TableRow list) = repAttrChanges |> List.map repeatedAttributeChangeRow 
+        let (rows : TableRow list) = 
+            repAttrChanges |> List.map (repeatedAttributeChangeRow assetInfo)
         match rows with
         | [] -> None
         | _ -> makeTableWithHeadings headings rows |> gridTable |> Some
     
-    let repeatedAttributeChangesSection (repeatedAttributeChanges : RepeatedAttributeChange list) : Markdown = 
-        match repeatedAttributeChangesTable repeatedAttributeChanges with
+    let repeatedAttributeChangesSection (assetInfo : AssetInfo) 
+                (repeatedAttributeChanges : RepeatedAttributeDelta list) : Markdown = 
+        match repeatedAttributeChangesTable assetInfo repeatedAttributeChanges with
         | None -> asterisks (text "No repeated attribute changes")  |> h3
         | Some table -> 
             h3 (text "Repeated Attribute Changes" )
@@ -196,12 +203,11 @@ module PrintReport =
     
 
 
-    let assetPropertyChangeRow (reference : string) 
-                                (assetName : string) 
-                                (assetProperty : AssetProperty) : Table.TableRow = 
+    let assetPropertyChangeRow (assetInfo : AssetInfo)
+                                (assetProperty : AssetPropertyDelta) : Table.TableRow = 
         let aiValue,aideValue = valueChanges assetProperty.AiValue assetProperty.AideValue
-        [ reference                     |> text |> markdownText
-        ; assetName                     |> text |> markdownText
+        [ assetInfo.AssetReference      |> text |> markdownText
+        ; assetInfo.AssetName           |> text |> markdownText
         ; assetProperty.PropertyName    |> text |> markdownText 
         ; aiValue
         ; aideValue
@@ -218,8 +224,8 @@ module PrintReport =
             ]
         
         let makeRows1 (assetChange : AssetChange)  = 
-            assetChange.AssetProperties 
-                |> List.map (assetPropertyChangeRow assetChange.Reference assetChange.AiAssetName)
+            assetChange.AssetChanges.AssetProperties
+                |> List.map (assetPropertyChangeRow assetChange.AssetInfo)
 
         let rows = assetChanges |> List.map makeRows1 |> List.concat
         match rows with
@@ -256,7 +262,7 @@ module PrintReport =
 
     let structureChange (structChange : AssetStructureChange) : Markdown = 
         let headline = 
-            text structChange.AssetReference ^+^ text structChange.CommonName 
+            text structChange.AssetInfo.AssetReference ^+^ text structChange.AssetInfo.CommonName
                 |> doubleAsterisks 
                 |> markdownText
         let summary = 
@@ -284,10 +290,10 @@ module PrintReport =
         | AideChange(_, structureChanges) -> 
             structureChangesSection structureChanges
 
-        | AttributeChange(_,xs,ys,zs) -> 
-            assetPropertyChangesSection xs
-            ^!!^ attributeChangesSection ys
-            ^!!^ repeatedAttributeChangesSection zs
+        | AttributeChange(info, changes) -> 
+            assetPropertyChangesSection changes
+            //^!!^ attributeChangesSection info changes
+            //^!!^ repeatedAttributeChangesSection zs
 
 
     let makeChangeRequest1 (changeRequest : ChangeRequest) : Markdown = 

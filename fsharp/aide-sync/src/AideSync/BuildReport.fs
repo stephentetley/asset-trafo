@@ -22,12 +22,12 @@ module BuildReport =
     /// Note - the field might not have type=string
     /// But it looks like we can naturally show any object
     /// we find with ToString().
-    let getAssetPropertyChange (answerRow : ResultItem) 
-                                (propertyDescription : string)
-                                (leftField : string) 
-                                (rightField : string) : AssetProperty option = 
-        let name1 = (valueByName answerRow leftField).ToString()
-        let name2 = (valueByName answerRow rightField).ToString()
+    let extractAssetPropertyChange (answerRow : ResultItem) 
+                                    (propertyDescription : string)
+                                    (leftFieldName : string) 
+                                    (rightFieldName : string) : AssetPropertyDelta option = 
+        let name1 = (valueByName answerRow leftFieldName).ToString()
+        let name2 = (valueByName answerRow rightFieldName).ToString()
         if name1 <> name2 then
             { PropertyName = propertyDescription
             ; AiValue = name1
@@ -36,7 +36,7 @@ module BuildReport =
         else None
 
 
-    let extractAssetPropertyChanges (answerRow : ResultItem) : AssetProperty list = 
+    let extractAssetPropertyChanges (answerRow : ResultItem) : AssetPropertyDelta list = 
         let properties = 
             [ ("Asset Name", "ai_asset_name","aide_asset_name")
             ; ("Common Name", "ai_common_name","aide_common_name")
@@ -49,45 +49,46 @@ module BuildReport =
             ; ("Asset Deleted", "ai_asset_deleted", "aide_asset_deleted")
             ]
         properties
-            |> List.map (fun (name, ai, aide) -> getAssetPropertyChange answerRow name ai aide)
+            |> List.map (fun (name, ai, aide) -> 
+                            extractAssetPropertyChange answerRow name ai aide)
             |> List.choose id 
 
 
-    let getAssetChanges (chreqId : int64) : SqliteDb<AssetChange list> =         
+    let getAssetChanges (chreqId : int64) 
+                        (assetId : int64) : SqliteDb<AssetPropertyDelta list> =         
         let sql : string = 
             """ 
             SELECT
                         asset_change.*
             FROM        asset_change AS asset_change
             WHERE
-                        asset_change.change_request_id = :chreqid
+                        asset_change.change_request_id = :chreqId
+                        asset_change.ai_asset_id = : assetid
             ;
             """
         let cmd = 
             new KeyedCommand(commandText = sql)
                 |> addNamedParam "chreqid" (int64Param chreqId)   
+                |> addNamedParam "assetid" (int64Param assetId) 
 
-        let readRow1 (answerRow : ResultItem) : AssetChange = 
-            let propChanges = extractAssetPropertyChanges answerRow
-            { Reference = (valueByName answerRow "ai_asset_reference").ToString()
-            ; AiAssetName = (valueByName answerRow "ai_asset_name").ToString()
-            ; AiCommonName = (valueByName answerRow "ai_common_name").ToString()
-            ; AssetProperties = propChanges
-            }
-
-        queryKeyed cmd (Strategy.ReadAll readRow1)
+        /// One row has a (small) number of property values
+        let readRow1 (reader : ResultItem) : AssetPropertyDelta list = 
+            extractAssetPropertyChanges reader
+            
+        /// TODO - joining all rows with concat here is suspect...
+        queryKeyed cmd (Strategy.ReadAll readRow1) |>> List.concat
         
 
     // ************************************************************************
     // Attribute changes
 
 
-    let getAttributeChanges (chreqId : int64) : SqliteDb<AttributeChange list> =
+
+    let getAttributeChanges (chreqId : int64) 
+                            (assetId : int64) : SqliteDb<AttributeDelta list> =
         let sql = 
             """
             SELECT 
-                    attr.asset_name           AS [asset_name],
-                    attr.asset_reference      AS [reference],
                     attr.attribute_name       AS [attibute_name],
                     attr.ai_value             AS [ai_value],
                     attr.ai_lookup_value      AS [ai_lookup_value],
@@ -96,40 +97,41 @@ module BuildReport =
             FROM    asset_attribute_change AS attr
             WHERE
                     attr.change_request_id = :chreqid
+            AND     attr.asset_id = :assetid
             ;
             """
         let cmd = 
             new KeyedCommand(commandText = sql)
                 |> addNamedParam "chreqid" (int64Param chreqId) 
+                |> addNamedParam "assetid" (int64Param assetId) 
                    
-        let readRow1 (reader : ResultItem) : AttributeChange = 
+        let readRow1 (reader : ResultItem) : AttributeDelta = 
             let aiValue = 
-                match reader.TryGetString(4) with
-                | None -> reader.TryGetString(3) |> Option.defaultValue "" |> Lookup
+                match reader.TryGetString(2) with
+                | None -> reader.TryGetString(1) |> Option.defaultValue "" |> Lookup
                 | Some value -> printfn "%s" value; value |> Literal
             let aideValue = 
-                match reader.TryGetString(6) with
-                | None -> reader.TryGetString(5) |> Option.defaultValue "" |> Lookup
+                match reader.TryGetString(4) with
+                | None -> reader.TryGetString(3) |> Option.defaultValue "" |> Lookup
                 | Some value -> value |> Literal
-            { AssetName = reader.GetString(0)
-            ; Reference = reader.GetString(1)
-            ; AttributeName = reader.GetString(2)
+            { AttributeName = reader.GetString(0)
             ; AiValue = aiValue
-            ; AideValue = aideValue
-            }
+            ; AideValue = aideValue }
+            
                    
         queryKeyed cmd (Strategy.ReadAll readRow1)
+
+
 
     // ************************************************************************
     // Repeated Attribute changes
 
 
-    let getRepeatedAttributeChanges (chreqId : int64) : SqliteDb<RepeatedAttributeChange list> =
+    let getRepeatedAttributeChanges (chreqId : int64) 
+                                    (assetId : int64) : SqliteDb<RepeatedAttributeDelta list> =
         let sql = 
             """
             SELECT 
-                    rep_attr.asset_name           AS [asset_name],
-                    rep_attr.asset_reference      AS [reference],
                     rep_attr.attribute_name       AS [attibute_name],
                     rep_attr.attribute_set_name   AS [attibute_set_name],
                     rep_attr.ai_value             AS [ai_value],
@@ -139,30 +141,32 @@ module BuildReport =
             FROM    asset_repeated_attribute_change AS rep_attr
             WHERE
                     rep_attr.change_request_id = :chreqid
+            AND     rep_attr.asset_id = : assetid
             ;
             """
         let cmd = 
             new KeyedCommand(commandText = sql)
                 |> addNamedParam "chreqid" (int64Param chreqId) 
+                |> addNamedParam "assetid" (int64Param assetId) 
             
-        let readRow1 (reader : ResultItem) : RepeatedAttributeChange = 
+        let readRow1 (reader : ResultItem) : RepeatedAttributeDelta = 
             let aiValue = 
-                match reader.TryGetString(5) with
-                | None -> reader.TryGetString(4) |> Option.defaultValue "" |> Lookup
+                match reader.TryGetString(3) with
+                | None -> reader.TryGetString(2) |> Option.defaultValue "" |> Lookup
                 | Some value -> printfn "%s" value; value |> Literal
             let aideValue = 
-                match reader.TryGetString(7) with
-                | None -> reader.TryGetString(6) |> Option.defaultValue "" |> Lookup
+                match reader.TryGetString(5) with
+                | None -> reader.TryGetString(4) |> Option.defaultValue "" |> Lookup
                 | Some value -> value |> Literal
-            { AssetName = reader.GetString(0)
-            ; Reference = reader.GetString(1)
-            ; RepeatedAttributeName = reader.GetString(2)
-            ; AttributeSetName = reader.GetString(3)
+            { RepeatedAttributeName = reader.GetString(0)
+            ; AttributeSetName = reader.GetString(1)
             ; AiValue = aiValue
             ; AideValue = aideValue
             }
                        
         queryKeyed cmd (Strategy.ReadAll readRow1)
+
+
 
     // ************************************************************************
     // Change Request Info
@@ -195,43 +199,99 @@ module BuildReport =
 
         queryKeyed cmd (Strategy.ReadAll readRow1) |>> List.tryHead
 
+    // ************************************************************************
+    // AssetInfo
 
+    let getAssetInfo (assetId : int64) : SqliteDb<AssetInfo option> =
+        let sql = 
+            """
+            SELECT 
+                    ai_asset.reference                AS [Reference],
+                    ai_asset.asset_name               AS [Name],
+                    ai_asset.asset_common_name        AS [CommonName]
+            FROM    
+                    ai_asset        AS ai_asset
+            WHERE
+                    ai_asset.ai_asset_id = :assetid
+            ;
+            """
+        let cmd = 
+            new KeyedCommand(commandText = sql)
+                |> addNamedParam "assetid" (int64Param assetId) 
+                   
+        let readRow1 (reader : ResultItem) : AssetInfo = 
+            { AssetId = assetId 
+              AssetReference = reader.GetString(0)
+              AssetName = reader.GetString(1)
+              CommonName = reader.GetString(2)
+            }
 
-    let structureRelationshipsDiff (changeReqId : int64) 
-                                   (sairef : string) : SqliteDb<Differences>= 
+        queryKeyed cmd (Strategy.ReadAll readRow1) |>> List.tryHead
+
+    // ************************************************************************
+    // Differences
+
+    let getDifferences (chreqId : int64) 
+                        (assetId : int64) : SqliteDb<Differences>= 
         sqliteDb { 
-            let! ai = findAiHierarchy sairef
-            let! aide = findAideHierarchy changeReqId sairef
+            let! ai = findAiHierarchy assetId
+            let! aide = findAideHierarchy chreqId assetId
             return diffLists ai.Items aide.Items
         }
 
-    let assetStructureChange (changeReqId : int64) 
-                             (sairef : string) : SqliteDb<AssetStructureChange>= 
+    let getAssetChangeset (chreqId : int64) 
+                            (assetId : int64) : SqliteDb<AssetChangeset> = 
+        
+        sqliteDb {
+            let! assetDeltas = getAssetChanges chreqId assetId
+            let! attrDeltas = getAttributeChanges chreqId assetId
+            let! repAttrDeltas = getRepeatedAttributeChanges chreqId assetId
+            return { AssetProperties = assetDeltas
+                     AttrChanges = attrDeltas
+                     RepeatedAttrChanges = repAttrDeltas }
+        }
+
+
+    let getAssetChange (chreqId : int64) 
+                        (assetId : int64) : SqliteDb<AssetChange option> = 
+        sqliteDb {
+            match! getAssetInfo assetId with
+            | Some info -> 
+                let! changes = getAssetChangeset chreqId assetId 
+                return (Some { AssetInfo = info; AssetChanges = changes })
+            | None -> return None
+        }
+
+
+    let assetStructureChange (chreqId : int64) 
+                             (assetId : int64) : SqliteDb<AssetStructureChange option>= 
         sqliteDb { 
-            let! diffs = structureRelationshipsDiff changeReqId sairef
-            let! commonName = findAiCommonName sairef |>> Option.defaultValue ""
-            return { AssetReference = sairef 
-                   ; CommonName = commonName
-                   ; StructureChanges = diffs }
+            match! getAssetInfo assetId with
+            | None -> return None
+            | Some info -> 
+                let! diffs = getDifferences chreqId assetId            
+                return (Some { AssetInfo = info 
+                             ; StructureChanges = diffs
+                             ; KidsChanges = [] })
         }
 
     let buildChangeRequest (chreqId : int64) : SqliteDb<ChangeRequest option> =
         sqliteDb { 
+            let! assetIds = findChangeRequestAssetIds chreqId
             match! getChangeRequestInfo chreqId with
             | None -> return None
             | Some info when info.RequestType = "Attribute" ->
-                let! xs = getAssetChanges chreqId
-                let! ys = getAttributeChanges chreqId 
-                let! zs = getRepeatedAttributeChanges chreqId
-                return Some (AttributeChange(info, xs, ys, zs))
+                let! changes = mapM (getAssetChange chreqId) assetIds |>> List.choose id
+                return Some (AttributeChange(info, changes))
+
             | Some info when info.RequestType = "AIDE" ->
-                let! sairefs = findChangeAideSairefs chreqId
-                printfn "%O" sairefs
-                let! xs = mapM (assetStructureChange chreqId) sairefs
-                return Some (AideChange(info, xs))
+                let! changes = mapM (assetStructureChange chreqId) assetIds |>> List.choose id
+                return Some (AideChange(info, changes))
             | Some info ->
                 return Some (UnhandledChangeRequest(info))
         }
+
+
 
     // ************************************************************************
     // Change Scheme Info

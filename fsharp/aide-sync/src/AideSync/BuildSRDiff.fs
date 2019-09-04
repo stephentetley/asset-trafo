@@ -43,10 +43,10 @@ module BuildSRDiff =
 
 
     let nameChanges (changeReqId : int64) 
-                    (sairef : string) : SqliteDb<NameChange list>= 
+                    (assetId : int64) : SqliteDb<NameChange list>= 
         sqliteDb { 
-            let! ai = findAiHierarchy sairef
-            let! aide = findAideHierarchy changeReqId sairef
+            let! ai = findAiHierarchy assetId
+            let! aide = findAideHierarchy changeReqId assetId
             return (nameChanges1 ai.Items aide.Items)
         }
         

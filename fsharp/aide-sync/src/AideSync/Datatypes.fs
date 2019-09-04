@@ -86,14 +86,12 @@ module Datatypes =
                 | Lookup s -> s
 
         
-    /// This represents a change on an attribute.
+    /// This represents a possible change on an attribute.
     /// The report on the system that we use for input only 
     /// shows changes. If an attribute is unchanged there will 
     /// be no record.
-    type AttributeChange = 
-        { AssetName : string
-          Reference : string
-          AttributeName : string
+    type AttributeDelta = 
+        { AttributeName : string
           AiValue : AttributeValue
           AideValue : AttributeValue
         }
@@ -101,10 +99,8 @@ module Datatypes =
         /// records from the master database
         member x.HasChanged with get () : bool = x.AideValue <> x.AiValue
 
-    type RepeatedAttributeChange = 
-        { AssetName : string
-          Reference : string
-          RepeatedAttributeName : string
+    type RepeatedAttributeDelta = 
+        { RepeatedAttributeName : string
           AttributeSetName : string
           AiValue : AttributeValue
           AideValue : AttributeValue
@@ -120,23 +116,40 @@ module Datatypes =
     /// key back to the asset.
     /// The input report lists both AI and AIDE property values regardless
     /// of whether the value has changed in AIDE.
-    type AssetProperty = 
+    type AssetPropertyDelta = 
         { PropertyName : string
           AiValue : string
           AideValue : string
         }
         member x.HasChanged with get () : bool = x.AideValue <> x.AiValue
 
-    type AssetChange = 
-        { Reference : string
-          AiAssetName : string
-          AiCommonName : string
-          AssetProperties : AssetProperty list
+    type AssetInfo = 
+        { AssetId : int64 
+          AssetReference : string
+          AssetName : string
+          CommonName : string
+        }
+
+    type AssetChangeset = 
+        { AssetProperties : AssetPropertyDelta list
+          AttrChanges : AttributeDelta list
+          RepeatedAttrChanges : RepeatedAttributeDelta list
         }
         member x.HasChangedProperties 
             with get () : bool = 
                 x.AssetProperties |> List.exists (fun prop -> prop.HasChanged)
 
+
+    type AssetChange = 
+        { AssetInfo : AssetInfo
+          AssetChanges : AssetChangeset
+        }
+        
+    type AssetStructureChange = 
+        { AssetInfo : AssetInfo
+          StructureChanges : Differences
+          KidsChanges : AssetChangeset list
+        }
 
     type ChangeRequestInfo = 
         { ChangeRequestId : int64
@@ -147,28 +160,21 @@ module Datatypes =
         }
 
 
-    type AssetStructureChange = 
-        { AssetReference : string 
-          CommonName : string
-          StructureChanges : Differences
-        }
-
     type ChangeRequest = 
-        | AttributeChange of info : ChangeRequestInfo 
-                            * assetChanges : AssetChange list  
-                            * attrChanges : AttributeChange list
-                            * repeatedAttrChanges : RepeatedAttributeChange list
-        | AideChange of info: ChangeRequestInfo 
-                        * structureChanges : AssetStructureChange list
+        | AttributeChange of 
+                info : ChangeRequestInfo * assetsChanges : AssetChange list  
+        | AideChange of 
+                info: ChangeRequestInfo * structureChanges : AssetStructureChange list
 
         | UnhandledChangeRequest of info : ChangeRequestInfo
 
         member v.Info 
             with get () : ChangeRequestInfo = 
                 match v with
-                | AttributeChange(info,_,_,_) -> info
+                | AttributeChange(info,_) -> info
                 | AideChange(info,_) -> info
                 | UnhandledChangeRequest info -> info
+
 
     type ChangeSchemeInfo = 
         { SchemeId : int64

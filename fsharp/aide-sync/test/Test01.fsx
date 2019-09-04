@@ -115,9 +115,9 @@ let test04 (sairef : string) =
     let connParams = getConnParams ()
     runSqliteDb connParams
         <| sqliteDb { 
-                match! findAiAssetIndex sairef with
+                match! findAiAssetId sairef with
                 | None -> return []
-                | Some key -> return! findAiDescendants key
+                | Some uid -> return! findAiDescendants uid
             }
 
 
@@ -126,9 +126,12 @@ let test05 (changeReqId : int64) (sairef : string) =
     let connParams = getConnParams ()
     runSqliteDb connParams
         <| sqliteDb { 
-                match! findAideAssetIndex changeReqId sairef with
+                match! findAiAssetId sairef with
                 | None -> return []
-                | Some key -> return! findAideDescendants key
+                | Some uid1 -> 
+                    match! findAideAssetId changeReqId uid1 with
+                    | None -> return []
+                    | Some uid2 -> return! findAideDescendants uid2
             }
 
 
@@ -138,7 +141,11 @@ let test05 (changeReqId : int64) (sairef : string) =
 let test06 (changeReqId : int64) (sairef : string) = 
     let connParams = getConnParams ()
     let action : SqliteDb<Differences> = 
-        structureRelationshipsDiff changeReqId sairef
+        sqliteDb { 
+            match! findAiAssetId sairef with 
+            | Some sairef -> return! getDifferences changeReqId sairef
+            | None -> return! throwError "None"
+        }
     match runSqliteDb connParams action with
     | Error msg -> printfn "%s" msg
     | Ok diffs -> 
@@ -154,7 +161,11 @@ let test06 (changeReqId : int64) (sairef : string) =
 let test07 (changeReqId : int64) (sairef : string) = 
     let connParams = getConnParams ()
     let action = 
-        nameChanges changeReqId sairef
+        sqliteDb { 
+            match! findAiAssetId sairef with 
+            | Some sairef -> return! getDifferences changeReqId sairef
+            | None -> return! throwError "None"
+        }
     match runSqliteDb connParams action with
     | Error msg -> printfn "%s" msg
     | Ok [] -> printfn "No changes identified"
@@ -205,7 +216,11 @@ let test08 (changeReqId : int64) (sairef : string) =
     let opts = pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"
     let connParams = getConnParams ()
     let action = 
-        structureRelationshipsDiff changeReqId sairef
+        sqliteDb { 
+            match! findAiAssetId sairef with 
+            | Some sairef -> return! getDifferences changeReqId sairef
+            | None -> return! throwError "None"
+        }
     match runSqliteDb connParams action with
     | Error msg -> printfn "%s" msg ; Error msg
     | Ok diffs -> 

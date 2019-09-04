@@ -16,7 +16,7 @@ module BasicQueries =
     // Find (numeric) id from SAI reference
 
     /// Assumption - at most one index for a key
-    let findAiAssetIndex (reference : string) : SqliteDb<int64 option> = 
+    let findAiAssetId (reference : string) : SqliteDb<int64 option> = 
         let sql = 
             """
             SELECT 
@@ -38,19 +38,19 @@ module BasicQueries =
     // Find CommonName from SAI reference
 
     /// Assumption - at most CommonName for a key
-    let findAiCommonName (reference : string) : SqliteDb<string option> = 
+    let findAiCommonName (assetId : int64)  : SqliteDb<string option> = 
         let sql = 
             """
             SELECT 
                     asset.asset_common_name        AS [CommonName]
             FROM    ai_asset       AS asset
             WHERE
-                    asset.reference = :sairef
+                    asset.asset_id = :assetid
             ;
             """
         let cmd = 
             new KeyedCommand (commandText = sql)
-                |> addNamedParam "sairef" (stringParam reference)
+                |> addNamedParam "assetid" (int64Param assetId)
         
         let readRow1 (result : ResultItem) : string option = result.TryGetString(0)
 
@@ -58,15 +58,16 @@ module BasicQueries =
 
 
     // ************************************************************************
-    // Find SAI references for a change request
+    // Find asset references for a change request
 
     /// Assumption - at most one index for a key
-    let findChangeAideSairefs (changeRequestId : int64) : SqliteDb<string list> = 
+    /// The references are the AI uid, not the AIDE uid
+    let findChangeRequestAssetIds (changeRequestId : int64) : SqliteDb<int64 list> = 
         let sql = 
             """
             SELECT 
-                    change.aide_asset_reference    AS [AssetId]
-            FROM    asset_change       AS change
+                    change.ai_asset_id      AS [AssetId]
+            FROM    asset_change            AS change
             WHERE
                     change.change_request_id = :chreq
             ;
@@ -75,7 +76,7 @@ module BasicQueries =
             new KeyedCommand (commandText = sql)
                 |> addNamedParam "chreq" (int64Param changeRequestId)
         
-        let readRow1 (result : ResultItem) : string = result.GetString(0)
+        let readRow1 (result : ResultItem) : int64 = result.GetInt64(0)
 
         queryKeyed cmd (Strategy.ReadAll readRow1) 
 
@@ -123,22 +124,22 @@ module BasicQueries =
     // Find (numeric) id from SAI reference
 
     /// Assumption - at most one index for the pair (change_request_id * key)
-    let findAideAssetIndex (changeRequestId : int64) 
-                           (reference : string) : SqliteDb<int64 option> = 
+    let findAideAssetId (changeRequestId : int64) 
+                           (assetId : int64) : SqliteDb<int64 option> = 
         let sql = 
             """
             SELECT 
-                    asset.aide_asset_id     AS [AideAssetId]
-            FROM    aide_asset              AS asset
+                    aide.aide_asset_id     AS [AideAssetId]
+            FROM    aide_asset              AS aide
             WHERE
-                    asset.reference = :sairef
-            AND     asset.change_request_id = :chreq 
+                    aide.change_request_id = :chreq 
+            AND     aide.asset_id = :assetid     
             ;
             """
         let cmd = 
             new KeyedCommand (commandText = sql)
-                |> addNamedParam "sairef" (stringParam reference)
                 |> addNamedParam "chreq" (int64Param changeRequestId)
+                |> addNamedParam "assetid" (int64Param assetId)
         
         let readRow1 (result : ResultItem) : int64 = result.GetInt64(0)
 
@@ -183,18 +184,15 @@ module BasicQueries =
 
 
 
-    let findAiHierarchy (reference : string) : SqliteDb<Hierarchy> =
-        sqliteDb { 
-            match! findAiAssetIndex reference with
-            | None -> return (Hierarchy [])
-            | Some key -> return! findAiDescendants key |>> Hierarchy
-        }
+    let findAiHierarchy (assetId : int64) : SqliteDb<Hierarchy> =
+        findAiDescendants assetId |>> Hierarchy
+
 
 
     let findAideHierarchy (changeRequestId : int64) 
-                              (reference : string) : SqliteDb<Hierarchy> =
+                          (assetId : int64) : SqliteDb<Hierarchy> =
         sqliteDb { 
-            match! findAideAssetIndex changeRequestId reference with
+            match! findAideAssetId changeRequestId assetId with
             | None -> return (Hierarchy [])
             | Some key -> return! findAideDescendants key |>> Hierarchy
         }
