@@ -84,7 +84,7 @@ module BasicQueries =
     // ************************************************************************
     // Find kids (AI)
             
-    let findAiDescendants (startId : int64) : SqliteDb<StructureItem list> =
+    let findAiDescendants (startId : int64) : SqliteDb<AiStructureItem list> =
         let sql = 
             """
             WITH RECURSIVE
@@ -109,8 +109,8 @@ module BasicQueries =
             new KeyedCommand (commandText = sql)
                 |> addNamedParam "startid" (int64Param startId)
         
-        let readRow1 (result : ResultItem) : StructureItem = 
-            { Uid = result.GetInt64(0)
+        let readRow1 (result : ResultItem) : AiStructureItem = 
+            { AssetId = result.GetInt64(0)
             ; Name = result.GetString(1)
             ; CommonName = result.GetString(2)            
             ; Reference = result.GetString(3)
@@ -147,7 +147,7 @@ module BasicQueries =
     // ************************************************************************
     // Find kids (AIDE)
             
-    let findAideDescendants (startId : int64) : SqliteDb<StructureItem list> =
+    let findAideDescendants (startId : int64) : SqliteDb<AideStructureItem list> =
         let sql = 
             """
             WITH RECURSIVE
@@ -172,8 +172,8 @@ module BasicQueries =
             new KeyedCommand (commandText = sql)
                 |> addNamedParam "startid" (int64Param startId)
         
-        let readRow1 (result : ResultItem) : StructureItem =
-            { Uid = result.GetInt64(0)
+        let readRow1 (result : ResultItem) : AideStructureItem =
+            { AideAssetId = result.GetInt64(0)
             ; Name = result.GetString(1)
             ; CommonName = result.GetString(2)
             ; Reference = result.GetString(3)
@@ -183,17 +183,17 @@ module BasicQueries =
 
 
 
-    let findAiHierarchy (assetId : int64) : SqliteDb<Hierarchy> =
-        findAiDescendants assetId |>> Hierarchy
+    let findAiHierarchy (assetId : int64) : SqliteDb<AiHierarchy> =
+        findAiDescendants assetId |>> AiHierarchy
 
 
 
     let findAideHierarchy (changeRequestId : int64) 
-                          (assetId : int64) : SqliteDb<Hierarchy> =
+                          (assetId : int64) : SqliteDb<AideHierarchy> =
         sqliteDb { 
             match! findAideAssetId changeRequestId assetId with
-            | None -> return (Hierarchy [])
-            | Some key -> return! findAideDescendants key |>> Hierarchy
+            | None -> return (AideHierarchy [])
+            | Some key -> return! findAideDescendants key |>> AideHierarchy
         }
 
 

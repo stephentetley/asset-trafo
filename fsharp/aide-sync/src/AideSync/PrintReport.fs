@@ -261,7 +261,7 @@ module PrintReport =
         match diff with
         | InLeft s -> text "Delete:" ^+^ text s.Reference |> markdownText
         | InRight s -> text "Add:" ^+^ text s.Reference |> markdownText
-        | Match s -> text "Id:" ^+^ text s.Reference |> markdownText
+        | Match(s1,_) -> text "Id:" ^+^ text s1.Reference |> markdownText
         | Difference(s1,s2) -> text "Diff:" ^+^ text s1.Reference |> markdownText
 
     let positiveDifferences (diffs : StructureItemDiff list) : Markdown = 

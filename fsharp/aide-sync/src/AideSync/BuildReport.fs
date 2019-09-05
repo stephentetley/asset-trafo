@@ -78,6 +78,8 @@ module BuildReport =
         /// TODO - joining all rows with concat here is suspect...
         queryKeyed cmd (Strategy.ReadAll readRow1) |>> List.concat
         
+    // let getAssetChangesForChild (aideAssetId : int64) : SqliteDb<AssetPropertyDelta list> = 
+        
 
     // ************************************************************************
     // Attribute changes
@@ -270,8 +272,8 @@ module BuildReport =
             | None -> return None
             | Some info -> 
                 let! diffs = getDifferences chreqId assetId
-                let  refs = aideRefsOfDifferences diffs
-                printfn "ChangeReq: %i, REFs for: %O" chreqId refs
+                let  uids = aideIdsOfDifferences diffs
+                printfn "ChangeReq: %i, REFs for: %O" chreqId uids
                 let! kids = 
                     mapM (getAssetChangeset chreqId) [] 
                         |>> List.filter (fun x -> x.HasChanged)

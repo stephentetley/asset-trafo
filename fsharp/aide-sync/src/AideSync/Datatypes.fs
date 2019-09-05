@@ -9,8 +9,22 @@ module Datatypes =
     
     /// Uid will be either AiAssetId (if item drawn from AI)
     /// or AideAssetId (if drawn from Aide).
-    type StructureItem = 
-        { Uid : int64
+    type AiStructureItem = 
+        { AssetId : int64
+          Name: string 
+          CommonName : string 
+          Reference : string
+        }
+        // We want to be able to sort top down (priority go down, 
+        // rather than go next).
+        // The simplest way to do this is hack the key so '/' has 
+        // priority over ' '.
+        member v.PathKey 
+            with get() : string  = 
+                v.CommonName.Replace(' ', '?')
+
+    type AideStructureItem = 
+        { AideAssetId : int64
           Name: string 
           CommonName : string 
           Reference : string
@@ -27,10 +41,10 @@ module Datatypes =
     /// A StructureItemDiff is a difference between the item in the Ai and Aide 
     /// hierarchies.
     type StructureItemDiff = 
-        | InLeft of StructureItem
-        | Match of StructureItem
-        | Difference of left:StructureItem * right:StructureItem
-        | InRight of StructureItem
+        | InLeft of AiStructureItem
+        | Match of left : AiStructureItem * right : AideStructureItem
+        | Difference of left : AiStructureItem * right : AideStructureItem
+        | InRight of AideStructureItem
 
         member v.HasDiff 
             with get () : bool =
@@ -44,7 +58,7 @@ module Datatypes =
             with get() : string  = 
                 match v with
                 | InLeft s -> s.PathKey
-                | Match s -> s.PathKey
+                | Match (s1,_) -> s1.PathKey
                 | Difference (s1,_) -> s1.PathKey
                 | InRight s -> s.PathKey
 
@@ -52,20 +66,20 @@ module Datatypes =
     type Differences = StructureItemDiff list
 
 
-    let aideRefsOfDifferences (diffs : Differences) : string list = 
-        let select (diff : StructureItemDiff) : string option = 
+    let aideIdsOfDifferences (diffs : Differences) : int64 list = 
+        let select (diff : StructureItemDiff) : int64 option = 
             match diff with
             | InLeft _ -> None
-            | Match s -> None
-            | Difference (_,s2) -> Some s2.Reference
-            | InRight s -> Some s.Reference
+            | Match(_,_) -> None
+            | Difference (_,s2) -> Some s2.AideAssetId
+            | InRight s -> Some s.AideAssetId
         List.choose select diffs
  
-    type Hierarchy = 
-        val private StructureItems : StructureItem list
+    type AiHierarchy = 
+        val private StructureItems : AiStructureItem list
 
-        new (items : StructureItem list) = 
-            let fn (s1 : StructureItem) = s1.CommonName
+        new (items : AiStructureItem list) = 
+            let fn (s1 : AiStructureItem) = s1.CommonName
             { StructureItems = List.sortBy fn items }
 
         member x.Size 
@@ -73,7 +87,7 @@ module Datatypes =
 
 
         member x.Items 
-            with get () : StructureItem list = x.StructureItems
+            with get () : AiStructureItem list = x.StructureItems
 
         member x.CommonNames 
             with get () : string list = 
@@ -84,7 +98,27 @@ module Datatypes =
                 x.StructureItems |> List.map (fun x -> x.Reference)
 
 
+    type AideHierarchy = 
+        val private StructureItems : AideStructureItem list
 
+        new (items : AideStructureItem list) = 
+            let fn (s1 : AideStructureItem) = s1.CommonName
+            { StructureItems = List.sortBy fn items }
+
+        member x.Size 
+            with get () : int = x.StructureItems.Length
+
+
+        member x.Items 
+            with get () : AideStructureItem list = x.StructureItems
+
+        member x.CommonNames 
+            with get () : string list = 
+                x.StructureItems |> List.map (fun x -> x.CommonName)
+
+        member x.References 
+            with get () : string list = 
+                x.StructureItems |> List.map (fun x -> x.Reference)
 
     type AttributeValue = 
         | Literal of string

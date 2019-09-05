@@ -152,6 +152,7 @@ let test06 (changeReqId : int64) (sairef : string) =
         let tempFile = outputFile "diff_temp.txt"
         diffs 
             |> showDiffs (fun o -> sprintf "%s - %s" o.Reference o.CommonName)
+                            (fun o -> sprintf "%s - %s" o.Reference o.CommonName)
             |> fun x -> File.WriteAllText(path = tempFile, contents = x)
 
 

@@ -27,9 +27,12 @@ module DiffImplementation =
     /// We rely on the inputs being ordered for the algorithm 
     /// to work - figuratively a pointer is running through each 
     /// list, and one will pause if it gets ahead of the other.
-    let diffLists (leftList : StructureItem list) 
-                  (rightList : StructureItem list) : Differences =
-        let refSort (xs : StructureItem list) = 
+    let diffLists (leftList : AiStructureItem list) 
+                  (rightList : AideStructureItem list) : Differences =
+        let refSortL (xs : AiStructureItem list) = 
+            xs |> List.sortBy (fun x -> x.Reference)
+        
+        let refSortR (xs : AideStructureItem list) = 
             xs |> List.sortBy (fun x -> x.Reference)
 
         let pathSort (xs : StructureItemDiff list) = 
@@ -50,7 +53,7 @@ module DiffImplementation =
                     // This reults in the leaf being highlighted even though 
                     // the "change" is above it.
                     if x.CommonName = y.CommonName then 
-                        cont (Match x :: ac)
+                        cont (Match(x,y) :: ac)
                     else
                         cont (Difference(x,y) :: ac))
 
@@ -63,19 +66,21 @@ module DiffImplementation =
                     work lefts ys (fun ac -> 
                     cont (InRight y :: ac))
                 | i -> failwithf "differenceL - Weird (impossible) pattern failure: %i" i
-        work (refSort leftList) (refSort rightList) (fun x -> x)
+        work (refSortL leftList) (refSortR rightList) (fun x -> x)
             |> pathSort 
 
-    let showDiffs (printer :StructureItem -> string) (diffs : Differences) : string = 
+    let showDiffs (printL : AiStructureItem -> string) 
+                  (printR : AideStructureItem -> string)
+                  (diffs : Differences) : string = 
         let sb = new StringBuilder ()
         let write1 (diff : StructureItemDiff) : unit = 
             match diff with
-            | InLeft s -> sb.AppendLine ("-" + printer s) |> ignore
-            | InRight s -> sb.AppendLine ("+" + printer s) |> ignore
-            | Match s -> sb.AppendLine (" " + printer s) |> ignore
+            | InLeft s -> sb.AppendLine ("-" + printL s) |> ignore
+            | InRight s -> sb.AppendLine ("+" + printR s) |> ignore
+            | Match (_,s2) -> sb.AppendLine (" " + printR s2) |> ignore
             
             | Difference(s1,s2) -> 
-                sb.AppendLine (sprintf "*[%s]=>%s" (printer s1) (printer s2)) |> ignore
+                sb.AppendLine (sprintf "*[%s]=>%s" (printL s1) (printR s2)) |> ignore
         List.iter write1 diffs
         sb.ToString()
 
@@ -133,27 +138,26 @@ module DiffImplementation =
         htmlSpan (attrStyle [backgroundColor colourName] :: extraAttrs) body
 
     let drawLabel (isRoot : bool) (item : TreeItem)  : Markdown = 
-        let makeLabel (item : StructureItem) : Text = 
-            if isRoot then 
-                text item.CommonName
-            else
-                text item.Name 
+        let makeLabelL (item : AiStructureItem) : Text = 
+            text <| if isRoot then item.CommonName else item.Name 
+        let makeLabelR (item : AideStructureItem) : Text = 
+            text <| if isRoot then item.CommonName else item.Name
 
         match item.Difference with
         | InLeft s -> 
             let title = htmlAttr "title" (sprintf "Delete '%s'" s.CommonName)
-            span lightCoral [title] (makeLabel s) |> markdownText
-        | Match s -> makeLabel s |> markdownText
+            span lightCoral [title] (makeLabelL s) |> markdownText
+        | Match(_,s) -> makeLabelR s |> markdownText
         | Difference (s1,s2) -> 
             let title = 
                 if s1.Name <> s2.Name then 
                     htmlAttr "title" (sprintf "Rename '%s' to '%s'" s1.Name s2.Name)
                 else
                     htmlAttr "title" (sprintf "Non-proper name change (floc path editted):&#013;'%s'&#013;to&#013;'%s'" s1.CommonName s2.CommonName)
-            span gold [title] (makeLabel s2)  |> markdownText
+            span gold [title] (makeLabelR s2)  |> markdownText
         | InRight s -> 
             let title = htmlAttr "title" (sprintf "Add '%s'" s.CommonName)
-            span paleGreen [title] (makeLabel s) |> markdownText
+            span paleGreen [title] (makeLabelR s) |> markdownText
 
     let drawStructure (diffs : Differences) : Markdown = 
         match buildStructureTree diffs with

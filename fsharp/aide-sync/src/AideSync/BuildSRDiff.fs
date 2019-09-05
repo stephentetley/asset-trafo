@@ -23,14 +23,14 @@ module BuildSRDiff =
           NewName : string
         }
 
-    let internal nameChanges1 (lefts : StructureItem list)
-                              (rights : StructureItem list) : NameChange list = 
+    let internal nameChanges1 (lefts : AiStructureItem list)
+                              (rights : AideStructureItem list) : NameChange list = 
         let rightsMap = 
             rights 
-                |> List.map (fun (x:StructureItem) -> (x.Reference, x.CommonName))
+                |> List.map (fun (x:AideStructureItem) -> (x.Reference, x.CommonName))
                 |> Map.ofList
         
-        let chooser (item : StructureItem) : NameChange option = 
+        let chooser (item : AiStructureItem) : NameChange option = 
             match Map.tryFind item.Reference rightsMap with
             | None -> None
             | Some name2 -> 
