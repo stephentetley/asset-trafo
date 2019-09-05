@@ -96,14 +96,13 @@ module BasicQueries =
                 WHERE ai_structure_relationships.parent_id = temp_table.child_id
                 )
             SELECT 
-                temp_table.child_id AS [ChildId],
-                asset.reference AS [Reference],
+                temp_table.child_id AS [AssetId],
                 asset.asset_name AS [Name],
-                asset.asset_common_name AS [CommonName]
+                asset.asset_common_name AS [CommonName],
+                asset.reference AS [Reference]
             FROM temp_table
             JOIN ai_asset    AS asset ON temp_table.child_id = asset.ai_asset_id
             ORDER BY asset.asset_common_name
-            ;
             ;
             """
         let cmd = 
@@ -111,10 +110,10 @@ module BasicQueries =
                 |> addNamedParam "startid" (int64Param startId)
         
         let readRow1 (result : ResultItem) : StructureItem = 
-            { AideAssetId = result.GetInt64(0)
-              Reference = result.GetString(1)
-            ; Name = result.GetString(2)
-            ; CommonName = result.GetString(3)
+            { Uid = result.GetInt64(0)
+            ; Name = result.GetString(1)
+            ; CommonName = result.GetString(2)            
+            ; Reference = result.GetString(3)
             }
 
         queryKeyed cmd (Strategy.ReadAll readRow1) 
@@ -160,10 +159,10 @@ module BasicQueries =
                 WHERE aide_structure_relationships.parent_id = temp_table.child_id
                 )
             SELECT 
-                temp_table.child_id AS [ChildId],
-                asset.reference AS [Reference],
+                temp_table.child_id AS [AideAssetId],
                 asset.asset_name AS [Name],
-                asset.asset_common_name AS [CommonName]
+                asset.asset_common_name AS [CommonName],
+                asset.reference AS [Reference]
             FROM temp_table
             JOIN aide_asset    AS asset ON temp_table.child_id = asset.aide_asset_id
             ORDER BY asset.asset_common_name
@@ -173,11 +172,11 @@ module BasicQueries =
             new KeyedCommand (commandText = sql)
                 |> addNamedParam "startid" (int64Param startId)
         
-        let readRow1 (result : ResultItem) : StructureItem = 
-            { AideAssetId = result.GetInt64(0)
-            ; Reference = result.GetString(1)
-            ; Name = result.GetString(2)
-            ; CommonName = result.GetString(3)
+        let readRow1 (result : ResultItem) : StructureItem =
+            { Uid = result.GetInt64(0)
+            ; Name = result.GetString(1)
+            ; CommonName = result.GetString(2)
+            ; Reference = result.GetString(3)
             }
 
         queryKeyed cmd (Strategy.ReadAll readRow1) 

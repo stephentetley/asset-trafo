@@ -7,7 +7,7 @@ temp_table(child_id) AS (
     WHERE ai_structure_relationships.parent_id = temp_table.child_id
     )
 SELECT 
-    temp_table.child_id AS [ChildId],
+    temp_table.child_id AS [AssetId],
     asset.reference AS [Reference],
     asset.asset_name AS [Name],
     asset.asset_common_name AS [CommonName]

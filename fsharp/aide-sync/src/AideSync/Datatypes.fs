@@ -7,9 +7,10 @@ namespace AideSync
 module Datatypes =
     
     
-    
+    /// Uid will be either AiAssetId (if item drawn from AI)
+    /// or AideAssetId (if drawn from Aide).
     type StructureItem = 
-        { AideAssetId : int64
+        { Uid : int64
           Name: string 
           CommonName : string 
           Reference : string
@@ -50,6 +51,15 @@ module Datatypes =
 
     type Differences = StructureItemDiff list
 
+
+    let aideRefsOfDifferences (diffs : Differences) : string list = 
+        let select (diff : StructureItemDiff) : string option = 
+            match diff with
+            | InLeft _ -> None
+            | Match s -> None
+            | Difference (_,s2) -> Some s2.Reference
+            | InRight s -> Some s.Reference
+        List.choose select diffs
  
     type Hierarchy = 
         val private StructureItems : StructureItem list

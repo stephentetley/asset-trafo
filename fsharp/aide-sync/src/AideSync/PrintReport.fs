@@ -287,7 +287,7 @@ module PrintReport =
             ^!!^ summary
             ^!!^ positiveDifferences structChange.StructureChanges
             ^!!^ drawPrunedStructure structChange.StructureChanges
-            // ^!!^ assetChange structChange.AssetInfo structChange.KidsChanges
+            ^!!^ vsep (List.map (assetChange structChange.AssetInfo) structChange.KidsChanges)
 
 
     let structureChangesSection (structureChanges : AssetStructureChange list) : Markdown = 

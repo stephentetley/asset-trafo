@@ -270,9 +270,10 @@ module BuildReport =
             | None -> return None
             | Some info -> 
                 let! diffs = getDifferences chreqId assetId
-                let! uids = findChangeRequestAssetIds chreqId
+                let  refs = aideRefsOfDifferences diffs
+                printfn "ChangeReq: %i, REFs for: %O" chreqId refs
                 let! kids = 
-                    mapM (getAssetChangeset chreqId) uids 
+                    mapM (getAssetChangeset chreqId) [] 
                         |>> List.filter (fun x -> x.HasChanged)
                 return (Some { AssetInfo = info 
                              ; StructureChanges = diffs
