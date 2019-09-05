@@ -290,8 +290,8 @@ module PrintReport =
             ^!!^ vsep (List.map (assetChange structChange.AssetInfo) structChange.KidsChanges)
 
 
-    let structureChangesSection (structureChanges : AssetStructureChange list) : Markdown = 
-        vcat (List.map structureChange structureChanges)
+    let structureChangesSection (structChanges : AssetStructureChange list) : Markdown = 
+        vsep (List.map structureChange structChanges)
 
     // ************************************************************************
     // Build the document
@@ -304,7 +304,11 @@ module PrintReport =
                         ^+^ doubleAsterisks (text info.RequestType)
             markdownText t1
 
-        | AideChange(_, structureChanges) -> 
+        | AideChange(info, structureChanges) -> 
+            printfn "Change Request: %i, structure changes count = %i" 
+                        info.ChangeRequestId 
+                        structureChanges.Length
+
             structureChangesSection structureChanges
 
         | AttributeChange(_, changes) -> 
@@ -313,7 +317,7 @@ module PrintReport =
                 |> vcat
 
 
-    let makeChangeRequest1 (changeRequest : ChangeRequest) : Markdown = 
+    let makeChangeRequest (changeRequest : ChangeRequest) : Markdown = 
         changeRequestSectionHeader (changeRequest.Info)
             ^!!^ changeRequestBody changeRequest
             ^!!^ linkToTop
@@ -328,7 +332,7 @@ module PrintReport =
         h1 (htmlAnchorId "top" (text "AIDE Change Scheme"))
             ^!!^ changeSchemeSummaryTable changeScheme
             ^!!^ changeRequestInfosSection requestInfos
-            ^!!^ vsep (List.map makeChangeRequest1 changeScheme.ChangeRequests)
+            ^!!^ vsep (List.map makeChangeRequest changeScheme.ChangeRequests)
 
 
     let temporaryChangeRequestsReport (changeRequests : ChangeRequest list) : Markdown = 
@@ -336,7 +340,7 @@ module PrintReport =
 
         h1 (htmlAnchorId "top" (text "AIDE Change Requests"))
             ^!!^ changeRequestInfosSection requestInfos
-            ^!!^ vsep (List.map makeChangeRequest1 changeRequests)
+            ^!!^ vsep (List.map makeChangeRequest changeRequests)
 
     // ************************************************************************
     // Invoking Pandoc

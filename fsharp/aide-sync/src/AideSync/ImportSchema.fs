@@ -280,6 +280,7 @@ module ImportSchema =
     [<Literal>]
     let AttributeNewSchema = 
         "AssetAttrValueId(int64),\
+        AideAssetId(int64),\
         AssetReference(string),\
         AssetName(string),\
         AssetCommonName(string),\
