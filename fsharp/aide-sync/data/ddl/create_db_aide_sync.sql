@@ -87,7 +87,8 @@ CREATE TABLE asset_attribute_change
 (
     aide_asset_attr_value_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
     change_request_id INTEGER,
-    asset_id INTEGER,
+    ai_asset_id INTEGER,
+    aide_asset_id INTEGER,
     asset_reference TEXT,
     asset_name TEXT,
     asset_common_name TEXT,
@@ -102,7 +103,8 @@ CREATE TABLE asset_repeated_attribute_change
 (
     aide_asset_attr_repeating_value_id INTEGER PRIMARY KEY UNIQUE NOT NULL,
     change_request_id INTEGER,
-    asset_id INTEGER,
+    ai_asset_id INTEGER,
+    aide_asset_id INTEGER,
     asset_reference TEXT,
     asset_name TEXT,
     asset_common_name TEXT,

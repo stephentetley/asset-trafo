@@ -78,8 +78,27 @@ module BuildReport =
         /// TODO - joining all rows with concat here is suspect...
         queryKeyed cmd (Strategy.ReadAll readRow1) |>> List.concat
         
-    // let getAssetChangesForChild (aideAssetId : int64) : SqliteDb<AssetPropertyDelta list> = 
-        
+    let getAssetChangesForChild (aideAssetId : int64) : SqliteDb<AssetPropertyDelta list> = 
+        let sql : string = 
+            """ 
+            SELECT
+                        asset_change.*
+            FROM        asset_change       AS asset_change
+            WHERE
+                        asset_change.aide_asset_id = :aideid
+            ;
+            """
+        let cmd = 
+            new KeyedCommand(commandText = sql)
+                |> addNamedParam "aideid" (int64Param aideAssetId)   
+
+        /// One row has a (small) number of property values
+        let readRow1 (reader : ResultItem) : AssetPropertyDelta list = 
+            extractAssetPropertyChanges reader
+            
+        /// TODO - joining all rows with concat here is suspect...
+        queryKeyed cmd (Strategy.ReadAll readRow1) |>> List.concat
+
 
     // ************************************************************************
     // Attribute changes
@@ -123,7 +142,39 @@ module BuildReport =
                    
         queryKeyed cmd (Strategy.ReadAll readRow1)
 
-
+    let getAttributeChangesForChild (aideAssetId : int64)  : SqliteDb<AttributeDelta list> =
+        let sql = 
+            """
+            SELECT 
+                    attr.attribute_name       AS [attibute_name],
+                    attr.ai_value             AS [ai_value],
+                    attr.ai_lookup_value      AS [ai_lookup_value],
+                    attr.aide_value           AS [aide_value],
+                    attr.aide_lookup_value    AS [aide_lookup_value]
+            FROM    asset_attribute_change AS attr
+            WHERE
+                    attr.aide_asset_id = :aideid
+            ;
+            """
+        let cmd = 
+            new KeyedCommand(commandText = sql)
+                |> addNamedParam "aideid" (int64Param aideAssetId)
+                   
+        let readRow1 (reader : ResultItem) : AttributeDelta = 
+            let aiValue = 
+                match reader.TryGetString(2) with
+                | None -> reader.TryGetString(1) |> Option.defaultValue "" |> Lookup
+                | Some value -> printfn "%s" value; value |> Literal
+            let aideValue = 
+                match reader.TryGetString(4) with
+                | None -> reader.TryGetString(3) |> Option.defaultValue "" |> Lookup
+                | Some value -> value |> Literal
+            { AttributeName = reader.GetString(0)
+            ; AiValue = aiValue
+            ; AideValue = aideValue }
+            
+                   
+        queryKeyed cmd (Strategy.ReadAll readRow1)
 
     // ************************************************************************
     // Repeated Attribute changes
@@ -168,7 +219,41 @@ module BuildReport =
                        
         queryKeyed cmd (Strategy.ReadAll readRow1)
 
-
+    let getRepeatedAttributeChangesForChild (aideAssetId : int64) : SqliteDb<RepeatedAttributeDelta list> =
+        let sql = 
+            """
+            SELECT 
+                    rep_attr.attribute_name       AS [attibute_name],
+                    rep_attr.attribute_set_name   AS [attibute_set_name],
+                    rep_attr.ai_value             AS [ai_value],
+                    rep_attr.ai_lookup_value      AS [ai_lookup_value],
+                    rep_attr.aide_value           AS [aide_value],
+                    rep_attr.aide_lookup_value    AS [aide_lookup_value]
+            FROM    asset_repeated_attribute_change AS rep_attr
+            WHERE
+                    rep_attr.aide_asset_id = :aideid
+            ;
+            """
+        let cmd = 
+            new KeyedCommand(commandText = sql)
+                |> addNamedParam "aideid" (int64Param aideAssetId)
+            
+        let readRow1 (reader : ResultItem) : RepeatedAttributeDelta = 
+            let aiValue = 
+                match reader.TryGetString(3) with
+                | None -> reader.TryGetString(2) |> Option.defaultValue "" |> Lookup
+                | Some value -> printfn "%s" value; value |> Literal
+            let aideValue = 
+                match reader.TryGetString(5) with
+                | None -> reader.TryGetString(4) |> Option.defaultValue "" |> Lookup
+                | Some value -> value |> Literal
+            { RepeatedAttributeName = reader.GetString(0)
+            ; AttributeSetName = reader.GetString(1)
+            ; AiValue = aiValue
+            ; AideValue = aideValue
+            }
+                       
+        queryKeyed cmd (Strategy.ReadAll readRow1)
 
     // ************************************************************************
     // Change Request Info
@@ -253,6 +338,16 @@ module BuildReport =
                      RepeatedAttrChanges = repAttrDeltas }
         }
 
+    let getAssetChangesetForChild (aideAssetId : int64) : SqliteDb<AssetChangeset> = 
+        sqliteDb {
+            let! assetDeltas = getAssetChangesForChild aideAssetId
+            let! attrDeltas = getAttributeChangesForChild aideAssetId
+            let! repAttrDeltas = getRepeatedAttributeChangesForChild aideAssetId
+            return { AssetProperties = assetDeltas
+                     AttrChanges = attrDeltas
+                     RepeatedAttrChanges = repAttrDeltas }
+        }
+
 
     let getAssetChange (chreqId : int64) 
                         (assetId : int64) : SqliteDb<AssetChange option> = 
@@ -274,9 +369,7 @@ module BuildReport =
                 let! diffs = getDifferences chreqId assetId
                 let  uids = aideIdsOfDifferences diffs
                 printfn "ChangeReq: %i, REFs for: %O" chreqId uids
-                let! kids = 
-                    mapM (getAssetChangeset chreqId) [] 
-                        |>> List.filter (fun x -> x.HasChanged)
+                let! kids = mapM getAssetChangesetForChild uids 
                 return (Some { AssetInfo = info 
                              ; StructureChanges = diffs
                              ; KidsChanges = kids })
