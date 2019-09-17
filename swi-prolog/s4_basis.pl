@@ -2,7 +2,11 @@
 
 
 :- module(s4_basis,
-    [ is_s4_site/1
+    [ atoms_to_floc/2
+    , floc_take/3
+    , floc_prefix/2
+    
+    , is_s4_site/1
     , is_s4_function/1
     , is_s4_process_group/1
     , is_s4_process/1
@@ -12,13 +16,32 @@
     , is_s4_component/1
     , is_s4_equipment/1
 
-    , atoms_to_floc/2
-    , floc_take/3
-    , floc_prefix/2
+    
 
     ]).
 
 :- use_module(library(db_facts)).
+
+
+%%% Manipulate s4 FLOC symbols
+
+atoms_to_floc(List, Floc) :- 
+    atomics_to_string(List, "-", S1),
+    string_to_atom(S1, Floc).
+    
+
+% if count > len take whole list.
+list_take(Src, Count, List) :- 
+    findall(Elt, (nth1(Ix, Src, Elt), Ix =< Count), List).
+
+floc_take(Src, Count, Floc) :- 
+    atomics_to_string(List, "-", Src),
+    list_take(List, Count, List1),
+    atoms_to_floc(List1, Floc).
+
+
+floc_prefix(Floc, Prefix) :- 
+    sub_atom(Floc, 0, _, _, Prefix).
 
 %%% 
 
@@ -61,22 +84,3 @@ is_s4_equipment(Ref) :-
     !.
 
 
-%%% Manipulate s4 FLOC symbols
-
-atoms_to_floc(List, Floc) :- 
-    atomics_to_string(List, "-", S1),
-    string_to_atom(S1, Floc).
-    
-
-% if count > len take whole list.
-list_take(Src, Count, List) :- 
-    findall(Elt, (nth1(Ix, Src, Elt), Ix =< Count), List).
-
-floc_take(Src, Count, Floc) :- 
-    atomics_to_string(List, "-", Src),
-    list_take(List, Count, List1),
-    atoms_to_floc(List1, Floc).
-
-
-floc_prefix(Floc, Prefix) :- 
-    sub_atom(Floc, 0, _, _, Prefix).

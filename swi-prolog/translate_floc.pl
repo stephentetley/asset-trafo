@@ -12,6 +12,7 @@
 :- use_module(library(db_facts)).
 
 :- use_module(aib_basis).
+:- use_module(s4_basis).
 
 
 %% # aib_ref_to_s4_floc/2
