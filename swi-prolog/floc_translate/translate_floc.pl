@@ -142,42 +142,15 @@ aib_ref_to_s4_floc(Ref, Flocs) :-
 %% a reference to the Aib Sai number. 
 %% This assumption may be overreaching.
 
-s4_floc_to_aib_ref(Floc, Ref) :- 
-    db_holds(assets, s4_site([ s4_floc=Floc, aib_ref=Ref ])), 
-    !.
 
 s4_floc_to_aib_ref(Floc, Ref) :- 
-    db_holds(assets, s4_function([ s4_floc=Floc, aib_ref=Ref ])), 
+    db_holds(assets, s4_aib_reference([ s4_floc=Floc, aib_ref=Ref ])),
     !.
 
-s4_floc_to_aib_ref(Floc, Ref) :- 
-    db_holds(assets, s4_process_group([ s4_floc=Floc, aib_ref=Ref ])), 
-    !.
-
-s4_floc_to_aib_ref(Floc, Ref) :- 
-    db_holds(assets, s4_process([ s4_floc=Floc, aib_ref=Ref ])),
-    !.
-
-s4_floc_to_aib_ref(Floc, Ref) :- 
-    db_holds(assets, s4_system([ s4_floc=Floc, aib_ref=Ref ])),
-    !.
-
-s4_floc_to_aib_ref(Floc, Ref) :- 
-    db_holds(assets, s4_assembly([ s4_floc=Floc, aib_ref=Ref ])), 
-    !.
-
-s4_floc_to_aib_ref(Floc, Ref) :- 
-    db_holds(assets, s4_item([ s4_floc=Floc, aib_ref=Ref ])), 
-    !.
-
-s4_floc_to_aib_ref(Floc, Ref) :- 
-    db_holds(assets, s4_component([ s4_floc=Floc, aib_ref=Ref ])),
-    !.
-
-%% Natural mapping for equipment.
+%% Same mapping for equipment.
 %% 
 
 
 s4_floc_to_aib_equipment(Floc, PliCode) :- 
-    db_holds(assets, s4_equipment([ s4_floc=Floc, aib_pli_code=PliCode ])).
+    db_holds(assets, s4_aib_reference([ s4_floc=Floc, aib_ref=PliCode ])).
 
