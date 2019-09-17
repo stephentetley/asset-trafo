@@ -174,44 +174,10 @@ let test07 (changeReqId : int64) (sairef : string) =
         List.iter (printfn "%O") changes
 
 
-let pandocHtmlDefaults (pathToCss : string) : PandocOptions = 
-    let highlightStyle = argument "--highlight-style" &= argValue "tango"
-    let selfContained = argument "--self-contained"
-    /// Github style is nicer for tables than Tufte
-    /// Note - body width has been changed on both stylesheets
-    let css = argument "--css" &= doubleQuote pathToCss
-    { Standalone = true
-      InputExtensions = []
-      OutputExtensions = []
-      OtherOptions = [ css; highlightStyle; selfContained ]  }
-
-
-let writeMarkdownReport (doc : Markdown) 
-                        (pageTitle : string)
-                        (pandocOpts : PandocOptions)
-                        (outputHtmlFile : string) : Result<unit, string> = 
-    
-    let mdFileAbsPath = Path.ChangeExtension(outputHtmlFile, "md") 
-    let mdFileName = Path.GetFileName(mdFileAbsPath)
-    let htmlFileName = Path.GetFileName(outputHtmlFile)
-    let outputDirectory = Path.GetDirectoryName(outputHtmlFile)
-    writeMarkdown 360 doc mdFileAbsPath
-    let retCode = 
-        runPandocHtml5 
-            true 
-            outputDirectory 
-            mdFileName
-            htmlFileName
-            (Some pageTitle)
-            pandocOpts
-    match retCode with
-    | Ok i -> printfn "Return code: %i" i ; Ok ()
-    | Error msg -> Error msg
-
 // e.g  test08 141913L "SAI00001460" ;;  // This has a couple of diffs (one is a delete and add back, the other a name change)
 // or   test08 141013L "SAI00001460" ;;  // This has quite good diffs
 // or   test08 148575L "SAI00584748" ;;  // simple additions
-//      test08 148574L "SAI00093850" ;;  // structure changes
+// or   test08 148574L "SAI00093850" ;;  // structure changes
 
 let test08 (changeReqId : int64) (sairef : string) = 
     let opts = pandocHtmlDefaults @"..\..\..\..\..\libs\markdown-css-master\github.css"

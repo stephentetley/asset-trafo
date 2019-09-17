@@ -118,7 +118,7 @@ module BuildReport =
             FROM    asset_attribute_change AS attr
             WHERE
                     attr.change_request_id = :chreqid
-            AND     attr.asset_id = :assetid
+            AND     attr.ai_asset_id = :assetid
             ;
             """
         let cmd = 
@@ -194,7 +194,7 @@ module BuildReport =
             FROM    asset_repeated_attribute_change AS rep_attr
             WHERE
                     rep_attr.change_request_id = :chreqid
-            AND     rep_attr.asset_id = :assetid
+            AND     rep_attr.ai_asset_id = :assetid
             ;
             """
         let cmd = 

@@ -388,7 +388,7 @@ module PrintReport =
     
 
     let writeFullReport (changeScheme : ChangeScheme) 
-                                (pandocOpts : PandocOptions)
-                                (outputHtmlFile : string) : Result<unit, string> = 
+                        (pandocOpts : PandocOptions)
+                        (outputHtmlFile : string) : Result<unit, string> = 
         let doc = makeFullReport changeScheme
         writeMarkdownReport doc "Aide Change Scheme Report" pandocOpts outputHtmlFile
