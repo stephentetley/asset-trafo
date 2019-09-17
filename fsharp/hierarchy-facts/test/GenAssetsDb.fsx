@@ -69,10 +69,18 @@ let main () : Result<unit, ErrMsg> =
     let connParams = sqliteConnParamsVersion3 dbActive
     runSqliteDb connParams 
         <| sqliteDb { 
+                printfn "S4 Hierarchy..."
                 do! insertS4FlocRecords s4FlocCsv
+                printfn "S4 Equipment..."
                 do! insertS4EquipmentRecords s4EquipmentCsv
+                printfn "Aib Hierarchy..."
                 do! insertAibFlocRecords aibFlocCsv
+                printfn "Aib Equipment..."
                 do! insertAibEquipmentRecords aibEquipCsv
+                printfn "Links..."
+                do! insertLinks s4FlocCsv
                 return ()
             }
 
+
+    

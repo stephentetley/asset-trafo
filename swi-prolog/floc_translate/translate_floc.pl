@@ -78,7 +78,7 @@ aib_equipment_below(SaiCode, PliCode) :-
 
 
 aib_equipment_to_s4_floc(PliCode, Floc) :- 
-    db_holds(assets, s4_equipment([ aib_pli_code=PliCode, s4_floc=Floc])).
+    db_holds(assets, s4_aib_reference([aib_ref=PliCode, s4_floc=Floc])).
 
 
 %% aib_ref_to_s4_floc_aux

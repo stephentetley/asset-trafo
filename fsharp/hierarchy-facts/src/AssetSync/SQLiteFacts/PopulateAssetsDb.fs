@@ -22,7 +22,7 @@ module PopulateAssetsDb =
     // ************************************************************************
     // S4 Flocs
 
-    // This table is huge, but we process it with multiple traversals as
+    // Even though this table is huge we process it with multiple traversals,
     // otherwise the processing is too complicated
 
     type S4FlocTable = 
@@ -51,7 +51,6 @@ module PopulateAssetsDb =
  
     let insertS4RecordsGeneric (step : S4FlocRow -> ('a * IndexedCommand) option)
                                (rows : seq<S4FlocRow>) : SqliteDb<unit> = 
-
         let insertStep (found : Set<'a>) (row : S4FlocRow) : SqliteDb<Set<'a>>= 
             match step row with
             | None -> mreturn found
@@ -63,12 +62,73 @@ module PopulateAssetsDb =
         withTransaction <| 
             (sfoldM insertStep Set.empty rows |>> ignore)
 
-    let instAibRef (row : S4FlocRow) : SQLiteParameter = 
-           match (row.InstallationReference, row.SubInstallationReference) with
-           | Some inst, None -> stringParam inst
-           | _, Some subInst  -> stringParam subInst
-           | _,_ -> nullParam ()
+    let instAibRef (row : S4FlocRow) : string option = 
+        match (row.InstallationReference, row.SubInstallationReference) with
+        | Some inst, None -> Some inst
+        | _, Some subInst  -> Some subInst
+        | _,_ -> None
 
+    type Link = string * string 
+        
+
+    
+    let s4AibLinks (links : Set<Link>) (row : S4FlocRow) : Set<Link> = 
+        let addL1 x = 
+            match instAibRef row, row.L1_Site_Code with
+            | Some sai, Some floc -> Set.add (sai, floc) x
+            | _, _ -> x
+        let addL3 x = 
+            match row.ProcessGroupReference, row.``L3_Floc Code`` with
+            | Some sai, Some floc -> Set.add (sai, floc) x
+            | _, _ -> x
+        let addL4 x = 
+            match row.ProcessReference, row.``L4_Floc Code`` with
+            | Some sai, Some floc -> Set.add (sai, floc) x
+            | _, _ -> x
+
+        let addL6AIB x = 
+            match row.L6_AIB_Reference, row.``L6_Floc Code`` with
+            | Some sai, Some floc -> Set.add (sai, floc) x
+            | _, _ -> x
+            
+        let addL6Equipment x = 
+            match row.``L6_Equipment PLI``, row.``L6_Floc Code`` with
+            | Some sai, Some floc -> Set.add (sai, floc) x
+            | _, _ -> x
+
+        let addL7AIB x = 
+            match row.L7_AIB_Reference, row.``L7_Floc Code`` with
+            | Some sai, Some floc -> Set.add (sai, floc) x
+            | _, _ -> x
+    
+        let addL7Equipment x = 
+            match row.``L7_Equipment PLI``, row.``L7_Floc Code`` with
+            | Some sai, Some floc -> Set.add (sai, floc) x
+            | _, _ -> x
+        
+        let addL8AIB x = 
+            match row.``L8_AIB Reference``, row.``L8_Floc Code`` with
+            | Some sai, Some floc -> Set.add (sai, floc) x
+            | _, _ -> x
+    
+        let addL8Equipment x = 
+            match row.``L8_Equipment PLI``, row.``L8_Floc Code`` with
+            | Some sai, Some floc -> Set.add (sai, floc) x
+            | _, _ -> x
+
+        links 
+            |> addL1 |> addL3 |> addL4 
+            |> addL6AIB |> addL6Equipment
+            |> addL7AIB |> addL7Equipment    
+            |> addL8AIB |> addL8Equipment
+    
+    let makeLinkInsert (sai : string, floc: string) : IndexedCommand = 
+        let sql = 
+            "INSERT INTO s4_aib_reference (aib_ref, s4_floc) \
+            VALUES (?,?)"
+        new IndexedCommand(commandText = sql)
+            |> addParam (stringParam sai)
+            |> addParam (stringParam floc)
 
 
     // S4 site (level 1)
@@ -77,13 +137,12 @@ module PopulateAssetsDb =
         | None -> None
         | Some siteCode -> 
             let sql = 
-                "INSERT INTO s4_site (s4_floc, name, aib_ref) \
-                VALUES (?,?,?)"
+                "INSERT INTO s4_site (s4_floc, name) \
+                VALUES (?,?)"
             let cmd = 
                 new IndexedCommand(commandText = sql)
                     |> addParam (stringParam siteCode)
                     |> addParam (optionNull stringParam row.``S/4 Hana Floc Description``)
-                    |> addParam (instAibRef row)
             Some (siteCode, cmd)
 
     
@@ -98,13 +157,12 @@ module PopulateAssetsDb =
         | Some flocCode -> 
             let sql = 
                 "INSERT INTO s4_function \
-                 (s4_floc, name, aib_ref, parent_floc) \
-                 VALUES (?,?,?,?)"
+                 (s4_floc, name, parent_floc) \
+                 VALUES (?,?,?)"
             let cmd = 
                 new IndexedCommand(commandText = sql)
                     |> addParam (stringParam flocCode)
                     |> addParam (optionNull stringParam  row.L2_Function)
-                    |> addParam (instAibRef row)
                     |> addParam (optionNull stringParam row.L1_Site_Code)
             Some (flocCode, cmd)
 
@@ -118,13 +176,12 @@ module PopulateAssetsDb =
         | Some flocCode -> 
             let sql = 
                 "INSERT INTO s4_process_group \
-                 (s4_floc, name, aib_ref, parent_floc) \
-                 VALUES (?,?,?,?)"
+                 (s4_floc, name, parent_floc) \
+                 VALUES (?,?,?)"
             let cmd = 
                 new IndexedCommand(commandText = sql)
                     |> addParam (stringParam flocCode)
                     |> addParam (optionNull stringParam  row.``L3_Process Group``)
-                    |> addParam (instAibRef row)
                     |> addParam (optionNull stringParam row.``L2_Floc Code``)
             Some (flocCode, cmd)
 
@@ -139,13 +196,12 @@ module PopulateAssetsDb =
         | Some flocCode -> 
             let sql = 
                 "INSERT INTO s4_process \
-                 (s4_floc, name, aib_ref, parent_floc) \
-                 VALUES (?,?,?,?)"
+                 (s4_floc, name, parent_floc) \
+                 VALUES (?,?,?)"
             let cmd = 
                 new IndexedCommand(commandText = sql)
                     |> addParam (stringParam flocCode)
                     |> addParam (optionNull stringParam  row.L4_Process)
-                    |> addParam (instAibRef row)
                     |> addParam (optionNull stringParam row.``L3_Floc Code``)
             Some (flocCode, cmd)
         
@@ -157,13 +213,12 @@ module PopulateAssetsDb =
         | Some flocCode -> 
             let sql = 
                 "INSERT INTO s4_system \
-                 (s4_floc, name, aib_ref, parent_floc) \
-                 VALUES (?,?,?,?)"
+                 (s4_floc, name, parent_floc) \
+                 VALUES (?,?,?)"
             let cmd = 
                 new IndexedCommand(commandText = sql)
                     |> addParam (stringParam flocCode)
                     |> addParam (optionNull stringParam  row.L5_System)
-                    |> addParam (instAibRef row)
                     |> addParam (optionNull stringParam row.``L4_Floc Code``)
             Some (flocCode, cmd)
 
@@ -176,13 +231,12 @@ module PopulateAssetsDb =
         | Some flocCode -> 
             let sql = 
                 "INSERT INTO s4_assembly \
-                 (s4_floc, name, aib_ref, parent_floc) \
-                 VALUES (?,?,?,?)"
+                 (s4_floc, name, parent_floc) \
+                 VALUES (?,?,?)"
             let cmd = 
                 new IndexedCommand(commandText = sql)
                     |> addParam (stringParam flocCode)
                     |> addParam (optionNull stringParam  row.``L6_Unit Description``)
-                    |> addParam (instAibRef row)
                     |> addParam (optionNull stringParam row.``L5_Floc Code``)
             Some (flocCode, cmd)
     
@@ -194,13 +248,12 @@ module PopulateAssetsDb =
         | Some flocCode -> 
             let sql = 
                 "INSERT INTO s4_item \
-                 (s4_floc, name, aib_ref, parent_floc) \
-                 VALUES (?,?,?,?)"
+                 (s4_floc, name, parent_floc) \
+                 VALUES (?,?,?)"
             let cmd = 
                 new IndexedCommand(commandText = sql)
                     |> addParam (stringParam flocCode)
                     |> addParam (optionNull stringParam  row.``L7_Sub Unit Description``)
-                    |> addParam (instAibRef row)
                     |> addParam (optionNull stringParam row.``L6_Floc Code``)
             Some (flocCode, cmd)
 
@@ -213,13 +266,12 @@ module PopulateAssetsDb =
         | Some flocCode -> 
             let sql = 
                 "INSERT INTO s4_component \
-                 (s4_floc, name, aib_ref, parent_floc) \
-                 VALUES (?,?,?,?)"
+                 (s4_floc, name, parent_floc) \
+                 VALUES (?,?,?)"
             let cmd = 
                 new IndexedCommand(commandText = sql)
                     |> addParam (stringParam flocCode)
                     |> addParam (optionNull stringParam  row.``L8_Item Description``)
-                    |> addParam (instAibRef row)
                     |> addParam (optionNull stringParam row.``L7_Floc Code``)
             Some (flocCode, cmd)
   
@@ -269,13 +321,12 @@ module PopulateAssetsDb =
         | Some(num), true -> 
             let sql = 
                 "INSERT INTO s4_equipment \
-                (s4_ref, name, aib_pli_code, category, obj_type, obj_class, s4_floc) \
-                VALUES (?,?,?, ?,?,?, ?)"
+                (s4_ref, name, category,  obj_type, obj_class, s4_floc) \
+                VALUES (?,?,?, ?,?,?)"
             let cmd = 
                 new IndexedCommand(commandText = sql)
                     |> addParam (int32Param num)
                     |> addParam (optionNull stringParam row.``Equipment Description``)
-                    |> addParam (stringParam row.``AI2 AIB Reference``)
                     |> addParam (stringParam row.Category)
                     |> addParam (optionNull stringParam row.``Object Type``)
                     |> addParam (optionNull stringParam row.Class)
@@ -284,18 +335,31 @@ module PopulateAssetsDb =
         | _,_ -> None
     
     
-    let insertEquipmentRow (row : S4EquipmentRow) : SqliteDb<unit> = 
-        match makeS4EquipmentInsert row with
-        | Some statement -> 
-            executeNonQueryIndexed statement |>> ignore
-        | None -> mreturn ()
+    
     
     
     
     let insertS4EquipmentRecords (csvPath : string) : SqliteDb<unit> = 
+        let insertEquipmentRow (row : S4EquipmentRow) : SqliteDb<unit> = 
+            match makeS4EquipmentInsert row with
+            | Some statement -> 
+                executeNonQueryIndexed statement |>> ignore
+            | None -> mreturn ()
+
         sqliteDb { 
             let! rows = liftOperation (fun _ -> getS4EquipmentRows csvPath)
             return! withTransaction <| forMz rows insertEquipmentRow
+        }
+
+    let insertLinks (csvPath : string) : SqliteDb<unit> = 
+        let insertLink (link : string * string) : SqliteDb<unit> = 
+            let statement = makeLinkInsert link
+            executeNonQueryIndexed statement |>> ignore
+
+        sqliteDb { 
+            let! rows = liftOperation (fun _ -> getS4FlocRows csvPath) 
+            let links = Seq.fold s4AibLinks Set.empty rows |> Set.toList
+            return! withTransaction <| forMz links insertLink
         }
         
     // ************************************************************************

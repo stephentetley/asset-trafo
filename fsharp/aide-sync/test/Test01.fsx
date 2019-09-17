@@ -85,6 +85,8 @@ let test01 () =
     runChangeRequestsReport changeRequests htmlOutput
 
 
+
+
 let runChangeSchemeReport (schemeCode : string) 
                             (outputHtmlFile : string) : Result<unit, ErrMsg> = 
     let connParams = getConnParams ()
@@ -96,7 +98,7 @@ let runChangeSchemeReport (schemeCode : string)
     | Ok (Some scheme) -> 
         writeFullReport scheme pandocOpts outputHtmlFile
 
-
+// This is the major test... 
 // test02 "PCL 70" ;;   // Structure changes
 let test02 (changeScheme : string) =
     let htmlOutput = outputFile "change_scheme_report_20190828.html"

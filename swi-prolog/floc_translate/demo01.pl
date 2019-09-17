@@ -71,6 +71,9 @@ demo10(Xs) :-
 demo10a(X) :- 
     s4_floc_to_aib_ref('ALDWK', X).
 
+demo11(X) :- 
+    s4_floc_to_aib_ref('ALDWK-CAA-NET-TEL', X).
+
 demo20(Xs) :- 
     aib_ref_to_s4_floc('SAI00002341', Xs).
 
