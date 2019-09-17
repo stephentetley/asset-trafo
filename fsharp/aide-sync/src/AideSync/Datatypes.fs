@@ -141,7 +141,8 @@ module Datatypes =
         }
         /// Note this should always be true as we only extract changed 
         /// records from the master database
-        member x.HasChanged with get () : bool = x.AideValue <> x.AiValue
+        member x.HasChanged 
+            with get () : bool = x.AideValue <> x.AiValue
 
     type RepeatedAttributeDelta = 
         { RepeatedAttributeName : string
@@ -151,7 +152,8 @@ module Datatypes =
         } 
         /// Note this should always be true as we only extract changed 
         /// records from the master database
-        member x.HasChanged with get () : bool = x.AideValue <> x.AiValue
+        member x.HasChanged 
+            with get () : bool = x.AideValue <> x.AiValue
 
     /// Assets have "properties" { name, common name, manufacturer, 
     /// grid ref... } that are stored inline with the "Asset record". 
@@ -165,7 +167,8 @@ module Datatypes =
           AiValue : string
           AideValue : string
         }
-        member x.HasChanged with get () : bool = x.AideValue <> x.AiValue
+        member x.HasChanged 
+            with get () : bool = x.AideValue <> x.AiValue
 
     type AssetInfo = 
         { AssetId : int64 
@@ -204,22 +207,37 @@ module Datatypes =
           RequestTime : System.DateTime
         }
 
+    // TODO - This makes things very complicated as a topdown
+    // traversal. It means we end up with two very differently 
+    // shaped tree types.
+    //type ChangeRequest = 
+    //    | AttributeChange of 
+    //            info : ChangeRequestInfo * assetsChanges : AssetChange list  
+    //    | AideChange of 
+    //            info: ChangeRequestInfo * structureChanges : AssetStructureChange list
 
-    type ChangeRequest = 
-        | AttributeChange of 
-                info : ChangeRequestInfo * assetsChanges : AssetChange list  
-        | AideChange of 
-                info: ChangeRequestInfo * structureChanges : AssetStructureChange list
+    //    | UnhandledChangeRequest of info : ChangeRequestInfo
 
-        | UnhandledChangeRequest of info : ChangeRequestInfo
+    //    member v.Info 
+    //        with get () : ChangeRequestInfo = 
+    //            match v with
+    //            | AttributeChange(info,_) -> info
+    //            | AideChange(info,_) -> info
+    //            | UnhandledChangeRequest info -> info
 
-        member v.Info 
-            with get () : ChangeRequestInfo = 
-                match v with
-                | AttributeChange(info,_) -> info
-                | AideChange(info,_) -> info
-                | UnhandledChangeRequest info -> info
+    // TODO - new datatype (17/9/19). 
+    // Use this to prevent a tricky recursive hierarchy
+    type AttributeChangeRequest = 
+        { Info : ChangeRequestInfo 
+          AssetChanges : AssetChange list 
+        }
 
+    // TODO - new datatype (17/9/19). 
+    // Use this to prevent a tricky recursive hierarchy
+    type AideChangeRequest = 
+        { Info : ChangeRequestInfo 
+          AssetStructureChanges : AssetStructureChange list 
+        }
 
     type ChangeSchemeInfo = 
         { SchemeId : int64
@@ -230,5 +248,7 @@ module Datatypes =
 
     type ChangeScheme = 
         { Info : ChangeSchemeInfo
-          ChangeRequests : ChangeRequest list
+          // REMOVE - ChangeRequests : ChangeRequest list
+          SimpleChanges : AttributeChangeRequest list
+          StructureChanges : AideChangeRequest list
         }

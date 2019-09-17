@@ -9,45 +9,45 @@ module Metrics =
     
     open AideSync.Datatypes
 
-    let numberOfDifferences (diffs : Differences) : int = 
+    let internal numberOfDifferences (diffs : Differences) : int = 
         let count1 (sd : StructureItemDiff) : int = 
             match sd with
             | Match _ -> 0
             | _ -> 1
         List.sumBy count1 diffs
 
-    let numberOfChangeRequests (scheme : ChangeScheme) : int = 
-        scheme.ChangeRequests.Length
 
-    let crNumberOfPropertyChanges (request : ChangeRequest) : int = 
+    let crNumberOfPropertyChanges (request : AttributeChangeRequest) : int = 
         let step (change : AssetChange) = 
-            change.AssetChanges.AssetProperties 
+            change.AssetChanges.AssetProperties
                 |> List.filter (fun x -> x.HasChanged) |> List.length
-        match request with
-        | AttributeChange(_,changes) -> List.sumBy step changes
-        | _ -> 0
+        List.sumBy step request.AssetChanges
+        
 
-    let crNumberOfAttributeChanges (request : ChangeRequest) : int = 
+    let crNumberOfAttributeChanges (request : AttributeChangeRequest) : int = 
         let step (change : AssetChange) = 
             change.AssetChanges.AttrChanges
                 |> List.filter (fun x -> x.HasChanged) |> List.length
-        match request with
-        | AttributeChange(_,changes) -> List.sumBy step changes
-        | _ -> 0
+        List.sumBy step request.AssetChanges
 
-    let crNumberOfRepeatedAttributeChanges (request : ChangeRequest) : int = 
+    let crNumberOfRepeatedAttributeChanges (request : AttributeChangeRequest) : int = 
         let step (change : AssetChange) = 
             change.AssetChanges.RepeatedAttrChanges
                 |> List.filter (fun x -> x.HasChanged) |> List.length
-        match request with
-        | AttributeChange(_,changes) -> List.sumBy step changes
-        | _ -> 0
-
-    let numberOfPropertyChanges (scheme : ChangeScheme) : int = 
-        scheme.ChangeRequests |> List.sumBy crNumberOfPropertyChanges
+        List.sumBy step request.AssetChanges
 
 
-    let numberOfAttributeChangesAll (scheme : ChangeScheme) : int = 
-        let a = scheme.ChangeRequests |> List.sumBy crNumberOfAttributeChanges
-        let b = scheme.ChangeRequests |> List.sumBy crNumberOfRepeatedAttributeChanges
-        a + b
+    
+    let numberOfChangeRequests (scheme : ChangeScheme) : int = 
+        scheme.SimpleChanges.Length + scheme.StructureChanges.Length
+
+
+    //let numberOfPropertyChanges (scheme : ChangeScheme) : int = 
+    //    scheme.ChangeRequests |> List.sumBy crNumberOfPropertyChanges
+
+
+    //let numberOfAttributeChangesAll (scheme : ChangeScheme) : int = 
+    //    let a = scheme.SimpleChanges 
+    //                |> List.sumBy (fun x -> crNumberOfAttributeChanges x.AssetChanges)
+    //    let b = scheme.StructureChanges |> List.sumBy crNumberOfRepeatedAttributeChanges
+    //    a + b

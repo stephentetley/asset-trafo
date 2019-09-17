@@ -19,9 +19,7 @@ module ImportSchema =
         ChangeRequestType(string),\
         ChangeRequestStatus(string),\
         ChangeRequestComments(string)"
-        
-
-
+       
     
     type ChangeRequestTable = 
         CsvProvider< Schema = ChangeRequestSchema                              

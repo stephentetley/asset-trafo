@@ -368,27 +368,39 @@ module BuildReport =
             | Some info -> 
                 let! diffs = getDifferences chreqId assetId
                 let  uids = aideIdsOfDifferences diffs
-                printfn "ChangeReq: %i, REFs for: %O" chreqId uids
+                printfn "Structure ChangeReq: %i, REFs for: %O" chreqId uids
                 let! kids = mapM getAssetChangesetForChild uids 
                 return (Some { AssetInfo = info 
                              ; StructureChanges = diffs
                              ; KidsChanges = kids })
         }
 
-    let buildChangeRequest (chreqId : int64) : SqliteDb<ChangeRequest option> =
+    let buildAideChangeRequest (chreqId : int64) : SqliteDb<AideChangeRequest option> =
         sqliteDb { 
             let! assetIds = findChangeRequestAssetIds chreqId
             match! getChangeRequestInfo chreqId with
-            | None -> return None
-            | Some info when info.RequestType = "Attribute" ->
-                let! changes = mapM (getAssetChange chreqId) assetIds |>> List.choose id
-                return Some (AttributeChange(info, changes))
+            
+            //| Some info when info.RequestType = "Attribute" ->
+            //    let! changes = mapM (getAssetChange chreqId) assetIds |>> List.choose id
+            //    return Some (AttributeChange(info, changes))
 
             | Some info when info.RequestType = "AIDE" ->
                 let! changes = mapM (assetStructureChange chreqId) assetIds |>> List.choose id
-                return Some (AideChange(info, changes))
-            | Some info ->
-                return Some (UnhandledChangeRequest(info))
+                return Some {Info=info; AssetStructureChanges = changes}
+
+            | _ -> return None
+        }
+
+    let buildAttributeChangeRequest (chreqId : int64) : SqliteDb<AttributeChangeRequest option> =
+        sqliteDb { 
+            let! assetIds = findChangeRequestAssetIds chreqId
+            match! getChangeRequestInfo chreqId with
+        
+            | Some info when info.RequestType = "Attribute" ->
+                let! changes = mapM (getAssetChange chreqId) assetIds |>> List.choose id
+                return Some {Info = info; AssetChanges = changes}
+
+            | _ -> return None
         }
 
 
@@ -450,10 +462,12 @@ module BuildReport =
             | None -> return None
             | Some info ->
                 let! crids = getSchemeChangeRequestIds schemeCode
-                let! crs = mapM buildChangeRequest crids |>> List.choose id 
+                let! simples = mapM buildAttributeChangeRequest crids |>> List.choose id 
+                let! structs = mapM buildAideChangeRequest crids |>> List.choose id 
                 let ans = 
                     { Info = info
-                    ; ChangeRequests = crs
+                    ; SimpleChanges = simples
+                    ; StructureChanges = structs
                     }
                 return (Some ans)
         }
