@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="SetupDb.fsx" />
     <None Include="Test01.fsx" />
   </ItemGroup>
 
