@@ -21,7 +21,7 @@
 %% for Aib and S4.
 %% If the fingerprint data exists in both systems, we can translate 
 %% functional locations from Aib to S4.
-%% Sometimes the trnslate may generate more than one result, if 
+%% Sometimes the translation may generate more than one result, if 
 %% children of the function location have been mapped to different
 %% parts of the tree.
 

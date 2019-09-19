@@ -80,7 +80,7 @@ is_s4_component(Floc) :-
 
 %% Ref is a BIGINT, printed with leading zeros in the initial extraction
 is_s4_equipment(Ref) :- 
-    db_holds(assets, s4_component([s4_ref=Ref, name=_])), 
+    db_holds(assets, s4_equipment([s4_ref=Ref, name=_])), 
     !.
 
 

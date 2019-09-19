@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29306.81
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FlocMapping", "src\FlocMapping.fsproj", "{9151FEBB-82E6-4688-8533-8660F0D3BC16}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FlocMappingTest", "test\FlocMappingTest.fsproj", "{9FC3F274-F440-49A4-8680-164A0665D449}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9151FEBB-82E6-4688-8533-8660F0D3BC16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9151FEBB-82E6-4688-8533-8660F0D3BC16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9151FEBB-82E6-4688-8533-8660F0D3BC16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9151FEBB-82E6-4688-8533-8660F0D3BC16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FC3F274-F440-49A4-8680-164A0665D449}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FC3F274-F440-49A4-8680-164A0665D449}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FC3F274-F440-49A4-8680-164A0665D449}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FC3F274-F440-49A4-8680-164A0665D449}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AC231E57-658D-4525-927B-D674C0ED51A0}
+	EndGlobalSection
+EndGlobal
