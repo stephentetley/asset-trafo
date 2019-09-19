@@ -60,7 +60,16 @@ let main () =
     let connParams = sqliteConnParamsVersion3 dbActive
     runSqliteDb connParams 
         <| sqliteDb { 
+                printfn "Aib flocs..."
                 do! insertAibFlocRows (sourceCsv "aib_floc_extract4.csv")
+                printfn "Aib equipment..."
                 do! insertAibEquipmentRows (sourceCsv "aib_equipment_extract2.csv")
+
+                printfn "S4 flocs..."
+                do! insertS4FlocRecords () 
+                printfn "S4 equipment..."
+                do! insertS4EquipmentRecords () 
+                printfn "S4 to Aib links..."
+                do! insertLinks ()
                 return ()
             }

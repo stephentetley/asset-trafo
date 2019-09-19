@@ -58,3 +58,44 @@ module ImportSchema =
             AibEquipmentTable.Load(uri = path) |> Ok
         with
         | ex -> Error ex.Message
+
+    // ************************************************************************
+    // S4 Floc
+
+    // This table is too complicated to provide a schema
+    // Edit the path here as necessary
+    type S4FlocTable = 
+        CsvProvider< @"G:\work\Projects\asset_sync\floc_mapping\S4_Floc_Mapping_Site-A-Z_General_Structure_Initial.csv"
+                   , MissingValues = @"#N/A,NULL"
+                   , CacheRows = false
+                   , PreferOptionals = true
+                   , AssumeMissingValues = true
+                   >
+    
+    type S4FlocRow = S4FlocTable.Row
+
+
+    let readS4FlocTable () : Result<S4FlocTable, string> =
+        try 
+            let table = new S4FlocTable () in Ok table
+        with
+        | ex -> Error ex.Message
+
+
+    // ************************************************************************
+    // S4 Equipment
+
+
+    // This table is too complicated to provide a schema
+    // Edit the path here as necessary
+    type S4EquipmentTable = 
+        CsvProvider< @"G:\work\Projects\asset_sync\floc_mapping\equipment_migration_s1.csv"
+                   , PreferOptionals = true >
+    
+    type S4EquipmentRow = S4EquipmentTable.Row
+
+    let readS4EquipmentTable () : Result<S4EquipmentTable, string> =
+        try 
+            let table = new S4EquipmentTable () in Ok table
+        with
+        | ex -> Error ex.Message
