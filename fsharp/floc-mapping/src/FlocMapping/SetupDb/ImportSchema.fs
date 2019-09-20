@@ -66,7 +66,7 @@ module ImportSchema =
     // Edit the path here as necessary
     type S4FlocTable = 
         CsvProvider< @"G:\work\Projects\asset_sync\floc_mapping\S4_Floc_Mapping_Site-A-Z_General_Structure_Initial.csv"
-                   , MissingValues = @"#N/A,NULL"
+                   , MissingValues = "#N/A,NULL"
                    , CacheRows = false
                    , PreferOptionals = true
                    , AssumeMissingValues = true

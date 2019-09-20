@@ -60,3 +60,15 @@ let demo02 (floc : string) =
 // demo03 "SAI00162177" ;;
 let demo03 (sai : string) = 
     aibEquipmentBelowDirect sai |> runDb
+
+let demo04 (sai : string) = 
+    aibEquipmentBelow sai |> runDb
+
+// demo05a "SAI00409172" ;;
+let demo05a (sai : string) =
+    aibToS4Direct sai |> runDb 
+
+// demo05 "SAI00409172" ;;
+let demo05 (sai : string) =
+    aibReferenceToS4Floc sai |> runDb
+

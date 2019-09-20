@@ -10,8 +10,24 @@ module AibBasis =
     open FlocMapping.Base.Addendum
 
     
-                
-    
+    type AibCategory = 
+        | AibInstallation
+        | AibProcessGroup
+        | AibProcess
+        | AibPlant
+        | AibPlantItem
+        | AibEquipment
+
+    let internal decodeAibCategory (categoryName : string) : AibCategory option = 
+        match categoryName with
+        | "INSTALLATION" -> Some AibInstallation
+        | "PROCESS GROUP" -> Some AibProcessGroup
+        | "PROCESSS" -> Some AibProcess
+        | "PLANT" -> Some AibPlant
+        | "PLANT ITEM" -> Some AibPlantItem
+        | "EQUIPMENT" -> Some AibEquipment
+        | _ -> None
+
 
     let private testSai (category : string) (sai : string) : SqliteDb<bool>= 
         let sql = 
@@ -61,3 +77,19 @@ module AibBasis =
         let readRow1 (result : ResultItem) : string = result.GetString(0)
         
         queryKeyed cmd (Strategy.Head readRow1) |> succeeds
+
+    let getAibCategory (saicode : string) : SqliteDb<AibCategory option> = 
+        let sql = 
+            """
+            SELECT floc.category
+            FROM aib_floc AS floc
+            WHERE floc.sai_ref = :saicode;
+            """
+        let cmd = 
+            new KeyedCommand (commandText = sql)
+                |> addNamedParam "saicode" (stringParam saicode)
+        
+        let readRow (result : ResultItem) : AibCategory option = 
+            result.GetString(0) |> decodeAibCategory
+        
+        queryKeyed cmd (Strategy.Head readRow) <|> mreturn None

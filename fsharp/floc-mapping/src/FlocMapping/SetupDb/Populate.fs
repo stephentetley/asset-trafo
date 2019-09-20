@@ -275,11 +275,14 @@ module Populate =
     // ************************************************************************
     // Table: s4_aib_reference
 
-
-    let instAibRef (row : S4FlocRow) : string option = 
+    // MissingValues does not seem to recognize the string "NULL"
+    // as None.
+    let installationAibRef (row : S4FlocRow) : string option = 
         match (row.InstallationReference, row.SubInstallationReference) with
+        // Prefer SubInst reference unless is is null
         | Some inst, None -> Some inst
-        | _, Some subInst  -> Some subInst
+        | Some inst, Some subInst when subInst = "NULL" -> Some inst
+        | _, Some subInst when subInst <> "NULL" -> Some subInst
         | _,_ -> None
 
     type Link = string * string 
@@ -287,50 +290,69 @@ module Populate =
     
     let s4AibLinks (links : Set<Link>) (row : S4FlocRow) : Set<Link> = 
         let addL1 x = 
-            match instAibRef row, row.L1_Site_Code with
-            | Some sai, Some floc -> Set.add (sai, floc) x
-            | _, _ -> x
-        let addL3 x = 
-            match row.ProcessGroupReference, row.``L3_Floc Code`` with
-            | Some sai, Some floc -> Set.add (sai, floc) x
-            | _, _ -> x
-        let addL4 x = 
-            match row.ProcessReference, row.``L4_Floc Code`` with
+            match installationAibRef row, row.L1_Site_Code with
             | Some sai, Some floc -> Set.add (sai, floc) x
             | _, _ -> x
 
+        let addL3 x = 
+            match row.ProcessGroupReference, row.``L3_Floc Code`` with
+            | Some sai, Some floc when sai <> "NULL" && floc <> "NULL" -> 
+                Set.add (sai, floc) x
+            | _, _ -> x
+
+        let addL4 x = 
+            match row.ProcessReference, row.``L4_Floc Code`` with
+            | Some sai, Some floc when sai <> "NULL" && floc <> "NULL" -> 
+                Set.add (sai, floc) x
+            | _, _ -> x
+
+        // Are we sure this link is truthful?
+        let addL6 x = 
+            match row.PlantReference, row.``L6_Floc Code`` with
+            | Some sai, Some floc when sai <> "NULL" && floc <> "NULL" -> 
+                Set.add (sai, floc) x
+            | _, _ -> x
+
+
         let addL6AIB x = 
             match row.L6_AIB_Reference, row.``L6_Floc Code`` with
-            | Some sai, Some floc -> Set.add (sai, floc) x
+            | Some sai, Some floc when sai <> "NULL" && floc <> "NULL" -> 
+                Set.add (sai, floc) x
             | _, _ -> x
             
         let addL6Equipment x = 
             match row.``L6_Equipment PLI``, row.``L6_Floc Code`` with
-            | Some sai, Some floc -> Set.add (sai, floc) x
+            | Some sai, Some floc when sai <> "NULL" && floc <> "NULL" -> 
+                Set.add (sai, floc) x
             | _, _ -> x
 
         let addL7AIB x = 
             match row.L7_AIB_Reference, row.``L7_Floc Code`` with
-            | Some sai, Some floc -> Set.add (sai, floc) x
+            | Some sai, Some floc when sai <> "NULL" && floc <> "NULL" -> 
+                Set.add (sai, floc) x
             | _, _ -> x
     
         let addL7Equipment x = 
             match row.``L7_Equipment PLI``, row.``L7_Floc Code`` with
-            | Some sai, Some floc -> Set.add (sai, floc) x
+            | Some sai, Some floc when sai <> "NULL" && floc <> "NULL" -> 
+                Set.add (sai, floc) x
             | _, _ -> x
         
         let addL8AIB x = 
             match row.``L8_AIB Reference``, row.``L8_Floc Code`` with
-            | Some sai, Some floc -> Set.add (sai, floc) x
+            | Some sai, Some floc when sai <> "NULL" && floc <> "NULL" -> 
+                Set.add (sai, floc) x
             | _, _ -> x
     
         let addL8Equipment x = 
             match row.``L8_Equipment PLI``, row.``L8_Floc Code`` with
-            | Some sai, Some floc -> Set.add (sai, floc) x
+            | Some sai, Some floc when sai <> "NULL" && floc <> "NULL" -> 
+                Set.add (sai, floc) x
             | _, _ -> x
 
         links 
-            |> addL1 |> addL3 |> addL4 
+            |> addL1    |> addL3 
+            |> addL4    |> addL6
             |> addL6AIB |> addL6Equipment
             |> addL7AIB |> addL7Equipment    
             |> addL8AIB |> addL8Equipment

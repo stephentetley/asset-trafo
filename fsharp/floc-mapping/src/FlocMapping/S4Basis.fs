@@ -39,6 +39,54 @@ module S4Basis =
         work 0 (fun x -> x)
                 
     
+    type S4Category = 
+        | S4Site
+        | S4Function
+        | S4ProcessGroup
+        | S4Process
+        | S4System
+        | S4Assembly
+        | S4Item
+        | S4Component
+        | S4Equipment
+        member x.Depth 
+            with get () : int option = 
+                match x with
+                | S4Site -> Some 1
+                | S4Function -> Some 2
+                | S4ProcessGroup -> Some 3
+                | S4Process -> Some 4
+                | S4System -> Some 5
+                | S4Assembly -> Some 6
+                | S4Item -> Some 7
+                | S4Component -> Some 8
+                | S4Equipment -> None 
+
+    let internal decodeS4Category (categoryName : string) : S4Category option = 
+        match categoryName with
+        | "SITE" -> Some S4Site
+        | "FUNCTION" -> Some S4Function
+        | "PROCESS GROUP" -> Some S4ProcessGroup
+        | "PROCESSS" -> Some S4Process
+        | "SYSTEM" -> Some S4System
+        | "ASSEMBLY" -> Some S4Assembly
+        | "ITEM" -> Some S4Item
+        | "COMPONENT" -> Some S4Component
+        | "EQUIPMENT" -> Some S4Equipment
+        | _ -> None
+
+    let getS4Category (floc : Floc) : S4Category option = 
+        match floc.Depth with
+        | 1 -> Some S4Site
+        | 2 -> Some S4Function
+        | 3 -> Some S4ProcessGroup
+        | 4 -> Some S4Process
+        | 5 -> Some S4System
+        | 6 -> Some S4Assembly
+        | 7 -> Some S4Item
+        | 8-> Some S4Component
+        | _ -> None
+
 
     let private testFloc (category : string) (floc : string) : SqliteDb<bool>= 
         let sql = 
@@ -96,3 +144,4 @@ module S4Basis =
         let readRow1 (result : ResultItem) : string = result.GetString(0)
         
         queryKeyed cmd (Strategy.Head readRow1) |> succeeds
+
