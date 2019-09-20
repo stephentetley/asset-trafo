@@ -13,32 +13,38 @@ module AibBasis =
                 
     
 
-    let private queryFloc (table : string) (sai : string) : SqliteDb<bool>= 
+    let private testSai (category : string) (sai : string) : SqliteDb<bool>= 
         let sql = 
-            sprintf "SELECT 'true' FROM %s AS t1 WHERE t1.sai_ref = :floc;" table
+            """
+            SELECT 'true' 
+            FROM aib_floc AS floc 
+            WHERE floc.sai_ref = :sai
+            AND   floc.category = :category;
+            """
 
         let cmd = 
             new KeyedCommand (commandText = sql)
-                |> addNamedParam "floc" (stringParam sai)
+                |> addNamedParam "sai" (stringParam sai)
+                |> addNamedParam "category" (stringParam category)
         
         let readRow1 (result : ResultItem) : string = result.GetString(0)
         
         queryKeyed cmd (Strategy.Head readRow1) |> succeeds
     
     let isAibInstallation (saicode : string) : SqliteDb<bool> = 
-        queryFloc "aib_installation" saicode
+        testSai "INSTALLATION" saicode
 
     let isAibProcessGroup (saicode : string) : SqliteDb<bool> = 
-        queryFloc "aib_process_group" saicode
+        testSai "PROCESS GROUP" saicode
 
     let isAibProcess (saicode : string) : SqliteDb<bool> = 
-        queryFloc "aib_process" saicode
+        testSai "PROCESS" saicode
     
     let isAibPlant (saicode : string) : SqliteDb<bool> = 
-        queryFloc "aib_plant" saicode
+        testSai "PLANT" saicode
     
     let isAibPlantItem (saicode : string) : SqliteDb<bool> = 
-        queryFloc "aib_plant_item" saicode
+        testSai "PLANT ITEM" saicode
 
 
     let isAibEquipment (plicode : string) : SqliteDb<bool> = 

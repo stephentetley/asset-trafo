@@ -40,41 +40,47 @@ module S4Basis =
                 
     
 
-    let private queryFloc (table : string) (floc : string) : SqliteDb<bool>= 
+    let private testFloc (category : string) (floc : string) : SqliteDb<bool>= 
         let sql = 
-            sprintf "SELECT 'true' FROM %s AS t1 WHERE t1.s4_floc = :floc;" table
+            """
+            SELECT 'true' 
+            FROM s4_floc AS floc
+            WHERE floc.s4_floc = :floc
+            AND   floc.category = :category;
+            """
 
         let cmd = 
             new KeyedCommand (commandText = sql)
                 |> addNamedParam "floc" (stringParam floc)
+                |> addNamedParam "category" (stringParam category)
         
         let readRow1 (result : ResultItem) : string = result.GetString(0)
         
         queryKeyed cmd (Strategy.Head readRow1) |> succeeds
     
     let isS4Site (floc : string) : SqliteDb<bool> = 
-        queryFloc "s4_site" floc
+        testFloc "SITE" floc
 
     let isS4Function (floc : string) : SqliteDb<bool> = 
-        queryFloc "s4_function" floc
+        testFloc "FUNCTION" floc
 
     let isS4ProcessGroup (floc : string) : SqliteDb<bool> = 
-        queryFloc "s4_process_group" floc
+        testFloc "PROCESS GROUP" floc
 
     let isS4Process (floc : string) : SqliteDb<bool> = 
-        queryFloc "s4_process" floc
+        testFloc "PROCESS" floc
     
     let isS4System (floc : string) : SqliteDb<bool> = 
-        queryFloc "s4_system" floc
+        testFloc "SYSTEM" floc
     
     let isS4Assembly (floc : string) : SqliteDb<bool> = 
-        queryFloc "s4_assembly" floc
+        testFloc "ASSEMBLY" floc
 
     let isS4Item (floc : string) : SqliteDb<bool> = 
-        queryFloc "s4_item" floc
+        testFloc "ITEM" floc
     
     let isS4Component (floc : string) : SqliteDb<bool> = 
-        queryFloc "s4_component" floc
+        testFloc "COMPONENT" floc
 
     let isS4Equipment (reference : uint32) : SqliteDb<bool> = 
         let sql = 
