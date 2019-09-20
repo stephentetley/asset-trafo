@@ -14,6 +14,7 @@ CREATE TABLE aib_floc
 (
     sai_ref TEXT UNIQUE PRIMARY KEY NOT NULL,
     short_name TEXT,
+    common_name TEXT,
     short_code TEXT,    -- eg CSO
     category TEXT,      -- eg PLANT ITEM
     asset_type TEXT, 
@@ -25,6 +26,7 @@ CREATE TABLE aib_equipment
 (
     pli_ref TEXT PRIMARY KEY UNIQUE NOT NULL, 
     short_name TEXT, 
+    common_name TEXT,
     category TEXT, 
     equipment_type TEXT,     
     parent_ref TEXT NOT NULL

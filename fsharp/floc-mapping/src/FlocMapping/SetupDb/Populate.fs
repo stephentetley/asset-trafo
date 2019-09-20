@@ -20,15 +20,17 @@ module Populate =
             INSERT INTO aib_floc
             (sai_ref, 
             short_name, 
+            common_name,
             short_code, 
             category, 
             asset_type, 
             parent_ref) 
-            VALUES (?,?,?,  ?,?,?);
+            VALUES (?,?,?,  ?,?,?, ?);
             """
         new IndexedCommand(commandText = sql)
             |> addParam (stringParam row.Reference)
             |> addParam (stringParam row.AssetName)
+            |> addParam (stringParam row.CommonName)
             |> addParam (stringParam row.AssetCode)
             |> addParam (stringParam row.Category)
             |> addParam (stringParam row.AssetType)
@@ -54,22 +56,21 @@ module Populate =
             INSERT INTO aib_equipment
             (pli_ref, 
             short_name, 
+            common_name,
             category, 
             equipment_type, 
             parent_ref) 
-            VALUES (?,?,?,  ?,?);
+            VALUES (?,?,?,  ?,?,?);
             """
         new IndexedCommand(commandText = sql)
             |> addParam (stringParam row.Reference)
             |> addParam (stringParam row.AssetName)
+            |> addParam (stringParam row.CommonName)
             |> addParam (stringParam row.Category)
             |> addParam (stringParam row.AssetType)
             |> addParam (stringParam row.ParentRef)
 
 
-    
-        
-    
     let insertAibEquipmentRows (csvPath : string) : SqliteDb<unit> = 
         let insertRow row = 
             executeNonQueryIndexed (aibEquipmentInsert row) |>> ignore
