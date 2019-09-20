@@ -72,3 +72,7 @@ let demo05a (sai : string) =
 let demo05 (sai : string) =
     aibReferenceToS4Floc sai |> runDb
 
+// demo06 "ALDWK-CAA-CON-LOC-SYS01" ;;
+let demo06 (floc : string) = 
+    s4ToAibDirect (makeFloc floc) |> runDb 
+

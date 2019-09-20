@@ -60,7 +60,10 @@ module TranslateFloc =
             return! mapM aibEquipmentBelowDirect funlocs |>> List.concat
         }
 
-    
+
+    // ************************************************************************
+    // Aib to S4
+
     let aibToS4Direct (saicode : string) : SqliteDb<Floc list> = 
         let sql = 
             """
@@ -99,3 +102,22 @@ module TranslateFloc =
             
         }
         
+    // ************************************************************************
+    // S4 to Aib
+
+    let s4ToAibDirect (floc : Floc) : SqliteDb<string list> = 
+        let sql = 
+            """
+            SELECT link.aib_ref
+            FROM s4_aib_reference AS link
+            WHERE link.s4_floc = :floc;
+            """
+        let cmd = 
+            new KeyedCommand (commandText = sql)
+                |> addNamedParam "floc" (stringParam <| floc.ToString()) 
+        
+        let readRow (result : ResultItem) : string = 
+            result.GetString(0)
+        
+        queryKeyed cmd (Strategy.Map readRow)
+
