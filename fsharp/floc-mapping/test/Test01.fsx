@@ -37,7 +37,7 @@ let test01 () =
     compare f1 f2
 
 let pathToDb () : string = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\db\assets.sqlite")
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\db\floc_mapping_active.sqlite")
 
 let getConnParams () : SqliteConnParams = 
     let dbActive = pathToDb () |> Path.GetFullPath
