@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FlocMapping", "src\FlocMapping.fsproj", "{9151FEBB-82E6-4688-8533-8660F0D3BC16}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FlocMapping", "src\FlocMapping.fsproj", "{9151FEBB-82E6-4688-8533-8660F0D3BC16}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FlocMappingTest", "test\FlocMappingTest.fsproj", "{9FC3F274-F440-49A4-8680-164A0665D449}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FlocMappingTest", "test\FlocMappingTest.fsproj", "{9FC3F274-F440-49A4-8680-164A0665D449}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FlocMappingWeb", "web\FlocMappingWeb.fsproj", "{DE47F88F-5528-4886-93EA-899F2287A5F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{9FC3F274-F440-49A4-8680-164A0665D449}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9FC3F274-F440-49A4-8680-164A0665D449}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9FC3F274-F440-49A4-8680-164A0665D449}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE47F88F-5528-4886-93EA-899F2287A5F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE47F88F-5528-4886-93EA-899F2287A5F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE47F88F-5528-4886-93EA-899F2287A5F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE47F88F-5528-4886-93EA-899F2287A5F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
