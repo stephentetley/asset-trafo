@@ -27,13 +27,14 @@ module View =
             ]
         ] |> makePake "SAI Code"
 
-    let resultsPage (sai : string) : XmlNode =
-        [
+    let resultsPage (sai : string) (s4Paths : string list): XmlNode =
+        
+        let p1 = p [] [ str sai ]
+        let paths = 
+            List.map (fun x -> p [] [str x]) s4Paths
+        let plast = 
             p [] [
-                str sai
+                a [ _href "/" ] [ str "Back" ]
             ]
-            
-            p [] [
-                a [ _href "/" ] [ str "Home" ]
-            ]
-        ] |> makePake "Aib Code"
+
+        ([p1] @ paths @ [plast]) |> makePake "Aib Code"
