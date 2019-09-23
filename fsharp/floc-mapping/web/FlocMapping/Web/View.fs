@@ -8,13 +8,14 @@ open Giraffe.GiraffeViewEngine
 
 module View = 
 
-    let makePage (title : string) (content : XmlNode list) = 
+    let makePage (pageTitle : string) (content : XmlNode list) = 
         html [] [
             head [] [
                 link [ _rel "stylesheet"
                        _type "text/css"
                        _href "/style.css"
                     ]
+                title [] [ str pageTitle ]
             ]
             body [] [
                 main [] content
@@ -32,7 +33,7 @@ module View =
                 ]
                 input [ _type "submit" ]
             ]
-        ] |> makePage "SAI Code"
+        ] |> makePage "AI2 SAI / PLI Code"
 
     let resultsPage (sai : string) 
                     (commonName : string) 
@@ -40,7 +41,7 @@ module View =
         [
             yield p [] [ str sai ]
             
-            yield p [_id "commonname"] [ str commonName ]
+            yield p [] [ span [_id "commonname"] [ str commonName ] ]
 
             yield p [] [ str "S4 Flocs:" ]
 
@@ -56,4 +57,4 @@ module View =
             yield p [] [
                 a [ _href "/" ] [ str "Back" ]
             ]
-        ] |> makePage "Aib Code"
+        ] |> makePage "S4 Mappings"
