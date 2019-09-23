@@ -34,6 +34,7 @@ let runDb (action : SqliteDb<'a>) : Result<'a, ErrMsg> =
 let aibReferenceToS4Floc_ (sai : string) : string list = 
     match runDb (aibReferenceToS4Floc sai) with
     | Error msg -> [msg]
+    | Ok [] -> ["Not found"]
     | Ok flocs -> List.map (fun x -> x.ToString()) flocs
 
 
