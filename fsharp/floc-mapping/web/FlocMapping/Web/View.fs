@@ -36,7 +36,7 @@ module View =
 
     let resultsPage (sai : string) 
                     (commonName : string) 
-                    (s4Paths : string list): XmlNode =
+                    (s4Paths : (string * string) list): XmlNode =
         [
             yield p [] [ str sai ]
             
@@ -44,7 +44,14 @@ module View =
 
             yield p [] [ str "S4 Flocs:" ]
 
-            yield! List.map (fun x -> p [] [str x]) s4Paths
+            yield p [] [ 
+                table [] 
+                    (List.map (fun (x,y) -> 
+                        tr [] [
+                                td [] [str x] 
+                                td [_id "commonname"] [str y]
+                              ]) s4Paths)
+                ]
 
             yield p [] [
                 a [ _href "/" ] [ str "Back" ]

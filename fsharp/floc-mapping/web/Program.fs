@@ -11,6 +11,7 @@ open FSharp.Control.Tasks.V2.ContextInsensitive
 
 open SLSqlite.Core  // must be before Giraffe
 open FlocMapping.AibBasis
+open FlocMapping.S4Basis
 open FlocMapping.TranslateFloc
 
 
@@ -32,17 +33,24 @@ let runDb (action : SqliteDb<'a>) : Result<'a, ErrMsg> =
     let conn = getConnParams () 
     runSqliteDb conn action
 
-let aibReferenceToS4Floc_ (sai : string) : string list = 
+let s4FlocName_ (floc : Floc) : string = 
+    match runDb (getS4FlocName floc) with
+    | Error msg -> ""
+    | Ok (Some ans) -> ans
+    | Ok None -> ""
+
+let aibReferenceToS4Floc_ (sai : string) : (string * string) list = 
     match runDb (aibReferenceToS4Floc sai) with
-    | Error msg -> [msg]
-    | Ok [] -> ["Not found"]
-    | Ok flocs -> List.map (fun x -> x.ToString()) flocs
+    | Error msg -> [(msg, "")]
+    | Ok [] -> [("Not found", "")]
+    | Ok flocs -> List.map (fun x -> x.ToString(), s4FlocName_ x) flocs
 
 let aibCommonName_ (sai : string) : string = 
     match runDb (getAibCommonName sai) with
     | Error msg -> ""
     | Ok (Some ans) -> ans
     | Ok None -> ""
+
 
 let saiHandler : HttpHandler = 
     fun (next : HttpFunc) (ctx : HttpContext) -> 

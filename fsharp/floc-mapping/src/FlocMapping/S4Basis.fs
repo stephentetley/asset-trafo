@@ -145,3 +145,19 @@ module S4Basis =
         
         queryKeyed cmd (Strategy.Head readRow1) |> succeeds
 
+    let getS4FlocName (floc : Floc) : SqliteDb<string option> = 
+        let sql = 
+            """
+            SELECT floc.name
+            FROM s4_floc AS floc
+            WHERE floc.s4_floc = :floc;
+            """
+        let cmd = 
+            new KeyedCommand (commandText = sql)
+                |> addNamedParam "floc" (stringParam <| floc.ToString())
+        
+        let readRow1 (result : ResultItem) : string = result.GetString(0)
+        
+        queryKeyed cmd (Strategy.Head readRow1) |> optional
+
+
