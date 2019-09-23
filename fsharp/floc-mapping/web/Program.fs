@@ -3,13 +3,36 @@
 open System
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
+open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
+open FSharp.Control.Tasks.V2.ContextInsensitive
 open Giraffe
+
+
+open FlocMapping.Web.Model
+open FlocMapping.Web.View
+
+
+let saiHandler : HttpHandler = 
+    fun (next : HttpFunc) (ctx : HttpContext) -> 
+        task { 
+            let! model = ctx.BindFormAsync<SaiModel>()
+            let sai = model.SaiCode
+            printfn "Sai: %s" sai
+            return! htmlView (resultsPage sai) next ctx
+        }
 
 let webApp =
     choose [
-        route "/ping"   >=> text "pong"
-        route "/"       >=> htmlFile "../../../pages/index.html" ]
+        GET >=> 
+            choose [
+                route "/"       >=> htmlView saiInputPage
+            ]
+        POST >=>
+            choose [
+                route "/results" >=> saiHandler
+            ]
+    ]
 
 let configureApp (app : IApplicationBuilder) =
     // Add Giraffe to the ASP.NET Core pipeline
