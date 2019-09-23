@@ -10,7 +10,12 @@ module View =
 
     let makePake (title : string) (content : XmlNode list) = 
         html [] [
-            head [] []
+            head [] [
+                link [ _rel "stylesheet"
+                       _type "text/css"
+                       _href "/style.css"
+                    ]
+            ]
             body [] [
                 main [] content
             ]

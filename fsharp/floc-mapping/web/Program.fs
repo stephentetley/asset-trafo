@@ -60,16 +60,27 @@ let webApp =
 
 let configureApp (app : IApplicationBuilder) =
     // Add Giraffe to the ASP.NET Core pipeline
+    app.UseStaticFiles () |> ignore
     app.UseGiraffe webApp
 
 let configureServices (services : IServiceCollection) =
     // Add Giraffe dependencies
     services.AddGiraffe() |> ignore
 
+// For deployment, use GetCurrentDirectory()...
+// let contentRoot = Directory.GetCurrentDirectory()
+let contentRoot = Path.Combine(__SOURCE_DIRECTORY__, "")
+let webRoot = Path.Combine(contentRoot, "webroot") 
+
 [<EntryPoint>]
 let main _ =
+    printfn "contentRoot = %s" contentRoot
+    printfn "webRoot = %s" webRoot
     WebHostBuilder()
         .UseKestrel()
+        .UseContentRoot(contentRoot)
+        .UseWebRoot(webRoot)
+       
         .Configure(Action<IApplicationBuilder> configureApp)
         .ConfigureServices(configureServices)
         .Build()

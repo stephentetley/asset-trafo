@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <title> Static page</title>
+    </head>
+    <body>
+        <main><p>To enable static content:</p>
+            <pre>app.UseStaticFiles () </pre>
+            <pre>WebHostBuilder()
+                ...
+                .UseContentRoot(contentRoot)
+                .UseWebRoot(webRoot)
+            </pre>        
+        </main>
+    </body>
+</html>
