@@ -61,9 +61,9 @@ let main () =
     runSqliteDb connParams 
         <| sqliteDb { 
                 printfn "Aib flocs..."
-                do! insertAibFlocRows (sourceCsv "aib_floc_extract4.csv")
+                do! insertAibFlocRows (sourceCsv "floc_mapping_aib_funlocs.csv")
                 printfn "Aib equipment..."
-                do! insertAibEquipmentRows (sourceCsv "aib_equipment_extract2.csv")
+                do! insertAibEquipmentRows (sourceCsv "floc_mapping_aib_equipment.csv")
 
                 printfn "S4 flocs..."
                 do! insertS4FlocRecords () 

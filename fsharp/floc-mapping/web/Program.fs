@@ -51,7 +51,7 @@ let webApp =
     choose [
         GET >=> 
             choose [
-                route "/"       >=> htmlView saiInputPage
+                route "/" >=> htmlView saiInputPage
             ]
         POST >=>
             choose [

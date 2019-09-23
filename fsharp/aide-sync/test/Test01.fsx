@@ -99,9 +99,9 @@ let runChangeSchemeReport (schemeCode : string)
         writeFullReport scheme pandocOpts outputHtmlFile
 
 // This is the major test... 
-// test02 "PCL 70" ;;   // Structure changes
+// test02 "PCL 81" ;;   // Structure changes
 let test02 (changeScheme : string) =
-    let htmlOutput = outputFile "change_scheme_report_20190828.html"
+    let htmlOutput = outputFile "change_scheme_report_20190923.html"
     runChangeSchemeReport changeScheme htmlOutput
 
 

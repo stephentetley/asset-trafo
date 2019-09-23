@@ -41,7 +41,7 @@ open SLSqlite.Core
 open AideSync.PopulateDb
 
 let sourceCsv (fileName : string) : string = 
-    Path.Combine(@"G:\work\Projects\asset_sync\aide_report", fileName)
+    Path.Combine(@"G:\work\Projects\asset_sync\aide_sync\20190923", fileName)
 
 let pathToDbTemplate () : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\data\ddl\aide_sync.sqlite")
@@ -53,17 +53,17 @@ let outputDbFile () =
 type ErrMsg = string
 
 let main () : Result<unit, ErrMsg> = 
-    let workSchemeCsv       = sourceCsv "change_requests_schemes_20190905.csv"
-    let changeRequestsCsv   = sourceCsv "change_requests_change_reqs_20190905.csv"
-    let aiAssetsCsv         = sourceCsv "ai_asset_20190905.csv"
-    let aideAssetsCsv       = sourceCsv "aide_asset_20190905.csv"
-    let assetChangesCsv     = sourceCsv "change_requests_assets_20190905.csv"
-    let attrChangesCsv      = sourceCsv "change_requests_attributes_20190905.csv"
-    let repAttrChangesCsv   = sourceCsv "change_requests_repeated_attributes_20190905.csv"
-    let newAssetsCsv        = sourceCsv "no_change_req_new_aide_assets_20190905.csv"
-    let newAttributesCsv    = sourceCsv "no_change_req_new_aide_attribute_values_20190905.csv"
-    let aideStructRelsCsv   = sourceCsv "structure_relationships_aide_20190905.csv"
-    let aiStructRelsCsv     = sourceCsv "structure_relationships_ai_20190905.csv"
+    let workSchemeCsv       = sourceCsv "change_requests_schemes.csv"
+    let changeRequestsCsv   = sourceCsv "change_requests_change_reqs.csv"
+    let aiAssetsCsv         = sourceCsv "ai_asset.csv"
+    let aideAssetsCsv       = sourceCsv "aide_asset.csv"
+    let assetChangesCsv     = sourceCsv "change_requests_assets.csv"
+    let attrChangesCsv      = sourceCsv "change_requests_attributes.csv"
+    let repAttrChangesCsv   = sourceCsv "change_requests_repeated_attributes.csv"
+    let newAssetsCsv        = sourceCsv "no_change_req_new_aide_assets.csv"
+    let newAttributesCsv    = sourceCsv "no_change_req_new_aide_attribute_values.csv"
+    let aideStructRelsCsv   = sourceCsv "structure_relationships_aide.csv"
+    let aiStructRelsCsv     = sourceCsv "structure_relationships_ai.csv"
 
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputDbFile () |> Path.GetFullPath
