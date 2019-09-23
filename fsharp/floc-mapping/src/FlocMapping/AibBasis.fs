@@ -93,3 +93,39 @@ module AibBasis =
             result.GetString(0) |> decodeAibCategory
         
         queryKeyed cmd (Strategy.Head readRow) <|> mreturn None
+
+
+    let private getPliCommonName (plicode : string) : SqliteDb<string> = 
+        let sql = 
+            """
+            SELECT equip.common_name
+            FROM aib_equipment AS equip
+            WHERE equip.pli_ref = :plicode;
+            """
+        let cmd = 
+            new KeyedCommand (commandText = sql)
+                |> addNamedParam "plicode" (stringParam plicode)
+        
+        let readRow (result : ResultItem) : string = 
+            result.GetString(0)
+        
+        queryKeyed cmd (Strategy.Head readRow) 
+
+    let private getSaiCommonName (saicode : string) : SqliteDb<string> = 
+        let sql = 
+            """
+            SELECT floc.common_name
+            FROM aib_floc AS floc
+            WHERE floc.sai_ref = :saicode;
+            """
+        let cmd = 
+            new KeyedCommand (commandText = sql)
+                |> addNamedParam "saicode" (stringParam saicode)
+        
+        let readRow (result : ResultItem) : string = 
+            result.GetString(0)
+        
+        queryKeyed cmd (Strategy.Head readRow) 
+
+    let getAibCommonName (code : string) : SqliteDb<string option> = 
+        optional (getPliCommonName code <|> getSaiCommonName code)

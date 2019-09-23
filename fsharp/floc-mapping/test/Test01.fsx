@@ -76,3 +76,7 @@ let demo05 (sai : string) =
 let demo06 (floc : string) = 
     s4ToAibDirect (makeFloc floc) |> runDb 
 
+
+// demo06 "PLI582855" ;;
+let demo06 (sai : string) = 
+    s4ToAibDirect sai |> runDb 

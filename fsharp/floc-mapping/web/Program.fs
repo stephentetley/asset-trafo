@@ -10,6 +10,7 @@ open FSharp.Control.Tasks.V2.ContextInsensitive
 
 
 open SLSqlite.Core  // must be before Giraffe
+open FlocMapping.AibBasis
 open FlocMapping.TranslateFloc
 
 
@@ -37,14 +38,20 @@ let aibReferenceToS4Floc_ (sai : string) : string list =
     | Ok [] -> ["Not found"]
     | Ok flocs -> List.map (fun x -> x.ToString()) flocs
 
+let aibCommonName_ (sai : string) : string = 
+    match runDb (getAibCommonName sai) with
+    | Error msg -> ""
+    | Ok (Some ans) -> ans
+    | Ok None -> ""
 
 let saiHandler : HttpHandler = 
     fun (next : HttpFunc) (ctx : HttpContext) -> 
         task { 
             let! model = ctx.BindFormAsync<SaiModel>()
             let sai = model.SaiCode
+            let commonName = aibCommonName_ sai
             let flocs = aibReferenceToS4Floc_ sai
-            return! htmlView (resultsPage sai flocs) next ctx
+            return! htmlView (resultsPage sai commonName flocs) next ctx
         }
 
 let webApp =

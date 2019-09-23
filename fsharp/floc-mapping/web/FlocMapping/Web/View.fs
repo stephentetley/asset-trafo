@@ -8,7 +8,7 @@ open Giraffe.GiraffeViewEngine
 
 module View = 
 
-    let makePake (title : string) (content : XmlNode list) = 
+    let makePage (title : string) (content : XmlNode list) = 
         html [] [
             head [] [
                 link [ _rel "stylesheet"
@@ -32,16 +32,21 @@ module View =
                 ]
                 input [ _type "submit" ]
             ]
-        ] |> makePake "SAI Code"
+        ] |> makePage "SAI Code"
 
-    let resultsPage (sai : string) (s4Paths : string list): XmlNode =
-        
-        let p1 = p [] [ str sai ]
-        let paths = 
-            List.map (fun x -> p [] [str x]) s4Paths
-        let plast = 
-            p [] [
+    let resultsPage (sai : string) 
+                    (commonName : string) 
+                    (s4Paths : string list): XmlNode =
+        [
+            yield p [] [ str sai ]
+            
+            yield p [_id "commonname"] [ str commonName ]
+
+            yield p [] [ str "S4 Flocs:" ]
+
+            yield! List.map (fun x -> p [] [str x]) s4Paths
+
+            yield p [] [
                 a [ _href "/" ] [ str "Back" ]
             ]
-
-        ([p1] @ paths @ [plast]) |> makePake "Aib Code"
+        ] |> makePage "Aib Code"
