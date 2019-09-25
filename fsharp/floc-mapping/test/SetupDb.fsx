@@ -47,8 +47,6 @@ let outputDbFile () =
 
 
 let main () = 
-    
-
     let dbTemplate = pathToDbTemplate ()
     let dbActive = outputDbFile () |> Path.GetFullPath
     printfn "%s" dbActive
@@ -69,7 +67,10 @@ let main () =
                 do! insertS4FlocRecords () 
                 printfn "S4 equipment..."
                 do! insertS4EquipmentRecords () 
-                printfn "S4 to Aib links..."
-                do! insertLinks ()
+                printfn "S4 to Aib Floc links..."
+                do! insertFlocLinks ()
+                printfn "S4 to Pli Equipment links..."
+                do! insertEquipmentLinks ()
                 return ()
             }
+

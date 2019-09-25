@@ -90,6 +90,7 @@ module ImportSchema =
     // Edit the path here as necessary
     type S4EquipmentTable = 
         CsvProvider< @"G:\work\Projects\asset_sync\floc_mapping\equipment_migration_s1.csv"
+                   , Schema="400 S/4 Equip Reference=int64 option"
                    , PreferOptionals = true >
     
     type S4EquipmentRow = S4EquipmentTable.Row

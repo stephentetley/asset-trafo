@@ -250,7 +250,7 @@ module Populate =
                 """
             let cmd = 
                 new IndexedCommand(commandText = sql)
-                    |> addParam (int32Param num)
+                    |> addParam (int64Param num)
                     |> addParam (optionNull stringParam row.``Equipment Description``)
                     |> addParam (stringParam row.Category)
                     |> addParam (optionNull stringParam row.``Object Type``)
@@ -288,7 +288,7 @@ module Populate =
     type Link = string * string 
     
     
-    let s4AibLinks (links : Set<Link>) (row : S4FlocRow) : Set<Link> = 
+    let s4AibFlocLinks (links : Set<Link>) (row : S4FlocRow) : Set<Link> = 
         let addL1 x = 
             match installationAibRef row, row.L1_Site_Code with
             | Some sai, Some floc -> Set.add (sai, floc) x
@@ -357,10 +357,10 @@ module Populate =
             |> addL7AIB |> addL7Equipment    
             |> addL8AIB |> addL8Equipment
     
-    let makeLinkInsert (sai : string, floc: string) : IndexedCommand = 
+    let makeFlocLinkInsert (sai : string, floc: string) : IndexedCommand = 
         let sql = 
             """
-            INSERT INTO s4_aib_reference 
+            INSERT INTO aib_ref_to_s4_floc 
             (aib_ref, 
             s4_floc)
             VALUES (?,?);
@@ -369,14 +369,39 @@ module Populate =
             |> addParam (stringParam sai)
             |> addParam (stringParam floc)
 
-    let insertLinks () : SqliteDb<unit> = 
+    let insertFlocLinks () : SqliteDb<unit> = 
         let insertLink (link : string * string) : SqliteDb<unit> = 
-            let statement = makeLinkInsert link
+            let statement = makeFlocLinkInsert link
             executeNonQueryIndexed statement |>> ignore
 
         sqliteDb { 
             let! table = liftOperationResult (fun _ -> readS4FlocTable ()) 
-            let links = Seq.fold s4AibLinks Set.empty table.Rows |> Set.toList
+            let links = Seq.fold s4AibFlocLinks Set.empty table.Rows |> Set.toList
             return! withTransaction <| forMz links insertLink
+        }
+
+    let makeEquipmentLinkInsert (pli : string) (equipNum: int64) : IndexedCommand = 
+        let sql = 
+            """
+            INSERT INTO pli_ref_to_s4_equip 
+            (pli_ref, 
+            s4_equip)
+            VALUES (?,?);
+            """
+        new IndexedCommand(commandText = sql)
+            |> addParam (stringParam pli)
+            |> addParam (int64Param equipNum)
+
+    let insertEquipmentLinks () : SqliteDb<unit> = 
+        let insertLink (row : S4EquipmentRow) : SqliteDb<unit> = 
+            match row.``AI2 AIB Reference``, row.``400 S/4 Equip Reference`` with
+            | pli, Some x -> 
+                let statement = makeEquipmentLinkInsert pli (int64 x)
+                executeNonQueryIndexed statement |>> ignore
+            | _, _ -> mreturn ()
+
+        sqliteDb { 
+            let! table = liftOperationResult (fun _ -> readS4EquipmentTable ()) 
+            return! withTransaction <| sforMz table.Rows insertLink
         }
 

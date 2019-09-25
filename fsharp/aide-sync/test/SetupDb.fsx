@@ -41,7 +41,8 @@ open SLSqlite.Core
 open AideSync.PopulateDb
 
 let sourceCsv (fileName : string) : string = 
-    Path.Combine(@"G:\work\Projects\asset_sync\aide_sync\20190923", fileName)
+    let current = "20190925"
+    Path.Combine(@"G:\work\Projects\asset_sync\aide_sync", current, fileName)
 
 let pathToDbTemplate () : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\data\ddl\aide_sync.sqlite")
