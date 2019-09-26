@@ -38,14 +38,24 @@ module View =
             ]
         ] |> makePage "AI2 SAI / PLI Code"
 
+    
+    
     let resultsPage (sai : string) 
                     (commonName : string) 
-                    (answers : FlocAnswer list): XmlNode =
+                    (answers : LookupAnswer list): XmlNode =
         [
-            yield p [] [ str sai ]
             
-            yield p [] [ span [_id "commonName"] [ str commonName ] ]
-
+            yield p [] [ str "AI2:" ]
+            
+            yield p [] [ 
+                htmlTable [ 
+                    toIHtmlRow [ 
+                        str sai
+                        span [_id "commonName"] [ str commonName ]
+                    ]
+                ]
+            ]
+            
             yield p [] [ str "S4 Flocs:" ]
 
             yield p [] [ htmlTable answers ] 
@@ -54,3 +64,11 @@ module View =
                 a [ _href "/" ] [ str "Back" ]
             ]
         ] |> makePage "S4 Mappings"
+
+    let internalErrorPage (errMsg : string) : XmlNode =
+        [
+            yield p [] ["An internal error has occured:" |> str]
+
+            yield p [] [errMsg |> str]
+
+        ] |> makePage "Internal Error"

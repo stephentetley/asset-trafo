@@ -36,7 +36,7 @@ CREATE TABLE aib_equipment
 CREATE TABLE s4_floc 
 (
     s4_floc TEXT PRIMARY KEY NOT NULL UNIQUE, 
-    name TEXT NOT NULL,
+    short_name TEXT NOT NULL,
     category TEXT NOT NULL,
     parent_floc TEXT
 );
@@ -44,11 +44,11 @@ CREATE TABLE s4_floc
 CREATE TABLE s4_equipment 
 (
     s4_ref BIGINT PRIMARY KEY NOT NULL UNIQUE, 
-    name TEXT, 
+    short_name TEXT, 
     category TEXT, 
     obj_type TEXT, 
     obj_class TEXT, 
-    s4_floc TEXT
+    parent_floc TEXT
 );
 
 CREATE TABLE aib_ref_to_s4_floc

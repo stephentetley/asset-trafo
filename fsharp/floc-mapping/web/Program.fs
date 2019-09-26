@@ -1,4 +1,5 @@
-﻿// Currently, this is just the sample code from the Giraffe GitHub pages
+﻿// Copyright (c) Stephen Tetley 2019
+// License: BSD 3 Clause
 
 open System
 open System.IO
@@ -13,6 +14,7 @@ open SLSqlite.Core  // must be before Giraffe
 open FlocMapping.AibBasis
 open FlocMapping.S4Basis
 open FlocMapping.TranslateFloc
+open FlocMapping.Web.DataAccess
 
 
 open Giraffe
@@ -21,17 +23,7 @@ open Giraffe
 open FlocMapping.Web.Model
 open FlocMapping.Web.View
 
-let pathToDb () : string = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\db\floc_mapping_active.sqlite")
 
-let getConnParams () : SqliteConnParams = 
-    let dbActive = pathToDb () |> Path.GetFullPath
-    sqliteConnParamsVersion3 dbActive
-
-
-let runDb (action : SqliteDb<'a>) : Result<'a, ErrMsg> = 
-    let conn = getConnParams () 
-    runSqliteDb conn action
 
 let s4FlocName_ (floc : Floc) : string = 
     match runDb (getS4FlocName floc) with
@@ -39,11 +31,11 @@ let s4FlocName_ (floc : Floc) : string =
     | Ok (Some ans) -> ans
     | Ok None -> ""
 
-let aibReferenceToS4Floc_ (sai : string) : FlocAnswer list = 
+let aibReferenceToS4Floc_ (sai : string) : LookupAnswer list = 
     match runDb (aibReferenceToS4Floc sai) with
     | Error msg -> []
     | Ok [] -> []
-    | Ok flocs -> List.map (fun x -> { S4Floc = x; Description = s4FlocName_ x}) flocs
+    | Ok flocs -> List.map (fun x -> FlocAns { S4Floc = x; Description = s4FlocName_ x}) flocs
 
 let aibCommonName_ (sai : string) : string = 
     match runDb (getAibCommonName sai) with
@@ -71,12 +63,11 @@ let saiHandler : HttpHandler =
 let webApp =
     choose [
         GET >=> 
-            choose [
-                route "/" >=> htmlView saiInputPage
-            ]
+            route "/" >=> htmlView saiInputPage
+            
         POST >=>
             choose [
-                route "/results" >=> saiHandler
+                route "/results" >=> warbler (fun _ -> saiHandler)
             ]
     ]
 

@@ -95,7 +95,10 @@ module Populate =
             let sql = 
                 """
                 INSERT INTO s4_floc
-                 (s4_floc, name, category, parent_floc)
+                 (s4_floc, 
+                 short_name, 
+                 category, 
+                 parent_floc)
                  VALUES (?,?,?, ?);
                 """
             let cmd = 
@@ -241,11 +244,11 @@ module Populate =
                 """
                 INSERT INTO s4_equipment
                 (s4_ref, 
-                name, 
+                short_name, 
                 category,  
                 obj_type, 
                 obj_class, 
-                s4_floc)
+                parent_floc)
                 VALUES (?,?,?, ?,?,?);
                 """
             let cmd = 
