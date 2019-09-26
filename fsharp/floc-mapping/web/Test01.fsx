@@ -27,3 +27,7 @@ let demo01 () =
 let demo02 () = 
     isPliCode "PLI00582858" |> printfn "%b"
     isPliCode "SAI00130367" |> printfn "%b"
+
+let demo03 () = 
+    isAibCode "PLI00582858" |> printfn "%b"
+    isAibCode "SAI00130367" |> printfn "%b"

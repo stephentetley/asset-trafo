@@ -30,6 +30,9 @@ module Base =
         
 
     let isPliCode (code : string) : bool = 
-        Regex.IsMatch(input=code, pattern = "^PLI(\d{8})$")
+        Regex.IsMatch(input=code, pattern = "^PLI\d{8}$")
+
+    let isAibCode (code : string) : bool = 
+        Regex.IsMatch(input=code, pattern = "^[A-Z]{3}\d{8}$")
         
 

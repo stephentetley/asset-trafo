@@ -14,6 +14,7 @@ open SLSqlite.Core  // must be before Giraffe
 open FlocMapping.AibBasis
 open FlocMapping.S4Basis
 open FlocMapping.TranslateFloc
+open FlocMapping.Web.Base
 open FlocMapping.Web.DataAccess
 
 
@@ -54,10 +55,14 @@ let saiHandler : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) -> 
         task { 
             let! model = ctx.BindFormAsync<SaiModel>()
-            let sai = model.SaiCode
-            let commonName = aibCommonName_ sai
-            let flocs = aibReferenceToS4Floc_ sai
-            return! htmlView (resultsPage sai commonName flocs) next ctx
+            let sai = model.SaiCode.Trim()
+            if not <| isAibCode sai then
+                return! htmlView (internalErrorPage <| sprintf "Invalid code %s" sai)  next ctx
+            else
+                let commonName = aibCommonName_ sai
+                match flocMapping sai |> runDb with
+                | Ok flocs -> return! htmlView (resultsPage sai commonName flocs) next ctx
+                | Error msg -> return! htmlView (internalErrorPage msg) next ctx
         }
 
 let webApp =
