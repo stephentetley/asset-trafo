@@ -25,36 +25,18 @@ open FlocMapping.Web.Model
 open FlocMapping.Web.View
 
 
-
-let s4FlocName_ (floc : Floc) : string = 
-    match runDb (getS4FlocName floc) with
-    | Error msg -> ""
-    | Ok (Some ans) -> ans
-    | Ok None -> ""
-
-let aibReferenceToS4Floc_ (sai : string) : LookupAnswer list = 
-    match runDb (aibReferenceToS4Floc sai) with
-    | Error msg -> []
-    | Ok [] -> []
-    | Ok flocs -> List.map (fun x -> FlocAns { S4Floc = x; Description = s4FlocName_ x}) flocs
-
 let aibCommonName_ (sai : string) : string = 
     match runDb (getAibCommonName sai) with
     | Error msg -> ""
     | Ok (Some ans) -> ans
     | Ok None -> ""
 
-let pliS4Numeric_ (pli : string) : int64 option = 
-    match runDb (s4EquipmentReference pli) with
-    | Error msg -> None
-    | Ok (Some ans) -> Some ans
-    | Ok None -> None
 
 
-let saiHandler : HttpHandler = 
+let result1Handler : HttpHandler = 
     fun (next : HttpFunc) (ctx : HttpContext) -> 
         task { 
-            let! model = ctx.BindFormAsync<SaiModel>()
+            let! model = ctx.BindFormAsync<Result1>()
             let sai = model.SaiCode.Trim()
             if not <| isAibCode sai then
                 return! htmlView (internalErrorPage <| sprintf "Invalid code %s" sai)  next ctx
@@ -65,6 +47,15 @@ let saiHandler : HttpHandler =
                 | Error msg -> return! htmlView (internalErrorPage msg) next ctx
         }
 
+let resultsHandler : HttpHandler = 
+    fun (next : HttpFunc) (ctx : HttpContext) -> 
+        task { 
+            let! model = ctx.BindFormAsync<ResultMany>()
+            let text = model.SaiCodes
+            return! htmlView (internalErrorPage text) next ctx
+        }
+
+
 let webApp =
     choose [
         GET >=> 
@@ -72,7 +63,8 @@ let webApp =
             
         POST >=>
             choose [
-                route "/results" >=> warbler (fun _ -> saiHandler)
+                route "/result1" >=> warbler (fun _ -> result1Handler)
+                route "/results" >=> warbler (fun _ -> resultsHandler)
             ]
     ]
 
@@ -87,7 +79,7 @@ let configureServices (services : IServiceCollection) =
 
 // For deployment, use GetCurrentDirectory()...
 // let contentRoot = Directory.GetCurrentDirectory()
-let contentRoot = Path.Combine(__SOURCE_DIRECTORY__, "")
+let contentRoot = Path.Combine( __SOURCE_DIRECTORY__ , "")
 let webRoot = Path.Combine(contentRoot, "webroot") 
 
 // Note - Chrome appears to cache the stylesheet, we may have to 

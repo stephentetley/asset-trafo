@@ -11,11 +11,16 @@ module Model =
     open FlocMapping.Web.Base
     
     [<CLIMutable>]
-    type SaiModel =
+    type Result1 =
         {
             SaiCode : string
         }
 
+    [<CLIMutable>]
+    type ResultMany =
+        {
+            SaiCodes : string
+        }
     
     type FlocAnswer = 
         { S4Floc : Floc 

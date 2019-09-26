@@ -148,7 +148,7 @@ module S4Basis =
     let getS4FlocName (floc : Floc) : SqliteDb<string option> = 
         let sql = 
             """
-            SELECT floc.name
+            SELECT floc.short_name
             FROM s4_floc AS floc
             WHERE floc.s4_floc = :floc;
             """
