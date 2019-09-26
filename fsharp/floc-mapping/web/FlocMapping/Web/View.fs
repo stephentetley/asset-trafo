@@ -3,10 +3,13 @@
 
 namespace FlocMapping.Web
 
-open Giraffe.GiraffeViewEngine
-
 
 module View = 
+    
+    open Giraffe.GiraffeViewEngine
+
+    open FlocMapping.Web.Model
+    open FlocMapping.Web.Base
 
     let makePage (pageTitle : string) (content : XmlNode list) = 
         html [] [
@@ -37,22 +40,15 @@ module View =
 
     let resultsPage (sai : string) 
                     (commonName : string) 
-                    (s4Paths : (string * string) list): XmlNode =
+                    (answers : FlocAnswer list): XmlNode =
         [
             yield p [] [ str sai ]
             
-            yield p [] [ span [_id "commonname"] [ str commonName ] ]
+            yield p [] [ span [_id "commonName"] [ str commonName ] ]
 
             yield p [] [ str "S4 Flocs:" ]
 
-            yield p [] [ 
-                table [] 
-                    (List.map (fun (x,y) -> 
-                        tr [] [
-                                td [] [str x] 
-                                td [_id "commonname"] [str y]
-                              ]) s4Paths)
-                ]
+            yield p [] [ htmlTable answers ] 
 
             yield p [] [
                 a [ _href "/" ] [ str "Back" ]

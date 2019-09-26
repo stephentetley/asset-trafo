@@ -6,8 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="FlocMapping\Web\Base.fs" />
     <Compile Include="FlocMapping\Web\Model.fs" />
-    <Compile Include="FlocMapping\web\View.fs" />
+    <Compile Include="FlocMapping\Web\View.fs" />
     <Compile Include="Program.fs" />
     <None Include="Test01.fsx" />
   </ItemGroup>

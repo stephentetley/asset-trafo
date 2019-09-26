@@ -3,15 +3,35 @@
    This is just an experiment to see how to reference stylesheets from Giraffe
 */
 
+
+/* S4 does not use a fixed with font for Floc codes, even though
+  length is significant. */
 html { 
-  font-size: 32px; 
+  font-size: 22px; 
   font-family: Helvetica, Arial, freesans, sans-serif;
 }
 
-#commonname {
+#commonName {
   font-size: 16px;
   font-family: Helvetica, Arial, freesans, sans-serif;
-  border-width: 2px;
-  border-style: solid;
-  border-color: lightblue;
+}
+
+table {
+  border: 1px solid rgb(196, 193, 193);
+  border-collapse: collapse;
+}
+
+tr {
+  /* border: 1px solid rgb(196, 193, 193); */
+  background: #ffffcc
+}
+
+td {
+  border: 1px solid rgb(196, 193, 193);
+  padding-left: 6px;
+  padding-right: 12px;
+}
+
+tr.even {
+  background: #ffffff
 }

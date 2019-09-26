@@ -64,16 +64,16 @@ module TranslateFloc =
     // ************************************************************************
     // Aib to S4
 
-    let aibToS4Direct (saicode : string) : SqliteDb<Floc list> = 
+    let aibToS4Direct (sai : string) : SqliteDb<Floc list> = 
         let sql = 
             """
             SELECT link.s4_floc
-            FROM s4_aib_reference AS link
-            WHERE link.aib_ref = :saicode;
+            FROM aib_ref_to_s4_floc AS link
+            WHERE link.aib_ref = :sai;
             """
         let cmd = 
             new KeyedCommand (commandText = sql)
-                |> addNamedParam "saicode" (stringParam saicode) 
+                |> addNamedParam "sai" (stringParam sai) 
         
         let readRow (result : ResultItem) : Floc = 
             result.GetString(0) |> makeFloc
@@ -121,3 +121,22 @@ module TranslateFloc =
         
         queryKeyed cmd (Strategy.Map readRow)
 
+
+    // ************************************************************************
+    // Aib equipment
+
+    let s4EquipmentReference (pli : string) : SqliteDb<int64 option> = 
+        let sql = 
+            """
+            SELECT link.s4_equip
+            FROM pli_ref_to_s4_equip AS link
+            WHERE link.pli_ref = :pli;
+            """
+        let cmd = 
+            new KeyedCommand (commandText = sql)
+                |> addNamedParam "floc" (stringParam pli) 
+        
+        let readRow (result : ResultItem) : int64 option = 
+            result.TryGetInt64(0)
+        
+        queryKeyed cmd (Strategy.Head readRow)

@@ -39,17 +39,23 @@ let s4FlocName_ (floc : Floc) : string =
     | Ok (Some ans) -> ans
     | Ok None -> ""
 
-let aibReferenceToS4Floc_ (sai : string) : (string * string) list = 
+let aibReferenceToS4Floc_ (sai : string) : FlocAnswer list = 
     match runDb (aibReferenceToS4Floc sai) with
-    | Error msg -> [(msg, "")]
-    | Ok [] -> [("Not found", "")]
-    | Ok flocs -> List.map (fun x -> x.ToString(), s4FlocName_ x) flocs
+    | Error msg -> []
+    | Ok [] -> []
+    | Ok flocs -> List.map (fun x -> { S4Floc = x; Description = s4FlocName_ x}) flocs
 
 let aibCommonName_ (sai : string) : string = 
     match runDb (getAibCommonName sai) with
     | Error msg -> ""
     | Ok (Some ans) -> ans
     | Ok None -> ""
+
+let pliS4Numeric_ (pli : string) : int64 option = 
+    match runDb (s4EquipmentReference pli) with
+    | Error msg -> None
+    | Ok (Some ans) -> Some ans
+    | Ok None -> None
 
 
 let saiHandler : HttpHandler = 
@@ -88,9 +94,11 @@ let configureServices (services : IServiceCollection) =
 let contentRoot = Path.Combine(__SOURCE_DIRECTORY__, "")
 let webRoot = Path.Combine(contentRoot, "webroot") 
 
+// Note - Chrome appears to cache the stylesheet, we may have to 
+// delete the cache to see any changes.
+
 [<EntryPoint>]
 let main _ =
-    printfn "contentRoot = %s" contentRoot
     printfn "webRoot = %s" webRoot
     WebHostBuilder()
         .UseKestrel()
