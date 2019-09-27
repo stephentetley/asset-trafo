@@ -36,6 +36,7 @@ open SLFormat.CommandOptions.CommandOptions
 open MarkdownDoc.Markdown
 open MarkdownDoc.Pandoc
 
+#load "..\src\AideSync\Base\Common.fs"
 #load "..\src\AideSync\Base\Addendum.fs"
 #load "..\src\AideSync\Datatypes.fs"
 #load "..\src\AideSync\BasicQueries.fs"
@@ -44,6 +45,7 @@ open MarkdownDoc.Pandoc
 #load "..\src\AideSync\BuildReport.fs"
 #load "..\src\AideSync\BuildSRDiff.fs"
 #load "..\src\AideSync\PrintReport.fs"
+open AideSync.Base.Common
 open AideSync.Datatypes
 open AideSync.BasicQueries
 open AideSync.DiffImplementation
@@ -100,8 +102,10 @@ let runChangeSchemeReport (schemeCode : string)
 
 // This is the major test... 
 // test02 "PCL 81" ;;   // Structure changes
+// test02 "R131600100" ;;
 let test02 (changeScheme : string) =
-    let htmlOutput = outputFile "change_scheme_report_20190923.html"
+    let name = sprintf "change_scheme_%s.html" (safeName changeScheme)
+    let htmlOutput = outputFile name
     runChangeSchemeReport changeScheme htmlOutput
 
 
