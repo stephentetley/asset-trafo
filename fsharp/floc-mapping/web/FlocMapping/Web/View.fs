@@ -75,6 +75,10 @@ module View =
                     yield td [] ["&rArr;" |> rawText]
                     yield! answerTop
                 ]
+
+                tr [_class "explanation"] [
+                    td [_colspan "4"] [commonName |> str]
+                ]
             ]
             
         // One Floc mapping generates
