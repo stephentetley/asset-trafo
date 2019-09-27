@@ -11,15 +11,9 @@ module Model =
     open FlocMapping.Web.Base
     
     [<CLIMutable>]
-    type Result1 =
-        {
-            SaiCode : string
-        }
-
-    [<CLIMutable>]
-    type ResultMany =
-        {
-            SaiCodes : string
+    type ReferencesForm =
+        { SingleReference : string
+          MultipleReferences : string
         }
     
     type FlocAnswer = 

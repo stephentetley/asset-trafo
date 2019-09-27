@@ -36,7 +36,7 @@ module DataAccess =
         aibReferenceToS4Floc sai >>= 
             mapM (fun x -> s4FlocName x |>> fun name -> { S4Floc = x; Description = name } )
 
-    let pliFlocMapping (pli : string) : SqliteDb<EquipmentAnswer list> = 
+    let pliEquipmentAnswers (pli : string) : SqliteDb<EquipmentAnswer list> = 
         let sql = 
             """
             SELECT 
@@ -63,5 +63,5 @@ module DataAccess =
 
     let flocMapping (code : string) : SqliteDb<LookupAnswer list> = 
         match isPliCode code with
-        | true -> pliFlocMapping code |>> List.map EquipmentAns
+        | true -> pliEquipmentAnswers code |>> List.map EquipmentAns
         | false -> saiFlocMapping code |>> List.map FlocAns

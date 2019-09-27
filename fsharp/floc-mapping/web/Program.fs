@@ -33,11 +33,11 @@ let aibCommonName_ (sai : string) : string =
 
 
 
-let result1Handler : HttpHandler = 
+let resultsHandler : HttpHandler = 
     fun (next : HttpFunc) (ctx : HttpContext) -> 
         task { 
-            let! model = ctx.BindFormAsync<Result1>()
-            let sai = model.SaiCode.Trim()
+            let! model = ctx.BindFormAsync<ReferencesForm>()
+            let sai = model.SingleReference.Trim()
             if not <| isAibCode sai then
                 return! htmlView (internalErrorPage <| sprintf "Invalid code %s" sai)  next ctx
             else
@@ -47,13 +47,6 @@ let result1Handler : HttpHandler =
                 | Error msg -> return! htmlView (internalErrorPage msg) next ctx
         }
 
-let resultsHandler : HttpHandler = 
-    fun (next : HttpFunc) (ctx : HttpContext) -> 
-        task { 
-            let! model = ctx.BindFormAsync<ResultMany>()
-            let text = model.SaiCodes
-            return! htmlView (internalErrorPage text) next ctx
-        }
 
 
 let webApp =
@@ -62,10 +55,7 @@ let webApp =
             route "/" >=> htmlView saiInputPage
             
         POST >=>
-            choose [
-                route "/result1" >=> warbler (fun _ -> result1Handler)
-                route "/results" >=> warbler (fun _ -> resultsHandler)
-            ]
+            route "/results" >=> warbler (fun _ -> resultsHandler)
     ]
 
 let configureApp (app : IApplicationBuilder) =

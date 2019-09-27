@@ -29,23 +29,15 @@ module View =
     // TODO - this page could list recent sainums
     let saiInputPage : XmlNode =
         [
-            form [ _action "/result1"; _method "POST" ] [
-                yield fieldset [] [
-                    p [] [
-                        label [_for "SaiCode" ] [ str "Aib Reference:" ]
-                        input [ _name "SaiCode"; _type "text" ]
-                    ]
-                    p [] [ 
-                        input [ _type "submit" ]
-                    ]
-                ]
-            ]
-
             form [ _action "/results"; _method "POST" ] [
-                yield fieldset [] [
+                fieldset [] [
                     p [] [
-                        label [_for "SaiCodes" ] [ str "Multiple References:" ]
-                        textarea [ _name "SaiCodes"; _rows "12" ] []
+                        label [_for "SingleReference" ] [ str "Aib Reference:" ]
+                        input [ _name "SingleReference"; _type "text" ]
+                    ]
+                    p [] [
+                        label [_for "MultipleReferences" ] [ str "Multiple References:" ]
+                        textarea [ _name "MultipleReferences"; _rows "12" ] []
                     ]
                     p [] [ 
                         input [ _type "submit" ]
