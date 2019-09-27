@@ -9,7 +9,6 @@ module View =
     open Giraffe.GiraffeViewEngine
 
     open FlocMapping.Web.Model
-    open FlocMapping.Web.Base
 
     let makePage (pageTitle : string) (content : XmlNode list) = 
         html [] [
@@ -26,7 +25,6 @@ module View =
         ]
 
 
-    // TODO - this page could list recent sainums
     let saiInputPage : XmlNode =
         [
             form [ _action "/results"; _method "POST" ] [
@@ -91,7 +89,7 @@ module View =
                 ]
             ]
             
-        // One Floc mapping generates
+        // One Floc mapping generates multiple table rows
         let mapping1 (mapping : FlocMapping) : XmlNode list = 
             List.map (answer1 mapping.AibReference mapping.AibCommonName) mapping.MappingAnswers
                 |> List.concat
