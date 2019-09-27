@@ -17,7 +17,8 @@ module Model =
     
     type FlocAnswer = 
         { S4Floc : Floc 
-          Description : string }
+          Description : string
+          DescriptionPath : string }
 
         interface IHtmlRow with
             member x.ToTr (attrs : XmlAttribute list) : XmlNode = 
@@ -32,6 +33,7 @@ module Model =
     type EquipmentAnswer = 
         { ParentFloc : Floc 
           ParentDesc : string
+          ParentDescPath : string 
           EquipmentId : int64 
           EquipmentDesc : string }
 

@@ -68,7 +68,11 @@ module View =
                     [
                         td [_colspan "2"] ["Lookup not found" |> str]
                     ]
-
+            let answerPath = 
+                match answer with
+                | EquipmentAns ans -> ans.ParentDescPath |> str
+                | FlocAns ans -> ans.DescriptionPath |> str
+                | LookupFail -> "&nbsp;" |> rawText
             [ 
                 tr [] [ 
                     yield td [] [aibRef |> str]
@@ -78,6 +82,12 @@ module View =
 
                 tr [_class "explanation"] [
                     td [_colspan "4"] [commonName |> str]
+                ]
+
+                tr [_class "explanation"] [
+                    td [] ["&nbsp;" |> rawText]
+                    td [] ["&rArr;" |> rawText]
+                    td [_colspan "2"] [answerPath]
                 ]
             ]
             
@@ -90,9 +100,9 @@ module View =
                 table [] [
                     thead [] [
                         tr [] [ 
-                            th [_style "width:30%"] ["Aib Code" |> str]
+                            th [_style "width:20%"] ["Aib Code" |> str]
                             th [_style "width:5%"] ["&nbsp;" |> rawText]
-                            th [_style "width:40%"] ["Floc" |> str]
+                            th [_style "width:50%"] ["Floc" |> str]
                             th [_style "width:25%"] ["Equipment Number" |> str]
                         ]
                     ]

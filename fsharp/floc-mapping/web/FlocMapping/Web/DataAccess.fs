@@ -60,10 +60,17 @@ module DataAccess =
 
 
     let saiFlocMapping (sai : string) : SqliteDb<FlocAnswer list> = 
-        aibReferenceToS4Floc sai >>= 
-            mapM (fun x -> s4FlocName x |>> fun name -> { S4Floc = x; Description = name } )
+        let fillout (floc : Floc) : SqliteDb<FlocAnswer> = 
+            sqliteDb { 
+                let! name = s4FlocName floc
+                let! path = s4CommonNamePath floc
+                return { S4Floc = floc
+                         Description = name 
+                         DescriptionPath = path } 
+            }
+        aibReferenceToS4Floc sai >>=  mapM fillout
 
-    let pliEquipmentAnswers (pli : string) : SqliteDb<EquipmentAnswer list> = 
+    let pliEquipmentAnswers1 (pli : string) : SqliteDb<EquipmentAnswer list> = 
         let sql = 
             """
             SELECT 
@@ -84,9 +91,18 @@ module DataAccess =
             { ParentFloc = result.GetString(0) |> makeFloc
               ParentDesc = result.GetString(1)
               EquipmentId = result.GetInt64(2)
-              EquipmentDesc = result.GetString(3) }
+              EquipmentDesc = result.GetString(3)
+              ParentDescPath = "" }
         
         queryKeyed cmd (Strategy.Map readRow)
+
+    let pliEquipmentAnswers (pli : string) : SqliteDb<EquipmentAnswer list> =
+        let fillout (ans : EquipmentAnswer) = 
+            sqliteDb { 
+                let! path = s4CommonNamePath ans.ParentFloc
+                return { ans with ParentDescPath = path }
+            }
+        pliEquipmentAnswers1 pli >>= mapM fillout
 
     let flocMapping (code : string) : SqliteDb<FlocMapping> =
         sqliteDb {
