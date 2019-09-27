@@ -5,6 +5,7 @@ namespace FlocMapping.Web
 
 module Base = 
     
+    open System
     open System.Text.RegularExpressions
 
     open Giraffe.GiraffeViewEngine
@@ -34,5 +35,14 @@ module Base =
 
     let isAibCode (code : string) : bool = 
         Regex.IsMatch(input=code, pattern = "^[A-Z]{3}\d{8}$")
+
+    /// Splits on Environment.NewLine
+    let toLines (source:string) : string list = 
+        source.Split(separator=[| Environment.NewLine |], options=StringSplitOptions.None) 
+            |> Array.toList
+
+    let decodeAibCodes (multilineText : string) : string list = 
+        let trim (s : string) : string = s.Trim()
+        multilineText |> toLines |> List.map trim |> List.filter isAibCode
         
 

@@ -37,13 +37,18 @@ let resultsHandler : HttpHandler =
     fun (next : HttpFunc) (ctx : HttpContext) -> 
         task { 
             let! model = ctx.BindFormAsync<ReferencesForm>()
-            let sai = model.SingleReference.Trim()
-            if not <| isAibCode sai then
-                return! htmlView (internalErrorPage <| sprintf "Invalid code %s" sai)  next ctx
-            else
-                let commonName = aibCommonName_ sai
-                match flocMapping sai |> runDb with
-                | Ok flocs -> return! htmlView (resultsPage sai commonName flocs) next ctx
+            
+            let sais = 
+                let x = model.SingleReference.Trim()
+                let xs = model.MultipleReferences |> decodeAibCodes
+                if isAibCode x then (x :: xs) else xs
+            
+            match sais with
+            | [] -> 
+                return! htmlView (internalErrorPage "No valid Aib references")  next ctx
+            | _ -> 
+                match mapM flocMapping sais |> runDb with
+                | Ok mappings -> return! htmlView (resultsPage mappings) next ctx
                 | Error msg -> return! htmlView (internalErrorPage msg) next ctx
         }
 

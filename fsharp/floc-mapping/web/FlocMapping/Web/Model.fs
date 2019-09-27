@@ -13,8 +13,7 @@ module Model =
     [<CLIMutable>]
     type ReferencesForm =
         { SingleReference : string
-          MultipleReferences : string
-        }
+          MultipleReferences : string }
     
     type FlocAnswer = 
         { S4Floc : Floc 
@@ -49,11 +48,17 @@ module Model =
     type LookupAnswer = 
         | EquipmentAns of EquipmentAnswer
         | FlocAns of FlocAnswer
+        | LookupFail 
 
         interface IHtmlRow with
             member x.ToTr (attrs : XmlAttribute list) : XmlNode = 
                 match x with
                 | EquipmentAns ans -> (ans :> IHtmlRow).ToTr attrs
                 | FlocAns ans -> (ans :> IHtmlRow).ToTr attrs
+                | LookupFail -> tr attrs [td [] ["Lookup failed" |> str]]
 
    
+    type FlocMapping = 
+        { AibReference : string 
+          AibCommonName : string
+          MappingAnswers : LookupAnswer list }

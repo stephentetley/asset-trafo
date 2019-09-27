@@ -48,26 +48,56 @@ module View =
 
     
     
-    let resultsPage (sai : string) 
+    
+    let resultsPage (mappings : FlocMapping list) : XmlNode =
+        let answer1 (aibRef : string) 
                     (commonName : string) 
-                    (answers : LookupAnswer list): XmlNode =
-        [
-            
-            yield p [] [ str "AI2:" ]
-            
-            yield p [] [ 
-                htmlTable [ 
-                    toIHtmlRow [ 
-                        str sai
-                        span [_id "commonName"] [ str commonName ]
+                    (answer : LookupAnswer) : XmlNode list = 
+            let answerTop = 
+                match answer with
+                | EquipmentAns ans -> 
+                    [ 
+                        td [] [ans.ParentFloc.ToString() |> str]
+                        td [] [ans.EquipmentId.ToString() |> str]
                     ]
+                | FlocAns ans -> 
+                    [
+                        td [_colspan "2"] [ans.S4Floc.ToString() |> str]
+                    ]
+                | LookupFail -> 
+                    [
+                        td [_colspan "2"] ["Lookup not found" |> str]
+                    ]
+
+            [ 
+                tr [] [ 
+                    yield td [] [aibRef |> str]
+                    yield td [] ["&rArr;" |> rawText]
+                    yield! answerTop
                 ]
             ]
             
-            yield p [] [ str "S4 Flocs:" ]
-
-            yield p [] [ htmlTable answers ] 
-
+        // One Floc mapping generates
+        let mapping1 (mapping : FlocMapping) : XmlNode list = 
+            List.map (answer1 mapping.AibReference mapping.AibCommonName) mapping.MappingAnswers
+                |> List.concat
+        [            
+            yield p [] [ 
+                table [] [
+                    thead [] [
+                        tr [] [ 
+                            th [_style "width:30%"] ["Aib Code" |> str]
+                            th [_style "width:5%"] ["&nbsp;" |> rawText]
+                            th [_style "width:40%"] ["Floc" |> str]
+                            th [_style "width:25%"] ["Equipment Number" |> str]
+                        ]
+                    ]
+                    tbody [] [
+                        yield! List.map mapping1 mappings |> List.concat
+                    ]
+                
+                ]
+            ]
             yield p [] [
                 a [ _href "/" ] [ str "Back" ]
             ]

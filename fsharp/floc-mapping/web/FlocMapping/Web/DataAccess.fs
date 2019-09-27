@@ -10,6 +10,7 @@ module DataAccess =
 
     open SLSqlite.Core
     
+    open FlocMapping.AibBasis
     open FlocMapping.S4Basis
     open FlocMapping.TranslateFloc
     open FlocMapping.Web.Base
@@ -61,7 +62,14 @@ module DataAccess =
         
         queryKeyed cmd (Strategy.Map readRow)
 
-    let flocMapping (code : string) : SqliteDb<LookupAnswer list> = 
-        match isPliCode code with
-        | true -> pliEquipmentAnswers code |>> List.map EquipmentAns
-        | false -> saiFlocMapping code |>> List.map FlocAns
+    let flocMapping (code : string) : SqliteDb<FlocMapping> =
+        sqliteDb {
+            let! commonName = getAibCommonName code |>> Option.defaultValue ""
+            let! flocAnswers = 
+                match isPliCode code with
+                | true -> pliEquipmentAnswers code |>> List.map EquipmentAns
+                | false -> saiFlocMapping code |>> List.map FlocAns
+            return { AibReference = code
+                     AibCommonName = commonName
+                     MappingAnswers = flocAnswers }
+        }
