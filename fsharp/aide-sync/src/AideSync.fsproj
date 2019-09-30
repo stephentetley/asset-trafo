@@ -8,6 +8,7 @@
     <Compile Include="AideSync\Base\Common.fs" />
     <Compile Include="AideSync\Base\Addendum.fs" />
     <Compile Include="AideSync\Datatypes.fs" />
+    <Compile Include="AideSync\Attributes.fs" />
     <Compile Include="AideSync\Datatypes2.fs" />
     <Compile Include="AideSync\DiffImplementation.fs" />
     <Compile Include="AideSync\StructureDiff.fs" />

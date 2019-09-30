@@ -38,6 +38,7 @@ open MarkdownDoc.Pandoc
 
 #load "..\src\AideSync\Base\Common.fs"
 #load "..\src\AideSync\Base\Addendum.fs"
+#load "..\src\AideSync\Attributes.fs"
 #load "..\src\AideSync\Datatypes2.fs"
 #load "..\src\AideSync\StructureDiff.fs"
 #load "..\src\AideSync\BasicQueries2.fs"
@@ -45,6 +46,7 @@ open MarkdownDoc.Pandoc
 
 open AideSync.Base.Common
 open AideSync.Base.Addendum
+open AideSync.Attributes
 open AideSync.Datatypes2
 open AideSync.StructureDiff
 open AideSync.BasicQueries2
@@ -91,13 +93,6 @@ let test03 () =
 
 let test04 () = 
     let action = 
-        buildStructureDiffs 149392L 523007L
-            |>> showDiffs (fun x -> x.CommonName) (fun x -> x.CommonName)
+        buildHierarchyDiffs 149392L 523007L
     runDb action
 
-
-let test05 () = 
-    let action = 
-        buildStructureDiffs 149392L 523007L
-            |>> buildTree
-    runDb action

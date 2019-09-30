@@ -6,7 +6,23 @@ namespace AideSync
 
 module Datatypes2 =
     
+    /// Assets have special attributes (Installed from date, 
+    /// Location Ref) that we call Properties
+    type Properties = Map<string,string>
+
+    type Attributes = Map<string,string>
+
     
+    type NameValueDiff =
+        | OnlyLeft of name : string * value : string
+        | Difference of name : string * leftValue : string * rightValue : string
+        | OnlyRight of name : string * value : string
+
+    let differenceAttributes (leftAttributes : Attributes) 
+                             (rights : Attributes) : NameValueDiff list = 
+        []
+                             
+
     type Property = 
         { PropertyName : string 
           AibValue : string
@@ -24,16 +40,12 @@ module Datatypes2 =
         member x.IsMatch 
             with get () : bool = x.AibValue = x.AideValue
 
-    type Structure<'Label> = 
-        | StructureNode of label : 'Label * kids : Structure<'Label> list
+    type Hierarchy<'Label> = 
+        | HierarchyNode of label : 'Label * kids : Hierarchy<'Label> list
 
 
 
-    type Delta<'TLeft, 'TRight> = 
-        | InLeft of 'TLeft
-        | Match of left : 'TLeft * right : 'TRight
-        | Difference of left : 'TLeft * right : 'TRight
-        | InRight of 'TRight
+    
 
 
   
@@ -42,7 +54,7 @@ module Datatypes2 =
     type AiFlocNode = 
         { AssetId : int64
           Reference : string
-          ShortName: string 
+          ShortName : string 
           CommonName : string 
         }
         // We want to be able to sort top down (priority go down, 
@@ -68,7 +80,20 @@ module Datatypes2 =
                 v.CommonName.Replace(' ', '?')
 
 
-    type InitialDelta = Delta<AiFlocNode, AideFlocNode>
+    type ItemNode = 
+        { Reference : string
+          ShortName : string 
+          CommonName : string 
+          Attributes : Attribute 
+        }
+
+
+    //type Delta<'TLeft, 'TRight> = 
+    //    | InLeft of 'TLeft
+    //    | Match of left : 'TLeft * right : 'TRight
+    //    | Difference of left : 'TLeft * right : 'TRight
+    //    | InRight of 'TRight
+
 
     type ChangeRequestInfo = 
         { ChangeRequestId : int64
@@ -80,7 +105,7 @@ module Datatypes2 =
 
     type ChangeRequest = 
         { Info : ChangeRequestInfo 
-          Changes : Structure<unit> list } // TODO - obvs. not unit
+          Changes : Hierarchy<unit> list } // TODO - obvs. not unit
 
     type ChangeSchemeInfo = 
         { SchemeId : int64

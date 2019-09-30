@@ -125,16 +125,20 @@ module BuildReport2 =
 
 
     // ************************************************************************
-    // Duild Structure diffs
+    // Build Structure diffs
 
 
-    let buildStructureDiffs (changeRequestId : int64) 
-                            (aiAssetId : int64) : SqliteDb<FlocDiff list>  = 
+    let buildHierarchyDiffs (changeRequestId : int64) 
+                            (aiAssetId : int64) : SqliteDb<Hierarchy<FlocDiff> option>  = 
             sqliteDb {
                 let! aiTree = findAiDescendants aiAssetId
                 let! aideId = findAideAssetId changeRequestId aiAssetId |> getOptional
                 let! aideTree = findAideDescendants aideId
-                return diffLists aiTree aideTree
+                return diffLists aiTree aideTree |> buildTree
             }
     
-       
+    // ************************************************************************
+    // Get Properties / Attributes
+
+
+    

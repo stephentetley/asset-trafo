@@ -27,6 +27,9 @@ module StructureDiff =
                 | InBoth (s1,_) -> s1.PathKey
                 | InRight s -> s.PathKey
    
+
+    
+
     /// F# design guidelines say favour object-interfaces rather than records of functions..
 
     /// Note - the inputs will be sorted before the differences
@@ -88,32 +91,12 @@ module StructureDiff =
             String.concat "?" parts.[0 .. parts.Length - 2]
         else ""
 
-
-    // Not in cps...
-    let buildTreeNotCps (items : FlocDiff list) : Structure<FlocDiff> option = 
-        let rec getSiblings (parent : FlocDiff) 
-                            (siblings : Structure<FlocDiff> list) 
-                            (workList : FlocDiff list) = 
-            match workList with
-            | [] -> List.rev siblings, []
-            | k1 :: rest -> 
-                if parentOfPath k1.PathKey = parent.PathKey then
-                    let kids,rest2 = getSiblings k1 [] rest
-                    let knode = StructureNode(k1, List.rev kids)
-                    getSiblings parent (knode :: siblings) rest2
-                else
-                    let knode = StructureNode(k1, [])
-                    getSiblings parent (knode :: siblings) rest
-        match items with
-        | [] -> None
-        | root :: kids -> 
-            let siblings, _ = getSiblings root [] kids in Some (StructureNode(root, siblings))
-
-
+    
+ 
     // In cps...
-    let buildTree (items : FlocDiff list) : Structure<FlocDiff> option = 
+    let buildTree (items : FlocDiff list) : Hierarchy<FlocDiff> option = 
         let rec getSiblings (parent : FlocDiff) 
-                            (siblings : Structure<FlocDiff> list) 
+                            (siblings : Hierarchy<FlocDiff> list) 
                             (workList : FlocDiff list) 
                             cont = 
             match workList with
@@ -121,15 +104,16 @@ module StructureDiff =
             | k1 :: rest -> 
                 if parentOfPath k1.PathKey = parent.PathKey then
                     getSiblings k1 [] rest (fun (kids,rest2) -> 
-                    let knode = StructureNode(k1, List.rev kids)
+                    let knode = HierarchyNode(k1, List.rev kids)
                     getSiblings parent (knode :: siblings) rest2 cont)
                     
                 else
-                    let knode = StructureNode(k1, [])
+                    let knode = HierarchyNode(k1, [])
                     getSiblings parent (knode :: siblings) rest cont
         match items with
         | [] -> None
         | root :: kids -> 
-            let siblings, _ = getSiblings root [] kids (fun x -> x) in Some (StructureNode(root, siblings))
+            let siblings, _ = getSiblings root [] kids (fun x -> x) 
+            Some (HierarchyNode(root, siblings))
 
 
