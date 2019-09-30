@@ -129,7 +129,7 @@ module BasicQueries =
             """
             SELECT 
                     aide.aide_asset_id     AS [AideAssetId]
-            FROM    aide_asset              AS aide
+            FROM    aide_asset             AS aide
             WHERE
                     aide.change_request_id = :chreq 
             AND     aide.asset_id = :assetid     

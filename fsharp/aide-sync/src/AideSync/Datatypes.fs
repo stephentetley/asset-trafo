@@ -203,36 +203,17 @@ module Datatypes =
         { ChangeRequestId : int64
           RequestType : string
           Status : string
-          Comment: string
+          Comment : string
           RequestTime : System.DateTime
         }
 
-    // TODO - This makes things very complicated as a topdown
-    // traversal. It means we end up with two very differently 
-    // shaped tree types.
-    //type ChangeRequest = 
-    //    | AttributeChange of 
-    //            info : ChangeRequestInfo * assetsChanges : AssetChange list  
-    //    | AideChange of 
-    //            info: ChangeRequestInfo * structureChanges : AssetStructureChange list
 
-    //    | UnhandledChangeRequest of info : ChangeRequestInfo
-
-    //    member v.Info 
-    //        with get () : ChangeRequestInfo = 
-    //            match v with
-    //            | AttributeChange(info,_) -> info
-    //            | AideChange(info,_) -> info
-    //            | UnhandledChangeRequest info -> info
-
-    // TODO - new datatype (17/9/19). 
     // Use this to prevent a tricky recursive hierarchy
     type AttributeChangeRequest = 
         { Info : ChangeRequestInfo 
           AssetChanges : AssetChange list 
         }
 
-    // TODO - new datatype (17/9/19). 
     // Use this to prevent a tricky recursive hierarchy
     type AideChangeRequest = 
         { Info : ChangeRequestInfo 
@@ -248,7 +229,6 @@ module Datatypes =
 
     type ChangeScheme = 
         { Info : ChangeSchemeInfo
-          // REMOVE - ChangeRequests : ChangeRequest list
           SimpleChanges : AttributeChangeRequest list
           StructureChanges : AideChangeRequest list
         }

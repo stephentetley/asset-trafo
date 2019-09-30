@@ -23,7 +23,7 @@ Environment.SetEnvironmentVariable("PATH",
     Environment.GetEnvironmentVariable("PATH") + ";" + SQLiteInterop
     )
 
-#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190823\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190930\lib\netstandard2.0"
 #r "SLSqlite.dll"
 open SLSqlite.Core
 
@@ -99,6 +99,7 @@ let runChangeSchemeReport (schemeCode : string)
     | Ok None -> Error (sprintf "Could not find scheme matching '%s'" schemeCode)
     | Ok (Some scheme) -> 
         writeFullReport scheme pandocOpts outputHtmlFile
+
 
 // This is the major test... 
 // test02 "PCL 81" ;;   // Structure changes

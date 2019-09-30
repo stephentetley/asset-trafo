@@ -19,8 +19,25 @@ module Addendum =
     // If the resultset is expected to have 1+ results Head makes sense
     // but if it is expected to have 0 or 1 then TryHead is ueful.
 
-    let optional (action : SqliteDb<'a>) : SqliteDb<'a option> = 
-        attempt (action |>> Some) (fun _ -> mreturn None)
+    //let pipe2 (action1 : SqliteDb<'a>) 
+    //          (action2 : SqliteDb<'b>) 
+    //          (combine : 'a -> 'b -> 'c) : SqliteDb<'c> = 
+    //    sqliteDb { 
+    //        let! a = action1
+    //        let! b = action2
+    //        return (combine a b)
+    //    }
+
+
+    //let optional (action : SqliteDb<'a>) : SqliteDb<'a option> = 
+    //    attempt (action |>> Some) (fun _ -> mreturn None)
+
+    //let getOptional (action : SqliteDb<'a option>) : SqliteDb<'a> = 
+    //    sqliteDb { 
+    //        match! action with
+    //        | Some a -> return a
+    //        | None -> throwError "getOptional - None" |> ignore
+    //    }
 
     let valueByName (reader : ResultItem) (field : string) : obj = 
         let ix = reader.GetOrdinal(field)

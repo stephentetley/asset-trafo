@@ -1,4 +1,15 @@
 
+-- drop indices
+DROP INDEX IF EXISTS idx_aide_asset_asset_id;
+DROP INDEX IF EXISTS idx_asset_change_ai_asset_id;
+DROP INDEX IF EXISTS idx_asset_change_change_request_id;
+DROP INDEX IF EXISTS idx_asset_attribute_change_ai_asset_id;
+DROP INDEX IF EXISTS idx_asset_attribute_change_aide_asset_id;
+
+-- drop views
+DROP VIEW  IF EXISTS view_scheme_change_requests;
+
+
 -- drop tables
 DROP VIEW IF EXISTS view_scheme_change_requests;
 DROP TABLE IF EXISTS work_scheme;
@@ -10,7 +21,7 @@ DROP TABLE IF EXISTS asset_attribute_change;
 DROP TABLE IF EXISTS asset_repeated_attribute_change;
 DROP TABLE IF EXISTS aide_structure_relationships;
 DROP TABLE IF EXISTS ai_structure_relationships;
-DROP VIEW  IF EXISTS view_scheme_change_requests;
+
 
 -- create tables
 
@@ -131,7 +142,7 @@ CREATE TABLE aide_structure_relationships
 );
 
 
-
+-- create views
 
 CREATE VIEW view_scheme_change_requests 
 AS 
@@ -142,3 +153,24 @@ FROM
     asset_change AS asset_change
 ORDER BY asset_change.scheme_id, asset_change.change_request_id
 ;
+
+-- create indices
+
+
+CREATE INDEX idx_aide_asset_asset_id
+ON aide_asset(asset_id);
+
+CREATE INDEX idx_asset_change_ai_asset_id
+ON asset_change(ai_asset_id);
+
+CREATE INDEX idx_asset_change_change_request_id
+ON asset_change(change_request_id);
+
+CREATE INDEX idx_asset_attribute_change_ai_asset_id
+ON asset_attribute_change(ai_asset_id);
+
+CREATE INDEX idx_asset_attribute_change_aide_asset_id
+ON asset_attribute_change(aide_asset_id);
+
+CREATE INDEX idx_asset_attribute_change_change_request_id
+ON asset_attribute_change(change_request_id);
