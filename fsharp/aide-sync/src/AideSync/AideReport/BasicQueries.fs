@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync
+namespace AideSync.AideReport
 
 
-module BasicQueries2 =
+module BasicQueries =
 
     
     open SLSqlite.Core
 
     open AideSync.Base.Addendum
-    open AideSync.Datatypes2
+    open AideSync.AideReport.Datatypes
 
 
 

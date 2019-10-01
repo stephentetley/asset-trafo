@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync
+namespace AideSync.AideReport
 
 
-module Datatypes2 =
+module Datatypes =
     
-    open AideSync.Attributes
+    open AideSync.AideReport.Attributes
 
 
     /// Assets have special attributes (Installed from date, 

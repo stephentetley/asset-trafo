@@ -1,22 +1,16 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync
+namespace AideSync.AideReport
 
 
 module StructureDiff =
     
     open System.Text
 
-    open AideSync.Datatypes2
+    open AideSync.AideReport.Datatypes
 
 
-    
-   
-
-    
-
-    /// F# design guidelines say favour object-interfaces rather than records of functions..
 
     /// Note - the inputs will be sorted before the differences
     /// are calculated. 

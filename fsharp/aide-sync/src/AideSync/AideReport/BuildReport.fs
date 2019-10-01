@@ -1,20 +1,19 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync
+namespace AideSync.AideReport
 
 
-module BuildReport2 =
+module BuildReport =
     
     open System.Data.SQLite
 
     open SLSqlite.Core
 
-    open AideSync.Base.Addendum
-    open AideSync.Attributes
-    open AideSync.Datatypes2
-    open AideSync.StructureDiff 
-    open AideSync.BasicQueries2      
+    open AideSync.AideReport.Attributes
+    open AideSync.AideReport.Datatypes
+    open AideSync.AideReport.StructureDiff 
+    open AideSync.AideReport.BasicQueries
     
 
     // ************************************************************************

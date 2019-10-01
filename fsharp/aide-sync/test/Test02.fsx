@@ -38,19 +38,19 @@ open MarkdownDoc.Pandoc
 
 #load "..\src\AideSync\Base\Common.fs"
 #load "..\src\AideSync\Base\Addendum.fs"
-#load "..\src\AideSync\Attributes.fs"
-#load "..\src\AideSync\Datatypes2.fs"
-#load "..\src\AideSync\StructureDiff.fs"
-#load "..\src\AideSync\BasicQueries2.fs"
-#load "..\src\AideSync\BuildReport2.fs"
+#load "..\src\AideSync\AideReport\Attributes.fs"
+#load "..\src\AideSync\AideReport\Datatypes.fs"
+#load "..\src\AideSync\AideReport\StructureDiff.fs"
+#load "..\src\AideSync\AideReport\BasicQueries.fs"
+#load "..\src\AideSync\AideReport\BuildReport.fs"
 
 open AideSync.Base.Common
 open AideSync.Base.Addendum
-open AideSync.Attributes
-open AideSync.Datatypes2
-open AideSync.StructureDiff
-open AideSync.BasicQueries2
-open AideSync.BuildReport2
+open AideSync.AideReport.Attributes
+open AideSync.AideReport.Datatypes
+open AideSync.AideReport.StructureDiff
+open AideSync.AideReport.BasicQueries
+open AideSync.AideReport.BuildReport
 
 let runDb (action : SqliteDb<'a>) : Result<'a, string> = 
     let dbActive = 
