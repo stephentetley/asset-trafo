@@ -43,6 +43,8 @@ open MarkdownDoc.Pandoc
 #load "..\src\AideSync\AideReport\StructureDiff.fs"
 #load "..\src\AideSync\AideReport\BasicQueries.fs"
 #load "..\src\AideSync\AideReport\BuildReport.fs"
+#load "..\src\AideSync\AideReport\PrintReport.fs"
+#load "..\src\AideSync\AideReport.fs"
 
 open AideSync.Base.Common
 open AideSync.Base.Addendum
@@ -51,12 +53,16 @@ open AideSync.AideReport.Datatypes
 open AideSync.AideReport.StructureDiff
 open AideSync.AideReport.BasicQueries
 open AideSync.AideReport.BuildReport
+open AideSync.AideReport.PrintReport
+open AideSync.AideReport
+
+let activeDb () = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\data\db\aide_sync_active.sqlite")
+
 
 let runDb (action : SqliteDb<'a>) : Result<'a, string> = 
-    let dbActive = 
-        Path.Combine(__SOURCE_DIRECTORY__, @"..\data\db\aide_sync_active.sqlite")
-
-    let connParams = sqliteConnParamsVersion3 dbActive
+    let dbPath = activeDb () 
+    let connParams = sqliteConnParamsVersion3 dbPath
     runSqliteDb connParams action
 
 let test01 () = 
@@ -120,3 +126,17 @@ let test08 () =
 let test09 () = 
     getChangeScheme "R131600100" |> runDb
     
+let outputFile (relFileName : string) = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
+
+
+// test10 "R131600100" ;;
+let test10 (schemeCode : string) = 
+    let name = sprintf "aide_change_report_%s.html" (safeName schemeCode)
+    let htmlOutput = outputFile name
+
+    let config : AideReportConfig = 
+        { PathToCss = @"..\..\..\..\..\libs\markdown-css-master\github.css"
+          PathToDb = activeDb () }
+
+    runChangeSchemeReport config schemeCode htmlOutput

@@ -21,6 +21,8 @@
     <Compile Include="AideSync\AideReport\StructureDiff.fs" />
     <Compile Include="AideSync\AideReport\BasicQueries.fs" />
     <Compile Include="AideSync\AideReport\BuildReport.fs" />
+    <Compile Include="AideSync\AideReport\PrintReport.fs" />
+    <Compile Include="AideSync\AideReport.fs" />
   </ItemGroup>
 
   <ItemGroup>
