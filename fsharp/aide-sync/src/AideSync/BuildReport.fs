@@ -26,8 +26,8 @@ module BuildReport =
                                     (propertyDescription : string)
                                     (leftFieldName : string) 
                                     (rightFieldName : string) : AssetPropertyDelta option = 
-        let name1 = (valueByName answerRow leftFieldName).ToString()
-        let name2 = (valueByName answerRow rightFieldName).ToString()
+        let name1 = answerRow.GetString(leftFieldName)
+        let name2 = answerRow.GetString(rightFieldName)
         if name1 <> name2 then
             { PropertyName = propertyDescription
             ; AiValue = name1

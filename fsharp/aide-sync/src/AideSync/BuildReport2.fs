@@ -11,6 +11,7 @@ module BuildReport2 =
     open SLSqlite.Core
 
     open AideSync.Base.Addendum
+    open AideSync.Attributes
     open AideSync.Datatypes2
     open AideSync.StructureDiff 
     open AideSync.BasicQueries2      
@@ -140,5 +141,89 @@ module BuildReport2 =
     // ************************************************************************
     // Get Properties / Attributes
 
-
     
+    let getAssetPropertyChanges (aideAssetId : int64) : SqliteDb<PropertyDiffs> = 
+        let sql = 
+            """
+            SELECT 
+                change.ai_asset_name            AS [ShortNameL],
+                change.aide_asset_name          AS [ShortNameR],
+                change.ai_common_name           AS [CommonNameL],
+                change.aide_common_name         AS [CommonNameR],
+                change.ai_installed_from_date   AS [InstalledFromDateL],
+                change.aide_installed_from_date AS [InstalledFromDateR],
+                change.ai_manufacturer          AS [ManufacturerL],
+                change.aide_manufacturer        AS [ManufacturerR],
+                change.ai_model                 AS [ModelL],
+                change.aide_model               AS [ModelR], 
+                change.ai_hierarchy_key         AS [HierarchyKeyL],
+                change.aide_hierarchy_key       AS [HierarchyKeyR], 
+                change.ai_asset_status          AS [AssetStatusL],
+                change.aide_asset_status        AS [AssetStatusR], 
+                change.ai_location_reference    AS [LocRefL],
+                change.aide_location_reference  AS [LocRefR], 
+                change.ai_asset_deleted         AS [AssetDeletedL],
+                change.aide_asset_deleted       AS [AssetDeletedR]
+            FROM    asset_change   AS change
+            WHERE   change.aide_asset_id = :aideid;
+            """
+        let cmd = 
+            new KeyedCommand (commandText = sql)
+                |> addNamedParam "aideid" (int64Param aideAssetId)
+        
+        let readRow (result : ResultItem) : PropertyDiffs = 
+            let getField (colName : string) : string option = result.TryGetString(colName)
+            let getFieldi (colName : string) : string option = 
+                result.TryGetInt16(colName) |> Option.map (fun x -> x.ToString())
+            [] 
+                |> addDifference "Name" (getField "ShortNameL") (getField "ShortNameR")
+                |> addDifference "Common Name" (getField "CommonNameL") (getField "CommonNameR")
+                |> addDifference "Installed From Date" (getField "InstalledFromDateL") (getField "InstalledFromDateR")
+                |> addDifference "Manufacturer" (getField "ManufacturerL") (getField "ManufacturerR")
+                |> addDifference "Model" (getField "ModelL") (getField "ManufacturerR")
+                |> addDifference "Hierarchy Key" (getField "HierarchyKeyL") (getField "HierarchyKeyR")
+                |> addDifference "Asset Status" (getField "AssetStatusL") (getField "AssetStatusR")
+                |> addDifference "Loc Ref" (getField "LocRefL") (getField "LocRefR")
+                // AssetDeleted is a TINYINT
+                |> addDifference "Asset Deleted" (getFieldi "AssetDeletedL") (getFieldi "AssetDeletedR")
+                |> List.rev
+
+        queryKeyed cmd (Strategy.Head readRow) <|> mreturn []
+
+
+
+    let getAssetAttributeChanges (aideAssetId : int64) : SqliteDb<AttributeDiffs> = 
+        let sql = 
+            """
+            SELECT 
+                attr_change.attribute_name      AS [AttributeName],
+                attr_change.ai_value            AS [ValueL1],
+                attr_change.ai_lookup_value     AS [ValueL2],
+                attr_change.aide_value          AS [ValueR1],
+                attr_change.aide_lookup_value   AS [ValueR2]
+            FROM    asset_attribute_change   AS attr_change
+            WHERE   
+                    attr_change.aide_asset_id = :aideid;
+            """
+        let cmd = 
+            new KeyedCommand (commandText = sql)
+                |> addNamedParam "aideid" (int64Param aideAssetId)
+        
+
+        let best (value1 : string option) (value2 : string option) : string option = 
+            match value2 with
+            | Some "NULL" -> value1
+            | Some _ -> value2
+            | None -> value1
+
+        let readRow (acc : AttributeDiffs) (result : ResultItem) : AttributeDiffs = 
+            match result.TryGetString("AttributeName") with
+            | None -> acc
+            | Some name ->
+                let left = best (result.TryGetString("ValueL1")) (result.TryGetString("ValueL2"))
+                let right = best (result.TryGetString("ValueR1")) (result.TryGetString("ValueR2"))
+                acc
+                    |> addDifference name left right
+                
+        let strategy : Strategy<AttributeDiffs> = Strategy<AttributeDiffs>.Fold readRow []
+        queryKeyed cmd strategy // <|> mreturn []

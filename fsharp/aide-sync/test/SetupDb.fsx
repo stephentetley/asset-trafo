@@ -24,15 +24,17 @@ Environment.SetEnvironmentVariable("PATH",
     )
 
 
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20191001\lib\netstandard2.0"
+#r "SLSqlite.dll"
+open SLSqlite.Core
+
+
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
 open SLFormat.CommandOptions
 open SLFormat.CommandOptions.SimpleInvoke
 
 
-#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190930\lib\netstandard2.0"
-#r "SLSqlite.dll"
-open SLSqlite.Core
 
 
 
@@ -53,6 +55,8 @@ let outputDbFile () =
 
 type ErrMsg = string
 
+// TODO - this should be in the library module, with the script 
+// doing little more than calling it.
 let main () : Result<unit, ErrMsg> = 
     let workSchemeCsv       = sourceCsv "change_requests_schemes.csv"
     let changeRequestsCsv   = sourceCsv "change_requests_change_reqs.csv"
@@ -77,17 +81,17 @@ let main () : Result<unit, ErrMsg> =
     let connParams = sqliteConnParamsVersion3 dbActive
     runSqliteDb connParams 
         <| sqliteDb { 
-                do! insertWorkSchemeRows workSchemeCsv
-                do! insertChangeRequestRows changeRequestsCsv
-                do! insertAiAssetRows aiAssetsCsv
-                do! insertAideAssetRows aideAssetsCsv
-                do! insertAssetChangeRows assetChangesCsv
-                do! insertAssetNewRows newAssetsCsv
-                do! insertAttributeChangeRows attrChangesCsv
-                do! insertAttributeNewRows newAttributesCsv
-                do! insertRepeatedAttributeChangeRows repAttrChangesCsv
-                do! insertAideStructRelationshipRows aideStructRelsCsv
-                do! insertAiStructRelationshipRows aiStructRelsCsv
-                return ()
-            }
+            do! insertWorkSchemeRows workSchemeCsv
+            do! insertChangeRequestRows changeRequestsCsv
+            do! insertAiAssetRows aiAssetsCsv
+            do! insertAideAssetRows aideAssetsCsv
+            do! insertAssetChangeRows assetChangesCsv
+            do! insertAssetNewRows newAssetsCsv
+            do! insertAttributeChangeRows attrChangesCsv
+            do! insertAttributeNewRows newAttributesCsv
+            do! insertRepeatedAttributeChangeRows repAttrChangesCsv
+            do! insertAideStructRelationshipRows aideStructRelsCsv
+            do! insertAiStructRelationshipRows aiStructRelsCsv
+            return ()
+        }
 

@@ -5,6 +5,7 @@ DROP INDEX IF EXISTS idx_asset_change_ai_asset_id;
 DROP INDEX IF EXISTS idx_asset_change_change_request_id;
 DROP INDEX IF EXISTS idx_asset_attribute_change_ai_asset_id;
 DROP INDEX IF EXISTS idx_asset_attribute_change_aide_asset_id;
+DROP INDEX IF EXISTS idx_asset_attribute_change_change_request_id;
 
 -- drop views
 DROP VIEW  IF EXISTS view_scheme_change_requests;
@@ -174,3 +175,4 @@ ON asset_attribute_change(aide_asset_id);
 
 CREATE INDEX idx_asset_attribute_change_change_request_id
 ON asset_attribute_change(change_request_id);
+

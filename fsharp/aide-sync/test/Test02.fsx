@@ -23,7 +23,7 @@ Environment.SetEnvironmentVariable("PATH",
     Environment.GetEnvironmentVariable("PATH") + ";" + SQLiteInterop
     )
 
-#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20190930\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20191001\lib\netstandard2.0"
 #r "SLSqlite.dll"
 open SLSqlite.Core
 
@@ -96,3 +96,9 @@ let test04 () =
         buildHierarchyDiffs 149392L 523007L
     runDb action
 
+let test05 () = 
+    getAssetPropertyChanges 6059L |> runDb
+
+
+let test06 () = 
+    getAssetAttributeChanges 2122243L |> runDb

@@ -18,8 +18,22 @@ module Attributes =
         | Difference of name : string * leftValue : string * rightValue : string
         | OnlyRight of name : string * value : string
 
+    type AttributeDiffs = NameValueDiff list
+    type PropertyDiffs = NameValueDiff list
+
+    let addDifference (name : string) 
+                      (valueLeft : string option) 
+                      (valueRight : string option) 
+                      (diffList : AttributeDiffs) : AttributeDiffs = 
+        match valueLeft, valueRight with
+        | Some a, Some b -> 
+            if a <> b then Difference(name, a, b) :: diffList else diffList
+        | Some a, None -> OnlyLeft(name, a) :: diffList
+        | None, Some b -> OnlyRight(name, b) :: diffList
+        | _, _ -> diffList
+
     let differenceAttributes (leftAttributes : Attributes) 
-                             (rightAttributes : Attributes) : NameValueDiff list = 
+                             (rightAttributes : Attributes) : AttributeDiffs = 
         let rec work lefts rights cont = 
             match lefts,rights with
             | xs, [] -> cont (List.map (fun (n,v) -> OnlyLeft(n,v)) xs)
