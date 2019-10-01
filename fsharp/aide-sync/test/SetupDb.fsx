@@ -34,13 +34,9 @@ open SLSqlite.Core
 open SLFormat.CommandOptions
 open SLFormat.CommandOptions.SimpleInvoke
 
-
-
-
-
-#load "..\src\AideSync\ImportSchema.fs"
-#load "..\src\AideSync\PopulateDb.fs"
-open AideSync.PopulateDb
+#load "..\src\AideSync\SetupDb\ImportSchema.fs"
+#load "..\src\AideSync\SetupDb\PopulateDb.fs"
+open AideSync.SetupDb.PopulateDb
 
 let sourceCsv (fileName : string) : string = 
     let current = "20190925"

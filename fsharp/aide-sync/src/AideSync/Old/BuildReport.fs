@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync
+namespace AideSync.Old
 
 
 module BuildReport =
@@ -11,9 +11,9 @@ module BuildReport =
     open SLSqlite.Core
 
     open AideSync.Base.Addendum
-    open AideSync.Datatypes
-    open AideSync.DiffImplementation      
-    open AideSync.BasicQueries
+    open AideSync.Old.Datatypes
+    open AideSync.Old.DiffImplementation      
+    open AideSync.Old.BasicQueries
 
 
     // ************************************************************************

@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync
+namespace AideSync.Old
 
 
 module Metrics =
     
     
-    open AideSync.Datatypes
+    open AideSync.Old.Datatypes
 
     let internal numberOfDifferences (diffs : Differences) : int = 
         let count1 (sd : StructureItemDiff) : int = 

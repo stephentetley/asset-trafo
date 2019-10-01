@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync
+namespace AideSync.Old
 
 
 module BuildSRDiff =
@@ -10,9 +10,9 @@ module BuildSRDiff =
 
     open SLSqlite.Core
 
-    open AideSync.Datatypes
-    open AideSync.DiffImplementation
-    open AideSync.BasicQueries
+    open AideSync.Old.Datatypes
+    open AideSync.Old.DiffImplementation
+    open AideSync.Old.BasicQueries
 
 
 

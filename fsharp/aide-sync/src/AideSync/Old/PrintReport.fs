@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync
+namespace AideSync.Old
 
 
 module PrintReport =
@@ -19,9 +19,9 @@ module PrintReport =
     
 
     open AideSync.Base.Addendum
-    open AideSync.Datatypes
-    open AideSync.DiffImplementation
-    open AideSync.Metrics
+    open AideSync.Old.Datatypes
+    open AideSync.Old.DiffImplementation
+    open AideSync.Old.Metrics
 
 
     let headingTitle : string -> Markdown = 

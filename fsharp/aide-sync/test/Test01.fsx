@@ -38,20 +38,20 @@ open MarkdownDoc.Pandoc
 
 #load "..\src\AideSync\Base\Common.fs"
 #load "..\src\AideSync\Base\Addendum.fs"
-#load "..\src\AideSync\Datatypes.fs"
-#load "..\src\AideSync\BasicQueries.fs"
-#load "..\src\AideSync\DiffImplementation.fs"
-#load "..\src\AideSync\Metrics.fs"
-#load "..\src\AideSync\BuildReport.fs"
-#load "..\src\AideSync\BuildSRDiff.fs"
-#load "..\src\AideSync\PrintReport.fs"
+#load "..\src\AideSync\Old\Datatypes.fs"
+#load "..\src\AideSync\Old\BasicQueries.fs"
+#load "..\src\AideSync\Old\DiffImplementation.fs"
+#load "..\src\AideSync\Old\Metrics.fs"
+#load "..\src\AideSync\Old\BuildReport.fs"
+#load "..\src\AideSync\Old\BuildSRDiff.fs"
+#load "..\src\AideSync\Old\PrintReport.fs"
 open AideSync.Base.Common
-open AideSync.Datatypes
-open AideSync.BasicQueries
-open AideSync.DiffImplementation
-open AideSync.BuildReport
-open AideSync.BuildSRDiff
-open AideSync.PrintReport
+open AideSync.Old.Datatypes
+open AideSync.Old.BasicQueries
+open AideSync.Old.DiffImplementation
+open AideSync.Old.BuildReport
+open AideSync.Old.BuildSRDiff
+open AideSync.Old.PrintReport
 
 let outputFile (relFileName : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)

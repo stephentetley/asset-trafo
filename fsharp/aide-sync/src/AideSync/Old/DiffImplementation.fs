@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync
+namespace AideSync.Old
 
 
 module DiffImplementation =
@@ -14,7 +14,7 @@ module DiffImplementation =
     open MarkdownDoc.Markdown.RoseTree
 
     open AideSync.Base.Addendum
-    open AideSync.Datatypes
+    open AideSync.Old.Datatypes
 
     
 
