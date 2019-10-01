@@ -191,6 +191,28 @@ module BuildReport2 =
         queryKeyed cmd (Strategy.Head readRow) <|> mreturn []
 
 
+    // Asset Atrribute Changes
+
+    // send in cmd for attr value or repeated attr value
+    let internal getAttrChanges (cmd : KeyedCommand) : SqliteDb<AttributeDiffs> = 
+        let best (value1 : string option) (value2 : string option) : string option = 
+            match value2 with
+            | Some "NULL" -> value1
+            | Some _ -> value2
+            | None -> value1
+
+        let readRow (acc : AttributeDiffs) (result : ResultItem) : AttributeDiffs = 
+            match result.TryGetString("AttributeName") with
+            | None -> acc
+            | Some name ->
+                let left = best (result.TryGetString("ValueL1")) (result.TryGetString("ValueL2"))
+                let right = best (result.TryGetString("ValueR1")) (result.TryGetString("ValueR2"))
+                acc
+                    |> addDifference name left right
+                
+        let strategy : Strategy<AttributeDiffs> = Strategy.Fold readRow []
+        queryKeyed cmd strategy <|> mreturn []
+
 
     let getAssetAttributeChanges (aideAssetId : int64) : SqliteDb<AttributeDiffs> = 
         let sql = 
@@ -208,22 +230,67 @@ module BuildReport2 =
         let cmd = 
             new KeyedCommand (commandText = sql)
                 |> addNamedParam "aideid" (int64Param aideAssetId)
-        
+        getAttrChanges cmd
 
-        let best (value1 : string option) (value2 : string option) : string option = 
-            match value2 with
-            | Some "NULL" -> value1
-            | Some _ -> value2
-            | None -> value1
+    let getAssetRepeatedAttributeChanges (aideAssetId : int64) : SqliteDb<AttributeDiffs> = 
+        let sql = 
+            """
+            SELECT 
+                rep_attr_change.attribute_name      AS [AttributeName],
+                rep_attr_change.ai_value            AS [ValueL1],
+                rep_attr_change.ai_lookup_value     AS [ValueL2],
+                rep_attr_change.aide_value          AS [ValueR1],
+                rep_attr_change.aide_lookup_value   AS [ValueR2]
+            FROM    asset_repeated_attribute_change   AS rep_attr_change
+            WHERE   
+                    rep_attr_change.aide_asset_id = :aideid;
+            """
+        let cmd = 
+            new KeyedCommand (commandText = sql)
+                |> addNamedParam "aideid" (int64Param aideAssetId)
+        getAttrChanges cmd
 
-        let readRow (acc : AttributeDiffs) (result : ResultItem) : AttributeDiffs = 
-            match result.TryGetString("AttributeName") with
-            | None -> acc
-            | Some name ->
-                let left = best (result.TryGetString("ValueL1")) (result.TryGetString("ValueL2"))
-                let right = best (result.TryGetString("ValueR1")) (result.TryGetString("ValueR2"))
-                acc
-                    |> addDifference name left right
-                
-        let strategy : Strategy<AttributeDiffs> = Strategy<AttributeDiffs>.Fold readRow []
-        queryKeyed cmd strategy // <|> mreturn []
+
+    let getNodeChanges (aideAssetId : int64) : SqliteDb<NodeChanges> = 
+        sqliteDb {
+            let! props = getAssetPropertyChanges aideAssetId
+            let! attrs = getAssetAttributeChanges aideAssetId
+            let! repAttrs = getAssetRepeatedAttributeChanges aideAssetId
+            return { PropertyChanges = props 
+                     AttributeChanges = attrs
+                     RepeatedAttributeChanges = repAttrs
+                    }
+        }
+    // ************************************************************************
+    // Expand FlocDiff nodes filling out their Properties and Attributes
+
+    let expandFlocDiff (flocNode : FlocDiff) : SqliteDb<StructureNode> = 
+        sqliteDb { 
+            match flocNode with
+            | InLeft body -> return Deleted(body)
+            | InBoth (b1,b2) -> 
+                let! changes = getNodeChanges b2.AideAssetId
+                return Common(b1,b2, changes)
+            | InRight body -> 
+                let! changes = getNodeChanges body.AideAssetId
+                return Added(body, changes)
+        }
+
+    
+    /// In CPS...
+    let expandFlocDiffHierarchy (hierarchy : Hierarchy<FlocDiff>) : SqliteDb<Hierarchy<StructureNode>> = 
+        let rec work tree mcont : SqliteDb<Hierarchy<StructureNode>>=
+            match tree with
+            | HierarchyNode(label,kids) -> 
+                expandFlocDiff label >>= fun node -> 
+                workList kids (fun kids1 -> 
+                mcont (HierarchyNode(node,kids1)))
+            
+        and workList kids mcont : SqliteDb<Hierarchy<StructureNode>>= 
+            match kids with 
+                | [] -> mcont []
+                | k1 :: rest -> 
+                    work k1 (fun v1 -> 
+                    workList rest (fun vs ->
+                    mcont (v1 :: vs)))
+        work hierarchy (fun x -> mreturn x)

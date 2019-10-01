@@ -11,21 +11,7 @@ module StructureDiff =
     open AideSync.Datatypes2
 
 
-    /// A StructureDiff is a difference between the item in the Ai and Aide 
-    /// hierarchies.
-    type FlocDiff = 
-        | InLeft of AiFlocNode
-        | InBoth of AiFlocNode * AideFlocNode
-        | InRight of AideFlocNode
-
-        /// To output we want an almost lexigraphical order but 
-        /// with '/' favoured over ' '
-        member v.PathKey 
-            with get() : string  = 
-                match v with
-                | InLeft s -> s.PathKey
-                | InBoth (s1,_) -> s1.PathKey
-                | InRight s -> s.PathKey
+    
    
 
     
@@ -117,3 +103,40 @@ module StructureDiff =
             Some (HierarchyNode(root, siblings))
 
 
+    // ************************************************************************
+    // Prune the tree
+
+    let nodeHasChanges (source : Hierarchy<StructureNode>) : bool = 
+        let rec work tree cont = 
+            match tree with
+            | HierarchyNode(body : StructureNode, kids) -> 
+                if body.CanBePruned then
+                    cont true
+                else workList kids cont
+        and workList kids cont =
+            match kids with
+            | [] -> cont false
+            | k1 :: rest ->
+                work k1 (fun v1 -> 
+                if v1 then cont v1 else workList rest cont)
+        work source (fun x -> x)
+
+    let pruneTree (source : Hierarchy<StructureNode>) : Hierarchy<StructureNode> option =
+        let rec work tree cont = 
+            match tree with 
+            | HierarchyNode(label : StructureNode, kids) -> 
+                workList kids (fun kids1 -> 
+                match kids1, label.CanBePruned with
+                | [], true -> cont None
+                | _, _ -> cont (Some (HierarchyNode(label,kids1))))
+        and workList kids cont = 
+            match kids with 
+            | [] -> cont []
+            | k1 :: rest -> 
+                work k1 (fun v1 -> 
+                workList rest (fun vs -> 
+                match v1 with
+                | Some v -> cont (v::vs)
+                | None -> cont vs))
+
+        work source (fun x -> x)

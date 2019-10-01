@@ -6,11 +6,11 @@ namespace AideSync
 
 module Datatypes2 =
     
+    open AideSync.Attributes
+
+
     /// Assets have special attributes (Installed from date, 
     /// Location Ref) that we call Properties
-    type Properties = Map<string,string>
-
-    type Attributes = Map<string,string>
 
     
     type NameValueDiff =
@@ -18,45 +18,12 @@ module Datatypes2 =
         | Difference of name : string * leftValue : string * rightValue : string
         | OnlyRight of name : string * value : string
 
-    let differenceAttributes (leftAttributes : Attributes) 
-                             (rights : Attributes) : NameValueDiff list = 
-        []
-                             
-
-    type Property = 
-        { PropertyName : string 
-          AibValue : string
-          AideValue : string }
-
-        member x.IsMatch 
-            with get () : bool = x.AibValue = x.AideValue
-
-
-    type Attribute = 
-        { AttributeName : string 
-          AibValue : string
-          AideValue : string }
-
-        member x.IsMatch 
-            with get () : bool = x.AibValue = x.AideValue
-
-    type Hierarchy<'Label> = 
-        | HierarchyNode of label : 'Label * kids : Hierarchy<'Label> list
-
-
-
-    
-
-
-  
-
-    
+ 
     type AiFlocNode = 
         { AssetId : int64
           Reference : string
           ShortName : string 
-          CommonName : string 
-        }
+          CommonName : string }
         // We want to be able to sort top down (priority go down, 
         // rather than go next).
         // The simplest way to do this is hack the key so '/' has 
@@ -65,35 +32,58 @@ module Datatypes2 =
             with get() : string  = 
                 v.CommonName.Replace(' ', '?')
 
-    type AideFlocNode = 
-        { AideAssetId : int64        
-          Reference : string
-          ShortName : string 
-          CommonName : string
-        }
-        // We want to be able to sort top down (priority go down, 
-        // rather than go next).
-        // The simplest way to do this is hack the key so '/' has 
-        // priority over ' '.
+     type AideFlocNode = 
+         { AideAssetId : int64        
+           Reference : string
+           ShortName : string 
+           CommonName : string }
+         // We want to be able to sort top down (priority go down, 
+         // rather than go next).
+         // The simplest way to do this is hack the key so '/' has 
+         // priority over ' '.
+         member v.PathKey 
+             with get() : string  = 
+                 v.CommonName.Replace(' ', '?')
+
+
+
+    /// A StructureDiff is a difference between the item in the Ai and Aide 
+    /// hierarchies.
+    type FlocDiff = 
+        | InLeft of AiFlocNode
+        | InBoth of AiFlocNode * AideFlocNode
+        | InRight of AideFlocNode
+
+        /// To output we want an almost lexigraphical order but 
+        /// with '/' favoured over ' '
         member v.PathKey 
             with get() : string  = 
-                v.CommonName.Replace(' ', '?')
+                match v with
+                | InLeft s -> s.PathKey
+                | InBoth (s1,_) -> s1.PathKey
+                | InRight s -> s.PathKey
 
 
-    type ItemNode = 
-        { Reference : string
-          ShortName : string 
-          CommonName : string 
-          Attributes : Attribute 
-        }
+
+    type StructureNode = 
+        | Deleted of node : AiFlocNode 
+        | Common of AiFlocNode * AideFlocNode * NodeChanges
+        | Added of AideFlocNode * NodeChanges
+
+        member x.CanBePruned 
+            with get () : bool = 
+                match x with
+                | Common(_,_,changes) -> not changes.HasChanges
+                | _ -> false
 
 
-    //type Delta<'TLeft, 'TRight> = 
-    //    | InLeft of 'TLeft
-    //    | Match of left : 'TLeft * right : 'TRight
-    //    | Difference of left : 'TLeft * right : 'TRight
-    //    | InRight of 'TRight
+    /// Hierarchy is polymorphic on label.
+    /// The label can represent an elementary item or a delta between
+    /// nodes in an Ai tree and an Aide tree.
+    type Hierarchy<'Label> = 
+        | HierarchyNode of label : 'Label * kids : Hierarchy<'Label> list
 
+  
 
     type ChangeRequestInfo = 
         { ChangeRequestId : int64
@@ -105,7 +95,7 @@ module Datatypes2 =
 
     type ChangeRequest = 
         { Info : ChangeRequestInfo 
-          Changes : Hierarchy<unit> list } // TODO - obvs. not unit
+          Changes : Hierarchy<StructureNode> list }
 
     type ChangeSchemeInfo = 
         { SchemeId : int64

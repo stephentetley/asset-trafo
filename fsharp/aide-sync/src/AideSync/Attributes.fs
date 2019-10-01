@@ -21,6 +21,17 @@ module Attributes =
     type AttributeDiffs = NameValueDiff list
     type PropertyDiffs = NameValueDiff list
 
+    type NodeChanges = 
+        { PropertyChanges : PropertyDiffs
+          AttributeChanges : AttributeDiffs 
+          RepeatedAttributeChanges : AttributeDiffs }
+
+        member x.HasChanges 
+            with get () : bool = 
+                not (x.PropertyChanges.IsEmpty) ||
+                not (x.AttributeChanges.IsEmpty) ||
+                not (x.RepeatedAttributeChanges.IsEmpty)
+
     let addDifference (name : string) 
                       (valueLeft : string option) 
                       (valueRight : string option) 
@@ -32,6 +43,8 @@ module Attributes =
         | None, Some b -> OnlyRight(name, b) :: diffList
         | _, _ -> diffList
 
+
+    /// Maybe not needed...
     let differenceAttributes (leftAttributes : Attributes) 
                              (rightAttributes : Attributes) : AttributeDiffs = 
         let rec work lefts rights cont = 
