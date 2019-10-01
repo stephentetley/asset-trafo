@@ -261,6 +261,8 @@ module BuildReport2 =
                      RepeatedAttributeChanges = repAttrs
                     }
         }
+
+
     // ************************************************************************
     // Expand FlocDiff nodes filling out their Properties and Attributes
 
@@ -294,3 +296,38 @@ module BuildReport2 =
                     workList rest (fun vs ->
                     mcont (v1 :: vs)))
         work hierarchy (fun x -> mreturn x)
+
+    let getStructureChange1 (changeRequestId : int64 ) 
+                            (assetRootId : int64) : SqliteDb<Hierarchy<StructureNode> option> = 
+        sqliteDb {
+            match! buildHierarchyDiffs changeRequestId assetRootId with
+            | None -> return None
+            | Some tree -> return! expandFlocDiffHierarchy tree |>> Some
+        }
+
+    let getStructureChanges (changeRequestId : int64) : SqliteDb<Hierarchy<StructureNode> list> = 
+        sqliteDb { 
+            let! assetIds = getChangeRequestAIRootIds changeRequestId
+            return! mapM (getStructureChange1 changeRequestId) assetIds |>> List.choose id
+        }
+
+    // ************************************************************************
+    // StructureChanges 
+
+    let getChangeRequest (changeRequestId : int64) : SqliteDb<ChangeRequest> = 
+        sqliteDb {
+            let! info = getChangeRequestInfo changeRequestId
+            let! changeRequests = getStructureChanges changeRequestId
+            return { Info = info; Changes = changeRequests }
+        }
+
+    // ************************************************************************
+    // Build the full structure
+
+    let getChangeScheme (schemeCode : string) : SqliteDb<ChangeScheme> = 
+        sqliteDb {
+            let! info = getChangeSchemeInfo schemeCode
+            let! changeRequests = 
+                getSchemeChangeRequestIds schemeCode >>= mapM getChangeRequest
+            return { Info = info; StructureChanges = changeRequests }
+        }

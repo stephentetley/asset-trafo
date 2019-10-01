@@ -102,3 +102,21 @@ let test05 () =
 
 let test06 () = 
     getAssetAttributeChanges 2122243L |> runDb
+
+let test07 () = 
+    getAssetRepeatedAttributeChanges 28888L |> runDb
+
+
+let test08 () = 
+    let action = 
+        sqliteDb { 
+            match! buildHierarchyDiffs 149392L 523007L with
+            | Some tree -> return! expandFlocDiffHierarchy tree |>> pruneTree
+            | None -> return None
+        }
+    runDb action
+
+
+let test09 () = 
+    getChangeScheme "R131600100" |> runDb
+    
