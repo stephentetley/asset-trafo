@@ -6,6 +6,8 @@ namespace AideSync.AideReport
 
 module Datatypes =
     
+    open MarkdownDoc.Markdown.RoseTree
+
     open AideSync.AideReport.Attributes
 
 
@@ -83,6 +85,20 @@ module Datatypes =
     type Hierarchy<'Label> = 
         | HierarchyNode of label : 'Label * kids : Hierarchy<'Label> list
 
+        member x.ToMarkdownTree () : RoseTree<'Label> = 
+            let rec work tree cont = 
+                match tree with
+                | HierarchyNode(label, kids) -> 
+                    workList kids (fun vs -> 
+                    cont (Node(label,vs)))
+            and workList kids cont = 
+                match kids with 
+                | [] -> cont []
+                | k1 :: rest -> 
+                    work k1 (fun v1 -> 
+                    workList rest (fun vs -> 
+                    cont (v1 :: vs)))
+            work x (fun x -> x)
   
 
     type ChangeRequestInfo = 

@@ -199,10 +199,6 @@ module PrintReport =
     // ************************************************************************
     // Asset "property" changes
 
-
-    
-
-
     let assetPropertyChangeRow (assetInfo : AssetInfo)
                                 (assetProperty : AssetPropertyDelta) : Table.TableRow = 
         let aiValue,aideValue = valueChanges assetProperty.AiValue assetProperty.AideValue
