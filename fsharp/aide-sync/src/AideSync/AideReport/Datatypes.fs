@@ -25,12 +25,15 @@ module Datatypes =
         { AssetId : int64
           Reference : string
           ShortName : string 
-          CommonName : string }
+          CommonName : string
+          ParentReference : string }
+
+        // The SortKey is not reliable for building.
         // We want to be able to sort top down (priority go down, 
         // rather than go next).
         // The simplest way to do this is hack the key so '/' has 
         // priority over ' '.
-        member v.PathKey 
+        member v.SortKey 
             with get() : string  = 
                 v.CommonName.Replace(' ', '?')
 
@@ -38,12 +41,10 @@ module Datatypes =
          { AideAssetId : int64        
            Reference : string
            ShortName : string 
-           CommonName : string }
-         // We want to be able to sort top down (priority go down, 
-         // rather than go next).
-         // The simplest way to do this is hack the key so '/' has 
-         // priority over ' '.
-         member v.PathKey 
+           CommonName : string
+           ParentReference : string }
+         
+         member v.SortKey 
              with get() : string  = 
                  v.CommonName.Replace(' ', '?')
 
@@ -58,13 +59,26 @@ module Datatypes =
 
         /// To output we want an almost lexigraphical order but 
         /// with '/' favoured over ' '
-        member v.PathKey 
+        member v.SortKey 
             with get() : string  = 
                 match v with
-                | InLeft s -> s.PathKey
-                | InBoth (s1,_) -> s1.PathKey
-                | InRight s -> s.PathKey
+                | InLeft s -> s.SortKey
+                | InBoth (s1,_) -> s1.SortKey
+                | InRight s -> s.SortKey
 
+        member v.Reference 
+            with get() : string  = 
+                match v with
+                | InLeft s -> s.Reference
+                | InBoth (s1,_) -> s1.Reference
+                | InRight s -> s.Reference
+
+        member v.ParentReference 
+            with get() : string  = 
+                match v with
+                | InLeft s -> s.ParentReference
+                | InBoth (s1,_) -> s1.ParentReference
+                | InRight s -> s.ParentReference
 
 
     type StructureNode = 

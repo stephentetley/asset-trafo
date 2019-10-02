@@ -26,7 +26,7 @@ module StructureDiff =
             xs |> List.sortBy (fun x -> x.Reference)
 
         let pathSort (xs : FlocDiff list) = 
-            xs |> List.sortBy (fun x -> x.PathKey)
+            xs |> List.sortBy (fun x -> x.SortKey)
 
         let rec work lefts rights cont = 
             match lefts,rights with
@@ -65,86 +65,51 @@ module StructureDiff =
     // ************************************************************************
     // Build the tree
 
+
+    // Note 
+    // ====
+    // The ``FlocDiff list`` is almost sorted, but not reliably so.
+    // We can assume first node is the root of the tree.
+    
+        
+
     // FATAL ERROR
-    // We cannot rely on PathKey - names might include '/' as a literal
+    // We cannot rely on SortKey - names might include '/' as a literal
     // and not a separator.
 
-    let isChild (parent : string) (child : string) : bool =
-        child.StartsWith(parent)
+    let buildTree (diffs : FlocDiff list) : Hierarchy<FlocDiff> option = 
+        printfn "Length of diffs = %i" diffs.Length
+        let makeNode (d1 : FlocDiff) : Hierarchy<FlocDiff> = 
+            HierarchyNode(d1,[])
 
-
-
-    type TreeStack = 
-        | ParentStack of stack : Hierarchy<FlocDiff> list
-        
-        member x.Height 
-            with get () : int = 
-                let (ParentStack xs) = x in xs.Length
-        
-        member x.Top 
-            with get () : Hierarchy<FlocDiff> = 
-                let (ParentStack xs) = x
+        /// Parent exists!
+        let addNode (d1 : FlocDiff) 
+                    (tree1 : Hierarchy<FlocDiff>) : Hierarchy<FlocDiff> =
+            let rec work (t1 : Hierarchy<FlocDiff>) cont =
+                match t1 with
+                | HierarchyNode(label,kids) -> 
+                    if label.Reference = d1.ParentReference then 
+                        cont (HierarchyNode(label, kids @ [makeNode d1]))
+                    else
+                        workList kids (fun kids1 ->
+                        cont (HierarchyNode(label,kids1)))
+            and workList (xs : Hierarchy<FlocDiff> list) cont = 
                 match xs with
-                | top :: _ -> top
-                | _ -> failwith "Top of empty"
-    
-        member x.IsChild (child : FlocDiff) : bool = 
-            let (ParentStack xs) = x
-            match xs with
-            | HierarchyNode(label,_) :: _ -> isChild label.PathKey child.PathKey
-            | _ -> false
-    
-        member x.Push(child : Hierarchy<FlocDiff>) : TreeStack = 
-            let (ParentStack xs) = x
-            ParentStack (child :: xs)
-    
-        member x.Pop() : TreeStack = 
-            let (ParentStack xs) = x
-            match xs with
-            | top :: HierarchyNode(label, kids) :: rest -> 
-                let top1 = HierarchyNode(label, kids @ [top])
-                ParentStack (top1 :: rest)
-            | _ -> failwith "buildTree TreeStack.Pop"
-    
-        member x.Flatten () : Hierarchy<FlocDiff> option = 
-            let rec work (stk : TreeStack) cont = 
-                if stk.Height > 1 then 
-                    work (stk.Pop()) cont
-                else
-                    let (ParentStack xs) = stk
-                    match xs with 
-                    | [one] -> cont (Some one)
-                    | _ -> cont None
-            work x (fun x -> x)
-            
-    
-        static member Create (root : Hierarchy<FlocDiff>) : TreeStack = 
-            ParentStack [root]
-    
-    let buildTree (source : FlocDiff list) : Hierarchy<FlocDiff> option =
-        let rec work (input : FlocDiff list) 
-                     (acc : TreeStack) 
-                     cont =
-            let key = 
-                match List.tryHead input with
-                | Some(x) -> x.PathKey
-                | None -> ""
-
-            // printfn "work, items left=%i, %s" input.Length key
-            match input with
-            | [] -> cont acc []
-            | k1 :: rest -> 
-                if acc.IsChild k1 then
-                    work rest (acc.Push(HierarchyNode(k1,[]))) cont
-                else    
-                    work input (acc.Pop()) cont
-    
-        match source with 
-        | [] -> None
+                | [] -> cont []     /// really a failure but should be impossible
+                | x :: rest -> 
+                    work x (fun v1 -> 
+                        if x = v1 then
+                            workList rest (fun vs -> 
+                            cont (v1 :: vs))
+                         else 
+                            cont (v1 :: rest))
+            work tree1 (fun x -> x)
+        
+        match diffs with
+        | [] -> None 
         | root :: rest -> 
-            let stack = TreeStack.Create( HierarchyNode(root, []) )
-            let tree1, _ = work rest stack (fun x y -> (x,y))            
-            tree1.Flatten()
+            List.fold (fun st a -> addNode a st) (makeNode root) rest |> Some
+
 
 
     // ************************************************************************
