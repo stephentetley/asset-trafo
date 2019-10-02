@@ -65,12 +65,12 @@ module StructureDiff =
     // ************************************************************************
     // Build the tree
 
-    let isChild1 (parent : string) (child : string) : bool = 
-        let onePlus () = 
-            let arrParent = parent.Split([| '?' |])
-            let arrChild = child.Split([| '?' |])
-            arrParent.Length + 1 = arrChild.Length
-        child.StartsWith(parent) && onePlus ()
+    // FATAL ERROR
+    // We cannot rely on PathKey - names might include '/' as a literal
+    // and not a separator.
+
+    let isChild (parent : string) (child : string) : bool =
+        child.StartsWith(parent)
 
 
 
@@ -88,10 +88,10 @@ module StructureDiff =
                 | top :: _ -> top
                 | _ -> failwith "Top of empty"
     
-        member x.IsChild1 (child : FlocDiff) : bool = 
+        member x.IsChild (child : FlocDiff) : bool = 
             let (ParentStack xs) = x
             match xs with
-            | HierarchyNode(label,_) :: _ -> isChild1 label.PathKey child.PathKey
+            | HierarchyNode(label,_) :: _ -> isChild label.PathKey child.PathKey
             | _ -> false
     
         member x.Push(child : Hierarchy<FlocDiff>) : TreeStack = 
@@ -104,7 +104,7 @@ module StructureDiff =
             | top :: HierarchyNode(label, kids) :: rest -> 
                 let top1 = HierarchyNode(label, kids @ [top])
                 ParentStack (top1 :: rest)
-            | _ -> ParentStack []
+            | _ -> failwith "buildTree TreeStack.Pop"
     
         member x.Flatten () : Hierarchy<FlocDiff> option = 
             let rec work (stk : TreeStack) cont = 
@@ -125,10 +125,16 @@ module StructureDiff =
         let rec work (input : FlocDiff list) 
                      (acc : TreeStack) 
                      cont =
+            let key = 
+                match List.tryHead input with
+                | Some(x) -> x.PathKey
+                | None -> ""
+
+            // printfn "work, items left=%i, %s" input.Length key
             match input with
             | [] -> cont acc []
             | k1 :: rest -> 
-                if acc.IsChild1 k1 then
+                if acc.IsChild k1 then
                     work rest (acc.Push(HierarchyNode(k1,[]))) cont
                 else    
                     work input (acc.Pop()) cont
@@ -137,7 +143,7 @@ module StructureDiff =
         | [] -> None
         | root :: rest -> 
             let stack = TreeStack.Create( HierarchyNode(root, []) )
-            let tree1, _ = work rest stack (fun x y -> (x,y))
+            let tree1, _ = work rest stack (fun x y -> (x,y))            
             tree1.Flatten()
 
 

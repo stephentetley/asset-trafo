@@ -11,7 +11,7 @@ open System.Text
 open MarkdownDoc.Markdown
 open MarkdownDoc.Markdown.RoseTree
 
-let input = 
+let sampleInput = 
     [ "a"
       "a/b1"
       "a/b1/c1"
@@ -98,7 +98,7 @@ let buildTree (source : string list) : RoseTree<string> option =
             else    
                 work input (acc.Pop()) cont
 
-    match input with 
+    match source with 
     | [] -> None
     | root :: rest -> 
         let stack = TreeStack.Create( RoseTree.Node(root, []) )
@@ -110,20 +110,13 @@ let outputTreeOpt (source : RoseTree<string> option) : unit =
     | None -> printfn "None"
     | Some tree -> 
         tree|> RoseTree.mapTree label 
-        |> RoseTree.drawTree |> renderMarkdown 100 |> printfn "%s"
+        |> RoseTree.drawTree |> renderMarkdown 400 |> printfn "%s"
     
 
 let test01 () = 
-    match buildTree input with
-    | None -> printfn "fail"
-    | Some tree -> 
-        tree|> RoseTree.mapTree label 
-            |> RoseTree.drawTree |> renderMarkdown 100 |> printfn "%s"
-
-
+    buildTree sampleInput |> outputTreeOpt
+    
 
 let test02 () = 
     TreeStack.Create(leaf "A").Push(leaf "B").Push(leaf "C").Flatten()
         |> outputTreeOpt
-
-
