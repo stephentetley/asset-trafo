@@ -8,6 +8,7 @@
     <None Include="SetupDb.fsx" />
     <None Include="Test01.fsx" />
     <None Include="Test02.fsx" />
+    <None Include="TempBuildTree.fsx" />
   </ItemGroup>
 
 </Project>

@@ -301,7 +301,7 @@ module BuildReport =
         sqliteDb {
             match! buildHierarchyDiffs changeRequestId assetRootId with
             | None -> return None
-            | Some tree -> return! expandFlocDiffHierarchy tree |>> Some
+            | Some tree -> return! expandFlocDiffHierarchy tree |>> Some // pruneTree
         }
 
     let getStructureChanges (changeRequestId : int64) : SqliteDb<Hierarchy<StructureNode> list> = 

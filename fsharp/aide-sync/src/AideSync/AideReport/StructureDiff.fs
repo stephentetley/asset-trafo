@@ -65,36 +65,80 @@ module StructureDiff =
     // ************************************************************************
     // Build the tree
 
-    let private parentOfPath (s : string) : string = 
-        let parts = s.Split([| '?' |])
-        if parts.Length > 0 then
-            String.concat "?" parts.[0 .. parts.Length - 2]
-        else ""
+    let isChild1 (parent : string) (child : string) : bool = 
+        let onePlus () = 
+            let arrParent = parent.Split([| '?' |])
+            let arrChild = child.Split([| '?' |])
+            arrParent.Length + 1 = arrChild.Length
+        child.StartsWith(parent) && onePlus ()
 
+
+
+    type TreeStack = 
+        | ParentStack of stack : Hierarchy<FlocDiff> list
+        
+        member x.Height 
+            with get () : int = 
+                let (ParentStack xs) = x in xs.Length
+        
+        member x.Top 
+            with get () : Hierarchy<FlocDiff> = 
+                let (ParentStack xs) = x
+                match xs with
+                | top :: _ -> top
+                | _ -> failwith "Top of empty"
     
- 
-    // In cps...
-    let buildTree (items : FlocDiff list) : Hierarchy<FlocDiff> option = 
-        let rec getSiblings (parent : FlocDiff) 
-                            (siblings : Hierarchy<FlocDiff> list) 
-                            (workList : FlocDiff list) 
-                            cont = 
-            match workList with
-            | [] -> cont (List.rev siblings, [])
-            | k1 :: rest -> 
-                if parentOfPath k1.PathKey = parent.PathKey then
-                    getSiblings k1 [] rest (fun (kids,rest2) -> 
-                    let knode = HierarchyNode(k1, List.rev kids)
-                    getSiblings parent (knode :: siblings) rest2 cont)
-                    
+        member x.IsChild1 (child : FlocDiff) : bool = 
+            let (ParentStack xs) = x
+            match xs with
+            | HierarchyNode(label,_) :: _ -> isChild1 label.PathKey child.PathKey
+            | _ -> false
+    
+        member x.Push(child : Hierarchy<FlocDiff>) : TreeStack = 
+            let (ParentStack xs) = x
+            ParentStack (child :: xs)
+    
+        member x.Pop() : TreeStack = 
+            let (ParentStack xs) = x
+            match xs with
+            | top :: HierarchyNode(label, kids) :: rest -> 
+                let top1 = HierarchyNode(label, kids @ [top])
+                ParentStack (top1 :: rest)
+            | _ -> ParentStack []
+    
+        member x.Flatten () : Hierarchy<FlocDiff> option = 
+            let rec work (stk : TreeStack) cont = 
+                if stk.Height > 1 then 
+                    work (stk.Pop()) cont
                 else
-                    let knode = HierarchyNode(k1, [])
-                    getSiblings parent (knode :: siblings) rest cont
-        match items with
+                    let (ParentStack xs) = stk
+                    match xs with 
+                    | [one] -> cont (Some one)
+                    | _ -> cont None
+            work x (fun x -> x)
+            
+    
+        static member Create (root : Hierarchy<FlocDiff>) : TreeStack = 
+            ParentStack [root]
+    
+    let buildTree (source : FlocDiff list) : Hierarchy<FlocDiff> option =
+        let rec work (input : FlocDiff list) 
+                     (acc : TreeStack) 
+                     cont =
+            match input with
+            | [] -> cont acc []
+            | k1 :: rest -> 
+                if acc.IsChild1 k1 then
+                    work rest (acc.Push(HierarchyNode(k1,[]))) cont
+                else    
+                    work input (acc.Pop()) cont
+    
+        match source with 
         | [] -> None
-        | root :: kids -> 
-            let siblings, _ = getSiblings root [] kids (fun x -> x) 
-            Some (HierarchyNode(root, siblings))
+        | root :: rest -> 
+            let stack = TreeStack.Create( HierarchyNode(root, []) )
+            let tree1, _ = work rest stack (fun x y -> (x,y))
+            tree1.Flatten()
 
 
     // ************************************************************************
