@@ -93,6 +93,27 @@ module Datatypes =
                 | _ -> false
 
 
+        member x.ShortName 
+            with get () : string = 
+                match x with
+                | Deleted node -> node.ShortName
+                | Common(node, _, _) -> node.ShortName
+                | Added(node, _) -> node.ShortName
+
+        member x.CommonName 
+            with get () : string = 
+                match x with
+                | Deleted node -> node.CommonName
+                | Common(node, _, _) -> node.CommonName
+                | Added(node, _) -> node.CommonName
+                
+        member x.Reference
+            with get () : string = 
+                match x with
+                | Deleted node -> node.Reference
+                | Common(node, _, _) -> node.Reference
+                | Added(node, _) -> node.Reference
+
     /// Hierarchy is polymorphic on label.
     /// The label can represent an elementary item or a delta between
     /// nodes in an Ai tree and an Aide tree.
@@ -123,9 +144,12 @@ module Datatypes =
           RequestTime : System.DateTime
         }
 
+
+    /// Potentially there may be multiple change requests
+    /// with the same ChangeRequestInfo header
     type ChangeRequest = 
         { Info : ChangeRequestInfo 
-          Changes : Hierarchy<StructureNode> list }
+          StructureChange : Hierarchy<StructureNode> }
 
     type ChangeSchemeInfo = 
         { SchemeId : int64
@@ -136,5 +160,5 @@ module Datatypes =
 
     type ChangeScheme = 
         { Info : ChangeSchemeInfo
-          StructureChanges : ChangeRequest list
+          ChangeRequests : ChangeRequest list
         }

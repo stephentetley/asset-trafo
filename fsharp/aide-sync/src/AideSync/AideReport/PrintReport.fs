@@ -31,7 +31,7 @@ module PrintReport =
     // Change scheme table
 
     let numberOfChangeRequests (scheme : ChangeScheme) : int =
-        scheme.StructureChanges 
+        scheme.ChangeRequests 
             |> List.map (fun x -> x.Info.ChangeRequestId)
             |> List.distinct
             |> List.length
@@ -58,32 +58,37 @@ module PrintReport =
     // Change requests summary
 
     /// Change Request Table 
-    let changeRequestInfosTable (infos : ChangeRequestInfo list) : Markdown option = 
+    let changeRequestInfosTable (requests : ChangeRequest list) : Markdown option = 
         let headings =
-            [ alignLeft 30 (headingTitle "Change Request Id")
-            ; alignLeft 28 (headingTitle "Status")
-            ; alignLeft 28 (headingTitle "Request Time")
-            
-            ; alignLeft 32 (headingTitle "Comment")
+            [ alignLeft 25 (headingTitle "Change Request Id")
+            ; alignLeft 20 (headingTitle "Asset Name")
+            ; alignLeft 40 (headingTitle "Common Name")
+            ; alignLeft 25 (headingTitle "Status")
+            ; alignLeft 30 (headingTitle "Comment")
             ]
 
-        let makeRow (info : ChangeRequestInfo) : TableRow= 
-            let name = info.ChangeRequestId.ToString()
-            [ inlineLink name ("#cr" + name) None   |> markdownText 
-            ; text info.Status                      |> markdownText
-            ; iso8601DateTimeMd info.RequestTime    |> markdownText 
-            ; info.Comment      |> text             |> markdownText 
+        let makeRow (request : ChangeRequest) : TableRow= 
+            let name = request.Info.ChangeRequestId.ToString()
+            let assetName,commonName = 
+                match request.StructureChange with
+                | HierarchyNode(root : StructureNode,_) -> 
+                    root.ShortName, root.CommonName
+            [ inlineLink name ("#cr" + name) None           |> markdownText
+            ; assetName                 |> text             |> markdownText 
+            ; commonName                |> text             |> markdownText 
+            ; text request.Info.Status                      |> markdownText
+            ; request.Info.Comment      |> text             |> markdownText 
             ]
         
-        let rows = infos |> List.map makeRow 
+        let rows = requests |> List.map makeRow 
     
-        match infos with
+        match requests with
         | [] -> None
         | _ -> makeTableWithHeadings headings rows |> gridTable |> Some
 
 
-    let changeRequestContentsTable (infos : ChangeRequestInfo list) : Markdown =
-        match changeRequestInfosTable infos with
+    let changeRequestContentsTable (changeRequests : ChangeRequest list) : Markdown =
+        match changeRequestInfosTable changeRequests with
         | None -> asterisks (text "No change requests")  |> h3
         | Some table -> table
 
@@ -117,14 +122,13 @@ module PrintReport =
         | Deleted s -> 
             let title = htmlAttr "title" (sprintf "Delete '%s'" s.CommonName)
             nodespan lightCoral [title] (makeLabelL s) |> markdownText
-        | Common(s1,s2,changes) -> makeLabelR s2 |> markdownText
-        //| Difference (s1,s2) -> 
-        //    let title = 
-        //        if s1.Name <> s2.Name then 
-        //            htmlAttr "title" (sprintf "Rename '%s' to '%s'" s1.Name s2.Name)
-        //        else
-        //            htmlAttr "title" (sprintf "Non-proper name change (floc path editted):&#013;'%s'&#013;to&#013;'%s'" s1.CommonName s2.CommonName)
-        //    span gold [title] (makeLabelR s2)  |> markdownText
+        | Common(s1,s2,changes) -> 
+            // makeLabelR s2 |> markdownText
+            if changes.HasChanges then
+                let title = htmlAttr "title" "Attributes Changed"
+                nodespan gold [title] (makeLabelR s2)  |> markdownText
+            else
+                makeLabelR s2 |> markdownText
         | Added(s,changes) -> 
             let title = htmlAttr "title" (sprintf "Add '%s'" s.CommonName)
             nodespan paleGreen [title] (makeLabelR s) |> markdownText
@@ -138,7 +142,7 @@ module PrintReport =
 
     let changeRequestDetails (changeRequest : ChangeRequest) : Markdown = 
         changeRequestSectionHeader changeRequest.Info
-            ^!!^ vsep (List.map changeRequestTree changeRequest.Changes)
+            ^!!^ changeRequestTree changeRequest.StructureChange
             ^!!^ linkToTop
 
     // ************************************************************************
@@ -146,13 +150,11 @@ module PrintReport =
 
 
     let makeFullReport (changeScheme : ChangeScheme) : Markdown = 
-        let individualInfos = 
-            changeScheme.StructureChanges |> List.map (fun x -> x.Info)
-
+ 
         h1 (htmlAnchorId "top" (text "AIDE Change Scheme"))
             ^!!^ changeSchemeSummaryTable changeScheme
-            ^!!^ changeRequestContentsTable individualInfos
-            ^!!^ vsep (List.map changeRequestDetails changeScheme.StructureChanges)
+            ^!!^ changeRequestContentsTable changeScheme.ChangeRequests
+            ^!!^ vsep (List.map changeRequestDetails changeScheme.ChangeRequests)
 
 
     // ************************************************************************

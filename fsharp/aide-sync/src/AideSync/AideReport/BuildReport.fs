@@ -132,8 +132,8 @@ module BuildReport =
     let buildHierarchyDiffs (changeRequestId : int64) 
                             (aiAssetId : int64) : SqliteDb<Hierarchy<FlocDiff> option>  = 
             sqliteDb {
-                let! aiTree = findAiDescendants aiAssetId <?> "call to findAiDescendants failed"
-                let! aideId = (findAideAssetId changeRequestId aiAssetId |> getOptional) <?> "call to findAideAssetId failed"
+                let! aiTree = findAiDescendants aiAssetId 
+                let! aideId = (findAideAssetId changeRequestId aiAssetId |> getOptional)
                 let! aideTree = findAideDescendants aideId
                 return diffLists aiTree aideTree |> buildTree
             } |?>> sprintf "buildHierarchyDiffs failed (changeRequestId=%i, aiAssetId=%i)\n%s" changeRequestId aiAssetId
@@ -316,21 +316,30 @@ module BuildReport =
     // ************************************************************************
     // StructureChanges 
 
-    let getChangeRequest (changeRequestId : int64) : SqliteDb<ChangeRequest> = 
+    let getChangeRequests (changeRequestId : int64) : SqliteDb<ChangeRequest list> = 
         sqliteDb {
             let! info = getChangeRequestInfo changeRequestId
-            let! changeRequests = getStructureChanges changeRequestId 
-            return { Info = info; Changes = changeRequests }
+            let! structureChanges = getStructureChanges changeRequestId 
+            let changeRequests = 
+                structureChanges 
+                    |> List.map (fun x -> {Info = info; StructureChange =x })
+            return changeRequests
         } |?>> (sprintf "getChangeRequest failed: %i\n%s" changeRequestId)
 
     // ************************************************************************
     // Build the full structure
 
+    let allChangeResusts (schemeCode : string) : SqliteDb<ChangeRequest list> =
+        sqliteDb { 
+            let! ids = getSchemeChangeRequestIds schemeCode
+            let! xss = mapM getChangeRequests ids
+            return List.concat xss
+        } |?>> sprintf "allChangeRequests (schemeCode = %s) failed\n%s" schemeCode
+
+
     let getChangeScheme (schemeCode : string) : SqliteDb<ChangeScheme> = 
         sqliteDb {
             let! info = getChangeSchemeInfo schemeCode
-            let! changeRequests = 
-                (getSchemeChangeRequestIds schemeCode >>= mapM getChangeRequest)
-                    |?%>>> "getChangeScheme - iterating results failed: %s\n"
-            return { Info = info; StructureChanges = changeRequests }
+            let! changeRequests = allChangeResusts schemeCode 
+            return { Info = info; ChangeRequests = changeRequests }
         } |?%>>> "getChangeScheme failed, error: \n%s"
