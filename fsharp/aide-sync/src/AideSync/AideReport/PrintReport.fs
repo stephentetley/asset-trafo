@@ -18,6 +18,7 @@ module PrintReport =
     open MarkdownDoc.Markdown.CssColors
     open MarkdownDoc.Pandoc
 
+    open AideSync.AideReport.Attributes
     open AideSync.AideReport.Datatypes
 
     let headingTitle : string -> Markdown = 
@@ -54,6 +55,10 @@ module PrintReport =
         makeTableWithoutHeadings specs rows |> gridTable
 
 
+
+    
+
+
     // ************************************************************************
     // Change requests summary
 
@@ -69,10 +74,8 @@ module PrintReport =
 
         let makeRow (request : ChangeRequest) : TableRow= 
             let name = request.Info.ChangeRequestId.ToString()
-            let assetName,commonName = 
-                match request.StructureChange with
-                | HierarchyNode(root : StructureNode,_) -> 
-                    root.ShortName, root.CommonName
+            let assetName = request.StructureChange.RootLabel.ShortName 
+            let commonName = request.StructureChange.RootLabel.CommonName
             [ inlineLink name ("#cr" + name) None           |> markdownText
             ; assetName                 |> text             |> markdownText 
             ; commonName                |> text             |> markdownText 
@@ -92,22 +95,53 @@ module PrintReport =
         | None -> asterisks (text "No change requests")  |> h3
         | Some table -> table
 
+
+    /// Change Scheme Table 
+    let changeAttributeChangeTable (changes : NodeChanges) : Markdown option =
+        let headings =
+            [ alignLeft 30 (headingTitle "Attribute Name")
+            ; alignLeft 30 (headingTitle "AI Value")
+            ; alignLeft 30 (headingTitle "AIDE Value")
+            ; alignLeft 30 (headingTitle "Note")
+            
+            ]
+        
+        let makeRow (change : AttributeValueChange) : TableRow= 
+            [ change.AttributeName          |> text        |> markdownText
+            ; change.LeftValue              |> text        |> markdownText 
+            ; change.RightValue             |> text        |> markdownText 
+            ; change.AttributeDescription   |> text        |> markdownText 
+            ]
+        
+        let rows = changes |> attributeValueChanges |> List.map makeRow 
+
+        match rows with
+        | [] -> None
+        | _ -> makeTableWithHeadings headings rows |> gridTable |> Some
+
+
     // ************************************************************************
     // Individual change request details
 
     /// Individual Change Request section header
-    let changeRequestSectionHeader (changeRequestInfo : ChangeRequestInfo) : Markdown = 
-        let requestId =  changeRequestInfo.ChangeRequestId   
+    let changeRequestSectionHeader (changeRequest : ChangeRequest) : Markdown = 
+        let requestId =  changeRequest.Info.ChangeRequestId   
 
         let title = 
-            let refname = sprintf "cr%i" requestId
-            htmlAnchorId refname (text "Change request" ^+^ int64Md requestId)
+            let refName = sprintf "cr%i" requestId
+            let titleText = 
+                text "Change request" 
+                    ^+^ int64Md requestId
+                    ^+^ text changeRequest.StructureChange.RootLabel.Reference
+                    ^+^ text changeRequest.StructureChange.RootLabel.ShortName
+            htmlAnchorId refName titleText
 
         h2 title
-            ^!!^ markdownText (text "Request status:" ^+^ text changeRequestInfo.Status)
-            ^!!^ markdownText (text "Request time:" ^+^ iso8601DateTimeMd changeRequestInfo.RequestTime)
-            ^!!^ markdownText (text "Request type:" ^+^ text changeRequestInfo.RequestType)
-            ^!!^ markdownText (text "Comment:" ^+^ text changeRequestInfo.Comment)
+            ^!!^ (text "Asset:" ^+^ text changeRequest.StructureChange.RootLabel.CommonName |> markdownText)
+            ^!!^ (text "Request status:" ^+^ text changeRequest.Info.Status |> markdownText)
+            ^!!^ markdownText (text "Request time:" ^+^ iso8601DateTimeMd changeRequest.Info.RequestTime)
+            ^!!^ markdownText (text "Request type:" ^+^ text changeRequest.Info.RequestType)
+            ^!!^ markdownText (text "Comment:" ^+^ text changeRequest.Info.Comment)
 
     let nodespan (colourName : string) (extraAttrs : HtmlAttrs) (body : Text) : Text = 
         htmlSpan (attrStyle [backgroundColor colourName] :: extraAttrs) body
@@ -139,10 +173,14 @@ module PrintReport =
             |> RoseTree.mapTree2 (drawLabel true) (drawLabel false)
             |> RoseTree.drawTree
 
+    let changeRequestAttibutes (changeRequest : ChangeRequest) : Markdown = 
+        let changes = collectChanges changeRequest.StructureChange |> List.map snd
+        vsep (List.map changeAttributeChangeTable changes |> List.choose id)
 
-    let changeRequestDetails (changeRequest : ChangeRequest) : Markdown = 
-        changeRequestSectionHeader changeRequest.Info
+    let changeRequestSection (changeRequest : ChangeRequest) : Markdown = 
+        changeRequestSectionHeader changeRequest
             ^!!^ changeRequestTree changeRequest.StructureChange
+            ^!!^ changeRequestAttibutes changeRequest
             ^!!^ linkToTop
 
     // ************************************************************************
@@ -154,7 +192,7 @@ module PrintReport =
         h1 (htmlAnchorId "top" (text "AIDE Change Scheme"))
             ^!!^ changeSchemeSummaryTable changeScheme
             ^!!^ changeRequestContentsTable changeScheme.ChangeRequests
-            ^!!^ vsep (List.map changeRequestDetails changeScheme.ChangeRequests)
+            ^!!^ vsep (List.map changeRequestSection changeScheme.ChangeRequests)
 
 
     // ************************************************************************

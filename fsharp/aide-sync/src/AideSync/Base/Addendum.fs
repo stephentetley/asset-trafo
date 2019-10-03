@@ -18,8 +18,8 @@ module Addendum =
     /// Added to sl-sqlite after last build
     type ErrorAugmentFormat = Printf.StringFormat<string -> string,string>
     
-    /// Version in current build is wrong ( |?%>> ) , use this version until next build
-    /// then do renaming...
+    /// Version in current build is wrong ( |?%>> ) , use this alternative 
+    /// until the next build then do renaming...
     let ( |?%>>> ) (action : SqliteDb<'a>) 
                    (errorModifier : ErrorAugmentFormat) : SqliteDb<'a> = 
         augmentErrorFmt errorModifier action

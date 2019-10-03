@@ -72,4 +72,36 @@ module Attributes =
             
                              
 
-    
+    type AttributeValueChange = 
+        { AttributeName : string
+          LeftValue : string
+          RightValue : string
+          AttributeDescription : string
+          }
+
+
+    let attributeValueChange (description : string) 
+                             (valueDiff : NameValueDiff) : AttributeValueChange = 
+        match valueDiff with
+        | OnlyLeft (name,left) ->
+            { AttributeName = name; LeftValue = left; 
+              RightValue = ""; AttributeDescription = description }
+
+        | Difference (name,left,right) ->
+            { AttributeName = name; LeftValue = left; 
+              RightValue = right; AttributeDescription = description }
+
+        | OnlyRight (name,right) ->
+            { AttributeName = name; LeftValue = ""; 
+              RightValue = right; AttributeDescription = description }
+
+
+    let attributeValueChanges (changes : NodeChanges) : AttributeValueChange list = 
+        let build1 desc changes = 
+            changes |> List.map (attributeValueChange desc)
+        
+        [ build1 ""         changes.AttributeChanges
+        ; build1 "Repeated" changes.RepeatedAttributeChanges
+        ; build1 "Property" changes.PropertyChanges
+        ] |> List.concat |> List.sortBy (fun x -> x.AttributeName)
+            

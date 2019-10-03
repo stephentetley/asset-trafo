@@ -15,10 +15,7 @@ module Datatypes =
     /// Location Ref) that we call Properties
 
     
-    type NameValueDiff =
-        | OnlyLeft of name : string * value : string
-        | Difference of name : string * leftValue : string * rightValue : string
-        | OnlyRight of name : string * value : string
+    
 
  
     type AiFlocNode = 
@@ -114,11 +111,24 @@ module Datatypes =
                 | Common(node, _, _) -> node.Reference
                 | Added(node, _) -> node.Reference
 
+        member x.AttributeChanges 
+            with get () : NodeChanges option = 
+                match x with
+                | Deleted _ -> None
+                | Common(_, _, changes) -> Some changes
+                | Added(_, changes) -> Some changes
+
     /// Hierarchy is polymorphic on label.
     /// The label can represent an elementary item or a delta between
     /// nodes in an Ai tree and an Aide tree.
     type Hierarchy<'Label> = 
         | HierarchyNode of label : 'Label * kids : Hierarchy<'Label> list
+
+
+        member x.RootLabel 
+            with get () : 'Label = 
+                match x with
+                | HierarchyNode(label,_) -> label
 
         member x.ToMarkdownTree () : RoseTree<'Label> = 
             let rec work tree cont = 
@@ -135,6 +145,24 @@ module Datatypes =
                     cont (v1 :: vs)))
             work x (fun x -> x)
   
+    let collectChanges (sourceTree : Hierarchy<StructureNode>) : (string * NodeChanges) list = 
+        let rec work tree cont = 
+            match tree with
+            | HierarchyNode(label : StructureNode,kids) -> 
+                let changes1 = 
+                    label.AttributeChanges |> Option.map (fun x -> label.Reference, x)
+                workList kids (fun vs ->
+                cont (changes1 :: vs))
+        and workList kids cont = 
+            match kids with
+            | [] -> cont []
+            | k1 :: rest -> 
+                work k1 (fun xs -> 
+                workList rest (fun ys -> 
+                cont (xs @ ys)))
+        work sourceTree (fun x -> x) |> List.choose id
+
+
 
     type ChangeRequestInfo = 
         { ChangeRequestId : int64
