@@ -111,7 +111,7 @@ module Datatypes =
                 | Common(node, _, _) -> node.Reference
                 | Added(node, _) -> node.Reference
 
-        member x.AttributeChanges 
+        member x.ValueChanges 
             with get () : NodeChanges option = 
                 match x with
                 | Deleted _ -> None
@@ -145,22 +145,20 @@ module Datatypes =
                     cont (v1 :: vs)))
             work x (fun x -> x)
   
-    let collectChanges (sourceTree : Hierarchy<StructureNode>) : (string * NodeChanges) list = 
-        let rec work tree cont = 
-            match tree with
-            | HierarchyNode(label : StructureNode,kids) -> 
-                let changes1 = 
-                    label.AttributeChanges |> Option.map (fun x -> label.Reference, x)
-                workList kids (fun vs ->
-                cont (changes1 :: vs))
-        and workList kids cont = 
-            match kids with
-            | [] -> cont []
-            | k1 :: rest -> 
-                work k1 (fun xs -> 
-                workList rest (fun ys -> 
-                cont (xs @ ys)))
-        work sourceTree (fun x -> x) |> List.choose id
+        member x.Flatten () : 'Label list = 
+            let rec work tree cont = 
+                match tree with
+                | HierarchyNode(label,kids) -> 
+                    workList kids (fun vs ->
+                    cont (label :: vs))
+            and workList kids cont = 
+                match kids with
+                | [] -> cont []
+                | k1 :: rest -> 
+                    work k1 (fun xs -> 
+                    workList rest (fun ys -> 
+                    cont (xs @ ys)))
+            work x (fun xs -> xs) 
 
 
 

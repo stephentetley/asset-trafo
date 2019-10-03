@@ -55,21 +55,17 @@ module PrintReport =
         makeTableWithoutHeadings specs rows |> gridTable
 
 
-
-    
-
-
     // ************************************************************************
     // Change requests summary
 
     /// Change Request Table 
     let changeRequestInfosTable (requests : ChangeRequest list) : Markdown option = 
         let headings =
-            [ alignLeft 25 (headingTitle "Change Request Id")
-            ; alignLeft 20 (headingTitle "Asset Name")
+            [ alignLeft 20 (headingTitle "Change Request Id")
+            ; alignLeft 30 (headingTitle "Reference")
+            ; alignLeft 30 (headingTitle "Asset Name")
             ; alignLeft 40 (headingTitle "Common Name")
-            ; alignLeft 25 (headingTitle "Status")
-            ; alignLeft 30 (headingTitle "Comment")
+            ; alignLeft 25 (headingTitle "Status")            
             ]
 
         let makeRow (request : ChangeRequest) : TableRow= 
@@ -77,10 +73,10 @@ module PrintReport =
             let assetName = request.StructureChange.RootLabel.ShortName 
             let commonName = request.StructureChange.RootLabel.CommonName
             [ inlineLink name ("#cr" + name) None           |> markdownText
+            ; request.StructureChange.RootLabel.Reference      |> text             |> markdownText 
             ; assetName                 |> text             |> markdownText 
             ; commonName                |> text             |> markdownText 
             ; text request.Info.Status                      |> markdownText
-            ; request.Info.Comment      |> text             |> markdownText 
             ]
         
         let rows = requests |> List.map makeRow 
@@ -97,12 +93,12 @@ module PrintReport =
 
 
     /// Change Scheme Table 
-    let changeAttributeChangeTable (changes : NodeChanges) : Markdown option =
+    let changeAttributeTable (changes : NodeChanges) : Markdown option =
         let headings =
-            [ alignLeft 30 (headingTitle "Attribute Name")
-            ; alignLeft 30 (headingTitle "AI Value")
-            ; alignLeft 30 (headingTitle "AIDE Value")
-            ; alignLeft 30 (headingTitle "Note")
+            [ alignLeft 25 (headingTitle "Attribute Name")
+            ; alignLeft 40 (headingTitle "AI Value")
+            ; alignLeft 40 (headingTitle "AIDE Value")
+            ; alignLeft 25 (headingTitle "Note")
             
             ]
         
@@ -119,7 +115,15 @@ module PrintReport =
         | [] -> None
         | _ -> makeTableWithHeadings headings rows |> gridTable |> Some
 
-
+    let structureNodeChanges (node : StructureNode) : Markdown option = 
+        let makeDoc table = 
+            (text node.Reference ^+^ text node.CommonName |> markdownText)
+                ^!!^ table
+        node.ValueChanges 
+            |> Option.bind changeAttributeTable
+            |> Option.map makeDoc
+                
+                    
     // ************************************************************************
     // Individual change request details
 
@@ -174,8 +178,8 @@ module PrintReport =
             |> RoseTree.drawTree
 
     let changeRequestAttibutes (changeRequest : ChangeRequest) : Markdown = 
-        let changes = collectChanges changeRequest.StructureChange |> List.map snd
-        vsep (List.map changeAttributeChangeTable changes |> List.choose id)
+        let changes = changeRequest.StructureChange.Flatten()
+        vsep (List.map structureNodeChanges changes |> List.choose id)
 
     let changeRequestSection (changeRequest : ChangeRequest) : Markdown = 
         changeRequestSectionHeader changeRequest
@@ -219,7 +223,8 @@ module PrintReport =
         let mdFileName = Path.GetFileName(mdFileAbsPath)
         let htmlFileName = Path.GetFileName(outputHtmlFile)
         let outputDirectory = Path.GetDirectoryName(outputHtmlFile)
-        writeMarkdown 140 doc mdFileAbsPath
+        /// Need a pretty wide page width...
+        writeMarkdown 200 doc mdFileAbsPath
         let retCode = 
             runPandocHtml5 
                 true 
