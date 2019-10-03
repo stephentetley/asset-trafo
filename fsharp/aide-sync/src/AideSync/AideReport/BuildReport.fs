@@ -10,6 +10,7 @@ module BuildReport =
 
     open SLSqlite.Core
 
+    open AideSync.Base.Addendum
     open AideSync.AideReport.Attributes
     open AideSync.AideReport.Datatypes
     open AideSync.AideReport.StructureDiff 
@@ -42,7 +43,7 @@ module BuildReport =
             ; SolutionProvider = reader.GetString(3)
             }
 
-        queryKeyed cmd (Strategy.Head readRow) 
+        queryKeyed cmd (Strategy.Head readRow) <?> "getChangeSchemeInfo failed"
 
     // ************************************************************************
     // Change Request ids
@@ -97,7 +98,7 @@ module BuildReport =
             ; RequestTime = reader.GetDateTime(4)
             }
 
-        queryKeyed cmd (Strategy.Head readRow)
+        queryKeyed cmd (Strategy.Head readRow) <?> "getChangeRequestInfo failed"
 
 
     // ************************************************************************
@@ -131,11 +132,11 @@ module BuildReport =
     let buildHierarchyDiffs (changeRequestId : int64) 
                             (aiAssetId : int64) : SqliteDb<Hierarchy<FlocDiff> option>  = 
             sqliteDb {
-                let! aiTree = findAiDescendants aiAssetId
-                let! aideId = findAideAssetId changeRequestId aiAssetId |> getOptional
+                let! aiTree = findAiDescendants aiAssetId <?> "call to findAiDescendants failed"
+                let! aideId = (findAideAssetId changeRequestId aiAssetId |> getOptional) <?> "call to findAideAssetId failed"
                 let! aideTree = findAideDescendants aideId
                 return diffLists aiTree aideTree |> buildTree
-            }
+            } |?>> sprintf "buildHierarchyDiffs failed (changeRequestId=%i, aiAssetId=%i)\n%s" changeRequestId aiAssetId
     
     // ************************************************************************
     // Get Properties / Attributes
@@ -294,21 +295,23 @@ module BuildReport =
                     work k1 (fun v1 -> 
                     workList rest (fun vs ->
                     mcont (v1 :: vs)))
-        work hierarchy (fun x -> mreturn x)
+        work hierarchy (fun x -> mreturn x) |?%>>> "expandFlocDiffHierarchy failed\n%s"
 
     let getStructureChange1 (changeRequestId : int64 ) 
                             (assetRootId : int64) : SqliteDb<Hierarchy<StructureNode> option> = 
         sqliteDb {
             match! buildHierarchyDiffs changeRequestId assetRootId with
             | None -> return None
-            | Some tree -> return! expandFlocDiffHierarchy tree |>> Some // pruneTree
-        }
+            | Some tree -> 
+                let! tree1 = expandFlocDiffHierarchy tree
+                return (Some tree1)
+        } |?>> sprintf "getStructureChange1: %i %i\n%s" changeRequestId assetRootId
 
     let getStructureChanges (changeRequestId : int64) : SqliteDb<Hierarchy<StructureNode> list> = 
         sqliteDb { 
             let! assetIds = getChangeRequestAIRootIds changeRequestId
             return! mapM (getStructureChange1 changeRequestId) assetIds |>> List.choose id
-        }
+        } |?>> sprintf "getStructureChanges: %i\n%s" changeRequestId
 
     // ************************************************************************
     // StructureChanges 
@@ -316,9 +319,9 @@ module BuildReport =
     let getChangeRequest (changeRequestId : int64) : SqliteDb<ChangeRequest> = 
         sqliteDb {
             let! info = getChangeRequestInfo changeRequestId
-            let! changeRequests = getStructureChanges changeRequestId
+            let! changeRequests = getStructureChanges changeRequestId 
             return { Info = info; Changes = changeRequests }
-        }
+        } |?>> (sprintf "getChangeRequest failed: %i\n%s" changeRequestId)
 
     // ************************************************************************
     // Build the full structure
@@ -327,6 +330,7 @@ module BuildReport =
         sqliteDb {
             let! info = getChangeSchemeInfo schemeCode
             let! changeRequests = 
-                getSchemeChangeRequestIds schemeCode >>= mapM getChangeRequest
+                (getSchemeChangeRequestIds schemeCode >>= mapM getChangeRequest)
+                    |?%>>> "getChangeScheme - iterating results failed: %s\n"
             return { Info = info; StructureChanges = changeRequests }
-        }
+        } |?%>>> "getChangeScheme failed, error: \n%s"

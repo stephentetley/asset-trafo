@@ -66,11 +66,11 @@ module BasicQueries =
         let sql = 
             """
             SELECT 
-                    aide.aide_asset_id     AS [AideAssetId]
-            FROM    aide_asset              AS aide
+                    changes.aide_asset_id     AS [AideAssetId]
+            FROM    asset_change           AS changes
             WHERE
-                    aide.change_request_id = :chreq 
-            AND     aide.asset_id = :assetid     
+                    changes.change_request_id = :chreq 
+            AND     changes.ai_asset_id = :assetid     
             ;
             """
         let cmd = 
@@ -80,7 +80,8 @@ module BasicQueries =
         
         let readRow1 (result : ResultItem) : int64 = result.GetInt64(0)
 
-        queryKeyed cmd (Strategy.Head readRow1) |> optional
+        queryKeyed cmd (Strategy.Head readRow1) |> optional 
+            <?> sprintf "findAideAssetId failed"
 
 
     // ************************************************************************
@@ -124,6 +125,7 @@ module BasicQueries =
             }
 
         queryKeyed cmd (Strategy.ReadAll readRow1) 
+            <?> "findAideDescendants failed"
 
 
 

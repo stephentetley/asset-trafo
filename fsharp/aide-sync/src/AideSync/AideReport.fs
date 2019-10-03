@@ -29,7 +29,7 @@ module AideReport =
 
         let pandocOpts = pandocHtmlDefaults config.PathToCss
 
-        match runSqliteDb connParams (getChangeScheme schemeCode ) with
+        match runSqliteDb connParams (getChangeScheme schemeCode) with
         | Error msg -> printfn "Fail: %s" msg ; Error "Bad"
         | Ok scheme -> writeFullReport scheme pandocOpts outputHtmlFile
 

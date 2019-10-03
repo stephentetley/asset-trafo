@@ -117,7 +117,7 @@ module PrintReport =
         | Deleted s -> 
             let title = htmlAttr "title" (sprintf "Delete '%s'" s.CommonName)
             nodespan lightCoral [title] (makeLabelL s) |> markdownText
-        | Common(_,s,changes) -> makeLabelR s |> markdownText
+        | Common(s1,s2,changes) -> makeLabelR s2 |> markdownText
         //| Difference (s1,s2) -> 
         //    let title = 
         //        if s1.Name <> s2.Name then 

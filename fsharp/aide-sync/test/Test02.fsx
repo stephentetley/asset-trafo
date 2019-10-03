@@ -23,7 +23,7 @@ Environment.SetEnvironmentVariable("PATH",
     Environment.GetEnvironmentVariable("PATH") + ";" + SQLiteInterop
     )
 
-#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20191001\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slsqlite\1.0.0-alpha-20191003\lib\netstandard2.0"
 #r "SLSqlite.dll"
 open SLSqlite.Core
 
@@ -129,7 +129,7 @@ let test09 () =
 let outputFile (relFileName : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
-// test "PCL 81" ;;
+// test10 "PCL 81" ;;
 // test10 "R131600100" ;;
 let test10 (schemeCode : string) = 
     let name = sprintf "aide_change_report_%s.html" (safeName schemeCode)
@@ -140,3 +140,18 @@ let test10 (schemeCode : string) =
           PathToDb = activeDb () }
 
     runChangeSchemeReport config schemeCode htmlOutput
+
+let printResult (result : Result<'a, ErrMsg>) : unit = 
+    match result with
+    | Error msg -> printfn "Error: %s" msg
+    | Ok ans -> printfn "Ok: %O" ans
+
+
+let test11 () = 
+    getChangeScheme "PCL 81" |> runDb |> printResult
+    // getChangeSchemeInfo "PCL 81" |> runDb |> printResult
+    // getSchemeChangeRequestIds "PCL 81" |> runDb |> printResult
+
+let test11a () = 
+    findAideAssetId 150491L 501505L |> runDb |> printResult
+
