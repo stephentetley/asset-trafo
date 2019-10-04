@@ -9,19 +9,13 @@
     <Compile Include="AideSync\Base\Addendum.fs" />
     <Compile Include="AideSync\SetupDb\ImportSchema.fs" />
     <Compile Include="AideSync\SetupDb\PopulateDb.fs" />
-    <Compile Include="AideSync\Old\Datatypes.fs" />
-    <Compile Include="AideSync\Old\DiffImplementation.fs" />
-    <Compile Include="AideSync\Old\BasicQueries.fs" />
-    <Compile Include="AideSync\Old\Metrics.fs" />
-    <Compile Include="AideSync\Old\BuildReport.fs" />
-    <Compile Include="AideSync\Old\BuildSRDiff.fs" />
-    <Compile Include="AideSync\Old\PrintReport.fs" />
     <Compile Include="AideSync\AideReport\Attributes.fs" />
     <Compile Include="AideSync\AideReport\Datatypes.fs" />
     <Compile Include="AideSync\AideReport\StructureDiff.fs" />
     <Compile Include="AideSync\AideReport\BasicQueries.fs" />
     <Compile Include="AideSync\AideReport\BuildReport.fs" />
     <Compile Include="AideSync\AideReport\PrintReport.fs" />
+    <Compile Include="AideSync\SetupDb.fs" />
     <Compile Include="AideSync\AideReport.fs" />
   </ItemGroup>
 

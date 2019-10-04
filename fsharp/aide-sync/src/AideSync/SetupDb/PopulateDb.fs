@@ -10,7 +10,7 @@ module PopulateDb =
 
     open SLSqlite.Core
 
-    open AideSync.ImportSchema
+    open AideSync.SetupDb.ImportSchema
 
 
     // FSharp.Data.CsvReader appears to read csv "NULL" 

@@ -5,9 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="SetupDb.fsx" />
-    <None Include="Test01.fsx" />
-    <None Include="Test02.fsx" />
+    <None Include="RunSetupDb.fsx" />
+    <None Include="TestReport01.fsx" />
     <None Include="TempBuildTree.fsx" />
   </ItemGroup>
 

@@ -74,7 +74,7 @@ module StructureDiff =
     
         
 
-    // ``buildTree`` has a very strong precodition that the input list
+    // ``buildTree`` has a very strong precondition that the input list
     // must be sorted so parent nodes are before child nodes.
     // It will lose data (nodes) if this is not the case.
     let buildTree (diffs : FlocDiff list) : Hierarchy<FlocDiff> option = 
