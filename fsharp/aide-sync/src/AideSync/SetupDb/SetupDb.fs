@@ -10,7 +10,7 @@ module SetupDb =
 
     open SLSqlite.Core
     
-    open AideSync.SetupDb.PopulateDb
+    open AideSync.SetupDb.Internal.PopulateDb
 
     type SetupDbConfig = 
         { ExportsSourceFolder : string

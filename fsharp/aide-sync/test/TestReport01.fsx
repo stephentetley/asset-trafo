@@ -38,23 +38,26 @@ open MarkdownDoc.Pandoc
 
 #load "..\src\AideSync\Base\Common.fs"
 #load "..\src\AideSync\Base\Addendum.fs"
-#load "..\src\AideSync\AideReport\Attributes.fs"
-#load "..\src\AideSync\AideReport\Datatypes.fs"
-#load "..\src\AideSync\AideReport\StructureDiff.fs"
-#load "..\src\AideSync\AideReport\BasicQueries.fs"
-#load "..\src\AideSync\AideReport\BuildReport.fs"
-#load "..\src\AideSync\AideReport\PrintReport.fs"
-#load "..\src\AideSync\AideReport.fs"
+#load "..\src\AideSync\AideReport\Internal\Attributes.fs"
+#load "..\src\AideSync\AideReport\Internal\Datatypes.fs"
+#load "..\src\AideSync\AideReport\Internal\StructureDiff.fs"
+#load "..\src\AideSync\AideReport\Internal\BasicQueries.fs"
+#load "..\src\AideSync\AideReport\Internal\BuildReport.fs"
+#load "..\src\AideSync\AideReport\Internal\PrintReport.fs"
+#load "..\src\AideSync\AideReport\AllSchemesReport.fs"
+#load "..\src\AideSync\AideReport\ChangeSchemeReport.fs"
 
 open AideSync.Base.Common
 open AideSync.Base.Addendum
-open AideSync.AideReport.Attributes
-open AideSync.AideReport.Datatypes
-open AideSync.AideReport.StructureDiff
-open AideSync.AideReport.BasicQueries
-open AideSync.AideReport.BuildReport
-open AideSync.AideReport.PrintReport
-open AideSync.AideReport
+open AideSync.AideReport.Internal.Attributes
+open AideSync.AideReport.Internal.Datatypes
+open AideSync.AideReport.Internal.StructureDiff
+open AideSync.AideReport.Internal.BasicQueries
+open AideSync.AideReport.Internal.BuildReport
+open AideSync.AideReport.Internal.PrintReport
+open AideSync.AideReport.AllSchemesReport
+open AideSync.AideReport.ChangeSchemeReport
+
 
 let activeDb () = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\data\db\aide_sync_active.sqlite")

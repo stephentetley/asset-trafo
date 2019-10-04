@@ -34,9 +34,9 @@ open SLSqlite.Core
 open SLFormat.CommandOptions
 open SLFormat.CommandOptions.SimpleInvoke
 
-#load "..\src\AideSync\SetupDb\ImportSchema.fs"
-#load "..\src\AideSync\SetupDb\PopulateDb.fs"
-#load "..\src\AideSync\SetupDb.fs"
+#load "..\src\AideSync\SetupDb\Internal\ImportSchema.fs"
+#load "..\src\AideSync\SetupDb\Internal\PopulateDb.fs"
+#load "..\src\AideSync\SetupDb\SetupDb.fs"
 open AideSync.SetupDb
 
 let pathtoCsvExports () : string = 

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync.SetupDb
+namespace AideSync.SetupDb.Internal
 
 
 module PopulateDb =
@@ -10,7 +10,7 @@ module PopulateDb =
 
     open SLSqlite.Core
 
-    open AideSync.SetupDb.ImportSchema
+    open AideSync.SetupDb.Internal.ImportSchema
 
 
     // FSharp.Data.CsvReader appears to read csv "NULL" 

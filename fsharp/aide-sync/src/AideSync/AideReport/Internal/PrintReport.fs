@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync.AideReport
+namespace AideSync.AideReport.Internal
 
 
 module PrintReport =
@@ -18,8 +18,8 @@ module PrintReport =
     open MarkdownDoc.Markdown.CssColors
     open MarkdownDoc.Pandoc
 
-    open AideSync.AideReport.Attributes
-    open AideSync.AideReport.Datatypes
+    open AideSync.AideReport.Internal.Attributes
+    open AideSync.AideReport.Internal.Datatypes
 
     let headingTitle : string -> Markdown = 
         markdownText << doubleAsterisks << text

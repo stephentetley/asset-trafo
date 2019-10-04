@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync.AideReport
+namespace AideSync.AideReport.Internal
 
 
 module Datatypes =
     
     open MarkdownDoc.Markdown.RoseTree
 
-    open AideSync.AideReport.Attributes
+    open AideSync.AideReport.Internal.Attributes
 
 
     /// Assets have special attributes (Installed from date, 

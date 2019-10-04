@@ -7,16 +7,17 @@
   <ItemGroup>
     <Compile Include="AideSync\Base\Common.fs" />
     <Compile Include="AideSync\Base\Addendum.fs" />
-    <Compile Include="AideSync\SetupDb\ImportSchema.fs" />
-    <Compile Include="AideSync\SetupDb\PopulateDb.fs" />
-    <Compile Include="AideSync\AideReport\Attributes.fs" />
-    <Compile Include="AideSync\AideReport\Datatypes.fs" />
-    <Compile Include="AideSync\AideReport\StructureDiff.fs" />
-    <Compile Include="AideSync\AideReport\BasicQueries.fs" />
-    <Compile Include="AideSync\AideReport\BuildReport.fs" />
-    <Compile Include="AideSync\AideReport\PrintReport.fs" />
-    <Compile Include="AideSync\SetupDb.fs" />
-    <Compile Include="AideSync\AideReport.fs" />
+    <Compile Include="AideSync\SetupDb\Internal\ImportSchema.fs" />
+    <Compile Include="AideSync\SetupDb\Internal\PopulateDb.fs" />
+    <Compile Include="AideSync\SetupDb\SetupDb.fs" />
+    <Compile Include="AideSync\AideReport\Internal\Attributes.fs" />
+    <Compile Include="AideSync\AideReport\Internal\Datatypes.fs" />
+    <Compile Include="AideSync\AideReport\Internal\StructureDiff.fs" />
+    <Compile Include="AideSync\AideReport\Internal\BasicQueries.fs" />
+    <Compile Include="AideSync\AideReport\Internal\BuildReport.fs" />
+    <Compile Include="AideSync\AideReport\Internal\PrintReport.fs" />
+    <Compile Include="AideSync\AideReport\AllSchemesReport.fs" />
+    <Compile Include="AideSync\AideReport\ChangeSchemeReport.fs" />
   </ItemGroup>
 
   <ItemGroup>

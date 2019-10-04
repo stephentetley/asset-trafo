@@ -1,17 +1,17 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync
+namespace AideSync.AideReport
 
 
-module AideReport =
+module ChangeSchemeReport =
     
     open System.IO
 
     open SLSqlite.Core
 
-    open AideSync.AideReport.BuildReport
-    open AideSync.AideReport.PrintReport
+    open AideSync.AideReport.Internal.BuildReport
+    open AideSync.AideReport.Internal.PrintReport
 
     type ErrMsg = string
 

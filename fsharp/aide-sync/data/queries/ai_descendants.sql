@@ -22,4 +22,3 @@ LEFT OUTER JOIN ai_asset    AS parent_asset ON temp_table.parent_id = parent_ass
 ORDER BY asset.asset_common_name
 ;
 
-SELECT asset.* FROM ai_asset AS asset WHERE asset.ai_asset_id = 826367;

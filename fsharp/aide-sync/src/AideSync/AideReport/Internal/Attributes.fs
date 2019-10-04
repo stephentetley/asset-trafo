@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AideSync.AideReport
+namespace AideSync.AideReport.Internal
 
 
 module Attributes =
