@@ -27,7 +27,10 @@ module BuildReport =
                         scheme.scheme_id            AS [scheme_id],
                         scheme.scheme_code          AS [scheme_code],
                         scheme.scheme_name          AS [scheme_name],
-                        scheme.solution_provider    AS [solution_provider]
+                        scheme.solution_provider    AS [solution_provider],
+                        scheme.batch_reference      AS [batch_reference],
+                        scheme.brm_solution_id      AS [brm_solution_id],
+                        scheme.brm_completion_year  AS [brm_completion_year],
             FROM work_scheme    AS scheme
             WHERE scheme.scheme_code = :schemecode
             ;
@@ -41,6 +44,9 @@ module BuildReport =
             ; SchemeCode = reader.GetString(1)
             ; Name = reader.GetString(2)
             ; SolutionProvider = reader.GetString(3)
+            ; BatchReference = reader.TryGetString(4)
+            ; BrmSolutionId = reader.TryGetString(5)
+            ; BrmCompletionYear = reader.TryGetInt32(6)
             }
 
         queryKeyed cmd (Strategy.Head readRow) <?> "getChangeSchemeInfo failed"

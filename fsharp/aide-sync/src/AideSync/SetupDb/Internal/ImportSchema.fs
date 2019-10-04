@@ -221,8 +221,10 @@ module ImportSchema =
          SchemeCode(string),\
          SchemeName(string),\
          Description(string),\
-         SolutionProvider(string)"
-        
+         SolutionProvider(string),\
+         BatchReference(string option),\
+         BRMSolutionId(string option),\
+         BRMCompletionYear(int option)"
 
     type WorkSchemeTable = 
         CsvProvider< Schema = WorkSchemeSchema

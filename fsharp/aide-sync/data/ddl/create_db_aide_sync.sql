@@ -32,7 +32,10 @@ CREATE TABLE work_scheme
     scheme_code TEXT,
     scheme_name TEXT,
     description TEXT,
-    solution_provider TEXT
+    solution_provider TEXT,
+    batch_reference TEXT,
+    brm_solution_id TEXT,
+    brm_completion_year INTEGER
 );
 
 CREATE TABLE change_request

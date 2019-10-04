@@ -33,8 +33,12 @@ module PopulateDb =
             scheme_code, 
             scheme_name, 
             description, 
-            solution_provider) 
-            VALUES (?,?,?,  ?,?);
+            solution_provider, 
+            batch_reference,
+            brm_solution_id,
+            brm_completion_year
+            ) 
+            VALUES (?,?,?,  ?,?,?, ?,?);
             """
         let cmd = 
             new IndexedCommand(commandText = sql)
@@ -43,6 +47,9 @@ module PopulateDb =
                 |> addParam (stringParam row.SchemeName)
                 |> addParam (stringParam row.Description)
                 |> addParam (stringParam row.SolutionProvider)
+                |> addParam (optionNull stringParam row.BatchReference)
+                |> addParam (optionNull stringParam row.BRMSolutionId)
+                |> addParam (optionNull int32Param row.BRMCompletionYear)
         cmd |> Some
 
     let insertWorkSchemeRow (row : WorkSchemeRow) : SqliteDb<unit> = 

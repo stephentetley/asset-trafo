@@ -217,6 +217,9 @@ module Datatypes =
           SchemeCode : string
           Name : string
           SolutionProvider : string
+          BatchReference : string option
+          BrmSolutionId : string option
+          BrmCompletionYear : int option
         }
 
     type ChangeScheme = 
