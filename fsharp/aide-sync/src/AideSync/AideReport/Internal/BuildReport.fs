@@ -30,7 +30,7 @@ module BuildReport =
                         scheme.solution_provider    AS [solution_provider],
                         scheme.batch_reference      AS [batch_reference],
                         scheme.brm_solution_id      AS [brm_solution_id],
-                        scheme.brm_completion_year  AS [brm_completion_year],
+                        scheme.brm_completion_year  AS [brm_completion_year]
             FROM work_scheme    AS scheme
             WHERE scheme.scheme_code = :schemecode
             ;
@@ -301,7 +301,7 @@ module BuildReport =
                     work k1 (fun v1 -> 
                     workList rest (fun vs ->
                     mcont (v1 :: vs)))
-        work hierarchy (fun x -> mreturn x) |?%>>> "expandFlocDiffHierarchy failed\n%s"
+        work hierarchy (fun x -> mreturn x) |?%>> "expandFlocDiffHierarchy failed\n%s"
 
     let getStructureChange1 (changeRequestId : int64 ) 
                             (assetRootId : int64) : SqliteDb<Hierarchy<StructureNode> option> = 
@@ -348,4 +348,4 @@ module BuildReport =
             let! info = getChangeSchemeInfo schemeCode
             let! changeRequests = allChangeResusts schemeCode 
             return { Info = info; ChangeRequests = changeRequests }
-        } |?%>>> "getChangeScheme failed, error: \n%s"
+        } |?%>> "getChangeScheme failed, error: \n%s"
