@@ -16,6 +16,7 @@
     <Compile Include="AideSync\AideReport\Internal\BasicQueries.fs" />
     <Compile Include="AideSync\AideReport\Internal\BuildReport.fs" />
     <Compile Include="AideSync\AideReport\Internal\PrintReport.fs" />
+    <Compile Include="AideSync\AideReport\Common.fs" />
     <Compile Include="AideSync\AideReport\AllSchemesReport.fs" />
     <Compile Include="AideSync\AideReport\ChangeSchemeReport.fs" />
   </ItemGroup>

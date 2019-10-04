@@ -9,8 +9,7 @@ module PrintReport =
     open System.IO
 
     // Note there is a name clash, so open this before MarkdownDoc.Markdown
-    // Possibly SLFormat.CommandOptions should not expose a function called text
-    open SLFormat.CommandOptions
+    
 
     open MarkdownDoc.Markdown
     open MarkdownDoc.Markdown.InlineHtml
@@ -18,14 +17,12 @@ module PrintReport =
     open MarkdownDoc.Markdown.CssColors
     open MarkdownDoc.Pandoc
 
+    open AideSync.Base.Common
     open AideSync.AideReport.Internal.Attributes
     open AideSync.AideReport.Internal.Datatypes
 
-    let headingTitle : string -> Markdown = 
-        markdownText << doubleAsterisks << text
+    
 
-    let linkToTop : Markdown = 
-        inlineLink "Back to top" "#top" None |> markdownText
 
 
     // ************************************************************************
@@ -92,7 +89,7 @@ module PrintReport =
         | Some table -> table
 
 
-    /// Change Scheme Table 
+    /// Change Attribute Table 
     let changeAttributeTable (changes : NodeChanges) : Markdown option =
         let headings =
             [ alignLeft 25 (headingTitle "Attribute Name")
@@ -191,56 +188,15 @@ module PrintReport =
     // Full report
 
 
-    let makeFullReport (changeScheme : ChangeScheme) : Markdown = 
- 
+    let makeFullChangeReport (changeScheme : ChangeScheme) : Markdown = 
         h1 (htmlAnchorId "top" (text "AIDE Change Scheme"))
             ^!!^ changeSchemeSummaryTable changeScheme
             ^!!^ changeRequestContentsTable changeScheme.ChangeRequests
             ^!!^ vsep (List.map changeRequestSection changeScheme.ChangeRequests)
 
-
-    // ************************************************************************
-    // Invoking Pandoc
-
-    let pandocHtmlDefaults (pathToCss : string) : PandocOptions = 
-        let highlightStyle = argument "--highlight-style" &= argValue "tango"
-        let selfContained = argument "--self-contained"
-        /// Github style is nicer for tables than Tufte
-        /// Note - body width has been changed on both stylesheets
-        let css = argument "--css" &= doubleQuote pathToCss
-        { Standalone = true
-          InputExtensions = []
-          OutputExtensions = []
-          OtherOptions = [ css; highlightStyle; selfContained ]  }
-
-
-    let writeMarkdownReport (doc : Markdown) 
-                            (pageTitle : string)
-                            (pandocOpts : PandocOptions)
-                            (outputHtmlFile : string) : Result<unit, string> = 
-        
-        let mdFileAbsPath = Path.ChangeExtension(outputHtmlFile, "md") 
-        let mdFileName = Path.GetFileName(mdFileAbsPath)
-        let htmlFileName = Path.GetFileName(outputHtmlFile)
-        let outputDirectory = Path.GetDirectoryName(outputHtmlFile)
-        /// Need a pretty wide page width...
-        writeMarkdown 200 doc mdFileAbsPath
-        let retCode = 
-            runPandocHtml5 
-                true 
-                outputDirectory 
-                mdFileName
-                htmlFileName
-                (Some pageTitle)
-                pandocOpts
-        match retCode with
-        | Ok i -> printfn "Return code: %i" i ; Ok ()
-        | Error msg -> Error msg
-
-
-    let writeFullReport (changeScheme : ChangeScheme) 
-                        (pandocOpts : PandocOptions)
-                        (outputHtmlFile : string) : Result<unit, string> = 
-        let doc = makeFullReport changeScheme
+    let writeFullChangeReport (changeScheme : ChangeScheme) 
+                              (pandocOpts : PandocOptions)
+                              (outputHtmlFile : string) : Result<unit, string> = 
+        let doc = makeFullChangeReport changeScheme
         writeMarkdownReport doc "Aide Change Scheme Report" pandocOpts outputHtmlFile
 

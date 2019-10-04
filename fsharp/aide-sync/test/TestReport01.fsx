@@ -44,6 +44,7 @@ open MarkdownDoc.Pandoc
 #load "..\src\AideSync\AideReport\Internal\BasicQueries.fs"
 #load "..\src\AideSync\AideReport\Internal\BuildReport.fs"
 #load "..\src\AideSync\AideReport\Internal\PrintReport.fs"
+#load "..\src\AideSync\AideReport\Common.fs"
 #load "..\src\AideSync\AideReport\AllSchemesReport.fs"
 #load "..\src\AideSync\AideReport\ChangeSchemeReport.fs"
 
@@ -55,8 +56,7 @@ open AideSync.AideReport.Internal.StructureDiff
 open AideSync.AideReport.Internal.BasicQueries
 open AideSync.AideReport.Internal.BuildReport
 open AideSync.AideReport.Internal.PrintReport
-open AideSync.AideReport.AllSchemesReport
-open AideSync.AideReport.ChangeSchemeReport
+open AideSync.AideReport
 
 
 let activeDb () = 
@@ -75,7 +75,7 @@ let outputFile (relFileName : string) =
 // This is the main function ...
 // test01 "PCL 81" ;;
 // test01 "R131600100" ;;
-let test01 (schemeCode : string) = 
+let test01 (schemeCode : string) : Result<unit, ErrMsg> = 
     let name = sprintf "aide_change_report_%s.html" (safeName schemeCode)
     let htmlOutput = outputFile name
 
@@ -85,14 +85,23 @@ let test01 (schemeCode : string) =
 
     runChangeSchemeReport config schemeCode htmlOutput
 
+let test02 () : Result<unit, ErrMsg> = 
+    let name = "all_change_schemes.html" 
+    let htmlOutput = outputFile name
 
+    let config : AideReportConfig = 
+        { PathToCss = @"..\..\..\..\..\libs\markdown-css-master\github.css"
+          PathToDb = activeDb () }
 
-/// There is an error building this one - a child node goes missing...
+    runAllSchemesReport config htmlOutput
 
-let test02 () = 
+/// There was an error building this one - a child node goes missing...
+/// Now fixed...
+
+let test03 () = 
     findAideDescendants 2022403L |> runDb
     
-let test02a () =
+let test03a () =
     // Currently (4/10/2019) this looses data if there are name 
     // inconsistencies between trees
     let line1 (x : FlocDiff) = 
@@ -103,13 +112,10 @@ let test02a () =
         |>> Option.map (fun x -> x.Flatten())
         |> runDb
 
-// Old ...
-
-
-
 let printResult (result : Result<'a, ErrMsg>) : unit = 
     match result with
     | Error msg -> printfn "Error: %s" msg
     | Ok ans -> printfn "Ok: %O" ans
 
-
+let test04 () = 
+    getAllSchemes () |> runDb

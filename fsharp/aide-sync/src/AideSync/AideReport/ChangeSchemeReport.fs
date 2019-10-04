@@ -3,22 +3,20 @@
 
 namespace AideSync.AideReport
 
-
+[<AutoOpen>]
 module ChangeSchemeReport =
     
     open System.IO
 
     open SLSqlite.Core
 
+    open AideSync.Base.Common
     open AideSync.AideReport.Internal.BuildReport
     open AideSync.AideReport.Internal.PrintReport
+    open AideSync.AideReport
 
     type ErrMsg = string
-
-    type AideReportConfig = 
-        { PathToCss : string 
-          PathToDb : string }
-
+    
 
     let runChangeSchemeReport (config : AideReportConfig) 
                                 (schemeCode : string) 
@@ -31,5 +29,5 @@ module ChangeSchemeReport =
 
         match runSqliteDb connParams (getChangeScheme schemeCode) with
         | Error msg -> printfn "Fail: %s" msg ; Error "Bad"
-        | Ok scheme -> writeFullReport scheme pandocOpts outputHtmlFile
+        | Ok scheme -> writeFullChangeReport scheme pandocOpts outputHtmlFile
 
