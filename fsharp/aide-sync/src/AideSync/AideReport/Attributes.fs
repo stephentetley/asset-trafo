@@ -71,37 +71,42 @@ module Attributes =
         work (Map.toList leftAttributes) (Map.toList rightAttributes) (fun x -> x)
             
                              
-
-    type AttributeValueChange = 
-        { AttributeName : string
+    /// Value change might be a change to an attribute 
+    /// (possibly repeated) or a so called 'property' like manufacturer.
+    type ValueChange = 
+        { FieldName : string
           LeftValue : string
           RightValue : string
-          AttributeDescription : string
+          Description : string
           }
 
 
-    let attributeValueChange (description : string) 
-                             (valueDiff : NameValueDiff) : AttributeValueChange = 
+    let valueChange (description : string) 
+                             (valueDiff : NameValueDiff) : ValueChange = 
         match valueDiff with
         | OnlyLeft (name,left) ->
-            { AttributeName = name; LeftValue = left; 
-              RightValue = ""; AttributeDescription = description }
+            { FieldName = name; LeftValue = left; 
+              RightValue = ""; Description = description }
 
         | Difference (name,left,right) ->
-            { AttributeName = name; LeftValue = left; 
-              RightValue = right; AttributeDescription = description }
+            { FieldName = name; LeftValue = left; 
+              RightValue = right; Description = description }
 
         | OnlyRight (name,right) ->
-            { AttributeName = name; LeftValue = ""; 
-              RightValue = right; AttributeDescription = description }
+            { FieldName = name; LeftValue = ""; 
+              RightValue = right; Description = description }
 
 
-    let attributeValueChanges (changes : NodeChanges) : AttributeValueChange list = 
-        let build1 desc changes = 
-            changes |> List.map (attributeValueChange desc)
-        
-        [ build1 ""         changes.AttributeChanges
-        ; build1 "Repeated" changes.RepeatedAttributeChanges
-        ; build1 "Property" changes.PropertyChanges
-        ] |> List.concat |> List.sortBy (fun x -> x.AttributeName)
+    let attributeValueChanges (changes : NodeChanges) : ValueChange list = 
+
+        [ List.map (valueChange "") changes.AttributeChanges
+        ; List.map (valueChange "Repeated") changes.RepeatedAttributeChanges
+        ] |> List.concat |> List.sortBy (fun x -> x.FieldName)
+
+
+    let propertyValueChanges (changes : NodeChanges) : ValueChange list = 
+        changes.PropertyChanges
+            |> List.map (valueChange "")
+            |> List.sortBy (fun x -> x.FieldName)
+
             

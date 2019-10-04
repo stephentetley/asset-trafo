@@ -25,6 +25,8 @@ module StructureDiff =
         let refSortR (xs : AideFlocNode list) = 
             xs |> List.sortBy (fun x -> x.Reference)
 
+        /// Note pathSort is not reliable for the full node list
+        /// but it should at least but the root node at the head.
         let pathSort (xs : FlocDiff list) = 
             xs |> List.sortBy (fun x -> x.SortKey)
 
@@ -32,7 +34,7 @@ module StructureDiff =
             match lefts,rights with
             | xs, [] -> cont (List.map InLeft xs)
             | [], ys -> cont (List.map InRight ys)
-            | (x::xs, y::ys) ->                 
+            | (x::xs, y::ys) ->     
                 match compare (x.Reference) (y.Reference) with
                 | i when i = 0 -> 
                     work xs ys (fun ac -> 
@@ -73,9 +75,9 @@ module StructureDiff =
     
         
 
-    // FATAL ERROR
-    // We cannot rely on SortKey - names might include '/' as a literal
-    // and not a separator.
+    // Current buildTree is not good enough (04/10/2019).
+    // It relies on the floc list always having parent
+    // before child but we cannot guarantee this...
 
     let buildTree (diffs : FlocDiff list) : Hierarchy<FlocDiff> option = 
         printfn "Length of diffs = %i" diffs.Length

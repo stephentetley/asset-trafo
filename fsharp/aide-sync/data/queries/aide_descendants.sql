@@ -1,16 +1,18 @@
 WITH RECURSIVE
-temp_table(child_id, parent_id) AS (
-    SELECT 1934321,0
+temp_table(child_id, parent_id, node_level) AS (
+    SELECT 2022403,0,1
         UNION ALL
     SELECT 
             aide_structure_relationships.child_id,
-            aide_structure_relationships.parent_id
+            aide_structure_relationships.parent_id,
+            node_level + 1
     FROM aide_structure_relationships, temp_table
     WHERE aide_structure_relationships.parent_id = temp_table.child_id
     )
 SELECT 
     temp_table.child_id AS [AideAssetId],
     asset.asset_id AS [AssetId],
+    temp_table.node_level  AS [NodeLevel],
     asset.reference AS [Reference],
     parent_asset.reference AS [ParentReference],
     asset.asset_name AS [Name],

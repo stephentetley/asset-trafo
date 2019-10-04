@@ -65,73 +65,14 @@ let runDb (action : SqliteDb<'a>) : Result<'a, string> =
     let connParams = sqliteConnParamsVersion3 dbPath
     runSqliteDb connParams action
 
-let test01 () = 
-    let kidAction schemeId = 
-        sqliteDb { 
-            let! changeInfo = getChangeRequestInfo schemeId
-            let! rootIds = getChangeRequestAIRootIds changeInfo.ChangeRequestId
-            return (changeInfo, rootIds)
-        }
 
-    let action = 
-        sqliteDb { 
-            let! info = getChangeSchemeInfo "R131600100"
-            let! schemeIds = getSchemeChangeRequestIds info.SchemeCode
-            let! changeInfos = smapM kidAction schemeIds
-            return (info,changeInfos)
-        }
-    action |> runDb
-
-
-let test02 () = 
-    findAiDescendants 523007L |> runDb
-
-
-// This was veeerrrryyy slooowww - much improved by adding indices to the db
-let test03 () = 
-    let action = 
-        sqliteDb {
-            let! aideId = findAideAssetId 149392L 523007L |> getOptional
-            let! flatTree = findAideDescendants aideId
-            return flatTree
-        }
-    action |> runDb
-
-let test04 () = 
-    let action = 
-        buildHierarchyDiffs 149392L 523007L
-    runDb action
-
-let test05 () = 
-    getAssetPropertyChanges 6059L |> runDb
-
-
-let test06 () = 
-    getAssetAttributeChanges 2122243L |> runDb
-
-let test07 () = 
-    getAssetRepeatedAttributeChanges 28888L |> runDb
-
-
-let test08 () = 
-    let action = 
-        sqliteDb { 
-            match! buildHierarchyDiffs 149392L 523007L with
-            | Some tree -> return! expandFlocDiffHierarchy tree |>> pruneTree
-            | None -> return None
-        }
-    runDb action
-
-
-let test09 () = 
-    getChangeScheme "R131600100" |> runDb
-    
 let outputFile (relFileName : string) = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
-// test10 "PCL 81" ;;
-// test10 "R131600100" ;;
-let test10 (schemeCode : string) = 
+// This is the main function ...
+// test01 "PCL 81" ;;
+// test01 "R131600100" ;;
+let test01 (schemeCode : string) = 
     let name = sprintf "aide_change_report_%s.html" (safeName schemeCode)
     let htmlOutput = outputFile name
 
@@ -141,17 +82,31 @@ let test10 (schemeCode : string) =
 
     runChangeSchemeReport config schemeCode htmlOutput
 
+
+
+/// There is an error building this one - a child node goes missing...
+
+let test02 () = 
+    findAideDescendants 2022403L |> runDb
+    
+let test02a () =
+    // Currently (4/10/2019) this looses data if there are name 
+    // inconsistencies between trees
+    let line1 (x : FlocDiff) = 
+        sprintf "%s %s" x.Reference x.CommonName
+
+    buildHierarchyDiffs 149397L 557271L 
+        |>> Option.map (hierarchyMap line1)
+        |>> Option.map (fun x -> x.Flatten())
+        |> runDb
+
+// Old ...
+
+
+
 let printResult (result : Result<'a, ErrMsg>) : unit = 
     match result with
     | Error msg -> printfn "Error: %s" msg
     | Ok ans -> printfn "Ok: %O" ans
 
-
-let test11 () = 
-    getChangeScheme "PCL 81" |> runDb |> printResult
-    // getChangeSchemeInfo "PCL 81" |> runDb |> printResult
-    // getSchemeChangeRequestIds "PCL 81" |> runDb |> printResult
-
-let test11a () = 
-    findAideAssetId 150491L 501505L |> runDb |> printResult
 

@@ -303,8 +303,8 @@ module BuildReport =
             match! buildHierarchyDiffs changeRequestId assetRootId with
             | None -> return None
             | Some tree -> 
-                let! tree1 = expandFlocDiffHierarchy tree
-                return (Some tree1)
+                let! tree1 = expandFlocDiffHierarchy tree |>> pruneTree
+                return tree1
         } |?>> sprintf "getStructureChange1: %i %i\n%s" changeRequestId assetRootId
 
     let getStructureChanges (changeRequestId : int64) : SqliteDb<Hierarchy<StructureNode> list> = 

@@ -102,11 +102,11 @@ module PrintReport =
             
             ]
         
-        let makeRow (change : AttributeValueChange) : TableRow= 
-            [ change.AttributeName          |> text        |> markdownText
-            ; change.LeftValue              |> text        |> markdownText 
-            ; change.RightValue             |> text        |> markdownText 
-            ; change.AttributeDescription   |> text        |> markdownText 
+        let makeRow (change : ValueChange) : TableRow= 
+            [ change.FieldName      |> text        |> markdownText
+            ; change.LeftValue      |> text        |> markdownText 
+            ; change.RightValue     |> text        |> markdownText 
+            ; change.Description    |> text        |> markdownText 
             ]
         
         let rows = changes |> attributeValueChanges |> List.map makeRow 

@@ -60,8 +60,16 @@ module Datatypes =
             with get() : string  = 
                 match v with
                 | InLeft s -> s.SortKey
-                | InBoth (s1,_) -> s1.SortKey
+                | InBoth (_,s2) -> s2.SortKey
                 | InRight s -> s.SortKey
+
+        /// This favours the Aide CommonName
+        member v.CommonName 
+            with get() : string  = 
+                match v with
+                | InLeft s -> s.CommonName
+                | InBoth (_,s2) -> s2.CommonName
+                | InRight s -> s.CommonName
 
         member v.Reference 
             with get() : string  = 
@@ -160,7 +168,25 @@ module Datatypes =
                     cont (xs @ ys)))
             work x (fun xs -> xs) 
 
+        member x.Map (mapper : 'Label -> 'NewLabel) : Hierarchy<'NewLabel> = 
+            let rec work tree cont = 
+                match tree with
+                | HierarchyNode(label,kids) ->
+                    let label1 = mapper label
+                    workList kids (fun kids1 ->
+                    cont (HierarchyNode(label1, kids1)))
+            and workList kids cont = 
+                match kids with
+                | [] -> cont []
+                | k1 :: rest -> 
+                    work k1 (fun kid1 -> 
+                    workList rest (fun kids2 -> 
+                    cont (kid1 :: kids2)))
+            work x (fun a -> a) 
 
+    let hierarchyMap (mapper : 'a -> 'b) 
+                     (tree : Hierarchy<'a>) : Hierarchy<'b> = 
+        tree.Map(mapper)
 
     type ChangeRequestInfo = 
         { ChangeRequestId : int64

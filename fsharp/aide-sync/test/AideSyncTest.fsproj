@@ -11,4 +11,8 @@
     <None Include="TempBuildTree.fsx" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\src\AideSync.fsproj" />
+  </ItemGroup>
+
 </Project>
