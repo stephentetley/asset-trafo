@@ -21,6 +21,7 @@ module Datatypes =
     type AiFlocNode = 
         { AssetId : int64
           Reference : string
+          HierarchyLevel : int
           ShortName : string 
           CommonName : string
           ParentReference : string }
@@ -35,8 +36,9 @@ module Datatypes =
                 v.CommonName.Replace(' ', '?')
 
      type AideFlocNode = 
-         { AideAssetId : int64        
+         { AideAssetId : int64
            Reference : string
+           HierarchyLevel : int
            ShortName : string 
            CommonName : string
            ParentReference : string }
@@ -75,15 +77,22 @@ module Datatypes =
             with get() : string  = 
                 match v with
                 | InLeft s -> s.Reference
-                | InBoth (s1,_) -> s1.Reference
+                | InBoth (_,s2) -> s2.Reference
                 | InRight s -> s.Reference
 
         member v.ParentReference 
             with get() : string  = 
                 match v with
                 | InLeft s -> s.ParentReference
-                | InBoth (s1,_) -> s1.ParentReference
+                | InBoth (_,s2) -> s2.ParentReference
                 | InRight s -> s.ParentReference
+
+        member v.HierarchyLevel
+            with get() : int  = 
+                match v with
+                | InLeft s -> s.HierarchyLevel
+                | InBoth (_,s2) -> s2.HierarchyLevel
+                | InRight s -> s.HierarchyLevel
 
 
     type StructureNode = 

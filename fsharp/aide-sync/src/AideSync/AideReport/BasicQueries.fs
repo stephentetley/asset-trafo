@@ -22,18 +22,20 @@ module BasicQueries =
         let sql = 
             """
             WITH RECURSIVE
-            temp_table(child_id, parent_id) AS (
-                SELECT :startid, 0
+            temp_table(child_id, parent_id, node_level) AS (
+                SELECT :startid, 0, 1
                     UNION ALL
                 SELECT 
                     ai_structure_relationships.child_id,
-                    ai_structure_relationships.parent_id
+                    ai_structure_relationships.parent_id,
+                    node_level + 1
                 FROM ai_structure_relationships, temp_table
                 WHERE ai_structure_relationships.parent_id = temp_table.child_id
                 )
             SELECT 
                 temp_table.child_id AS [AssetId],
                 asset.reference AS [Reference],
+                temp_table.node_level AS [NodeLevel],
                 parent_asset.reference AS [ParentReference],
                 asset.asset_name AS [Name],
                 asset.asset_common_name AS [CommonName]
@@ -50,9 +52,10 @@ module BasicQueries =
         let readRow1 (result : ResultItem) : AiFlocNode = 
             { AssetId = result.GetInt64(0)
               Reference = result.GetString(1)
-              ParentReference = result.TryGetString(2) |> Option.defaultValue ""
-              ShortName = result.GetString(3)
-              CommonName = result.GetString(4)
+              HierarchyLevel = result.GetInt32(2)
+              ParentReference = result.TryGetString(3) |> Option.defaultValue ""
+              ShortName = result.GetString(4)
+              CommonName = result.GetString(5)
             }
     
         queryKeyed cmd (Strategy.ReadAll readRow1) 
@@ -91,18 +94,20 @@ module BasicQueries =
         let sql = 
             """
             WITH RECURSIVE
-            temp_table(child_id, parent_id) AS (
-                SELECT :startid, 0
+            temp_table(child_id, parent_id, node_level) AS (
+                SELECT :startid, 0, 1
                     UNION ALL
                 SELECT 
                     aide_structure_relationships.child_id,
-                    aide_structure_relationships.parent_id
+                    aide_structure_relationships.parent_id,
+                    node_level + 1
                 FROM aide_structure_relationships, temp_table
                 WHERE aide_structure_relationships.parent_id = temp_table.child_id
                 )
             SELECT 
                 temp_table.child_id AS [AideAssetId],
                 asset.reference AS [Reference],
+                temp_table.node_level AS [NodeLevel],
                 parent_asset.reference AS [ParentReference],
                 asset.asset_name AS [Name],
                 asset.asset_common_name AS [CommonName]
@@ -119,9 +124,10 @@ module BasicQueries =
         let readRow1 (result : ResultItem) : AideFlocNode =
             { AideAssetId = result.GetInt64(0)
             ; Reference = result.GetString(1)
-            ; ParentReference = result.TryGetString(2) |> Option.defaultValue ""
-            ; ShortName = result.GetString(3)
-            ; CommonName = result.GetString(4)
+            ; HierarchyLevel = result.GetInt32(2)
+            ; ParentReference = result.TryGetString(3) |> Option.defaultValue ""
+            ; ShortName = result.GetString(4)
+            ; CommonName = result.GetString(5)
             }
 
         queryKeyed cmd (Strategy.ReadAll readRow1) 

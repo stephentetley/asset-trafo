@@ -25,10 +25,10 @@ module StructureDiff =
         let refSortR (xs : AideFlocNode list) = 
             xs |> List.sortBy (fun x -> x.Reference)
 
-        /// Note pathSort is not reliable for the full node list
-        /// but it should at least but the root node at the head.
-        let pathSort (xs : FlocDiff list) = 
-            xs |> List.sortBy (fun x -> x.SortKey)
+        /// Note - we need to see parent before we can add child
+        /// Sorting on level should be good enough
+        let levelSort (xs : FlocDiff list) = 
+            xs |> List.sortBy (fun x -> x.HierarchyLevel)
 
         let rec work lefts rights cont = 
             match lefts,rights with
@@ -49,7 +49,7 @@ module StructureDiff =
                     cont (InRight y :: ac))
                 | i -> failwithf "differenceL - Weird (impossible) pattern failure: %i" i
         work (refSortL leftList) (refSortR rightList) (fun x -> x)
-            |> pathSort 
+            |> levelSort 
 
     let showDiffs (printL : AiFlocNode -> string) 
                   (printR : AideFlocNode -> string)
@@ -70,15 +70,13 @@ module StructureDiff =
 
     // Note 
     // ====
-    // The ``FlocDiff list`` is almost sorted, but not reliably so.
-    // We can assume first node is the root of the tree.
+    // The ``FlocDiff list`` is reliably sorted if we sort on HierarchyLevel.
     
         
 
-    // Current buildTree is not good enough (04/10/2019).
-    // It relies on the floc list always having parent
-    // before child but we cannot guarantee this...
-
+    // ``buildTree`` has a very strong precodition that the input list
+    // must be sorted so parent nodes are before child nodes.
+    // It will lose data (nodes) if this is not the case.
     let buildTree (diffs : FlocDiff list) : Hierarchy<FlocDiff> option = 
         printfn "Length of diffs = %i" diffs.Length
         let makeNode (d1 : FlocDiff) : Hierarchy<FlocDiff> = 
