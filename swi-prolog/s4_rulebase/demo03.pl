@@ -1,5 +1,9 @@
 % demo03.pl
 
+:- use_module(library(apply)).
+:- use_module(library(lists)).
+:- use_module(library(yall)).
+
 :- use_module(library(prosqlite)).
 :- use_module(rules/rules).
 
@@ -19,13 +23,18 @@ db_disconnect :-
     sqlite_disconnect(rulebase).
 
 
-demo01(Code) :- 
-    is_site(Code).
+demo01(Code, Pgs) :- 
+    is_site(Code), 
+    site_function_all(Code, Xs), 
+    convlist([X,Y] >> function_process_groups(X,Y), Xs, Yss),
+    flatten(Yss, Pgs).
 
-% demo02(Code) :- 
-%     s4_site(Code, _), !.
+
+demo02(PgCode, Ps) :-
+    process_group_processes(PgCode, Ps).
+
+demo03(SysCode, Es) :-
+    system_equipment(SysCode, Es).
 
 
-% demo03(Name) :- 
-%     site(Obj, 'SEAME'),
-%     Obj = s4_site(_, Name), !.
+
