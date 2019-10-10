@@ -1,6 +1,7 @@
-% demo02.pl
+% demo03.pl
 
 :- use_module(library(prosqlite)).
+:- use_module(rules/rules).
 
 %% prosqlite
 %% connection opened with as_predicates
@@ -12,29 +13,19 @@
 db_connect :- 
     sqlite_connect('data/db/s4_rulebase.sqlite', 
         rulebase,
-        [as_predicates(true)]).
+        [as_predicates(true), arity(palette), at_module(db_rules)]).
 
 db_disconnect :- 
     sqlite_disconnect(rulebase).
 
 
-demo01(Xs) :- 
-    findall(X, s4_site(X,_), Xs).
+demo01(Code) :- 
+    is_site(Code).
 
-demo02(X,Y) :- 
-    s4_site(P1,X),
-    s4_function(P2, _, _, _, P1),
-    s4_process_group(P3, _, _, _, P2),
-    s4_process(_, Y, _, _, P3).
-
-demo02a(Code, Ps) :-
-    s4_site(Code, Name), 
-    findall(X, demo02(Name, X), Ps), !.
+% demo02(Code) :- 
+%     s4_site(Code, _), !.
 
 
-
-
-demo03(E) :- 
-    s4_equipment(_,E,_,_,_, 'SEAME-CAA-NET-TEL-SYS01').
-
-
+% demo03(Name) :- 
+%     site(Obj, 'SEAME'),
+%     Obj = s4_site(_, Name), !.
