@@ -22,7 +22,7 @@ demo02(Site, Funs) :-
 
 demo03(SiteFloc, Ans) :- 
     get_s4_site(SiteFloc, Site),
-    s4_site_function(Site, Fun), 
+    s4_site_child_function(Site, Fun), 
     s4_function_code(Fun, 'EDC'),
     s4_function_parent(Fun, Ans).
 
