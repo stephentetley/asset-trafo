@@ -26,6 +26,10 @@
     ]).
 
 
+%%% Obsolete
+%%% It is nicer to return a record *that can be deconstructed)
+%%% than a uid that has to be chined into another query.
+
 %% Site
 is_site(Code) :-
     db_rules:s4_site(['s4_floc'=Code, 'site_name'=_]),!.

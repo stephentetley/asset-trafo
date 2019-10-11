@@ -52,6 +52,10 @@
     , s4_system_floc/2
     , s4_system_name/2    
     , s4_system_code/2
+    , s4_system_object_description/2
+    , s4_system_class_code/2
+    , s4_system_class_description/2
+    , s4_system_system_code/2
     , s4_system_child_assembly/2
     , s4_system_child_assembly_all/2
     , s4_system_child_equipment/2
@@ -64,12 +68,20 @@
     , s4_assembly_floc/2
     , s4_assembly_name/2    
     , s4_assembly_code/2
+    , s4_assembly_object_description/2
+    , s4_assembly_class_code/2
+    , s4_assembly_class_description/2
     , s4_assembly_child_equipment/2
     , s4_assembly_child_equipment_all/2
     , s4_assembly_parent/2
 
         % Equipment
-    , get_s4_equipment/2
+    , get_s4_equipment/2    
+    , s4_equipment_description/2
+    , s4_equipment_category/2
+    , s4_equipment_object_type/2
+    , s4_equipment_object_class/2
+    , s4_equipment_parent/2
 
     ]).
 
@@ -258,3 +270,14 @@ get_s4_equipment(Uid, Equipment) :-
     make_s4_equipment([uid(Uid), description(Descr), category(Category), 
         object_type(ObjType), object_class(ObjClass),         
         s4_floc(S4Floc)], Equipment).
+
+s4_equipment_parent(Equipment, Parent) :-
+    s4_equipment_s4_floc(Equipment, F1),
+    s4_equipment_parent_aux(F1, Parent).
+
+s4_equipment_parent_aux(Floc, Parent) :-
+    get_s4_system(Floc, Parent).
+
+s4_equipment_parent_aux(Floc, Parent) :-
+    get_s4_assembly(Floc, Parent).
+
