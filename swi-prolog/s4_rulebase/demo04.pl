@@ -20,3 +20,9 @@ demo02(Site, Funs) :-
     get_s4_site('SEAME', Site),
     s4_site_function_all(Site, Funs).
 
+demo03(SiteFloc, Ans) :- 
+    get_s4_site(SiteFloc, Site),
+    s4_site_function(Site, Fun), 
+    s4_function_code(Fun, 'EDC'),
+    s4_function_parent(Fun, Ans).
+
