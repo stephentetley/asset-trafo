@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FSharp.Data" Version="3.1.1" />
+    <PackageReference Include="FSharp.Data" Version="3.3.2" />
     <PackageReference Include="Hashids-fs" Version="2.0.0" />
     <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20190903" />
     <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190721" />
