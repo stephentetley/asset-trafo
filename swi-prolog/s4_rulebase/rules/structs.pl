@@ -52,10 +52,10 @@
     , s4_system_floc/2
     , s4_system_name/2    
     , s4_system_code/2
+    , s4_system_object_code/2
     , s4_system_object_description/2
     , s4_system_class_code/2
     , s4_system_class_description/2
-    , s4_system_system_code/2
     , s4_system_child_assembly/2
     , s4_system_child_assembly_all/2
     , s4_system_child_equipment/2
@@ -96,8 +96,8 @@
 :- record s4_function(floc:atom, name:atom, code:atom, object_description:atom, parent_ref:atom).
 :- record s4_process_group(floc:atom, name:atom, code:atom, object_description:atom, parent_ref:atom).
 :- record s4_process(floc:atom, name:atom, code:atom, object_description:atom, parent_ref:atom).
-:- record s4_system(floc:atom, name:atom, code:atom, object_description:atom, 
-        class_code:atom, class_description:atom, system_code:atom, parent_ref:atom).
+:- record s4_system(floc:atom, name:atom, code:atom, object_code:atom, object_description:atom, 
+        class_code:atom, class_description:atom, parent_ref:atom).
 
 :- record s4_assembly(floc:atom, name:atom, code:atom, object_description:atom, 
         class_code:atom, class_description:atom, parent_ref:atom).
@@ -199,12 +199,13 @@ s4_process_parent(Process, ProcessGroup) :-
 
 get_s4_system(Floc, System) :-
     db_rules:s4_system(['s4_floc'=Floc, 'system_name'=Name,
-            'object_code'=Object, 'object_description'=ObjDesc, 
+            'short_code'=Code, 
+            'object_code'=ObjCode, 'object_description'=ObjDesc, 
             'class_code'=ClassCode, 'class_description'=ClassDesc, 
-            'system_code'=Code, 'parent_floc'=Parent]),    
+            'parent_floc'=Parent]),    
     make_s4_system([floc(Floc), name(Name), code(Code), 
-        object_description(ObjDesc), class_code(ClassCode), 
-        class_description(ClassDesc), system_code(SystemCode), 
+        object_code(ObjCode), object_description(ObjDesc), 
+        class_code(ClassCode), class_description(ClassDesc), 
         parent_ref(Parent)], System).
 
 

@@ -146,7 +146,7 @@ module PopulateDb =
                 INSERT INTO s4_system
                 (s4_floc, 
                 system_name, 
-                system_code,
+                short_code,
                 object_code,
                 object_description,
                 class_code,

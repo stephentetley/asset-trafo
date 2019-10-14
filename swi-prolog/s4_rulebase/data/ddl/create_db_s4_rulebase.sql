@@ -61,7 +61,7 @@ CREATE TABLE s4_system
 (
     s4_floc TEXT PRIMARY KEY UNIQUE NOT NULL, 
     system_name TEXT NOT NULL, 
-    system_code TEXT,
+    short_code TEXT,
     object_code TEXT,
     object_description TEXT, 
     class_code TEXT,
