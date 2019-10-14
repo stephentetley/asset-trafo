@@ -107,6 +107,9 @@ CREATE TABLE s4_equipment
     s4_equip_ref INTEGER PRIMARY KEY NOT NULL UNIQUE, 
     description TEXT, 
     category TEXT, 
+    model TEXT,
+    manufacturer TEXT,
+    serial_number TEXT,
     object_type TEXT, 
     object_class TEXT, 
     s4_floc TEXT NOT NULL

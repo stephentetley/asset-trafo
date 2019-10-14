@@ -11,6 +11,10 @@ module PopulateDb =
 
     type ErrMsg = string
 
+
+    let flocLength (flocCode : string) : int = 
+        let arr : string [] = flocCode.Split( [| '-' |])
+        arr.Length
     type S4DataTable = 
         CsvProvider< Sample = @"G:\work\Projects\asset_sync\S4_Floc_Mapping_Site-A-Z_General_Structure_Initial.csv"
                    , MissingValues = @"#N/A,NULL"
@@ -170,7 +174,8 @@ module PopulateDb =
     /// S4 Assembly (level 6)
     let s4AssemblyInsertStep (row : S4DataRow) : (string * IndexedCommand) option = 
         match row.``L6_Floc Code``, row.``L6_Unit Description``, row.``L5_Floc Code`` with
-        | Some flocCode, Some procName, Some parent-> 
+        | Some flocCode, Some procName, Some parent 
+            when flocLength flocCode = 6 -> 
             let sql = 
                 """
                 INSERT INTO s4_assembly
@@ -212,8 +217,7 @@ module PopulateDb =
             do! insertTraversal s4ProcessInsertStep
             do! insertTraversal s4SystemInsertStep
             do! insertTraversal s4AssemblyInsertStep
-            //do! insertTraversal s4ItemInsertStep
-            //do! insertTraversal s4ComponentInsertStep
+            // Items and Components not currently represented in sample data
             return ()
         }
 
@@ -230,6 +234,8 @@ module PopulateDb =
     let getS4EquipmentRows (cvsPath : string) : S4EquipmentRow list = 
         let table = S4EquipmentTable.Load(uri = cvsPath) in Seq.toList table.Rows
 
+
+    /// Note - subordinate equipment not currently represented in the sample data
     let makeS4EquipmentInsert (row : S4EquipmentRow) : IndexedCommand option = 
         match row.``400 S/4 Equip Reference``, row.``Migration Status (Y/N)`` with
         | Some(num), true -> 
@@ -239,16 +245,22 @@ module PopulateDb =
                 (s4_equip_ref, 
                 description, 
                 category,
+                model,
+                manufacturer,
+                serial_number,
                 object_type, 
                 object_class, 
                 s4_floc)
-                VALUES (?,?,?, ?,?,?)
+                VALUES (?,?,?, ?,?,?, ?,?,?)
                 """
             let cmd = 
                 new IndexedCommand(commandText = sql)
                     |> addParam (int32Param num)
                     |> addParam (optionNull stringParam row.``Equipment Description``)
                     |> addParam (stringParam row.Category)
+                    |> addParam (optionNull stringParam row.``Std Manufacturer``)
+                    |> addParam (optionNull stringParam row.``Std Model``)
+                    |> addParam (optionNull stringParam row.``Std Serial``)
                     |> addParam (optionNull stringParam row.``Object Type``)
                     |> addParam (optionNull stringParam row.Class)
                     |> addParam (stringParam row.``L6_Floc Code``)
