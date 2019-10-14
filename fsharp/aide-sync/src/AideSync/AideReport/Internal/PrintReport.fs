@@ -24,7 +24,11 @@ module PrintReport =
 
     
 
+    let deletedRed : string = "#F1BFBF"
 
+    let addedGreen : string = paleGreen
+
+    let modifiedOrange : string = gold
 
     // ************************************************************************
     // Change scheme table
@@ -117,8 +121,9 @@ module PrintReport =
         let makeDoc table = 
             let heading = 
                 htmlAnchorId (md5Hash node.CommonName)
-                    (text node.Reference ^+^ text node.CommonName)
-            markdownText heading ^!!^ table
+                            (text node.Reference ^+^ text node.CommonName)
+                    |> h3
+            heading ^!!^ table
         node.ValueChanges 
             |> Option.bind changeAttributeTable
             |> Option.map makeDoc
@@ -162,23 +167,44 @@ module PrintReport =
 
         match item with
         | Deleted s -> 
-            let wrap t1 = inlineLink t1 ("#"+ md5Hash s.CommonName) None
-            nodespan lightCoral [] (makeLabelL s wrap) |> markdownText
+            // no link for deleted
+            nodespan deletedRed [] (makeLabelL s text) |> markdownText
         | Common(s1,s2,changes) -> 
             if changes.HasChanges then
                 let wrap t1 = inlineLink t1 ("#"+ md5Hash s2.CommonName) None
-                nodespan gold [] (makeLabelR s2 wrap)  |> markdownText
+                nodespan modifiedOrange [] (makeLabelR s2 wrap)  |> markdownText
             else
                 makeLabelR s2 text |> markdownText
         | Added(s,changes) -> 
             let wrap t1 = inlineLink t1 ("#"+ md5Hash s.CommonName) None
-            nodespan paleGreen [] (makeLabelR s wrap) |> markdownText
+            nodespan addedGreen [] (makeLabelR s wrap) |> markdownText
 
+    let treeLegend () : Markdown = 
+        let specs = 
+            let cellSpec1 = { ColumnSpec.Width = 60 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            List.replicate 5 cellSpec1; 
+            
+        let colourize (colour : string) (source : string) = 
+            htmlSpan [attrStyle [styleDecl "background-color" colour]] (text source)
+        let row1 : TableRow = 
+            [ markdownText ("Legend:" |> text) 
+            ; markdownText ("Added" |> colourize addedGreen)
+            ; markdownText ("Deleted" |> colourize deletedRed)
+            ; markdownText ("Modified" |> colourize modifiedOrange)
+            ; markdownText ("No change" |> text)
+            ]
+        makeTableWithoutHeadings specs [row1] |> gridTable
+        
 
     let changeRequestTree (hierarchy : Hierarchy<StructureNode>) : Markdown = 
-        hierarchy.ToMarkdownTree() 
-            |> RoseTree.mapTree2 (drawLabel true) (drawLabel false)
-            |> RoseTree.drawTree
+        let tree = 
+            hierarchy.ToMarkdownTree() 
+                |> RoseTree.mapTree2 (drawLabel true) (drawLabel false)
+                |> RoseTree.drawTree
+        (text "Structure Changes:" |> markdownText)
+            ^!!^ treeLegend ()
+            ^!!^ tree
+
 
     let changeRequestAttibutes (changeRequest : ChangeRequest) : Markdown = 
         let changes = changeRequest.StructureChange.Flatten()
