@@ -49,3 +49,34 @@ demo06(Ans) :-
     get_process(X3, 'TEL', X4),
     get_system(X4, 'SYS01', X5),
     get_equipment(X5, Ans).
+
+
+demo07_aux("One").
+demo07_aux("Two").
+
+failing(_) :- false.
+id(X, X).
+
+demo07z(Ans) :- 
+    findall(X, demo07_aux(X), Ans).
+
+demo07(Ans) :- 
+    count(demo07_aux, Ans).
+
+demo08(Ans) :- 
+    get_s4_site_by_re("^Selby.*CSO\\Z", X1),
+    count(get_function(X1, 'CAA'), Ans), 
+    !.
+
+demo09 :- 
+    get_s4_site_by_re("^Selby.*CSO\\Z", X1),
+    satisfies(get_function(X1, 'CAA')),
+    !.
+
+demo10(Ans) :-
+    get_s4_site_by_re("^Selby.*CSO\\Z", X1),
+    get_function(X1, X2),
+    get_process_group(X2, Ans),
+    s4_process_group_code(Ans, 'NET').
+
+
