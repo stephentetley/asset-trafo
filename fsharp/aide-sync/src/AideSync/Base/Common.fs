@@ -4,8 +4,9 @@
 namespace AideSync.Base
 
 module Common = 
-    
+        
     open System.IO 
+    
 
     // Possibly SLFormat.CommandOptions should not expose a function called text
     open SLFormat.CommandOptions
@@ -21,6 +22,8 @@ module Common =
         let ans2 = List.fold (fun (s:string) (c:char) -> s.Replace(c,'_')) ans1 bads
         let ans3 = List.fold (fun (s:string) (c:char) -> s.Replace(c,'_')) ans2 white
         ans3.Trim()
+
+
 
     // ************************************************************************
     // Markdown

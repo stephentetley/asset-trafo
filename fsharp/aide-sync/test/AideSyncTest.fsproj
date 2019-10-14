@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <None Include="RunSetupDb.fsx" />
+    <None Include="Temp01.fsx" />
     <None Include="TestReport01.fsx" />
     <None Include="TempBuildTree.fsx" />
   </ItemGroup>

@@ -17,6 +17,7 @@ module PrintReport =
     open MarkdownDoc.Markdown.CssColors
     open MarkdownDoc.Pandoc
 
+    open AideSync.Base.Addendum
     open AideSync.Base.Common
     open AideSync.AideReport.Internal.Attributes
     open AideSync.AideReport.Internal.Datatypes
@@ -114,8 +115,10 @@ module PrintReport =
 
     let structureNodeChanges (node : StructureNode) : Markdown option = 
         let makeDoc table = 
-            (text node.Reference ^+^ text node.CommonName |> markdownText)
-                ^!!^ table
+            let heading = 
+                htmlAnchorId (md5Hash node.CommonName)
+                    (text node.Reference ^+^ text node.CommonName)
+            markdownText heading ^!!^ table
         node.ValueChanges 
             |> Option.bind changeAttributeTable
             |> Option.map makeDoc
@@ -147,26 +150,29 @@ module PrintReport =
     let nodespan (colourName : string) (extraAttrs : HtmlAttrs) (body : Text) : Text = 
         htmlSpan (attrStyle [backgroundColor colourName] :: extraAttrs) body
 
+
     let drawLabel (isRoot : bool) (item : StructureNode)  : Markdown = 
-        let makeLabelL (item : AiFlocNode) : Text = 
-            text <| if isRoot then item.CommonName else item.ShortName
-        let makeLabelR (item : AideFlocNode) : Text = 
-            text <| if isRoot then item.CommonName else item.ShortName
+        let makeLabelL (item : AiFlocNode) (wrap : string -> Text) : Text = 
+            if isRoot then item.CommonName else item.ShortName
+                |> wrap
+
+        let makeLabelR (item : AideFlocNode) (wrap : string -> Text) : Text = 
+            if isRoot then item.CommonName else item.ShortName
+                |> wrap
 
         match item with
         | Deleted s -> 
-            let title = htmlAttr "title" (sprintf "Delete '%s'" s.CommonName)
-            nodespan lightCoral [title] (makeLabelL s) |> markdownText
+            let wrap t1 = inlineLink t1 ("#"+ md5Hash s.CommonName) None
+            nodespan lightCoral [] (makeLabelL s wrap) |> markdownText
         | Common(s1,s2,changes) -> 
-            // makeLabelR s2 |> markdownText
             if changes.HasChanges then
-                let title = htmlAttr "title" "Attributes Changed"
-                nodespan gold [title] (makeLabelR s2)  |> markdownText
+                let wrap t1 = inlineLink t1 ("#"+ md5Hash s2.CommonName) None
+                nodespan gold [] (makeLabelR s2 wrap)  |> markdownText
             else
-                makeLabelR s2 |> markdownText
+                makeLabelR s2 text |> markdownText
         | Added(s,changes) -> 
-            let title = htmlAttr "title" (sprintf "Add '%s'" s.CommonName)
-            nodespan paleGreen [title] (makeLabelR s) |> markdownText
+            let wrap t1 = inlineLink t1 ("#"+ md5Hash s.CommonName) None
+            nodespan paleGreen [] (makeLabelR s wrap) |> markdownText
 
 
     let changeRequestTree (hierarchy : Hierarchy<StructureNode>) : Markdown = 
