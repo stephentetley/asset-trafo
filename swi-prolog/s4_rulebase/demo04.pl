@@ -4,6 +4,7 @@
 :- use_module(library(pcre)).
 
 :- use_module(rules/structs).
+:- use_module(rules/select).
 
 db_connect :- 
     sqlite_connect('data/db/s4_rulebase.sqlite', 
@@ -31,9 +32,18 @@ demo03(SiteFloc, Ans) :-
 
 %% Need a 'fuzzy' way of finding sites, etc...
 %% PCRE to the rescue
-demo04(Patt, Ans) :-
-    get_s4_site(SiteFloc, Ans),
-    s4_site_name(Ans, Name),
-    re_match(Patt, Name).
+demo04(Ans) :-
+    get_s4_site_by_name('Wistow WwTW', Ans).
+
+%% Need a 'fuzzy' way of finding sites, etc...
+%% PCRE to the rescue
+demo05(Patt, Ans) :-
+    get_s4_site_by_re(Patt, Ans).
 
 
+demo06(Ans) :- 
+    get_s4_site_by_re("^Selby.*CSO\\Z", X1),
+    get_function(X1, 'CAA', X2),
+    get_process_group(X2, 'NET', X3),
+    get_process(X3, 'TEL', X4),
+    get_system(X4, 'SYS01', Ans).

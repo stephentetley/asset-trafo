@@ -146,11 +146,11 @@ module PopulateDb =
                 INSERT INTO s4_system
                 (s4_floc, 
                 system_name, 
+                system_code,
                 object_code,
                 object_description,
                 class_code,
                 class_description,
-                system_code,
                 parent_floc)
                 VALUES (?,?,?, ?,?,?, ?,?);
                 """
@@ -158,11 +158,11 @@ module PopulateDb =
                 new IndexedCommand(commandText = sql)
                     |> addParam (stringParam flocCode)
                     |> addParam (stringParam procName)
+                    |> addParam (optionNull stringParam row.``L5_System Code``)
                     |> addParam (optionNull stringParam row.``L5_Object Type``)
                     |> addParam (optionNull stringParam row.``L5_Object Type Description``)
                     |> addParam (optionNull stringParam row.L5_Class)
                     |> addParam (optionNull stringParam row.``L5_Class Desc``)
-                    |> addParam (optionNull stringParam row.``L5_System Code``)
                     |> addParam (stringParam parent)
             Some (flocCode, cmd)
         | _, _, _-> None

@@ -134,7 +134,7 @@ get_s4_function(Floc, Function) :-
 
 
 s4_function_child_process_group(Function, ProcessGroup) :-
-    s4_process_group_floc(Function, F1),
+    s4_function_floc(Function, F1),
     db_rules:s4_process_group(['s4_floc'=F2, 'parent_floc'=F1]),
     get_s4_process_group(F2, ProcessGroup).
 
@@ -176,8 +176,8 @@ get_s4_process(Floc, Process) :-
     db_rules:s4_process(['s4_floc'=Floc, 'process_name'=Name,
         'short_code'=Code, 'object_description'=ObjDesc, 
         'parent_floc'=Parent]),
-    make_s4_process_group([floc(Floc), name(Name), code(Code), 
-        object_description(ObjDesc), parent(Parent)], Process).
+    make_s4_process([floc(Floc), name(Name), code(Code), 
+        object_description(ObjDesc), parent_ref(Parent)], Process).
 
 
 
@@ -199,9 +199,9 @@ s4_process_parent(Process, ProcessGroup) :-
 
 get_s4_system(Floc, System) :-
     db_rules:s4_system(['s4_floc'=Floc, 'system_name'=Name,
-            'object_code'=Code, 'object_description'=ObjDesc, 
+            'object_code'=Object, 'object_description'=ObjDesc, 
             'class_code'=ClassCode, 'class_description'=ClassDesc, 
-            'system_code'=SystemCode, 'parent_floc'=Parent]),    
+            'system_code'=Code, 'parent_floc'=Parent]),    
     make_s4_system([floc(Floc), name(Name), code(Code), 
         object_description(ObjDesc), class_code(ClassCode), 
         class_description(ClassDesc), system_code(SystemCode), 

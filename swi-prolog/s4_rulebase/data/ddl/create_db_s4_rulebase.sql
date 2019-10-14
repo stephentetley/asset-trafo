@@ -60,12 +60,12 @@ CREATE TABLE s4_process
 CREATE TABLE s4_system
 (
     s4_floc TEXT PRIMARY KEY UNIQUE NOT NULL, 
-    system_name TEXT NOT NULL,
+    system_name TEXT NOT NULL, 
+    system_code TEXT,
     object_code TEXT,
     object_description TEXT, 
     class_code TEXT,
-    class_description TEXT, 
-    system_code TEXT,
+    class_description TEXT,
     parent_floc TEXT
 );
 
