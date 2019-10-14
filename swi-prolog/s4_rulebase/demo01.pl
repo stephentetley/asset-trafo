@@ -1,28 +1,51 @@
 % demo01.pl
 
 :- use_module(library(prosqlite)).
+:- use_module(library(pcre)).
 
-%% prosqlite
-%% connection opened with as_predicates
+:- use_module(rules/structs).
+:- use_module(rules/select).
 
-
-%% Before testing the demos at the prompt...
-%% ?-  assets_connect.
-
-%% When done
-%% ?- assets_disconnect.
 
 db_connect :- 
-    sqlite_connect('./data/db/s4_rulebase.sqlite', rulebase), !.
+    sqlite_connect('data/db/s4_rulebase.sqlite', 
+        rulebase,
+        [as_predicates(true), arity(palette), at_module(db_rules)]).
 
 db_disconnect :- 
     sqlite_disconnect(rulebase).
 
 
-%% Returns a "Prolog answer" (one record at once, iteratable with semicolon)
-%% rather than a set.
-demo01(Row) :- 
-    sqlite_query(rulebase, "SELECT site.s4_floc FROM s4_site AS site;", Row).
+demo01 :- 
+    atom("string").
+
+demo02(SiteFloc, Funs) :- 
+    get_s4_site(SiteFloc, Site),
+    s4_site_child_function_all(Site, Funs).
 
 
+%% Site with an environmental discharge...
+demo03(SiteFloc, Ans) :- 
+    get_s4_site(SiteFloc, Site),
+    s4_site_child_function(Site, Fun), 
+    s4_function_code(Fun, 'EDC'),
+    s4_function_parent(Fun, Ans).
 
+%% Need a 'fuzzy' way of finding sites, etc...
+%% PCRE to the rescue
+demo04(Ans) :-
+    get_s4_site_by_name('Wistow WwTW', Ans).
+
+%% Need a 'fuzzy' way of finding sites, etc...
+%% PCRE to the rescue
+demo05(Patt, Ans) :-
+    get_s4_site_by_re(Patt, Ans).
+
+
+demo06(Ans) :- 
+    get_s4_site_by_re("^Selby.*CSO\\Z", X1),
+    get_function(X1, 'CAA', X2),
+    get_process_group(X2, 'NET', X3),
+    get_process(X3, 'TEL', X4),
+    get_system(X4, 'SYS01', X5),
+    get_equipment(X5, Ans).

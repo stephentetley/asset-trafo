@@ -12,6 +12,7 @@
     , get_process_group/3
     , get_process/3
     , get_system/3
+    , get_equipment/2
 
     ] ).
 
@@ -50,10 +51,12 @@ get_process(ProcessGroup, Code, Process) :-
 get_system(Process, Code, System) :- 
     is_s4_process(Process),
     s4_process_child_system(Process, System),
-    s4_system_code(System, Temp),
-    writeln(Temp),
     s4_system_code(System, Code).
 
+
+%% TODO - addressing?
+get_equipment(System, Equipment) :- 
+    s4_system_child_equipment(System, Equipment).
 
 
 
