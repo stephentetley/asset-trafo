@@ -43,12 +43,12 @@ demo05(Patt, Ans) :-
 
 
 demo06(Ans) :- 
-    get_s4_site_by_re("^Selby.*CSO\\Z", X1),
+    get_s4_site_by_re("^Selby", X1),
     get_function(X1, 'CAA', X2),
     get_process_group(X2, 'NET', X3),
     get_process(X3, 'TEL', X4),
-    get_system(X4, 'SYS01', X5),
-    get_equipment(X5, Ans).
+    get_system(X4, 'SYS01', Ans).
+    %% get_equipment(X5, Ans).
 
 
 demo07_aux("One").

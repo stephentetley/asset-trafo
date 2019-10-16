@@ -6,7 +6,7 @@ open System
 open System.Text
 
 
-#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20190903\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20191014\lib\netstandard2.0"
 #r "MarkdownDoc.dll"
 open MarkdownDoc.Markdown
 open MarkdownDoc.Markdown.RoseTree
