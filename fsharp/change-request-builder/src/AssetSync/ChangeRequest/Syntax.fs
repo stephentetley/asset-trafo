@@ -66,13 +66,14 @@ module Syntax =
     /// Lookup name by floc if None.
     type FlocRequest = 
         { Path : FlocPath 
-          Name : string option }
+          StartUpDate : DateTime
+          Description : string option }
 
 
     type EquipmentRequest =
-        { Path : FlocPath 
-          Code : uint64
-          Name : string }
+        { FunLoc : FlocPath 
+          StartUpDate : DateTime
+          Description : string }
 
     
     type ChangeRequest = 
