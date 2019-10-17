@@ -16,6 +16,9 @@ module Printer =
     let applyDoc (writer : 'a -> Doc) (items : 'a list) : Doc = 
         fun sb -> List.fold (fun ac x -> writer x ac) sb items
 
+    let private tab : Doc = 
+        fun sb -> sb.Append "\t"
+
     let private newline : Doc = 
         fun sb -> sb.AppendLine ""
 
@@ -25,7 +28,7 @@ module Printer =
     let private writeText (source : string) : Doc = 
         fun sb -> sb.Append source
     
-    let private commentLine (source : string) : Doc = 
+    let private directiveLine (source : string) : Doc = 
         "* " + source |> writeLine
 
     let intersperse (sep : string) (docs : Doc list) : Doc = 
@@ -35,7 +38,7 @@ module Printer =
             fun sb -> List.fold (fun ac fn -> ac |> writeText sep |> fn) (d1 sb) rest
 
     let patchType (source : PatchType) : Doc = 
-        commentLine <|
+        directiveLine <|
             match source with
             | Download -> "Download"
             
@@ -43,7 +46,7 @@ module Printer =
         let dmname = 
             match source with
             | U1 -> "U1"
-        commentLine <| sprintf "Data Model: %s" dmname 
+        directiveLine <| sprintf "Data Model: %s" dmname 
             
     
 
@@ -56,29 +59,29 @@ module Printer =
             | Equi -> "EQUI"
             | ClassEqui -> "CLASSEQUI" 
             | ValuaEqui -> "VALUAEQUI"
-        commentLine <| sprintf "Entity Type: %s" etname
+        directiveLine <| sprintf "Entity Type: %s" etname
             
     let variant () : Doc = 
-        commentLine <| "Variant:"
+        directiveLine <| "Variant:"
 
     let user (userName : string) : Doc = 
-        commentLine <| sprintf "User: %s" userName
+        directiveLine <| sprintf "User: %s" userName
 
     let dateTime (dt : DateTime) : Doc = 
-        commentLine 
+        directiveLine 
             <| sprintf "Date: %s / Time: %s"
                     (dt.ToString(format="yyyyMMdd"))
                     (dt.ToString(format="hhmmss"))
 
 
     let selectionId (source : SelectionId) : Doc = 
-        commentLine <| 
+        directiveLine <| 
             match source with
             | EquiEq num -> sprintf "EQUI EQ | %s |" num.Number
             | FuncLocEq floc -> sprintf "FUNCLOC EQ | %s |" floc
 
     let selection (items : SelectionId list) : Doc = 
-        commentLine "Selection:" >> applyDoc selectionId items
+        directiveLine "Selection:" >> applyDoc selectionId items
        
     let headerRow (headers : HeaderRow) : Doc = 
         let titles = headers.Columns |> List.map  writeText
@@ -87,9 +90,10 @@ module Printer =
     let headerRows (rows : HeaderRow list)  : Doc = 
         applyDoc headerRow rows
 
+    // DataRow ends with tab
     let dataRow (row : DataRow) : Doc = 
         let cells = row.Cells |> List.map writeText
-        intersperse "\t" cells >> newline
+        intersperse "\t" cells >> tab >> newline
 
     let dataRows (rows : DataRow list)  : Doc = 
         applyDoc dataRow rows
