@@ -87,8 +87,6 @@ module Printer =
         let titles = headers.Columns |> List.map  writeText
         writeText "*" >> intersperse "\t" titles >> newline
             
-    let headerRows (rows : HeaderRow list)  : Doc = 
-        applyDoc headerRow rows
 
     // DataRow ends with tab
     let dataRow (row : DataRow) : Doc = 
@@ -99,7 +97,7 @@ module Printer =
         applyDoc dataRow rows
 
 
-    let printPatch (patch : Patch) : string = 
+    let patchToString (patch : Patch) : string = 
         new StringBuilder ()
             |> patchType patch.PatchType
             |> dataModel patch.DataModel
@@ -108,7 +106,10 @@ module Printer =
             |> user patch.User
             |> dateTime patch.DateTime
             |> selection patch.Selection
-            |> headerRows patch.HeaderRows
+            |> headerRow patch.HeaderRow
             |> dataRows patch.DataRows
             |> fun sb -> sb.ToString ()
 
+    let writePatch (outpath : string) (patch : Patch) : unit = 
+        let text = patchToString patch
+        IO.File.WriteAllText(path=outpath, contents=text)

@@ -130,8 +130,6 @@ module Parser =
         let inner = sepBy cellValue tab |>> (List.toArray >> HeaderRow)
         directive (inner .>> newline)
 
-    let pHeaderRows : PatchParser<HeaderRow list> = 
-        many1 (attempt pHeaderRow)
 
     let pDataRow : PatchParser<DataRow> = 
         let inner = sepEndBy cellValue tab |>> (List.toArray >> DataRow)
@@ -140,7 +138,7 @@ module Parser =
     let pDataRows : PatchParser<DataRow list> = 
         many1 (attempt pDataRow)
 
-    let parsePatch = 
+    let parsePatch : PatchParser<Patch> = 
         parse {
             let! ptype = pPatchType
             let! dmodel = pDataModel
@@ -149,7 +147,7 @@ module Parser =
             let! user = pUser
             let! date = pDateTime
             let! selection = pSelection
-            let! headers = pHeaderRows
+            let! header = pHeaderRow
             let! datas = pDataRows
             return { PatchType = ptype 
                      DataModel = dmodel
@@ -158,6 +156,12 @@ module Parser =
                      User = user
                      DateTime = date
                      Selection = selection
-                     HeaderRows = headers
+                     HeaderRow = header
                      DataRows = datas }
         }
+
+
+    let readPatch (inputFile : string) : Result<Patch, string> = 
+        match runParserOnFile parsePatch () inputFile Text.Encoding.UTF8 with
+        | Failure (str,_,_) -> Result.Error str
+        | Success (ans,_,_) -> Result.Ok ans

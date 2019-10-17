@@ -60,7 +60,12 @@ module Syntax =
           User : string
           DateTime : DateTime
           Selection : SelectionId list
-          HeaderRows : HeaderRow list
+          HeaderRow : HeaderRow
           DataRows : DataRow list
         }
 
+        /// Column Headings should be the last row of the HeaderRows
+        /// (before this we may have a Header Row of descriptions)
+        member x.ColumnHeaders 
+            with get () : string list = 
+                x.HeaderRow.Columns

@@ -19,7 +19,7 @@ open AssetPatch.Base.Printer
 
 
 let demo01 () = 
-    let headers = HeaderRow [| "FUNCLOC"; "TXTMI"; "ABCKZFLOC" |]
+    let header = HeaderRow [| "FUNCLOC"; "TXTMI"; "ABCKZFLOC" |]
     let patch = 
         { PatchType = Download 
           DataModel = U1
@@ -33,7 +33,7 @@ let demo01 () =
                 FuncLocEq "BIR23-EDC-LQD-RGM" 
                 FuncLocEq "BIR23-EDC-LQD-RGM-SYS01" 
             ]
-          HeaderRows = [ headers ]
+          HeaderRow = header
           DataRows = 
             [   DataRow [| "BIR23-EDC" ; "Environmental Discharge"; "" |]
                 DataRow [| "BIR23-EDC-LQD" ; "Liquid Discharge"; "" |]
@@ -41,7 +41,7 @@ let demo01 () =
                 DataRow [| "BIR23-EDC-LQD-RGM-SYS01" ; "EA Event duration Monitoring"; "" |]
             ]
         }
-    printPatch patch |> printfn "%s"
+    patchToString patch |> printfn "%s"
 
 
 let demo02 () = 
@@ -50,9 +50,18 @@ let demo02 () =
 let demo03 () = 
     let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
     let outpath = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\fl_out.txt"
-    match runParserOnFile parsePatch () source Text.Encoding.UTF8 with
-    | Failure (str,_,_) -> Result.Error str
-    | Success (ans,_,_) ->
-        let text = printPatch ans
-        IO.File.WriteAllText(path=outpath, contents=text)
+    match readPatch source with
+    | Result.Error msg -> Result.Error msg
+    | Result.Ok ans ->
+        writePatch outpath ans
         Result.Ok ans
+
+
+let demo04 () = 
+    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
+    match readPatch source with
+    | Result.Error msg -> failwith msg
+    | Result.Ok ans ->
+        List.iter (printfn "%s") ans.ColumnHeaders
+
+
