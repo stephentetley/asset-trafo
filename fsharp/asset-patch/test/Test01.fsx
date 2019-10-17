@@ -64,4 +64,11 @@ let demo04 () =
     | Result.Ok ans ->
         List.iter (printfn "%s") ans.ColumnHeaders
 
+let demo05 () = 
+    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
+    match readPatch source with
+    | Result.Error msg -> failwith msg
+    | Result.Ok ans ->
+        let ix = ans.FieldIndex "ANLNRI"
+        ans.DataRows |> List.map  (fun row -> row.[ix])
 

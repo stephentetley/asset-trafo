@@ -40,7 +40,24 @@ module Syntax =
 
         member x.Columns 
             with get () : string list = 
-                let (HeaderRow xs ) = x in Array.toList xs
+                let (HeaderRow arr) = x in Array.toList arr
+
+        member x.Item 
+            with get (index:int) : string = 
+                let (HeaderRow arr) = x in arr.[index]
+        
+        member x.FieldIndex 
+            with get (name: string) : int = 
+                let (HeaderRow arr) = x in 
+                Array.findIndex (fun x -> x = name) arr
+
+
+        member x.Select (indices : int list) : HeaderRow = 
+            let (HeaderRow arr ) = x 
+            List.map (fun ix -> arr.[ix]) indices 
+                |> List.toArray
+                |> HeaderRow
+
     
     type Value = string
 
@@ -50,7 +67,19 @@ module Syntax =
 
         member x.Cells 
             with get () : string list = 
-                let (DataRow xs ) = x in Array.toList xs
+                let (DataRow arr ) = x in Array.toList arr
+
+        member x.Item 
+            with get (index:int) : string = 
+                let (DataRow arr) = x in arr.[index]
+
+        member x.Select (indices : int list) : DataRow = 
+            let (DataRow arr ) = x 
+            List.map (fun ix -> arr.[ix]) indices 
+                |> List.toArray
+                |> DataRow
+
+            
 
     type Patch = 
         { PatchType : PatchType 
@@ -69,3 +98,11 @@ module Syntax =
         member x.ColumnHeaders 
             with get () : string list = 
                 x.HeaderRow.Columns
+
+        member x.FieldIndex 
+            with get (name: string) : int = 
+                x.HeaderRow.FieldIndex name
+
+        member x.Indices 
+            with get (columns : string list) : int list = 
+                List.map (fun name -> x.FieldIndex(name)) columns
