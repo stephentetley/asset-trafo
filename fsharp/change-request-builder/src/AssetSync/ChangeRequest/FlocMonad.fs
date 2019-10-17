@@ -91,7 +91,7 @@ module FlocMonad =
                   Path = parent.Path.Extend code }
             Ok (child, FlocRequest child :: acc)
 
-    let addEquipment (name : string) (code : uint64) (parent : FlocRequest) : FlocMonad<EquipmentRequest> = 
+    let addEquipment (name : string) (parent : FlocRequest) : FlocMonad<EquipmentRequest> = 
         /// At some point code will be looked up in a table of valid codes...
         FlocMonad <| fun env acc -> 
             let child : EquipmentRequest = 

@@ -17,6 +17,6 @@ let demo01 () =
                             >>= extend "EDG" 
                             >>= extend "LQD" 
                             >>= extendx "SYS01" "EA Monitoring System"
-                let! monitor = addEquipment "Level Monitor 1" 1000010UL floc1 
+                let! monitor = addEquipment "Level Monitor 1" floc1 
                 return ()
             }
