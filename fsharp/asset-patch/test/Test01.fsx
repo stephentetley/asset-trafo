@@ -49,4 +49,10 @@ let demo02 () =
 
 let demo03 () = 
     let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
-    runParserOnFile parsePatch () source Text.Encoding.UTF8 
+    let outpath = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\fl_out.txt"
+    match runParserOnFile parsePatch () source Text.Encoding.UTF8 with
+    | Failure (str,_,_) -> Result.Error str
+    | Success (ans,_,_) ->
+        let text = printPatch ans
+        IO.File.WriteAllText(path=outpath, contents=text)
+        Result.Ok ans

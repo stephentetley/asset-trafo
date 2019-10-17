@@ -93,7 +93,7 @@ module Printer =
     // DataRow ends with tab
     let dataRow (row : DataRow) : Doc = 
         let cells = row.Cells |> List.map writeText
-        intersperse "\t" cells >> tab >> newline
+        intersperse "\t" cells >> newline
 
     let dataRows (rows : DataRow list)  : Doc = 
         applyDoc dataRow rows
