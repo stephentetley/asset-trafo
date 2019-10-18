@@ -132,13 +132,14 @@ module Parser =
 
 
     let pDataRow : PatchParser<DataRow> = 
-        let inner = sepEndBy cellValue tab |>> (List.toArray >> DataRow)
+        // Cannot use sepEndBy because we must end with tab.
+        let inner = many1 (cellValue .>> tab) |>> (List.toArray >> DataRow)
         inner .>> newline
 
     let pDataRows : PatchParser<DataRow list> = 
         many1 (attempt pDataRow)
 
-    let parsePatch : PatchParser<Patch> = 
+    let parsePatch : PatchParser<PatchFile> = 
         parse {
             let! ptype = pPatchType
             let! dmodel = pDataModel
@@ -161,7 +162,7 @@ module Parser =
         }
 
 
-    let readPatch (inputFile : string) : Result<Patch, string> = 
+    let readPatch (inputFile : string) : Result<PatchFile, string> = 
         match runParserOnFile parsePatch () inputFile Text.Encoding.UTF8 with
         | Failure (str,_,_) -> Result.Error str
         | Success (ans,_,_) -> Result.Ok ans

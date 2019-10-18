@@ -54,21 +54,39 @@ let demo03 () =
     | Result.Error msg -> Result.Error msg
     | Result.Ok ans ->
         writePatch outpath ans
-        Result.Ok ans
+        // List.iter (printfn "%O") ans.RowAssocs
+        Result.Ok ans.RowAssocs
 
 
-let demo04 () = 
-    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
-    match readPatch source with
+let showHeaders (filePath : string) = 
+    match readPatch filePath with
     | Result.Error msg -> failwith msg
     | Result.Ok ans ->
         List.iter (printfn "%s") ans.ColumnHeaders
+
+let demo04 () =
+    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Equipment.txt"
+    showHeaders source        
+
 
 let demo05 () = 
     let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
     match readPatch source with
     | Result.Error msg -> failwith msg
     | Result.Ok ans ->
-        let ix = ans.FieldIndex "ANLNRI"
-        ans.DataRows |> List.map  (fun row -> row.[ix])
+        let ix = ans.ColumnIndex "ANLNRI"
+        ans.DataRows |> List.map (fun row -> row.[ix])
+
+
+
+let demo06 () = 
+    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
+    match readPatch source with
+    | Result.Error msg -> failwith msg
+    | Result.Ok ans ->
+        try 
+            let row = ans.RowAssocs.[0]
+            row
+        with
+        | ex -> failwith ex.Message
 

@@ -79,9 +79,13 @@ module Syntax =
                 |> List.toArray
                 |> DataRow
 
-            
+    // Can't really use a Map as we want to preserve order...            
+    let internal makeRowRecord (headers : HeaderRow) 
+                                (row : DataRow) : (string * string) list = 
+        List.foldBack2 (fun a b st -> (a,b) :: st) headers.Columns row.Cells []
 
-    type Patch = 
+
+    type PatchFile = 
         { PatchType : PatchType 
           DataModel : DataModel
           EntityType : EntityType
@@ -99,10 +103,19 @@ module Syntax =
             with get () : string list = 
                 x.HeaderRow.Columns
 
-        member x.FieldIndex 
+        member x.ColumnIndex 
             with get (name: string) : int = 
                 x.HeaderRow.FieldIndex name
 
         member x.Indices 
             with get (columns : string list) : int list = 
-                List.map (fun name -> x.FieldIndex(name)) columns
+                List.map (fun name -> x.ColumnIndex(name)) columns
+
+        /// Return the rows as AssocLists pairing column name with value
+        member x.RowAssocs
+            with get () : ((string * string) list) list= 
+                x.DataRows |> List.map (makeRowRecord x.HeaderRow)
+
+
+
+        

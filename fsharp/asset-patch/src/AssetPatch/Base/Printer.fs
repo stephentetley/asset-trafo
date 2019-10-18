@@ -91,13 +91,13 @@ module Printer =
     // DataRow ends with tab
     let dataRow (row : DataRow) : Doc = 
         let cells = row.Cells |> List.map writeText
-        intersperse "\t" cells >> newline
+        intersperse "\t" cells >> tab >> newline
 
     let dataRows (rows : DataRow list)  : Doc = 
         applyDoc dataRow rows
 
 
-    let patchToString (patch : Patch) : string = 
+    let patchToString (patch : PatchFile) : string = 
         new StringBuilder ()
             |> patchType patch.PatchType
             |> dataModel patch.DataModel
@@ -110,6 +110,6 @@ module Printer =
             |> dataRows patch.DataRows
             |> fun sb -> sb.ToString ()
 
-    let writePatch (outpath : string) (patch : Patch) : unit = 
+    let writePatch (outpath : string) (patch : PatchFile) : unit = 
         let text = patchToString patch
         IO.File.WriteAllText(path=outpath, contents=text)
