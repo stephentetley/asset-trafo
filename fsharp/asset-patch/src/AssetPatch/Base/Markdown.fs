@@ -55,12 +55,107 @@ module Markdown =
         | Result.Error msg -> Result.Error msg
 
 
+    let cellValue (str : string) : Markdown = 
+        match str with
+        | null | "" -> nbsp 
+        | _ -> str |> text |> markdownText
+
+    let linkToTop : Markdown = 
+        inlineLink "Back to top" "#top" None |> markdownText
+
+
     let patchType (source : PatchType) : Markdown = 
        match source with
-       | Download -> "Download" |> rawtext |> h1
+       | Download -> "Download" |> rawtext |> doubleAsterisks |> markdownText
+
+    let dataModel (source : DataModel) : Text = 
+        match source with
+        | U1 -> "U1" |> rawtext
+
+    let entityType (source : EntityType) : Text = 
+        let name = 
+            match source with
+            | FuncLoc -> "FUNCLOC"
+            | ClassFloc -> "CLASSFLOC"
+            | ValuaFloc -> "VALUAFLOC"
+            | Equi -> "EQUI"
+            | ClassEqui -> "CLASSEQUI" 
+            | ValuaEqui -> "VALUAEQUI"
+        name |> rawtext
+    
+    let variant () : Markdown = 
+        nbsp
+
+
+    let selectionIdType (selId : SelectionId) : Text = 
+        match selId with
+        | EquiEq _ -> "EQUI EQ" |> text
+        | FuncLocEq _ -> "FUNCLOC EQ" |> text
+
+    let selectionIdValue (selId : SelectionId) : Text = 
+        match selId with
+        | EquiEq x -> x.Number |> text
+        | FuncLocEq x -> text x
+
+
+    let headerTable (source : PatchFile) : Markdown = 
+        let specs = 
+            [ { ColumnSpec.Width = 40 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            ; { ColumnSpec.Width = 50 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            ]
+        let makeRow (name : string) (value : Markdown) : TableRow = 
+            [ doubleAsterisks (name |> text) |> markdownText ; value ]
+        let rows : TableRow list= 
+            [ [patchType source.PatchType; nbsp]
+            ; makeRow "Data Model:"     (dataModel source.DataModel |> markdownText)
+            ; makeRow "Entity Type:"    (entityType source.EntityType |> markdownText)
+            ; makeRow "Variant:"        (variant source.Variant)
+            ; makeRow "User:"           (text source.User |> markdownText)            
+            ; makeRow "Date:"           (source.DateTime.ToString(format="yyyyMMdd") |> cellValue)
+            ; makeRow "Time:"           (source.DateTime.ToString(format="hhmmss") |> cellValue)
+            ]
+        makeTableWithoutHeadings specs rows |> gridTable
+        
+    let selectionTable (source : SelectionId list) : Markdown = 
+        let specs = 
+            [ { ColumnSpec.Width = 30 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            ; { ColumnSpec.Width = 60 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            ]
+        let makeRow (selId : SelectionId) : TableRow = 
+            [ selectionIdType selId |> markdownText 
+            ; selectionIdValue selId |> markdownText ]
+        let rows : TableRow list = 
+            List.map makeRow source
+        makeTableWithoutHeadings specs rows |> gridTable
+
+    let selectionSection (source : PatchFile) : Markdown = 
+        h2 (text "Selection")
+            ^!!^ selectionTable source.Selection
+
+    let dataAssocTable (source : (string * string) list) : Markdown = 
+        let specs = 
+            [ { ColumnSpec.Width = 30 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            ; { ColumnSpec.Width = 40 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            ]
+        let makeRow (name, value) : TableRow = 
+            [ name |> cellValue; value |> text |> markdownText ]
+        let rows : TableRow list = 
+            List.map makeRow source
+        makeTableWithoutHeadings specs rows |> gridTable
+
+    let dataRows (patch : PatchFile) : Markdown = 
+        let makeTable ix rowAssoc = 
+            h2 (text "Row" ^^ int32Md (ix+1))
+                ^!!^ dataAssocTable rowAssoc
+                ^!!^ linkToTop
+        List.mapi makeTable patch.RowAssocs |> vsep
 
     let patchToMarkdown (patch : PatchFile) : Markdown = 
-        patchType patch.PatchType
+        h1 (text "Patch Report")
+            ^!!^ headerTable patch
+            ^!!^ selectionSection patch
+            ^!!^ dataRows patch
+            ^!!^ emptyMarkdown
 
     let pandocGenHtml (pandocOpts : PandocOptions)
                        (outputHtmlFile : string) 
