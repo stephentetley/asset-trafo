@@ -8,10 +8,13 @@
     <Compile Include="AssetPatch\Base\Syntax.fs" />
     <Compile Include="AssetPatch\Base\Parser.fs" />
     <Compile Include="AssetPatch\Base\Printer.fs" />
+    <Compile Include="AssetPatch\Base\Markdown.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FParsec" Version="1.0.4-rc3" />
+    <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20191014" />
+    <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190721" />
   </ItemGroup>
 
 </Project>
