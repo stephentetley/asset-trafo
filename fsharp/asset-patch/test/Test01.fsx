@@ -21,10 +21,13 @@ open FParsec
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\Markdown.fs"
+#load "..\src\AssetPatch\FuncLocBuilder\FuncLocPath.fs"
+#load "..\src\AssetPatch\FuncLocBuilder\FuncLoc.fs"
 open AssetPatch.Base.Syntax
 open AssetPatch.Base.Parser
 open AssetPatch.Base.Printer
 open AssetPatch.Base.Markdown
+open AssetPatch.FuncLocBuilder
 
 
 let outputFile (relFileName : string) = 
@@ -109,3 +112,10 @@ let demo06 () =
                                     , searchPattern = "*.txt")
     Array.iter (summarize >> ignore) sources
 
+let demo07 () = 
+    FuncLocPath.Create "BIR23-EDC" 
+
+let demo08 () = 
+    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
+    FuncLoc.getRootFromPathFile "BIR23-EDC" source
+    

@@ -66,6 +66,13 @@ module Syntax =
     type DataRow = 
         | DataRow of Value []
 
+        static member FromAssocList (assocs : AssocList<string,string>) : DataRow = 
+            assocs.Assocs 
+                |> List.map snd
+                |> List.toArray
+                |> DataRow
+
+
         member x.Cells 
             with get () : string list = 
                 let (DataRow arr ) = x in Array.toList arr
@@ -118,5 +125,8 @@ module Syntax =
                 x.DataRows |> List.map (makeRowRecord x.HeaderRow)
 
 
+        /// Returns the first assoc row where the predicate matches
+        member x.TryFindAssoc (projection : string -> string -> bool) : AssocList<string,string> option = 
+            x.RowAssocs |> List.tryFind (AssocList.tryFindKey projection >> Option.isSome)
 
         

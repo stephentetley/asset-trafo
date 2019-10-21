@@ -41,8 +41,14 @@ module AssocList =
     let tryFind (key : 'Key) (source : AssocList<'Key, 'T>) : 'T option = 
         List.tryFind (fun x -> fst x = key) source.Assocs
             |> Option.map snd
+            
+    let tryFindKey (predicate : 'Key -> 'T -> bool) (source : AssocList<'Key, 'T>) : 'T option = 
+        List.tryFind (fun (k,v) -> predicate k v) source.Assocs
+            |> Option.map snd
 
-    let update (key: 'Key) (value: 'T) (source: AssocList<'Key, 'T>) : AssocList<'Key, 'T> = 
+        
+
+    let update (key: 'Key) (value: 'T) (source: AssocList<'Key, 'T>) : AssocList<'Key, 'T> when 'Key : equality  = 
         let rec work xs cont = 
             match xs with 
             | [] -> cont []
@@ -53,5 +59,15 @@ module AssocList =
                     work rest (fun vs -> 
                     cont (x :: vs))
         work source.Assocs (fun xs -> AssocList(xs))
+
+    let remove (key : 'Key) 
+                (source: AssocList<'Key, 'T>) : AssocList<'Key, 'T> when 'Key : equality  = 
+        source.Assocs 
+            |> List.filter (fun x -> fst x <> key)
+            |> AssocList
+
+    let removes (keys : seq<'Key>) 
+                (source: AssocList<'Key, 'T>) : AssocList<'Key, 'T> when 'Key : equality  = 
+        Seq.fold (fun st k -> remove k st) source keys
 
         

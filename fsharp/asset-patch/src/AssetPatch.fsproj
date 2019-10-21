@@ -10,6 +10,7 @@
     <Compile Include="AssetPatch\Base\Parser.fs" />
     <Compile Include="AssetPatch\Base\Printer.fs" />
     <Compile Include="AssetPatch\Base\Markdown.fs" />
+    <Compile Include="AssetPatch\FuncLocBuilder\FuncLocPath.fs" />
     <Compile Include="AssetPatch\FuncLocBuilder\FuncLoc.fs" />
   </ItemGroup>
 
