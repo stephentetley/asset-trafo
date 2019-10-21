@@ -116,8 +116,9 @@ module FuncLoc =
         List.map build1 rows |> allSome
 
 
-    let makeFuncLocAdditionsPatch (user : string) 
-                                    (funcLocs : FuncLoc list) : Result<PatchFile, ErrMsg> = 
+    let makeAdditionsPatch (user : string) 
+                            (timestamp : System.DateTime)
+                            (funcLocs : FuncLoc list) : Result<PatchFile, ErrMsg> = 
         let makeRows = 
             List.sort >> List.map toPatchData >> allSome
 
@@ -131,7 +132,7 @@ module FuncLoc =
                      EntityType = FuncLoc
                      Variant = ()
                      User = user
-                     DateTime = System.DateTime.Now
+                     DateTime = timestamp
                      Selection = selIds
                      HeaderRow = header
                      DataRows = List.map DataRow.FromAssocList rows
