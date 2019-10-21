@@ -6,7 +6,7 @@ namespace AssetPatch.Base
 module Syntax =
 
     open System
-
+    open AssetPatch.Base
    
 
     [<Struct>]
@@ -34,6 +34,8 @@ module Syntax =
     type SelectionId = 
         | EquiEq of IntegerString 
         | FuncLocEq of string
+
+
     
     type HeaderRow = 
         | HeaderRow of columns : string []
@@ -50,7 +52,6 @@ module Syntax =
             with get (name: string) : int = 
                 let (HeaderRow arr) = x in 
                 Array.findIndex (fun x -> x = name) arr
-
 
         member x.Select (indices : int list) : HeaderRow = 
             let (HeaderRow arr ) = x 
@@ -81,8 +82,8 @@ module Syntax =
 
     // Can't really use a Map as we want to preserve order...            
     let internal makeRowRecord (headers : HeaderRow) 
-                                (row : DataRow) : (string * string) list = 
-        List.foldBack2 (fun a b st -> (a,b) :: st) headers.Columns row.Cells []
+                                (row : DataRow) : AssocList<string, string> = 
+        List.foldBack2 (fun a b st -> AssocList.Cons(a,b,st)) headers.Columns row.Cells AssocList.empty
 
 
     type PatchFile = 
@@ -113,7 +114,7 @@ module Syntax =
 
         /// Return the rows as AssocLists pairing column name with value
         member x.RowAssocs
-            with get () : ((string * string) list) list= 
+            with get () : AssocList<string,string> list= 
                 x.DataRows |> List.map (makeRowRecord x.HeaderRow)
 
 

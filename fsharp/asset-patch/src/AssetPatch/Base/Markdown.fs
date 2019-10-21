@@ -118,34 +118,37 @@ module Markdown =
         
     let selectionTable (source : SelectionId list) : Markdown = 
         let specs = 
-            [ { ColumnSpec.Width = 30 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            [ { ColumnSpec.Width = 10 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            ; { ColumnSpec.Width = 30 ; ColumnSpec.Alignment = Alignment.AlignLeft }
             ; { ColumnSpec.Width = 60 ; ColumnSpec.Alignment = Alignment.AlignLeft }
             ]
-        let makeRow (selId : SelectionId) : TableRow = 
-            [ selectionIdType selId |> markdownText 
+        let makeRow (ix : int) (selId : SelectionId) : TableRow = 
+            [ ix + 1 |> int32Md |> markdownText 
+            ; selectionIdType selId |> markdownText 
             ; selectionIdValue selId |> markdownText ]
         let rows : TableRow list = 
-            List.map makeRow source
+            List.mapi makeRow source
         makeTableWithoutHeadings specs rows |> gridTable
 
     let selectionSection (source : PatchFile) : Markdown = 
         h2 (text "Selection")
             ^!!^ selectionTable source.Selection
 
-    let dataAssocTable (source : (string * string) list) : Markdown = 
+    let dataAssocTable (source : AssocList<string, string>) : Markdown = 
         let specs = 
-            [ { ColumnSpec.Width = 30 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            [ { ColumnSpec.Width = 10 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+            ; { ColumnSpec.Width = 30 ; ColumnSpec.Alignment = Alignment.AlignLeft }
             ; { ColumnSpec.Width = 40 ; ColumnSpec.Alignment = Alignment.AlignLeft }
             ]
-        let makeRow (name, value) : TableRow = 
-            [ name |> cellValue; value |> text |> markdownText ]
+        let makeRow (ix :int) (name, value) : TableRow = 
+            [ ix + 1 |> int32Md |> markdownText ;  name |> cellValue; value |> text |> markdownText ]
         let rows : TableRow list = 
-            List.map makeRow source
+            List.mapi makeRow (AssocList.toList source)
         makeTableWithoutHeadings specs rows |> gridTable
 
     let dataRows (patch : PatchFile) : Markdown = 
-        let makeTable ix rowAssoc = 
-            h2 (text "Row" ^^ int32Md (ix+1))
+        let makeTable ix (rowAssoc : AssocList<string, string>) = 
+            h2 (text "Row" ^+^ int32Md (ix+1))
                 ^!!^ dataAssocTable rowAssoc
                 ^!!^ linkToTop
         List.mapi makeTable patch.RowAssocs |> vsep

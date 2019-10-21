@@ -16,7 +16,7 @@ open FParsec
 #I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20191014\lib\netstandard2.0"
 #r "MarkdownDoc.dll"
 
-
+#load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\Syntax.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
@@ -90,8 +90,12 @@ let demo05 () =
         ans.DataRows |> List.map (fun row -> row.[ix])
 
 
-let summarize (inputPatch : string) 
-                (outputHtml : string) : Result<unit, string> = 
+let summarize (inputPatch : string) : Result<unit, string> = 
+    let filename = 
+        Path.GetFileName(inputPatch) 
+            |> fun s -> Path.ChangeExtension(path = s, extension = "html")
+
+    let outputHtml = outputFile filename
     let pathToCss = @"..\..\..\..\..\libs\markdown-css-master\github.css"
     match readPatch inputPatch with
     | Result.Error msg -> Result.Error msg
@@ -100,7 +104,8 @@ let summarize (inputPatch : string)
         pandocGenHtml opts outputHtml ans
 
 let demo06 () = 
-    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
-    let output = outputFile "Functional_Location.html"
-    summarize source output
+    let sources = 
+        System.IO.Directory.GetFiles( path = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm"
+                                    , searchPattern = "*.txt")
+    Array.iter (summarize >> ignore) sources
 
