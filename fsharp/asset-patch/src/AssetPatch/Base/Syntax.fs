@@ -36,7 +36,7 @@ module Syntax =
         | FuncLocEq of string
 
 
-    
+    [<Struct>]
     type HeaderRow = 
         | HeaderRow of columns : string []
 
@@ -44,7 +44,7 @@ module Syntax =
             with get () : string list = 
                 let (HeaderRow arr) = x in Array.toList arr
 
-        member x.Item 
+        member x.GetItem 
             with get (index:int) : string = 
                 let (HeaderRow arr) = x in arr.[index]
         
@@ -66,6 +66,8 @@ module Syntax =
     type DataRow = 
         | DataRow of Value []
 
+        
+
         static member FromAssocList (assocs : AssocList<string,string>) : DataRow = 
             assocs.Assocs 
                 |> List.map snd
@@ -76,10 +78,17 @@ module Syntax =
         member x.Cells 
             with get () : string list = 
                 let (DataRow arr ) = x in Array.toList arr
-
-        member x.Item 
+        
+        // Calling this Property `GetItem` does not allow index notation, 
+        // but we are seeing a "Parameter count mismatch" bug if we call 
+        // the property `Item`.
+        // FSharp error #5713
+        member x.GetItem 
             with get (index:int) : string = 
-                let (DataRow arr) = x in arr.[index]
+                match x with
+                | DataRow (arr:string[]) -> arr.[index]
+
+
 
         member x.Select (indices : int list) : DataRow = 
             let (DataRow arr ) = x 

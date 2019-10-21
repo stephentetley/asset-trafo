@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="AssetPatch\Base\AssocList.fs" />
+    <Compile Include="AssetPatch\Base\Common.fs" />
     <Compile Include="AssetPatch\Base\Syntax.fs" />
     <Compile Include="AssetPatch\Base\Parser.fs" />
     <Compile Include="AssetPatch\Base\Printer.fs" />

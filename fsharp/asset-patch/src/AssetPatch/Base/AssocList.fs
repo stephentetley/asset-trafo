@@ -70,4 +70,7 @@ module AssocList =
                 (source: AssocList<'Key, 'T>) : AssocList<'Key, 'T> when 'Key : equality  = 
         Seq.fold (fun st k -> remove k st) source keys
 
+    let keys (source : AssocList<'Key, 'T>) : 'Key [] =
+        source |> toListBy (fun k _ -> k) |> List.toArray
+
         

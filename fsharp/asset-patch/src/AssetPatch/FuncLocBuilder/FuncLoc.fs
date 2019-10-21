@@ -55,8 +55,13 @@ module FuncLocType =
 [<RequireQualifiedAccess>]
 module FuncLoc =
     
+    open FSharp.Core
+
     open AssetPatch.Base
+    open AssetPatch.Base.Common
+    open AssetPatch.Base.Syntax
     open AssetPatch.Base.Parser
+
 
     let getRootFromPathFile (rootCode : string) (filePath : string) : Result<FuncLoc, string> = 
         match readPatch filePath with
@@ -96,5 +101,43 @@ module FuncLoc =
                 |> AssocList.update "TPLMA" (parent.ToString())
                 |> Some
 
+
+
+    let getHeaderRow (rows : AssocList<string, string> list) : HeaderRow option = 
+        match rows with
+        | [] -> None
+        | row1 :: _ -> row1 |> AssocList.keys |> HeaderRow |> Some
+
+    let getSelectionIds (rows : AssocList<string, string> list) : (SelectionId list) option = 
+        let build1 assocs = 
+            match AssocList.tryFind "FUNCLOC" assocs with
+            | None -> None
+            | Some funcloc -> FuncLocEq funcloc |> Some        
+        List.map build1 rows |> allSome
+
+
+    let makeFuncLocAdditionsPatch (user : string) 
+                                    (funcLocs : FuncLoc list) : Result<PatchFile, ErrMsg> = 
+        let makeRows = 
+            List.sort >> List.map toPatchData >> allSome
+
+        match makeRows funcLocs with
+        | None -> Error "Empty or invalid funclocs..."
+        | Some rows -> 
+            match getHeaderRow rows, getSelectionIds rows with
+            | Some header, Some selIds -> 
+                Ok { PatchType = Download 
+                     DataModel = U1
+                     EntityType = FuncLoc
+                     Variant = ()
+                     User = user
+                     DateTime = System.DateTime.Now
+                     Selection = selIds
+                     HeaderRow = header
+                     DataRows = List.map DataRow.FromAssocList rows
+                   }
+            | None, _ -> Error "Could not extract headers"
+            | _, None -> Error "Could not extract Selection Ids"
+                
 
 

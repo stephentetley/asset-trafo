@@ -7,8 +7,9 @@ open System.IO
 #I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\netstandard1.6"
 #r "FParsec"
 #r "FParsecCS"
-open FParsec
 
+
+open FSharp.Core
 
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
 #r "SLFormat.dll"
@@ -17,12 +18,14 @@ open FParsec
 #r "MarkdownDoc.dll"
 
 #load "..\src\AssetPatch\Base\AssocList.fs"
+#load "..\src\AssetPatch\Base\Common.fs"
 #load "..\src\AssetPatch\Base\Syntax.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\Markdown.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLocPath.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLoc.fs"
+open AssetPatch.Base
 open AssetPatch.Base.Syntax
 open AssetPatch.Base.Parser
 open AssetPatch.Base.Printer
@@ -60,7 +63,7 @@ let demo01 () =
 
 
 let demo02 () = 
-    run pPatchType "* Download" 
+    FParsec.CharParsers.run pPatchType "* Download" 
 
 let demo03 () = 
     let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
@@ -90,7 +93,7 @@ let demo05 () =
     | Result.Error msg -> failwith msg
     | Result.Ok ans ->
         let ix = ans.ColumnIndex "ANLNRI"
-        ans.DataRows |> List.map (fun row -> row.[ix])
+        ans.DataRows |> List.map (fun row -> row.GetItem(ix))
 
 
 let summarize (inputPatch : string) : Result<unit, string> = 
@@ -117,5 +120,15 @@ let demo07 () =
 
 let demo08 () = 
     let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
-    FuncLoc.getRootFromPathFile "BIR23-EDC" source
-    
+    match FuncLoc.getRootFromPathFile "BIR23-EDC" source with
+    | Result.Error msg -> Result.Error msg
+    | Result.Ok root -> 
+        let f1 = FuncLoc.extend "LQD" "Liquid Discharge" "LQD" root
+        FuncLoc.makeFuncLocAdditionsPatch "FORDB" [f1]
+
+let demo08a () = 
+    AssocList.ofList [ ("FUNCLOC", "BIR23-EDC")]
+        |> DataRow.FromAssocList
+
+
+
