@@ -25,12 +25,14 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Markdown.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLocPath.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLoc.fs"
+#load "..\src\AssetPatch\FuncLocBuilder\FuncLocMonad.fs"
 open AssetPatch.Base
 open AssetPatch.Base.Syntax
 open AssetPatch.Base.Parser
 open AssetPatch.Base.Printer
 open AssetPatch.Base.Markdown
 open AssetPatch.FuncLocBuilder
+open AssetPatch.FuncLocBuilder.FuncLocMonad
 
 
 let outputFile (relFileName : string) = 
@@ -124,11 +126,26 @@ let demo08 () =
     | Result.Error msg -> Result.Error msg
     | Result.Ok root -> 
         let f1 = FuncLoc.extend "LQD" "Liquid Discharge" "LQD" root
-        FuncLoc.makeFuncLocAdditionsPatch "FORDB" [f1]
+        FuncLoc.makeAdditionsPatch "FORDB" System.DateTime.Now [f1]
 
 let demo08a () = 
     AssocList.ofList [ ("FUNCLOC", "BIR23-EDC")]
         |> DataRow.FromAssocList
 
 
+let demo09 () = 
+    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
+    let outfile = outputFile "test_patch01.txt"
+    let action = 
+        flocBuilder {
+            let! r1 =  root "BIR23-EDC" 
+            let! smon = 
+                r1  |> extend "EDG" "Environmental Discharge" "EDC"
+                    >>= extend "LQD" "Liquid Discharge" "LQD"
+                    >>= extend "SYS01" "EA Monitoring System" "SMON"                
+            return ()
+        }
+    compile { PathToFlocFile = source; User = "FORDB"; Timestamp = System.DateTime.Now }
+            action
+            outfile
 
