@@ -73,6 +73,8 @@ module FuncLocMonad =
         | Error msg -> Error msg
 
 
+    /// Note - there is probably scope to add a phantom type layer over FlocLoc
+    /// encoding whether you have a Site, Function, System, etc.
     let extend (itemCode : string) (description : string) (objType : string) (parent : FuncLoc) : FlocMonad<FuncLoc> = 
         /// At some point code will be looked up in a table of valid codes...
         FlocMonad <| fun env acc -> 

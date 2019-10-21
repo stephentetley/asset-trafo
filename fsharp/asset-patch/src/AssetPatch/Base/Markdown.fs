@@ -112,7 +112,7 @@ module Markdown =
             ; makeRow "Variant:"        (variant source.Variant)
             ; makeRow "User:"           (text source.User |> markdownText)            
             ; makeRow "Date:"           (source.DateTime.ToString(format="yyyyMMdd") |> cellValue)
-            ; makeRow "Time:"           (source.DateTime.ToString(format="hhmmss") |> cellValue)
+            ; makeRow "Time:"           (source.DateTime.ToString(format="HHmmss") |> cellValue)
             ]
         makeTableWithoutHeadings specs rows |> gridTable
         

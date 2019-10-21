@@ -71,7 +71,7 @@ module Printer =
         directiveLine 
             <| sprintf "Date: %s / Time: %s"
                     (dt.ToString(format="yyyyMMdd"))
-                    (dt.ToString(format="hhmmss"))
+                    (dt.ToString(format="HHmmss"))
 
 
     let selectionId (source : SelectionId) : Doc = 
