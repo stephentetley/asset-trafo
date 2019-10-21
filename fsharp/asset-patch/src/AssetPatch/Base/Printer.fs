@@ -97,7 +97,7 @@ module Printer =
         applyDoc dataRow rows
 
 
-    let patchToString (patch : PatchFile) : string = 
+    let patchToString (patch : PatchFile<'T>) : string = 
         new StringBuilder ()
             |> patchType patch.PatchType
             |> dataModel patch.DataModel
@@ -110,7 +110,7 @@ module Printer =
             |> dataRows patch.DataRows
             |> fun sb -> sb.ToString ()
 
-    let writePatch (outpath : string) (patch : PatchFile) : unit = 
+    let writePatch (outpath : string) (patch : PatchFile<'T>) : unit = 
         let text = patchToString patch
         IO.File.WriteAllText(path=outpath, contents=text)
 

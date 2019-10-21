@@ -11,7 +11,6 @@ module FuncLocMonad =
     open AssetPatch.Base.Common   
     open AssetPatch.Base.Printer
     open AssetPatch.FuncLocBuilder
-
     
 
     type Env = 
@@ -147,7 +146,7 @@ module FuncLocMonad =
         match execFlocMonad env action with
         | Error msg -> Error msg
         | Ok flocs -> 
-            match FuncLoc.makeAdditionsPatch config.User config.Timestamp flocs with
+            match FuncLocPatch.makePatch config.User config.Timestamp flocs with
             | Ok patch -> 
                 writePatch outputPath patch ; Ok ()
             | Error msg -> Error msg

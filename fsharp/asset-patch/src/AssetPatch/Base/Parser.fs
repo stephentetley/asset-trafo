@@ -140,7 +140,7 @@ module Parser =
     let pDataRows : PatchParser<DataRow list> = 
         many1 (attempt pDataRow)
 
-    let parsePatch : PatchParser<PatchFile> = 
+    let parsePatch () : PatchParser<PatchFile<'T>> = 
         parse {
             let! ptype = pPatchType
             let! dmodel = pDataModel
@@ -163,7 +163,7 @@ module Parser =
         }
 
 
-    let readPatch (inputFile : string) : Result<PatchFile, ErrMsg> = 
-        match runParserOnFile parsePatch () inputFile Text.Encoding.UTF8 with
+    let readPatch (inputFile : string) : Result<PatchFile<'T>, ErrMsg> = 
+        match runParserOnFile (parsePatch ()) () inputFile Text.Encoding.UTF8 with
         | Failure (str,_,_) -> Result.Error str
         | Success (ans,_,_) -> Result.Ok ans

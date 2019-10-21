@@ -25,6 +25,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Markdown.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLocPath.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLoc.fs"
+#load "..\src\AssetPatch\FuncLocBuilder\FuncLocPatch.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLocMonad.fs"
 open AssetPatch.Base
 open AssetPatch.Base.Syntax
@@ -126,7 +127,7 @@ let demo08 () =
     | Result.Error msg -> Result.Error msg
     | Result.Ok root -> 
         let f1 = FuncLoc.extend "LQD" "Liquid Discharge" "LQD" root
-        FuncLoc.makeAdditionsPatch "FORDB" System.DateTime.Now [f1]
+        FuncLocPatch.makePatch "FORDB" System.DateTime.Now [f1]
 
 let demo08a () = 
     AssocList.ofList [ ("FUNCLOC", "BIR23-EDC")]

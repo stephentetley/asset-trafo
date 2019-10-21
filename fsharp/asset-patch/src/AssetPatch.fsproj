@@ -13,6 +13,7 @@
     <Compile Include="AssetPatch\Base\Markdown.fs" />
     <Compile Include="AssetPatch\FuncLocBuilder\FuncLocPath.fs" />
     <Compile Include="AssetPatch\FuncLocBuilder\FuncLoc.fs" />
+    <Compile Include="AssetPatch\FuncLocBuilder\FuncLocPatch.fs" />
     <Compile Include="AssetPatch\FuncLocBuilder\FuncLocMonad.fs" />
   </ItemGroup>
 

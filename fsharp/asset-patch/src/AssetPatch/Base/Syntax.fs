@@ -102,7 +102,7 @@ module Syntax =
         List.foldBack2 (fun a b st -> AssocList.Cons(a,b,st)) headers.Columns row.Cells AssocList.empty
 
 
-    type PatchFile = 
+    type PatchFile<'T> = 
         { PatchType : PatchType 
           DataModel : DataModel
           EntityType : EntityType
@@ -138,4 +138,17 @@ module Syntax =
         member x.TryFindAssoc (projection : string -> string -> bool) : AssocList<string,string> option = 
             x.RowAssocs |> List.tryFind (AssocList.tryFindKey projection >> Option.isSome)
 
-        
+
+    // ************************************************************************
+    // Typing PatchFiles
+
+    type FuncLocPhantom = class end
+    
+    type FuncLocPatch = PatchFile<FuncLocPhantom>
+
+    
+    type ClassFlocPhantom = class end
+
+    type ClassFlocPatch = PatchFile<ClassFlocPhantom>
+
+

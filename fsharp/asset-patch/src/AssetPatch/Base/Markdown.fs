@@ -98,7 +98,7 @@ module Markdown =
         | FuncLocEq x -> text x
 
 
-    let headerTable (source : PatchFile) : Markdown = 
+    let headerTable (source : PatchFile<'T>) : Markdown = 
         let specs = 
             [ { ColumnSpec.Width = 40 ; ColumnSpec.Alignment = Alignment.AlignLeft }
             ; { ColumnSpec.Width = 50 ; ColumnSpec.Alignment = Alignment.AlignLeft }
@@ -130,7 +130,7 @@ module Markdown =
             List.mapi makeRow source
         makeTableWithoutHeadings specs rows |> gridTable
 
-    let selectionSection (source : PatchFile) : Markdown = 
+    let selectionSection (source : PatchFile<'T>) : Markdown = 
         h2 (text "Selection")
             ^!!^ selectionTable source.Selection
 
@@ -146,14 +146,14 @@ module Markdown =
             List.mapi makeRow (AssocList.toList source)
         makeTableWithoutHeadings specs rows |> gridTable
 
-    let dataRows (patch : PatchFile) : Markdown = 
+    let dataRows (patch : PatchFile<'T>) : Markdown = 
         let makeTable ix (rowAssoc : AssocList<string, string>) = 
             h2 (text "Row" ^+^ int32Md (ix+1))
                 ^!!^ dataAssocTable rowAssoc
                 ^!!^ linkToTop
         List.mapi makeTable patch.RowAssocs |> vsep
 
-    let patchToMarkdown (patch : PatchFile) : Markdown = 
+    let patchToMarkdown (patch : PatchFile<'T>) : Markdown = 
         h1 (text "Patch Report")
             ^!!^ headerTable patch
             ^!!^ selectionSection patch
@@ -162,7 +162,7 @@ module Markdown =
 
     let pandocGenHtml (pandocOpts : PandocOptions)
                        (outputHtmlFile : string) 
-                       (patch : PatchFile) : Result<unit, string> = 
+                       (patch : PatchFile<'T>) : Result<unit, string> = 
         let doc = patchToMarkdown patch 
         writeHtml5Markdown "Patch Summary" pandocOpts outputHtmlFile doc
 
