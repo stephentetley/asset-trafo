@@ -1,20 +1,20 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.FuncLocBuilder
+namespace AssetPatch.FlocPatch
 
 
-module FuncLocMonad =
+module FlocPatchMonad =
 
     open System
 
     open AssetPatch.Base
     open AssetPatch.Base.Common   
     open AssetPatch.Base.Printer
-    open AssetPatch.FuncLocBuilder
-    open AssetPatch.FuncLocBuilder.FuncLocCommon
-    open AssetPatch.FuncLocBuilder.FuncLocPatch
-    open AssetPatch.FuncLocBuilder.ClassFlocPatch
+    open AssetPatch.FlocPatch
+    open AssetPatch.FlocPatch.Common
+    open AssetPatch.FlocPatch.FuncLocPatch
+    open AssetPatch.FlocPatch.ClassFlocPatch
     
 
     type Env = 
@@ -22,43 +22,43 @@ module FuncLocMonad =
           }
 
     /// Floc = F(unctional) Loc(action)
-    /// FlocMonad is a Reader-State-Error monad to build trails
+    /// FlocPatch is a Reader-State-Error monad to build trails
     /// of functional locations to build a structure.
-    type FlocMonad<'a> = 
-        FlocMonad of (Env -> FuncLoc list -> Result<'a * FuncLoc list, ErrMsg>)
+    type FlocPatch<'a> = 
+        FlocPatch of (Env -> FuncLoc list -> Result<'a * FuncLoc list, ErrMsg>)
 
 
 
-    let inline private apply1 (ma : FlocMonad<'a>) 
+    let inline private apply1 (ma : FlocPatch<'a>) 
                               (env : Env)
                               (acc : FuncLoc list) : Result<'a * FuncLoc list, ErrMsg> = 
-        let (FlocMonad fn) = ma in fn env acc
+        let (FlocPatch fn) = ma in fn env acc
 
-    let mreturn (x:'a) : FlocMonad<'a> = 
-        FlocMonad (fun _ acc -> Ok (x, acc))
+    let mreturn (x:'a) : FlocPatch<'a> = 
+        FlocPatch (fun _ acc -> Ok (x, acc))
 
-    let inline private bindM (ma : FlocMonad<'a>) 
-                             (fn : 'a -> FlocMonad<'b>) : FlocMonad<'b> =
-        FlocMonad <| fun env acc -> 
+    let inline private bindM (ma : FlocPatch<'a>) 
+                             (fn : 'a -> FlocPatch<'b>) : FlocPatch<'b> =
+        FlocPatch <| fun env acc -> 
             match apply1 ma env acc with
             | Ok (a, acc1) -> apply1 (fn a) env acc1
             | Error msg -> Error msg
 
-    let failM (msg:string) : FlocMonad<'a> = 
-        FlocMonad (fun _ _ -> Error msg)
+    let failM (msg:string) : FlocPatch<'a> = 
+        FlocPatch (fun _ _ -> Error msg)
     
-    let inline private altM  (ma : FlocMonad<'a>) 
-                             (mb : FlocMonad<'a>) : FlocMonad<'a> = 
-        FlocMonad <| fun env acc -> 
+    let inline private altM  (ma : FlocPatch<'a>) 
+                             (mb : FlocPatch<'a>) : FlocPatch<'a> = 
+        FlocPatch <| fun env acc -> 
             match apply1 ma env acc with
             | Ok ans -> Ok ans
             | Error _ -> apply1 mb env acc
     
     
-    let inline private delayM (fn : unit -> FlocMonad<'a>) : FlocMonad<'a> = 
+    let inline private delayM (fn : unit -> FlocPatch<'a>) : FlocPatch<'a> = 
         bindM (mreturn ()) fn 
     
-    type FlocMonadBuilder() = 
+    type FlocPatchBuilder() = 
         member self.Return x        = mreturn x
         member self.Bind (p,f)      = bindM p f
         member self.Zero ()         = failM "Zero"
@@ -66,11 +66,16 @@ module FuncLocMonad =
         member self.Delay fn        = delayM fn
         member self.ReturnFrom(ma)  = ma
 
-    let (flocBuilder : FlocMonadBuilder) = new FlocMonadBuilder()
+    let (flocpatch : FlocPatchBuilder) = new FlocPatchBuilder()
 
+    let runFlocPatch (env: Env) (action : FlocPatch<'a> ) : Result<'a * FuncLoc list, ErrMsg> = 
+        let (FlocPatch fn ) = action 
+        match fn env [] with
+        | Ok ans -> Ok ans
+        | Error msg -> Error msg
 
-    let execFlocMonad (env: Env) (action : FlocMonad<'a> ) : Result<FuncLoc list, ErrMsg> = 
-        let (FlocMonad fn ) = action 
+    let execFlocPatch (env: Env) (action : FlocPatch<'a> ) : Result<FuncLoc list, ErrMsg> = 
+        let (FlocPatch fn ) = action 
         match fn env [] with
         | Ok (_, changes) -> Ok changes /// List.sortWith compareFlocChange flocs |> Ok
         | Error msg -> Error msg
@@ -78,46 +83,46 @@ module FuncLocMonad =
 
     /// Note - there is probably scope to add a phantom type layer over FlocLoc
     /// encoding whether you have a Site, Function, System, etc.
-    let extend (itemCode : string) (description : string) (objType : string) (parent : FuncLoc) : FlocMonad<FuncLoc> = 
+    let extend (itemCode : string) (description : string) (objType : string) (parent : FuncLoc) : FlocPatch<FuncLoc> = 
         /// At some point code will be looked up in a table of valid codes...
-        FlocMonad <| fun env acc -> 
+        FlocPatch <| fun env acc -> 
             let child : FuncLoc = 
                 FuncLoc.extend itemCode description objType parent
             Ok (child, child :: acc)
 
 
-    let root (flocCode : string) : FlocMonad<FuncLoc> = 
-        FlocMonad <| fun env acc -> 
+    let root (flocCode : string) : FlocPatch<FuncLoc> = 
+        FlocPatch <| fun env acc -> 
             match FuncLoc.getRootFromPathFile flocCode env.PathToInitialDownload with
             | Error msg -> Error msg
             | Ok root -> Ok (root, acc)
 
 
     /// Bind operator
-    let ( >>= ) (ma : FlocMonad<'a>) 
-                (fn : 'a -> FlocMonad<'b>) : FlocMonad<'b> = 
+    let ( >>= ) (ma : FlocPatch<'a>) 
+                (fn : 'a -> FlocPatch<'b>) : FlocPatch<'b> = 
         bindM ma fn
 
     /// Flipped Bind operator
-    let ( =<< ) (fn : 'a -> FlocMonad<'b>) 
-                (ma : FlocMonad<'a>) : FlocMonad<'b> = 
+    let ( =<< ) (fn : 'a -> FlocPatch<'b>) 
+                (ma : FlocPatch<'a>) : FlocPatch<'b> = 
         bindM ma fn
 
 
-    let kleisliL (mf : 'a -> FlocMonad<'b>)
-                 (mg : 'b -> FlocMonad<'c>)
-                 (source:'a) : FlocMonad<'c> = 
-        flocBuilder { 
+    let kleisliL (mf : 'a -> FlocPatch<'b>)
+                 (mg : 'b -> FlocPatch<'c>)
+                 (source:'a) : FlocPatch<'c> = 
+        flocpatch { 
             let! b = mf source
             let! c = mg b
             return c
         }
 
     /// Flipped kleisliL
-    let kleisliR (mf : 'b -> FlocMonad<'c>)
-                 (mg : 'a -> FlocMonad<'b>)
-                 (source:'a) : FlocMonad<'c> = 
-        flocBuilder { 
+    let kleisliR (mf : 'b -> FlocPatch<'c>)
+                 (mg : 'a -> FlocPatch<'b>)
+                 (source:'a) : FlocPatch<'c> = 
+        flocpatch { 
             let! b = mg source
             let! c = mf b
             return c
@@ -125,16 +130,16 @@ module FuncLocMonad =
 
 
     /// Operator for kleisliL
-    let (>=>) (mf : 'a -> FlocMonad<'b>)
-              (mg : 'b -> FlocMonad<'c>)
-              (source:'a) : FlocMonad<'c> = 
+    let (>=>) (mf : 'a -> FlocPatch<'b>)
+              (mg : 'b -> FlocPatch<'c>)
+              (source:'a) : FlocPatch<'c> = 
         kleisliL mf mg source
 
 
     /// Operator for kleisliR
-    let (<=<) (mf : 'b -> FlocMonad<'c>)
-              (mg : 'a -> FlocMonad<'b>)
-              (source:'a) : FlocMonad<'c> = 
+    let (<=<) (mf : 'b -> FlocPatch<'c>)
+              (mg : 'a -> FlocPatch<'b>)
+              (source:'a) : FlocPatch<'c> = 
         kleisliR mf mg source
 
 
@@ -144,20 +149,21 @@ module FuncLocMonad =
           Timestamp : DateTime }
     
     let compilePatch (config : BuildConfig) 
-                        (action : FlocMonad<'a> ) 
+                        (action : FlocPatch<'a> ) 
                         (root : string) 
-                        (outputDirectory : string) : Result<unit, ErrMsg> = 
+                        (outputDirectory : string) : Result<'a, ErrMsg> = 
         let fmEnv = { PathToInitialDownload = config.PathToFlocFile }
         CompilerMonad.runCompiler () <|
             CompilerMonad.compile {
-                let! flocs = CompilerMonad.liftResult <| execFlocMonad fmEnv action
+                let! (ans, flocs) = 
+                    CompilerMonad.liftResult <| runFlocPatch fmEnv action
                 let! flPatch = makeFuncLocPatch config.User config.Timestamp flocs
                 let out1 = filenameFuncLocs outputDirectory root
                 writePatch out1 flPatch
                 let! cfPatch = makeClassFlocPatch config.User config.Timestamp flocs
                 let out2 = filenameClassFlocs outputDirectory root
                 writePatch out2 cfPatch
-                return ()
+                return ans
             }
 
 

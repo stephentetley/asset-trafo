@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.FuncLocBuilder
+namespace AssetPatch.FlocPatch
 
 
 
@@ -14,7 +14,7 @@ module ClassFlocPatch =
     open AssetPatch.Base
     open AssetPatch.Base.Syntax
     open AssetPatch.Base.CompilerMonad
-    open AssetPatch.FuncLocBuilder.FuncLocCommon
+    open AssetPatch.FlocPatch.Common
 
     type private Env = Unit
     type CFCompiler<'a> = CompilerMonad<'a, Env>

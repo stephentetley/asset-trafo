@@ -24,21 +24,19 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\Markdown.fs"
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
-#load "..\src\AssetPatch\FuncLocBuilder\FuncLocPath.fs"
-#load "..\src\AssetPatch\FuncLocBuilder\FuncLoc.fs"
-#load "..\src\AssetPatch\FuncLocBuilder\FuncLocCommon.fs"
-#load "..\src\AssetPatch\FuncLocBuilder\FuncLocPatch.fs"
-#load "..\src\AssetPatch\FuncLocBuilder\ClassFlocPatch.fs"
-#load "..\src\AssetPatch\FuncLocBuilder\FuncLocMonad.fs"
+#load "..\src\AssetPatch\FlocPatch\Common.fs"
+#load "..\src\AssetPatch\FlocPatch\FuncLocPath.fs"
+#load "..\src\AssetPatch\FlocPatch\FuncLoc.fs"
+#load "..\src\AssetPatch\FlocPatch\FuncLocPatch.fs"
+#load "..\src\AssetPatch\FlocPatch\ClassFlocPatch.fs"
+#load "..\src\AssetPatch\FlocPatch\FlocPatchMonad.fs"
 open AssetPatch.Base
 open AssetPatch.Base.Syntax
 open AssetPatch.Base.Parser
 open AssetPatch.Base.Printer
 open AssetPatch.Base.Markdown
-open AssetPatch.FuncLocBuilder
-open AssetPatch.FuncLocBuilder.FuncLocPatch
-open AssetPatch.FuncLocBuilder.ClassFlocPatch
-open AssetPatch.FuncLocBuilder.FuncLocMonad
+open AssetPatch.FlocPatch
+open AssetPatch.FlocPatch.FlocPatchMonad
 
 
 let outputDirectory () : string = 
@@ -47,34 +45,7 @@ let outputDirectory () : string =
 let outputFile (relFileName : string) : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
-let demo01 () = 
-    let header = HeaderRow [| "FUNCLOC"; "TXTMI"; "ABCKZFLOC" |]
-    let patch = 
-        { PatchType = Download 
-          DataModel = U1
-          EntityType = FuncLoc
-          Variant = ()
-          User = "FORDB"
-          DateTime = System.DateTime.Now
-          Selection = 
-            [   FuncLocEq "BIR23-EDC" 
-                FuncLocEq "BIR23-EDC-LQD" 
-                FuncLocEq "BIR23-EDC-LQD-RGM" 
-                FuncLocEq "BIR23-EDC-LQD-RGM-SYS01" 
-            ]
-          HeaderRow = header
-          DataRows = 
-            [   DataRow [| "BIR23-EDC" ; "Environmental Discharge"; "" |]
-                DataRow [| "BIR23-EDC-LQD" ; "Liquid Discharge"; "" |]
-                DataRow [| "BIR23-EDC-LQD-RGM" ; "Regulatory Monitoring"; "" |]
-                DataRow [| "BIR23-EDC-LQD-RGM-SYS01" ; "EA Event duration Monitoring"; "" |]
-            ]
-        }
-    patchToString patch |> printfn "%s"
 
-
-let demo02 () = 
-    FParsec.CharParsers.run pPatchType "* Download" 
 
 let demo03 () = 
     let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
@@ -126,29 +97,14 @@ let demo06 () =
                                     , searchPattern = "*.txt")
     Array.iter (summarize >> ignore) sources
 
-let demo07 () = 
-    FuncLocPath.Create "BIR23-EDC" 
 
-let demo08 () = 
-    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
-    match FuncLoc.getRootFromPathFile "BIR23-EDC" source with
-    | Result.Error msg -> Result.Error msg
-    | Result.Ok root -> 
-        let f1 = FuncLoc.extend "LQD" "Liquid Discharge" "LQD" root
-        runCFCompiler <| makeClassFlocPatch "FORDB" System.DateTime.Now [f1]
-
-let demo08a () = 
-    AssocList.ofList [ ("FUNCLOC", "BIR23-EDC")]
-        |> DataRow.FromAssocList
-
-
-let demo09 () = 
+let compilePatch01 () = 
     let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\aco01_funcloc_file_download.txt"
     let action = 
-        flocBuilder {
-            let! r1 =  root "ACO01" 
-            let! smon = 
-                r1  |> extend "EDG" "Environmental Discharge" "EDC"
+        flocpatch {
+            let! path =  
+                root "ACO01" 
+                    >>= extend "EDG" "Environmental Discharge" "EDC"
                     >>= extend "LQD" "Liquid Discharge" "LQD"
                     >>= extend "SYS01" "EA Monitoring System" "SMON"                
             return ()

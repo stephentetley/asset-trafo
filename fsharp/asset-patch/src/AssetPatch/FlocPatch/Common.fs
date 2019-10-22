@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.FuncLocBuilder
+namespace AssetPatch.FlocPatch
 
 
 
-module FuncLocCommon =
+module Common =
     
     open System.IO
 

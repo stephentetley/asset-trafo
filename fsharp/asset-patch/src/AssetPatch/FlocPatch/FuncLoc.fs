@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.FuncLocBuilder
+namespace AssetPatch.FlocPatch
 
 
 [<AutoOpen>]
 module FuncLocType =
     
     open AssetPatch.Base
-    open AssetPatch.FuncLocBuilder
+    open AssetPatch.FlocPatch
     
     /// The other way is to look at differences to an existing root funcloc
     /// Then only 8 fields change:
