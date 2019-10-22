@@ -23,6 +23,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\Markdown.fs"
+#load "..\src\AssetPatch\Base\CompilerMonad.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLocPath.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLoc.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLocPatch.fs"
@@ -146,7 +147,7 @@ let demo09 () =
                     >>= extend "SYS01" "EA Monitoring System" "SMON"                
             return ()
         }
-    compile { PathToFlocFile = source; User = "FORDB"; Timestamp = System.DateTime.Now }
+    compilePatch { PathToFlocFile = source; User = "FORDB"; Timestamp = System.DateTime.Now }
             action
             outfile
 

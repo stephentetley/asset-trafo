@@ -139,9 +139,9 @@ module FuncLocMonad =
           User : string
           Timestamp : DateTime }
     
-    let compile (config : BuildConfig) 
-                (action : FlocMonad<'a> ) 
-                (outputPath : string) : Result<unit, ErrMsg> = 
+    let compilePatch (config : BuildConfig) 
+                        (action : FlocMonad<'a> ) 
+                        (outputPath : string) : Result<unit, ErrMsg> = 
         let env = { PathToInitialDownload = config.PathToFlocFile }
         match execFlocMonad env action with
         | Error msg -> Error msg
