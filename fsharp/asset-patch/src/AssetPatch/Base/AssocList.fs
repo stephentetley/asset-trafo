@@ -73,4 +73,15 @@ module AssocList =
     let keys (source : AssocList<'Key, 'T>) : 'Key [] =
         source |> toListBy (fun k _ -> k) |> List.toArray
 
-        
+    let prioritize1 (key : 'Key) 
+                    (assocs : AssocList<'Key, 'T>) : AssocList<'Key, 'T> when 'Key : equality  = 
+        match tryFind key assocs with
+        | None -> assocs
+        | Some value -> 
+            remove key assocs 
+                |> fun xs -> AssocList.Cons(key, value, xs)
+                
+
+    let prioritize (keys : 'Key list) 
+                   (assocs : AssocList<'Key, 'T>) : AssocList<'Key, 'T> when 'Key : equality  = 
+        List.foldBack prioritize1 keys assocs

@@ -12,6 +12,7 @@
     <Compile Include="AssetPatch\Base\Printer.fs" />
     <Compile Include="AssetPatch\Base\Markdown.fs" />
     <Compile Include="AssetPatch\Base\CompilerMonad.fs" />
+    <Compile Include="AssetPatch\Base\QueryPatch.fs" />
     <Compile Include="AssetPatch\FlocPatch\Common.fs" />
     <Compile Include="AssetPatch\FlocPatch\FuncLocPath.fs" />
     <Compile Include="AssetPatch\FlocPatch\FuncLoc.fs" />

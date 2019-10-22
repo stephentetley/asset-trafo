@@ -198,6 +198,19 @@ module CompilerMonad =
             | Ok a -> Ok a
             | Error msg -> Error (update msg)
 
+
+    // ************************************************************************
+    // Reader operations
+
+    let ask () : CompilerMonad<'env, 'env> = 
+        CompilerMonad <| fun env -> Ok env
+
+    let asks (projection : 'env -> 'ans) : CompilerMonad<'ans, 'env> = 
+        CompilerMonad <| fun env -> Ok (projection env)
+
+
+
+
     // ************************************************************************
     // Alternatives and Optionals...
 

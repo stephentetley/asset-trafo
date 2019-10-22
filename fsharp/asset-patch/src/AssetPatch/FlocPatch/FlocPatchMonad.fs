@@ -18,7 +18,7 @@ module FlocPatchMonad =
     
 
     type Env = 
-        { PathToInitialDownload : string
+        { PathToFuncLocDownload : string
           }
 
     /// Floc = F(unctional) Loc(action)
@@ -93,7 +93,7 @@ module FlocPatchMonad =
 
     let root (flocCode : string) : FlocPatch<FuncLoc> = 
         FlocPatch <| fun env acc -> 
-            match FuncLoc.getRootFromPathFile flocCode env.PathToInitialDownload with
+            match FuncLoc.getRootFromPathFile flocCode env.PathToFuncLocDownload with
             | Error msg -> Error msg
             | Ok root -> Ok (root, acc)
 
@@ -152,7 +152,7 @@ module FlocPatchMonad =
                         (action : FlocPatch<'a> ) 
                         (root : string) 
                         (outputDirectory : string) : Result<'a, ErrMsg> = 
-        let fmEnv = { PathToInitialDownload = config.PathToFlocFile }
+        let fmEnv = { PathToFuncLocDownload = config.PathToFlocFile }
         CompilerMonad.runCompiler () <|
             CompilerMonad.compile {
                 let! (ans, flocs) = 

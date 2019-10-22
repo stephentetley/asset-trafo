@@ -27,5 +27,8 @@ let toListBy01 () : string list =
         |> AssocList.toListBy (fun x i -> sprintf "%s:%i" x i)
 
 
+let prioritize01 () : AssocList<string, int> = 
+    AssocList.ofList [("C", 67); ("D", 68) ; ("A", 65) ; ("B", 66)]
+        |> AssocList.prioritize ["A"; "B"]
 
 

@@ -97,6 +97,8 @@ let demo06 () =
                                     , searchPattern = "*.txt")
     Array.iter (summarize >> ignore) sources
 
+// let eaMonitoringPatch (rootName : string) = 
+
 
 let compilePatch01 () = 
     let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\aco01_funcloc_file_download.txt"
