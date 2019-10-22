@@ -57,9 +57,6 @@ module FuncLoc =
     
     open FSharp.Core
 
-    open AssetPatch.Base
-    open AssetPatch.Base.Common
-    open AssetPatch.Base.Syntax
     open AssetPatch.Base.Parser
 
 

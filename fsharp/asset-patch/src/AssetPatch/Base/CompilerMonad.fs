@@ -13,7 +13,6 @@ module CompilerMonad =
     open AssetPatch.Base.Common
 
 
-
     /// Floc = F(unctional) Loc(action)
     /// FlocMonad is a Reader-State-Error monad to build trails
     /// of functional locations to build a structure.
@@ -60,7 +59,7 @@ module CompilerMonad =
     let (compile : CompilerMonadBuilder) = new CompilerMonadBuilder()
 
 
-    let runFlocMonad (env: 'env) (action : CompilerMonad<'a, 'env> ) : Result<'a, ErrMsg> = 
+    let runCompiler (env: 'env) (action : CompilerMonad<'a, 'env> ) : Result<'a, ErrMsg> = 
         apply1 action env
 
     // ************************************************************************
@@ -208,6 +207,10 @@ module CompilerMonad =
                 (action2 : CompilerMonad<'a, 'env>) : CompilerMonad<'a, 'env> = 
         altM action1 action2
 
+    let liftOption (opt : Option<'a>) : CompilerMonad<'a, 'env> = 
+        match opt with
+        | Some ans -> mreturn ans
+        | None -> throwError "liftOption None"
 
     /// Try to run a computation.
     /// On failure, recover or throw again with the handler.

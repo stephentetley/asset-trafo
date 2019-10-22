@@ -4,15 +4,73 @@
 namespace AssetPatch.FuncLocBuilder
 
 
-[<RequireQualifiedAccess>]
+
 module ClassFlocPatch =
     
+    open System.Text
     
     open FSharp.Core
 
     open AssetPatch.Base
     open AssetPatch.Base.Common
     open AssetPatch.Base.Syntax
+    open AssetPatch.Base.CompilerMonad
+
+    type private Env = Unit
+    type CFCompiler<'a> = CompilerMonad<'a, Env>
+
+    let runCFCompiler (action : CFCompiler<'a>) = 
+        runCompiler () action
+    
+    type FlocClass = 
+        { ClassName : string
+          ClassType : int
+          ClInt : int
+          ClStatus1 : int
+        }
+
+    let flocClassToAssocs (flocClass : FlocClass) : AssocList<string, string> =         
+        [ ("CLASS", flocClass.ClassName)
+        ; ("CLASSTYPE", sprintf "%03i" flocClass.ClassType)
+        ; ("CLINT", sprintf "%010i" flocClass.ClInt)
+        ; ("CLSTATUS1", sprintf "%i" flocClass.ClStatus1)
+        ] |> AssocList.ofList 
+
+    let clAIB_REFERENCE : FlocClass =
+        { ClassName = "AIB_REFERENCE"
+          ClassType = 3
+          ClInt = 850
+          ClStatus1 = 1 }
+    
+    let clEAST_NORTH : FlocClass =
+        { ClassName = "EAST_NORTH"
+          ClassType = 3
+          ClInt = 379
+          ClStatus1 = 1 }
+
+    let clUNICLASS_CODE : FlocClass =
+        { ClassName = "UNICLASS_CODE"
+          ClassType = 3
+          ClInt = 905
+          ClStatus1 = 1 }
+
+    let makeClassAssocs (flocClass : FlocClass) (funcLocs : string list) : AssocList<string, string> list = 
+        let make1 funcLoc = 
+            AssocList.Cons("FUNCLOC", funcLoc, flocClassToAssocs flocClass)
+        List.map make1 funcLocs
+
+    let makeAllAssocs (flocClasses : FlocClass list) (funcLocs : string list) : AssocList<string, string> list = 
+        List.map (fun x -> makeClassAssocs x funcLocs) flocClasses 
+            |> List.concat
+
+
+    /// TODO - this is a simplification, some flocs will require 
+    /// different classes...
+    let sampleFlocClasses = 
+        [ clAIB_REFERENCE 
+        ; clEAST_NORTH
+        ; clUNICLASS_CODE
+        ]
 
 
     

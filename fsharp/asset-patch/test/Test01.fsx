@@ -26,7 +26,9 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLocPath.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLoc.fs"
+#load "..\src\AssetPatch\FuncLocBuilder\FuncLocCommon.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLocPatch.fs"
+#load "..\src\AssetPatch\FuncLocBuilder\ClassFlocPatch.fs"
 #load "..\src\AssetPatch\FuncLocBuilder\FuncLocMonad.fs"
 open AssetPatch.Base
 open AssetPatch.Base.Syntax
@@ -34,6 +36,8 @@ open AssetPatch.Base.Parser
 open AssetPatch.Base.Printer
 open AssetPatch.Base.Markdown
 open AssetPatch.FuncLocBuilder
+open AssetPatch.FuncLocBuilder.FuncLocPatch
+open AssetPatch.FuncLocBuilder.ClassFlocPatch
 open AssetPatch.FuncLocBuilder.FuncLocMonad
 
 
@@ -128,7 +132,7 @@ let demo08 () =
     | Result.Error msg -> Result.Error msg
     | Result.Ok root -> 
         let f1 = FuncLoc.extend "LQD" "Liquid Discharge" "LQD" root
-        FuncLocPatch.makePatch "FORDB" System.DateTime.Now [f1]
+        runFLCompiler <| makeFuncLocPatch "FORDB" System.DateTime.Now [f1]
 
 let demo08a () = 
     AssocList.ofList [ ("FUNCLOC", "BIR23-EDC")]
@@ -137,7 +141,7 @@ let demo08a () =
 
 let demo09 () = 
     let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
-    let outfile = outputFile "test_patch01.txt"
+    let outfile = outputFile "test_patch_funcloc01.txt"
     let action = 
         flocBuilder {
             let! r1 =  root "BIR23-EDC" 

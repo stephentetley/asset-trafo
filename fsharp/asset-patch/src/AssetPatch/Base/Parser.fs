@@ -8,7 +8,6 @@ module Parser =
     open FParsec
     open System
 
-    open AssetPatch.Base.Common
     open AssetPatch.Base.Syntax
 
     type PatchParser<'ans> = Parser<'ans, unit>
@@ -163,7 +162,7 @@ module Parser =
         }
 
 
-    let readPatch (inputFile : string) : Result<PatchFile<'T>, ErrMsg> = 
+    let readPatch (inputFile : string) : Result<PatchFile<'T>, string> = 
         match runParserOnFile (parsePatch ()) () inputFile Text.Encoding.UTF8 with
         | Failure (str,_,_) -> Result.Error str
         | Success (ans,_,_) -> Result.Ok ans
