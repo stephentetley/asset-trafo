@@ -12,9 +12,9 @@ module ClassFlocPatch =
     open FSharp.Core
 
     open AssetPatch.Base
-    open AssetPatch.Base.Common
     open AssetPatch.Base.Syntax
     open AssetPatch.Base.CompilerMonad
+    open AssetPatch.FuncLocBuilder.FuncLocCommon
 
     type private Env = Unit
     type CFCompiler<'a> = CompilerMonad<'a, Env>
@@ -73,4 +73,14 @@ module ClassFlocPatch =
         ]
 
 
-    
+    let makeClassFlocPatch (user : string) 
+                            (timestamp : System.DateTime)
+                            (funcLocs : FuncLoc list) : CFCompiler<FuncLocPatch> = 
+        compile {
+            let rows = 
+                funcLocs 
+                    |> List.sortBy (fun x -> x.FuncLocPath)
+                    |> List.map (fun x -> x.FuncLocPath.ToString())
+                    |> makeAllAssocs sampleFlocClasses
+            return! makePatch FuncLoc user timestamp rows
+        }

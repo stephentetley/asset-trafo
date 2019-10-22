@@ -212,6 +212,18 @@ module CompilerMonad =
         | Some ans -> mreturn ans
         | None -> throwError "liftOption None"
 
+    let liftResult (result : Result<'a, ErrMsg>) : CompilerMonad<'a, 'env> = 
+        match result with
+        | Ok ans -> mreturn ans
+        | Error err -> throwError err
+
+    let liftResultBy (errProjection : 'Err -> ErrMsg) 
+                     (result : Result<'a, 'Err>) : CompilerMonad<'a, 'env> = 
+        match result with
+        | Ok ans -> mreturn ans
+        | Error err -> throwError (errProjection err)
+
+
     /// Try to run a computation.
     /// On failure, recover or throw again with the handler.
     let attempt (action : CompilerMonad<'a, 'env>) 

@@ -31,7 +31,7 @@ module FuncLocCommon =
             match AssocList.tryFind "FUNCLOC" assocs with
             | None -> None
             | Some funcloc -> FuncLocEq funcloc |> Some        
-        mapM (liftOption << build1) rows
+        mapM (liftOption << build1) rows |>> List.distinct
 
 
     let makePatch (entityType : EntityType) 

@@ -132,7 +132,7 @@ let demo08 () =
     | Result.Error msg -> Result.Error msg
     | Result.Ok root -> 
         let f1 = FuncLoc.extend "LQD" "Liquid Discharge" "LQD" root
-        runFLCompiler <| makeFuncLocPatch "FORDB" System.DateTime.Now [f1]
+        runCFCompiler <| makeClassFlocPatch "FORDB" System.DateTime.Now [f1]
 
 let demo08a () = 
     AssocList.ofList [ ("FUNCLOC", "BIR23-EDC")]
@@ -141,7 +141,8 @@ let demo08a () =
 
 let demo09 () = 
     let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
-    let outfile = outputFile "test_patch_funcloc01.txt"
+    let flOutfile = outputFile "test_patch_funcloc01.txt"
+    let clOutfile = outputFile "test_patch_classfloc01.txt"
     let action = 
         flocBuilder {
             let! r1 =  root "BIR23-EDC" 
@@ -153,5 +154,6 @@ let demo09 () =
         }
     compilePatch { PathToFlocFile = source; User = "FORDB"; Timestamp = System.DateTime.Now }
             action
-            outfile
+            flOutfile
+            clOutfile
 
