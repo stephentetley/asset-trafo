@@ -48,6 +48,13 @@ module FuncLocPathType =
                     | x -> x
                 | _ -> failwith "Invalid CompareTo on FlocPath"
 
+        member x.Parent 
+            with get (): FuncLocPath option = 
+                let (FuncLocPath xs) = x
+                match xs with
+                | [] -> None
+                | _ :: rest -> FuncLocPath rest |> Some
+
         static member Create (rootPath : string) : FuncLocPath = 
             let xs = rootPath.Split [| '-' |] |> List.ofArray |> List.rev
             FuncLocPath(xs)
@@ -60,11 +67,7 @@ module FuncLocPath =
         let (FuncLocPath xs)  = path
         FuncLocPath (itemCode :: xs)
 
-    let parent (path: FuncLocPath) : FuncLocPath option = 
-        let (FuncLocPath xs) = path
-        match xs with
-        | [] -> None
-        | _ :: rest -> FuncLocPath rest |> Some
+    
 
 
 

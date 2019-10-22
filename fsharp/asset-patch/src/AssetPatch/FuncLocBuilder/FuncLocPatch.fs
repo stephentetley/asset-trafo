@@ -15,18 +15,18 @@ module FuncLocPatch =
     open AssetPatch.Base.Syntax
 
 
-    let toFuncLocPatchData (funcloc : FuncLoc) : AssocList<string,string> option = 
+    let funcLocAssocList (funcLoc : FuncLoc) : AssocList<string,string> option = 
         let magicFields = [ "JOBJN_FL"; "FLOC_REF" ]
-        match FuncLocPath.parent funcloc.FuncLocPath with
+        match funcLoc.FuncLocPath.Parent with
         | None -> None
         | Some parent ->             
-            funcloc.InheritedAttributes
+            funcLoc.InheritedAttributes
                 |> AssocList.removes magicFields
-                |> AssocList.update "FUNCLOC" (funcloc.FuncLocPath.ToString())
-                |> AssocList.update "TXTMI" funcloc.Description
-                |> AssocList.update "FLTYP" (funcloc.Level.ToString())
-                |> AssocList.update "IEQUI" (if funcloc.Level >= 5 then "X" else "")
-                |> AssocList.update "EQART" funcloc.ObjectType
+                |> AssocList.update "FUNCLOC" (funcLoc.FuncLocPath.ToString())
+                |> AssocList.update "TXTMI" funcLoc.Description
+                |> AssocList.update "FLTYP" (funcLoc.Level.ToString())
+                |> AssocList.update "IEQUI" (if funcLoc.Level >= 5 then "X" else "")
+                |> AssocList.update "EQART" funcLoc.ObjectType
                 |> AssocList.update "TPLMA1" (parent.ToString())
                 |> AssocList.update "TPLMA" (parent.ToString())
                 |> Some
@@ -50,7 +50,7 @@ module FuncLocPatch =
                   (timestamp : System.DateTime)
                   (funcLocs : FuncLoc list) : Result<FuncLocPatch, ErrMsg> = 
         let makeRows = 
-            List.sort >> List.map toFuncLocPatchData >> allSome
+            List.sort >> List.map funcLocAssocList >> allSome
 
         match makeRows funcLocs with
         | None -> Error "Empty or invalid funclocs..."
