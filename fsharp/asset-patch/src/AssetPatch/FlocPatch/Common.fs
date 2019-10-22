@@ -45,6 +45,16 @@ module Common =
         mapM (liftOption << build1) rows |>> List.distinct
 
 
+    let private makeHeader (entityType : EntityType) 
+                            (user : string) 
+                            (timestamp : System.DateTime) : PatchHeader = 
+        { PatchType = Download 
+          DataModel = U1
+          EntityType = entityType
+          Variant = ()
+          User = user
+          DateTime = timestamp }
+
     let makePatch (entityType : EntityType) 
                     (user : string) 
                     (timestamp : System.DateTime)
@@ -52,12 +62,7 @@ module Common =
         compile {
             let! header = getHeaderRow rows
             let! selIds = getSelectionIds rows
-            return { PatchType = Download 
-                     DataModel = U1
-                     EntityType = entityType
-                     Variant = ()
-                     User = user
-                     DateTime = timestamp
+            return { PatchHeader = makeHeader entityType user timestamp 
                      Selection = selIds
                      HeaderRow = header
                      DataRows = List.map DataRow.FromAssocList rows

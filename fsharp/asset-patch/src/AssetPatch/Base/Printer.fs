@@ -96,15 +96,17 @@ module Printer =
     let dataRows (rows : DataRow list)  : Doc = 
         applyDoc dataRow rows
 
+    let patchHeader (header : PatchHeader) : Doc = 
+        patchType header.PatchType
+            >> dataModel header.DataModel
+            >> entityType header.EntityType
+            >> variant header.Variant
+            >> user header.User
+            >> dateTime header.DateTime
 
     let patchToString (patch : PatchFile<'T>) : string = 
         new StringBuilder ()
-            |> patchType patch.PatchType
-            |> dataModel patch.DataModel
-            |> entityType patch.EntityType
-            |> variant patch.Variant
-            |> user patch.User
-            |> dateTime patch.DateTime
+            |> patchHeader patch.PatchHeader
             |> selection patch.Selection
             |> headerRow patch.HeaderRow
             |> dataRows patch.DataRows

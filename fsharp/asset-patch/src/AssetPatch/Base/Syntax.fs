@@ -102,13 +102,20 @@ module Syntax =
         List.foldBack2 (fun a b st -> AssocList.Cons(a,b,st)) headers.Columns row.Cells AssocList.empty
 
 
-    type PatchFile<'T> = 
+    /// Note Patch header is "common information" it does not
+    /// strictly correspond to the commented out meta-data in a patch file
+    type PatchHeader = 
         { PatchType : PatchType 
           DataModel : DataModel
           EntityType : EntityType
           Variant : unit
           User : string
           DateTime : DateTime
+        } 
+
+
+    type PatchFile<'T> = 
+        { PatchHeader : PatchHeader
           Selection : SelectionId list
           HeaderRow : HeaderRow
           DataRows : DataRow list

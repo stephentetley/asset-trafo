@@ -98,7 +98,7 @@ module Markdown =
         | FuncLocEq x -> text x
 
 
-    let headerTable (source : PatchFile<'T>) : Markdown = 
+    let headerTable (source : PatchHeader) : Markdown = 
         let specs = 
             [ { ColumnSpec.Width = 40 ; ColumnSpec.Alignment = Alignment.AlignLeft }
             ; { ColumnSpec.Width = 50 ; ColumnSpec.Alignment = Alignment.AlignLeft }
@@ -155,7 +155,7 @@ module Markdown =
 
     let patchToMarkdown (patch : PatchFile<'T>) : Markdown = 
         h1 (text "Patch Report")
-            ^!!^ headerTable patch
+            ^!!^ headerTable patch.PatchHeader
             ^!!^ selectionSection patch
             ^!!^ dataRows patch
             ^!!^ emptyMarkdown

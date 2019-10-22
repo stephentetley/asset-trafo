@@ -139,7 +139,7 @@ module Parser =
     let pDataRows : PatchParser<DataRow list> = 
         many1 (attempt pDataRow)
 
-    let parsePatch () : PatchParser<PatchFile<'T>> = 
+    let pPatchHeader : PatchParser<PatchHeader> = 
         parse {
             let! ptype = pPatchType
             let! dmodel = pDataModel
@@ -147,17 +147,23 @@ module Parser =
             let! variant  = pVariant
             let! user = pUser
             let! date = pDateTime
-            let! selection = pSelection
-            let! header = pHeaderRow
-            let! datas = pDataRows
-            return { PatchType = ptype 
+            return { PatchType = ptype
                      DataModel = dmodel
                      EntityType = etype
                      Variant = variant
                      User = user
-                     DateTime = date
+                     DateTime = date }
+        }
+
+    let parsePatch () : PatchParser<PatchFile<'T>> = 
+        parse {
+            let! fileHeader = pPatchHeader
+            let! selection = pSelection
+            let! headerRow = pHeaderRow
+            let! datas = pDataRows
+            return { PatchHeader = fileHeader
                      Selection = selection
-                     HeaderRow = header
+                     HeaderRow = headerRow
                      DataRows = datas }
         }
 
