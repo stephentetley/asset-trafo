@@ -25,6 +25,8 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\Markdown.fs"
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
+#load "..\src\AssetPatch\Base\QueryPatch.fs"
+#load "..\src\AssetPatch\Base\TidyPatch.fs"
 #load "..\src\AssetPatch\FlocPatch\Common.fs"
 #load "..\src\AssetPatch\FlocPatch\FuncLocPath.fs"
 #load "..\src\AssetPatch\FlocPatch\FuncLoc.fs"
@@ -36,7 +38,7 @@ open AssetPatch.Base.Syntax
 open AssetPatch.Base.Parser
 open AssetPatch.Base.Printer
 open AssetPatch.Base.Markdown
-open AssetPatch.FlocPatch
+open AssetPatch.Base.TidyPatch
 open AssetPatch.FlocPatch.FlocPatchMonad
 
 
@@ -116,4 +118,11 @@ let compilePatch01 () =
             action
             "ACO01"
             (outputDirectory ())
+
+let tidy01 () = 
+    let src = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\ACO01_funcloc_file_download.txt"
+    let dest = outputFile "ACO01_funcloc_tidy.txt"
+    tidyPatch ["FUNCLOC"; "TXTMI"] [] src dest
+
+
 

@@ -49,6 +49,8 @@ module AbsPatch =
         | FuncLoc | ClassFloc | ValuaFloc -> "FUNCLOC"
         | Equi | ClassEqui | ValuaEqui -> "EQUI"
 
+
+
     /// At least one row exists and it must have a field 
     /// matching ``FUNCLOC`` or ``EQUI``
     let private selectionIds (entityType : EntityType)

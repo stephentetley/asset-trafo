@@ -12,7 +12,7 @@ module QueryPatch =
     type PatchQuery<'a, 'ptype> = CompilerMonad<'a, PatchFile<'ptype>>
 
     let askUser () : PatchQuery<string, 'any> = 
-        asks (fun patchFile -> patchFile.User)
+        asks (fun patchFile -> patchFile.Header.User)
 
     let askDataModel () : PatchQuery<DataModel, 'any> = 
-        asks (fun patchFile -> patchFile.DataModel)
+        asks (fun patchFile -> patchFile.Header.DataModel)
