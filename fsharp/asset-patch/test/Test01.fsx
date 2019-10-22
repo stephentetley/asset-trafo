@@ -41,7 +41,10 @@ open AssetPatch.FuncLocBuilder.ClassFlocPatch
 open AssetPatch.FuncLocBuilder.FuncLocMonad
 
 
-let outputFile (relFileName : string) = 
+let outputDirectory () : string = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\output")
+
+let outputFile (relFileName : string) : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
 let demo01 () = 
@@ -140,20 +143,18 @@ let demo08a () =
 
 
 let demo09 () = 
-    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
-    let flOutfile = outputFile "test_patch_funcloc01.txt"
-    let clOutfile = outputFile "test_patch_classfloc01.txt"
+    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\aco01_funcloc_file_download.txt"
     let action = 
         flocBuilder {
-            let! r1 =  root "BIR23-EDC" 
+            let! r1 =  root "ACO01" 
             let! smon = 
                 r1  |> extend "EDG" "Environmental Discharge" "EDC"
                     >>= extend "LQD" "Liquid Discharge" "LQD"
                     >>= extend "SYS01" "EA Monitoring System" "SMON"                
             return ()
         }
-    compilePatch { PathToFlocFile = source; User = "FORDB"; Timestamp = System.DateTime.Now }
+    compilePatch { PathToFlocFile = source; User = "TETLEYS"; Timestamp = System.DateTime.Now }
             action
-            flOutfile
-            clOutfile
+            "ACO01"
+            (outputDirectory ())
 

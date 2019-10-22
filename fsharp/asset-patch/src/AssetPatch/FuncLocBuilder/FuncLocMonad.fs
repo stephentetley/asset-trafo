@@ -12,6 +12,7 @@ module FuncLocMonad =
     open AssetPatch.Base.Common   
     open AssetPatch.Base.Printer
     open AssetPatch.FuncLocBuilder
+    open AssetPatch.FuncLocBuilder.FuncLocCommon
     open AssetPatch.FuncLocBuilder.FuncLocPatch
     open AssetPatch.FuncLocBuilder.ClassFlocPatch
     
@@ -144,16 +145,18 @@ module FuncLocMonad =
     
     let compilePatch (config : BuildConfig) 
                         (action : FlocMonad<'a> ) 
-                        (flOutputPath : string)
-                        (cfOutputPath : string) : Result<unit, ErrMsg> = 
+                        (root : string) 
+                        (outputDirectory : string) : Result<unit, ErrMsg> = 
         let fmEnv = { PathToInitialDownload = config.PathToFlocFile }
         CompilerMonad.runCompiler () <|
             CompilerMonad.compile {
                 let! flocs = CompilerMonad.liftResult <| execFlocMonad fmEnv action
                 let! flPatch = makeFuncLocPatch config.User config.Timestamp flocs
-                writePatch flOutputPath flPatch
+                let out1 = filenameFuncLocs outputDirectory root
+                writePatch out1 flPatch
                 let! cfPatch = makeClassFlocPatch config.User config.Timestamp flocs
-                writePatch cfOutputPath cfPatch
+                let out2 = filenameClassFlocs outputDirectory root
+                writePatch out2 cfPatch
                 return ()
             }
 
