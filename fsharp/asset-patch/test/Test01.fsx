@@ -20,6 +20,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\Common.fs"
 #load "..\src\AssetPatch\Base\Syntax.fs"
+#load "..\src\AssetPatch\Base\AbsPatch.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\Markdown.fs"

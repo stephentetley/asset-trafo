@@ -62,7 +62,7 @@ module Common =
         compile {
             let! header = getHeaderRow rows
             let! selIds = getSelectionIds rows
-            return { PatchHeader = makeHeader entityType user timestamp 
+            return { Header = makeHeader entityType user timestamp 
                      Selection = selIds
                      HeaderRow = header
                      DataRows = List.map DataRow.FromAssocList rows

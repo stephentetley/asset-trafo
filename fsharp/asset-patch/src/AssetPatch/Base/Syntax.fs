@@ -115,7 +115,7 @@ module Syntax =
 
 
     type PatchFile<'T> = 
-        { PatchHeader : PatchHeader
+        { Header : PatchHeader
           Selection : SelectionId list
           HeaderRow : HeaderRow
           DataRows : DataRow list
@@ -157,5 +157,10 @@ module Syntax =
     type ClassFlocPhantom = class end
 
     type ClassFlocPatch = PatchFile<ClassFlocPhantom>
+
+    type ValuaFlocPhantom = class end
+    
+    type ValuaFlocPatch = PatchFile<ValuaFlocPhantom>
+
 
 

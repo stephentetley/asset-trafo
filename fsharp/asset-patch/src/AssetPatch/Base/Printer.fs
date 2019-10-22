@@ -106,7 +106,7 @@ module Printer =
 
     let patchToString (patch : PatchFile<'T>) : string = 
         new StringBuilder ()
-            |> patchHeader patch.PatchHeader
+            |> patchHeader patch.Header
             |> selection patch.Selection
             |> headerRow patch.HeaderRow
             |> dataRows patch.DataRows

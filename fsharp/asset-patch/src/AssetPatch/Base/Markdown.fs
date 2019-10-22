@@ -155,7 +155,7 @@ module Markdown =
 
     let patchToMarkdown (patch : PatchFile<'T>) : Markdown = 
         h1 (text "Patch Report")
-            ^!!^ headerTable patch.PatchHeader
+            ^!!^ headerTable patch.Header
             ^!!^ selectionSection patch
             ^!!^ dataRows patch
             ^!!^ emptyMarkdown
