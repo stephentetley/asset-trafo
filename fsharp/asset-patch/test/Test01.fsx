@@ -37,6 +37,8 @@ open AssetPatch.Base
 open AssetPatch.Base.Syntax
 open AssetPatch.Base.Parser
 open AssetPatch.Base.Printer
+open AssetPatch.Base.Typings
+open AssetPatch.Base.QueryPatch
 open AssetPatch.FlocPatch.FlocPatchMonad
 
 
@@ -45,6 +47,17 @@ let outputDirectory () : string =
 
 let outputFile (relFileName : string) : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
+
+let typing01 () = 
+    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Equipment.txt"
+    match readEquiPatch source with
+    | Error msg -> Error msg
+    | Ok patch -> 
+        runQuery patch 
+            <| askEquiSelectors () 
+
+
+
 
 
 

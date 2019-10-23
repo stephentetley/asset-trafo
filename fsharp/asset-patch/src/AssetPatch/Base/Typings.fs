@@ -12,9 +12,12 @@ module Typings =
     // ************************************************************************
     // Typing PatchFiles / Phantom types
 
+    // Discriminate the two categories of Selector Ids
+    type FuncLocSelectors = interface end
+    type EquiSelectors = interface end
 
-
-    type FuncLocPhantom = class end
+    type FuncLocPhantom = 
+        inherit FuncLocSelectors
     
     type FuncLocPatch = PatchFile<FuncLocPhantom>
 
@@ -24,7 +27,8 @@ module Typings =
 
 
     
-    type ClassFlocPhantom = class end
+    type ClassFlocPhantom =
+        inherit FuncLocSelectors
 
     type ClassFlocPatch = PatchFile<ClassFlocPhantom>
 
@@ -32,7 +36,8 @@ module Typings =
         readPatch inputFile
 
 
-    type ValuaFlocPhantom = class end
+    type ValuaFlocPhantom = 
+        inherit FuncLocSelectors
     
     type ValuaFlocPatch = PatchFile<ValuaFlocPhantom>
 
@@ -41,14 +46,16 @@ module Typings =
 
 
 
-    type EquiPhantom = class end
+    type EquiPhantom = 
+        inherit EquiSelectors
 
     type EquiPatch = PatchFile<EquiPhantom>
     
     let readEquiPatch (inputFile : string) : Result<EquiPatch, string> = 
         readPatch inputFile
     
-    type ClassEquiPhantom = class end
+    type ClassEquiPhantom = 
+        inherit EquiSelectors
 
     type ClassEquiPatch = PatchFile<ClassEquiPhantom>
     
@@ -56,11 +63,14 @@ module Typings =
         readPatch inputFile
     
 
-    type ValuaEquiPhantom = class end
+    type ValuaEquiPhantom =
+        inherit EquiSelectors
 
     type ValuaEquiPatch = PatchFile<ValuaEquiPhantom>
     
     let readValuaEquiPatch (inputFile : string) : Result<ValuaEquiPatch, string> = 
         readPatch inputFile
 
+
+    
 
