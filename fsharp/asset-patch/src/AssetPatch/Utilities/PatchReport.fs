@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.Base
+namespace AssetPatch.Utilities
 
-module Markdown =
+module PatchReport =
 
     open System.IO 
 
@@ -13,7 +13,9 @@ module Markdown =
     open MarkdownDoc.Markdown
     open MarkdownDoc.Pandoc
 
+    open AssetPatch.Base
     open AssetPatch.Base.Syntax
+    open AssetPatch.Base.Parser
 
 
     // ************************************************************************
@@ -166,4 +168,21 @@ module Markdown =
         let doc = patchToMarkdown patch 
         writeHtml5Markdown "Patch Summary" pandocOpts outputHtmlFile doc
 
+
+    
+    let patchReport (pathToCssSytlesheet : string) 
+                    (outputFile : string option) 
+                    (inputPatch : string)  : Result<unit, string> = 
+        let outputHtmlFile = 
+            match outputFile with
+            | Some path -> path
+            | None -> 
+                Path.GetFileName(inputPatch) 
+                    |> fun s -> Path.ChangeExtension(path = s, extension = "html")
+        match readPatch inputPatch with
+        | Result.Error msg -> Result.Error msg
+        | Result.Ok ans -> 
+            let opts = pandocHtmlDefaultOptions pathToCssSytlesheet
+            pandocGenHtml opts outputHtmlFile ans
+            
         

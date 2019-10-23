@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.Base
+namespace AssetPatch.Utilities
 
 
 module TidyPatch = 
     
+    open AssetPatch.Base
     open AssetPatch.Base.Common
     open AssetPatch.Base.Parser
     open AssetPatch.Base.Printer

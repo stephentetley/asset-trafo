@@ -11,10 +11,10 @@
     <Compile Include="AssetPatch\Base\AbsPatch.fs" />
     <Compile Include="AssetPatch\Base\Parser.fs" />
     <Compile Include="AssetPatch\Base\Printer.fs" />
-    <Compile Include="AssetPatch\Base\Markdown.fs" />
     <Compile Include="AssetPatch\Base\CompilerMonad.fs" />
     <Compile Include="AssetPatch\Base\QueryPatch.fs" />
-    <Compile Include="AssetPatch\Base\TidyPatch.fs" />
+    <Compile Include="AssetPatch\Utilities\PatchReport.fs" />
+    <Compile Include="AssetPatch\Utilities\TidyPatch.fs" />
     <Compile Include="AssetPatch\FlocPatch\Common.fs" />
     <Compile Include="AssetPatch\FlocPatch\FuncLocPath.fs" />
     <Compile Include="AssetPatch\FlocPatch\FuncLoc.fs" />

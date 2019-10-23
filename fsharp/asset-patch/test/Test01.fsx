@@ -23,10 +23,8 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\AbsPatch.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
-#load "..\src\AssetPatch\Base\Markdown.fs"
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
 #load "..\src\AssetPatch\Base\QueryPatch.fs"
-#load "..\src\AssetPatch\Base\TidyPatch.fs"
 #load "..\src\AssetPatch\FlocPatch\Common.fs"
 #load "..\src\AssetPatch\FlocPatch\FuncLocPath.fs"
 #load "..\src\AssetPatch\FlocPatch\FuncLoc.fs"
@@ -37,8 +35,6 @@ open AssetPatch.Base
 open AssetPatch.Base.Syntax
 open AssetPatch.Base.Parser
 open AssetPatch.Base.Printer
-open AssetPatch.Base.Markdown
-open AssetPatch.Base.TidyPatch
 open AssetPatch.FlocPatch.FlocPatchMonad
 
 
@@ -81,24 +77,6 @@ let demo05 () =
         ans.DataRows |> List.map (fun row -> row.GetItem(ix))
 
 
-let summarize (inputPatch : string) : Result<unit, string> = 
-    let filename = 
-        Path.GetFileName(inputPatch) 
-            |> fun s -> Path.ChangeExtension(path = s, extension = "html")
-
-    let outputHtml = outputFile filename
-    let pathToCss = @"..\..\..\..\..\libs\markdown-css-master\github.css"
-    match readPatch inputPatch with
-    | Result.Error msg -> Result.Error msg
-    | Result.Ok ans ->
-        let opts = pandocHtmlDefaultOptions pathToCss
-        pandocGenHtml opts outputHtml ans
-
-let demo06 () = 
-    let sources = 
-        System.IO.Directory.GetFiles( path = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm"
-                                    , searchPattern = "*.txt")
-    Array.iter (summarize >> ignore) sources
 
 // let eaMonitoringPatch (rootName : string) = 
 
@@ -119,10 +97,6 @@ let compilePatch01 () =
             "ACO01"
             (outputDirectory ())
 
-let tidy01 () = 
-    let src = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\ACO01_funcloc_file_download.txt"
-    let dest = outputFile "ACO01_funcloc_tidy.txt"
-    tidyPatch ["FUNCLOC"; "TXTMI"] [] src dest
 
 
 
