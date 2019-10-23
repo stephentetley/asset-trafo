@@ -23,6 +23,11 @@ module FuncLocPatch =
     let runFLCompiler (action : FLCompiler<'a>) = 
         runCompiler () action
 
+    let private excludeList : string list = 
+        // Field x comment
+        [ "JOBJN_FL"        // Magic Number
+        ; "FLOC_REF"        // Magic number
+        ]
 
     let private funcLocAssocList (funcLoc : FuncLoc) : FLCompiler<AssocList<string,string>> = 
         compile {
@@ -33,6 +38,7 @@ module FuncLocPatch =
                 funcLoc.InheritedAttributes
                     |> AssocList.prioritize priorities
                     |> AssocList.removes magicFields
+                    |> AssocList.update "STATEXT" "UCON"
                     |> AssocList.update "FUNCLOC" (funcLoc.FuncLocPath.ToString())
                     |> AssocList.update "TXTMI" funcLoc.Description
                     |> AssocList.update "FLTYP" (funcLoc.Level.ToString())
