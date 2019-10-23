@@ -13,6 +13,7 @@ module ClassFlocPatch =
 
     open AssetPatch.Base
     open AssetPatch.Base.Syntax
+    open AssetPatch.Base.Typings
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.FlocPatch.Common
 

@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Test01.fsx" />
     <None Include="TestUtils01.fsx" />
+    <None Include="Test01.fsx" />
     <None Include="Temp01.fsx" />
   </ItemGroup>
 

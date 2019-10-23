@@ -146,21 +146,4 @@ module Syntax =
             x.RowAssocs |> List.tryFind (AssocList.tryFindKey projection >> Option.isSome)
 
 
-    // ************************************************************************
-    // Typing PatchFiles
-
-    type FuncLocPhantom = class end
     
-    type FuncLocPatch = PatchFile<FuncLocPhantom>
-
-    
-    type ClassFlocPhantom = class end
-
-    type ClassFlocPatch = PatchFile<ClassFlocPhantom>
-
-    type ValuaFlocPhantom = class end
-    
-    type ValuaFlocPatch = PatchFile<ValuaFlocPhantom>
-
-
-
