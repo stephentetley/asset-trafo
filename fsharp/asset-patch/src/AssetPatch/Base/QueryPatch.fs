@@ -41,3 +41,6 @@ module QueryPatch =
             | EquiEq istr -> Some istr
             | _ -> failwith "Phantom typing has made this impossible"
         asks (fun patchFile -> patchFile.Selection |> List.map extract |> List.choose id)
+    
+    let askColumnHeaders () : PatchQuery<string list, 'any> = 
+        asks (fun patchFile -> patchFile.HeaderRow.Columns)

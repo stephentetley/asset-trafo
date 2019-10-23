@@ -10,6 +10,7 @@ module Printer =
 
 
     open AssetPatch.Base.Syntax
+    open AssetPatch.Base.Acronyms
 
     type Doc = StringBuilder -> StringBuilder
 
@@ -83,6 +84,13 @@ module Printer =
     let selection (items : SelectionId list) : Doc = 
         directiveLine "Selection:" >> applyDoc selectionId items
        
+    let descriptiveHeaderRow (entityType : EntityType) 
+                             (headers : HeaderRow) : Doc = 
+        let decode = decodeAcronym entityType >> Option.defaultValue ""
+        let titles = headers.Columns |> List.map  (decode >> writeText)
+        writeText "*" >> intersperse "\t" titles >> newline
+
+
     let headerRow (headers : HeaderRow) : Doc = 
         let titles = headers.Columns |> List.map  writeText
         writeText "*" >> intersperse "\t" titles >> newline
@@ -108,6 +116,7 @@ module Printer =
         new StringBuilder ()
             |> patchHeader patch.Header
             |> selection patch.Selection
+            |> descriptiveHeaderRow patch.Header.EntityType patch.HeaderRow
             |> headerRow patch.HeaderRow
             |> dataRows patch.DataRows
             |> fun sb -> sb.ToString ()

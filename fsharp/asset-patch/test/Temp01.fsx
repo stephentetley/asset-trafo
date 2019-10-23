@@ -32,3 +32,44 @@ let prioritize01 () : AssocList<string, int> =
         |> AssocList.prioritize ["A"; "B"]
 
 
+// Typing experiments
+
+type AnyLevel = interface end
+
+
+type IParent<'T> = interface end
+
+type SiteLevel = interface end
+    
+
+type FunctionLevel = 
+    inherit SiteLevel
+
+    
+type ProcessGroupLevel = 
+    inherit FunctionLevel
+
+type ProcessLevel = 
+    inherit ProcessGroupLevel
+
+
+
+
+type Floc<'level> = Floc of string
+
+let f1 : Floc<ProcessLevel> = Floc "ACO01-EDG-LQD-RGM"
+
+let f2 : Floc<FunctionLevel> = Floc "ACO01-EDG"
+
+//let fail01 () : Bool = 
+//    f1 = f2
+
+let ok01 () : Floc<AnyLevel> list = 
+    let unwrap (fl : Floc<_>) : Floc<AnyLevel> = match f1 with Floc(x) -> Floc(x)        
+    [unwrap f1; unwrap f2]
+
+
+let typeLevelChild (parent: Floc<'T1>) (child : Floc<'T2>) : bool when 'T2 :> 'T1  = true
+
+
+

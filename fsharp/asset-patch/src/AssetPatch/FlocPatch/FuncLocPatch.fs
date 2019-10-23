@@ -27,9 +27,11 @@ module FuncLocPatch =
     let private funcLocAssocList (funcLoc : FuncLoc) : FLCompiler<AssocList<string,string>> = 
         compile {
             let magicFields = [ "JOBJN_FL"; "FLOC_REF" ]
+            let priorities = [ "FUNCLOC"; "CLASSTYPE" ]
             let! parent = liftOption funcLoc.FuncLocPath.Parent
             return 
                 funcLoc.InheritedAttributes
+                    |> AssocList.prioritize priorities
                     |> AssocList.removes magicFields
                     |> AssocList.update "FUNCLOC" (funcLoc.FuncLocPath.ToString())
                     |> AssocList.update "TXTMI" funcLoc.Description
