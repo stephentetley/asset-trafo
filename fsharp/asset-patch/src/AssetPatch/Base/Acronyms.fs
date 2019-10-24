@@ -7,6 +7,9 @@ module Acronyms =
 
     open AssetPatch.Base.Syntax
 
+    // ************************************************************************
+    // funcloc fields
+
     let private funclocColumnAcronyms : Map<string,string> = 
         Map.ofList <|
             [ ("ABCKZFLOC", "ABC Indicator")
@@ -117,6 +120,9 @@ module Acronyms =
             ; ("LGWIDI", "Work center origin")
             ]
 
+    // ************************************************************************
+    // classfloc fields
+
     let private classflocColumnAcronyms : Map<string,string> = 
         Map.ofList <|
             [ ("CLASS", "Class")
@@ -125,7 +131,10 @@ module Acronyms =
             ; ("CLSTATUS1", "Status")
             ; ("FUNCLOC", "Functional Location")
             ]
-    
+
+    // ************************************************************************
+    // valualoc fields
+
     let private valuaflocColumnAcronyms : Map<string,string> = 
         Map.ofList <|
             [ ("ATAW1", "Alternative unit")
@@ -147,10 +156,181 @@ module Acronyms =
             ; ("ATFLB", "Value to")
             ]    
 
+
+
+    // ************************************************************************
+    // equi fields
+
+    let private equiColumnAcronyms : Map<string,string> = 
+        Map.ofList <|
+            [ ("ABCK_EILO", "ABC Indicator")
+            ; ("ABCKZI", "ABC indic. Origin")
+            ; ("ANSWT", "Acquisition Value")
+            ; ("ANSDT", "Acquisition date")
+            ; ("DEACT", "Active Inactive Status Indicator")
+            ; ("ZADRNR", "Address")
+            ; ("ZADRNRI", "Address origin")
+            ; ("ANL1_EILO", "Asset")
+            ; ("BEGRUI", "AuthGroup origin")
+            ; ("BEGRU", "AuthorizGroup")
+            ; ("CHAR2EQUI", "Batch")
+            ; ("CGWLDT_EQ", "Begin guatantee(C)")
+            ; ("VGWLDT_EQ", "Begin guatantee(V)")
+            ; ("GSBE_EILO", "Business Area")
+            ; ("GSBERI", "Business area orig.")
+            ; ("RBNR_EEQZ", "Catalog Profile")
+            ; ("ZZCLASS", "Class")
+            ; ("BUKRSI", "CompCode origin")
+            ; ("BUKR_EILO", "Company Code")
+            ; ("KMATN", "Configurable material")
+            ; ("BAUMM_EQI", "Construction month")
+            ; ("SUBM_EEQZ", "Construction type Material")
+            ; ("BAUJJ", "Construction year")
+            ; ("KOKRSI", "ControlArea origin")
+            ; ("KOKR_EILO", "Controlling Area")
+            ; ("KOST_EILO", "Cost Center")
+            ; ("KOSTLI", "Cost center origin")
+            ; ("HERLD", "Country of manufact.")
+            ; ("WAERS", "Currency")
+            ; ("KUNDE_EQ", "Current customer")
+            ; ("KUNDE", "Current customer")
+            ; ("KUN1_EEQZ", "Customer")
+            ; ("GEWRKI", "Data origin")
+            ; ("LVORM_EQI", "Deletion Indicator")
+            ; ("AULDT_EQI", "Delivery date")
+            ; ("TXTMI", "Description (medium text)")
+            ; ("USTA_EQUI", "Display lines for user status")
+            ; ("VTWEG", "Distribution Channel")
+            ; ("SPART", "Division")
+            ; ("KUN2_EEQZ", "End customer")
+            ; ("EQUI", "Equipment")
+            ; ("EQTYP", "Equipment category")
+            ; ("TPLNR_I", "FunctLoc. Origin")
+            ; ("TPLN_EILO", "Functional Location")
+            ; ("BRGEW", "Gross Weight")
+            ; ("CGAERB_EQ", "Indicator: Pass on warranty(C)")
+            ; ("VGAERB_EQ", "Indicator: Pass on warranty(V)")
+            ; ("INVNR", "Inventory number")
+            ; ("EQASP", "Language Key")
+            ; ("LSERNR", "Last num. SerialNo")
+            ; ("LIZNR", "License number")
+            ; ("STOR_EILO", "Location")
+            ; ("STORTI", "Location origin")
+            ; ("EQ_LTEXT", "Long Text")
+            ; ("ARBP_EEQZ", "Main work center")
+            ; ("INGR_EEQZ", "Maint. Planner Group")
+            ; ("RBNR_I", "MaintCatalog origin")
+            ; ("INGRPI", "MaintPlGroup origin")
+            ; ("SWERKI", "MaintPlant origin")
+            ; ("SWER_EILO", "Maintenance Plant")
+            ; ("SERGE", "ManufSerialNumber")
+            ; ("MAPA_EEQZ", "ManufactPartNo.")
+            ; ("HERST", "Manufacturer")
+            ; ("CMGANR_EQ", "Master Warranty(C)")
+            ; ("VMGANR_EQ", "Master Warranty(D)")
+            ; ("MAT2EQUI", "Material")
+            ; ("MAT2EQUIC", "Material")
+            ; ("MAT_EQU", "Material")
+            ; ("SERNR", "Material Serial Number")
+            ; ("TYPBZ", "Model number")
+            ; ("OBJI_EILO", "Object ID")
+            ; ("OBJT_EQUI", "Object Type")
+            ; ("EQART_EQU", "Object Type")
+            ; ("KUN3_EEQZ", "Operator")
+            ; ("PPSIDI", "PP WrkCenter origin")
+            ; ("PPLA_EEQZ", "Planning Plant")
+            ; ("WERK_EQUI", "Plant")
+            ; ("BEBE_EILO", "Plant Section")
+            ; ("BEBERI", "Plant Section Origin")
+            ; ("WERGW_EQI", "Palnt for WorkCenter")
+            ; ("IWERKI", "Plant plant origin")
+            ; ("HEQN_EEQZ", "Position")
+            ; ("KRFKZ", "Referenced config.")
+            ; ("MSGR_EILO", "Room")
+            ; ("MSGRPI", "Room number origin")
+            ; ("VKORG", "Sales Organization")
+            ; ("VKGRP", "Sales group")
+            ; ("VKBUR", "Sales office")
+            ; ("VKORGI", "SalesOrg. Origin")
+            ; ("GERNR", "Serial Number")
+            ; ("AUFN_EILO", "Settlement Order")
+            ; ("AUFNRI", "SettlemntOrderOrigin")
+            ; ("GROES_EQU", "Size/dimension")
+            ; ("EQFN_EILO", "Sort Field")
+            ; ("EQFNRI", "Sort field origin")
+            ; ("DAUF_EILO", "Standing Order")
+            ; ("DAUFNI", "StandingOrderOrigin")
+            ; ("INBDT", "Start-up date")
+            ; ("STATTEXT", "Status")
+            ; ("STSM_EQUI", "Status Profile")
+            ; ("USTW_EQUI", "Status of an object")
+            ; ("USWO_EQUI", "Status without status number")
+            ; ("LAGER_EQI", "Storage location")
+            ; ("ANL2_EILO", "Sub-number")
+            ; ("HEQU_EEQZ", "Superord. Equipment")
+            ; ("TIDN_EEQZ", "Technical IdentNo.")
+            ; ("GEWEI", "Unit of weight")
+            ; ("DATA_EEQZ", "Valid From")
+            ; ("DATB_EEQZ", "Valid To")
+            ; ("DATBI_EIL", "Valid To")
+            ; ("ELIEF_EQI", "Vendor")
+            ; ("PROI_EILO", "WBS Element")
+            ; ("PROIDI", "WBS element origin")
+            ; ("CGWLEN_EQ", "Warranty End Date(C)")
+            ; ("VGWLEN_EQ", "Warranty end date(V)")
+            ; ("CWAGET_EQ", "Warranty inheritance possible(C)")
+            ; ("VWAGET_EQ", "Warranty inheritance possible(V)")
+            ; ("ARBP_EILO", "Work center")
+            ]
+    
+    // ************************************************************************
+    // classequi fields
+
+    let private classequiColumnAcronyms : Map<string,string> = 
+        Map.ofList <|
+            [ ("CLASS", "Class")
+            ; ("CLASSTYPE", "Class Type")
+            ; ("CLINT", "Internal class no")
+            ; ("CLSTATUS1", "Status")
+            ; ("EQUI", "Equipment")            
+            ]
+
+            
+    // ************************************************************************
+    // valuaequi fields
+
+    let private valuaequiColumnAcronyms : Map<string,string> = 
+        Map.ofList <|            
+            [ ("ATAW1", "Alternative unit")
+            ; ("ATAWE", "Alternative unit")
+            ; ("ATAUT", "Author")
+            ; ("CHARID", "Characteristic ID")
+            ; ("ATNAM", "Characteristic Name")
+            ; ("ATWRT", "Characteristic Value")
+            ; ("CLASSTYPE", "Class Type")
+            ; ("ATCOD", "Code")
+            ; ("ATVGLART", "Comp. type")
+            ; ("TEXTBEZ", "Description")
+            ; ("EQUI", "Equipment")
+            ; ("ATZIS", "Instance counter")
+            ; ("VALCNT", "Int counter values")
+            ; ("ATIMB", "Internal char no.")
+            ; ("ATSRT", "Position")
+            ; ("ATFLV", "Value from")
+            ; ("ATFLB", "Value to")
+            ]
+
+
+    // ************************************************************************
+    // Decode function
+
     let decodeAcronym (entityType : EntityType) 
                       (acronym : string) : string option = 
         match entityType with
         | FuncLoc -> Map.tryFind acronym funclocColumnAcronyms  
         | ClassFloc -> Map.tryFind acronym classflocColumnAcronyms  
         | ValuaFloc -> Map.tryFind acronym valuaflocColumnAcronyms
-        | Equi | ClassEqui | ValuaEqui -> None
+        | Equi -> Map.tryFind acronym equiColumnAcronyms
+        | ClassEqui -> Map.tryFind acronym classequiColumnAcronyms
+        | ValuaEqui -> Map.tryFind acronym valuaequiColumnAcronyms
+

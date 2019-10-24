@@ -6,11 +6,12 @@ namespace AssetPatch.Base
 
 
 module Addendum =
-    
-    open System
+
     open System.Text
     
-    // This is being added to SLFormat
+    // This has been added to SLFormat
+    // The MarkdownDoc dependency needs updating before we
+    // can use the SLFormat version
 
     type Doc = StringBuilder -> StringBuilder
 
