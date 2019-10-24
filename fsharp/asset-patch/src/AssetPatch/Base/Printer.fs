@@ -14,6 +14,12 @@ module Printer =
 
     type Doc = StringBuilder -> StringBuilder
 
+    let renderDoc (doc : Doc) : string = 
+        new StringBuilder ()
+            |> doc
+            |> fun sb -> sb.ToString ()
+
+
     let applyDoc (writer : 'a -> Doc) (items : 'a list) : Doc = 
         fun sb -> List.fold (fun ac x -> writer x ac) sb items
 
@@ -37,6 +43,15 @@ module Printer =
         | [] -> id
         | d1 :: rest -> 
             fun sb -> List.fold (fun ac fn -> ac |> writeText sep |> fn) (d1 sb) rest
+
+    let punctuate (sep : Doc) (docs : Doc list) : Doc = 
+        match docs with
+        | [] -> id
+        | d1 :: rest -> 
+            fun sb -> List.fold (fun ac fn -> ac |> sep |> fn) (d1 sb) rest
+
+    let vcat (docs : Doc list) : Doc = 
+        punctuate newline docs
 
     let patchType (source : PatchType) : Doc = 
         directiveLine <|
@@ -113,15 +128,38 @@ module Printer =
             >> dateTime header.DateTime
 
     let patchToString (patch : PatchFile<'T>) : string = 
-        new StringBuilder ()
-            |> patchHeader patch.Header
-            |> selection patch.Selection
-            |> descriptiveHeaderRow patch.Header.EntityType patch.HeaderRow
-            |> headerRow patch.HeaderRow
-            |> dataRows patch.DataRows
-            |> fun sb -> sb.ToString ()
+        let d1 = 
+            patchHeader patch.Header
+                >> selection patch.Selection
+                >> descriptiveHeaderRow patch.Header.EntityType patch.HeaderRow
+                >> headerRow patch.HeaderRow
+                >> dataRows patch.DataRows
+        renderDoc d1
 
     let writePatch (outpath : string) (patch : PatchFile<'T>) : unit = 
         let text = patchToString patch
         IO.File.WriteAllText(path=outpath, contents=text)
 
+    // ************************************************************************
+    // Variant 'receipt'
+
+    let descriptiveHeaderLines (entityType : EntityType) 
+                                (headers : HeaderRow) : Doc = 
+        let decode = decodeAcronym entityType >> Option.defaultValue ""
+        let titles = headers.Columns |> List.map  (decode >> writeText)
+        vcat titles
+
+    let writeReceipt (outpath : string) (patch : PatchFile<'T>) : unit = 
+        let text = 
+            writeLine "# Variant headings"
+                >> descriptiveHeaderLines patch.Header.EntityType patch.HeaderRow
+                |> renderDoc
+        IO.File.WriteAllText(path=outpath, contents=text)
+
+
+
+    let writePatchAndMetadata (outpath : string) (patch : PatchFile<'T>) : unit = 
+        let name1 = IO.Path.GetFileNameWithoutExtension(outpath) + ".variant.txt"
+        let variantPath = IO.Path.Combine(IO.Path.GetDirectoryName(outpath), name1)        
+        writeReceipt variantPath patch
+        writePatch outpath patch

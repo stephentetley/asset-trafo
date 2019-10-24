@@ -159,10 +159,10 @@ module FlocPatchMonad =
                     CompilerMonad.liftResult <| runFlocPatch fmEnv action
                 let! flPatch = makeFuncLocPatch config.User config.Timestamp flocs
                 let out1 = filenameFuncLocs outputDirectory root
-                writePatch out1 flPatch
+                writePatchAndMetadata out1 flPatch
                 let! cfPatch = makeClassFlocPatch config.User config.Timestamp flocs
                 let out2 = filenameClassFlocs outputDirectory root
-                writePatch out2 cfPatch
+                writePatchAndMetadata out2 cfPatch
                 return ans
             }
 
