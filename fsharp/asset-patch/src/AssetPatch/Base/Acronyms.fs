@@ -39,7 +39,7 @@ module Acronyms =
             ; ("HERLD", "Country of manufact.")
             ; ("WAERS", "Currency")
             ; ("LVORM", "Deletion Indicator")
-            ; ("TXTMI", "Description (medium text) ")
+            ; ("TXTMI", "Description (medium text)")
             ; ("USTA_FLOC", "Display lines for user status")
             ; ("VTWEG", "Distribution Channel")
             ; ("SPART", "Division")
@@ -143,7 +143,7 @@ module Acronyms =
             ; ("VALCNT", "Int count values")
             ; ("ATIMB", "Internal char no.")
             ; ("ATSRT", "Position")
-            ; ("ATFLV", "Value from ")
+            ; ("ATFLV", "Value from")
             ; ("ATFLB", "Value to")
             ]    
 

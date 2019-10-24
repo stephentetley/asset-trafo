@@ -4,7 +4,9 @@
 #r "System.Text.Encoding.dll"
 open System.IO
 
+#load "..\src\AssetPatch\Base\Addendum.fs"
 #load "..\src\AssetPatch\Base\AssocList.fs"
+open AssetPatch.Base.Addendum
 open AssetPatch.Base
 
 
@@ -69,7 +71,13 @@ let ok01 () : Floc<AnyLevel> list =
     [unwrap f1; unwrap f2]
 
 
-let typeLevelChild (parent: Floc<'T1>) (child : Floc<'T2>) : bool when 'T2 :> 'T1  = true
+//let typeLevelChild (parent: Floc<'T1>) (child : Floc<'T2>) : bool when 'T2 :> 'T1  = true
+
+// ******************************
+
+let format01 () = 
+    render (format "left=%s" [| "right" :> obj |])
+
 
 
 

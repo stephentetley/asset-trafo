@@ -64,9 +64,7 @@ module Syntax =
 
     [<Struct>]
     type DataRow = 
-        | DataRow of Value []
-
-        
+        | DataRow of Value []        
 
         static member FromAssocList (assocs : AssocList<string,string>) : DataRow = 
             assocs.Assocs 

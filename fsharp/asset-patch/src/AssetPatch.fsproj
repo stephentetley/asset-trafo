@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="AssetPatch\Base\Addendum.fs" />
     <Compile Include="AssetPatch\Base\AssocList.fs" />
     <Compile Include="AssetPatch\Base\Common.fs" />
     <Compile Include="AssetPatch\Base\Syntax.fs" />

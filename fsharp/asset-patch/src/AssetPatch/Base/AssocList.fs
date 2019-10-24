@@ -85,3 +85,14 @@ module AssocList =
     let prioritize (keys : 'Key list) 
                    (assocs : AssocList<'Key, 'T>) : AssocList<'Key, 'T> when 'Key : equality  = 
         List.foldBack prioritize1 keys assocs
+
+
+    /// Create a new assoc list by selecting fields of interest from the original 
+    /// list.
+    let select (keys : 'Key list) 
+               (assocs : AssocList<'Key, 'T>) : AssocList<'Key, 'T> when 'Key : equality  = 
+        let add1 key acc = 
+            match tryFind key assocs with
+            | None -> acc
+            | Some value -> AssocList.Cons(key, value, acc)                   
+        List.foldBack add1 keys empty

@@ -6,55 +6,28 @@ namespace AssetPatch.Base
 module Printer =
 
     open System
-    open System.Text
 
-
+    open AssetPatch.Base.Addendum
     open AssetPatch.Base.Syntax
     open AssetPatch.Base.Acronyms
+   
 
-    type Doc = StringBuilder -> StringBuilder
-
-    let renderDoc (doc : Doc) : string = 
-        new StringBuilder ()
-            |> doc
-            |> fun sb -> sb.ToString ()
-
-
-    let applyDoc (writer : 'a -> Doc) (items : 'a list) : Doc = 
-        fun sb -> List.fold (fun ac x -> writer x ac) sb items
-
-    let private tab : Doc = 
-        fun sb -> sb.Append "\t"
-
-    let private newline : Doc = 
-        fun sb -> sb.AppendLine ""
-
-    let private writeLine (source : string) : Doc = 
-        fun sb -> sb.AppendLine source
-
-    let private writeText (source : string) : Doc = 
-        fun sb -> sb.Append source
     
-    let private directiveLine (source : string) : Doc = 
-        "* " + source |> writeLine
+    let private comment (source : string) : Doc = 
+        character '*' ^+^ text source
 
-    let intersperse (sep : string) (docs : Doc list) : Doc = 
-        match docs with
-        | [] -> id
-        | d1 :: rest -> 
-            fun sb -> List.fold (fun ac fn -> ac |> writeText sep |> fn) (d1 sb) rest
+    let private defines (name: string) (value : string) : Doc = 
+        character '*' ^+^ text name ^^ colon ^+^ text value
 
-    let punctuate (sep : Doc) (docs : Doc list) : Doc = 
-        match docs with
-        | [] -> id
-        | d1 :: rest -> 
-            fun sb -> List.fold (fun ac fn -> ac |> sep |> fn) (d1 sb) rest
+    
+    // ************************************************************************
+    // Print a doc 
+    // This is line oriented so we don't use a *pretty* printer 
+    // which tries to fit lines.
 
-    let vcat (docs : Doc list) : Doc = 
-        punctuate newline docs
 
     let patchType (source : PatchType) : Doc = 
-        directiveLine <|
+        comment <|
             match source with
             | Download -> "Download"
             
@@ -62,7 +35,7 @@ module Printer =
         let dmname = 
             match source with
             | U1 -> "U1"
-        directiveLine <| sprintf "Data Model: %s" dmname 
+        defines "Data Model" dmname 
             
     
 
@@ -75,66 +48,70 @@ module Printer =
             | Equi -> "EQUI"
             | ClassEqui -> "CLASSEQUI" 
             | ValuaEqui -> "VALUAEQUI"
-        directiveLine <| sprintf "Entity Type: %s" etname
+        defines "Entity Type" etname
             
     let variant () : Doc = 
-        directiveLine <| "Variant:"
+        comment "Variant:"
 
     let user (userName : string) : Doc = 
-        directiveLine <| sprintf "User: %s" userName
+        defines "User" userName
 
     let dateTime (dt : DateTime) : Doc = 
-        directiveLine 
+        comment
             <| sprintf "Date: %s / Time: %s"
-                    (dt.ToString(format="yyyyMMdd"))
-                    (dt.ToString(format="HHmmss"))
+                        (dt.ToString(format="yyyyMMdd"))
+                        (dt.ToString(format="HHmmss"))
+                         
 
 
     let selectionId (source : SelectionId) : Doc = 
-        directiveLine <| 
+        comment <| 
             match source with
             | EquiEq num -> sprintf "EQUI EQ | %s |" num.Number
             | FuncLocEq floc -> sprintf "FUNCLOC EQ | %s |" floc
 
     let selection (items : SelectionId list) : Doc = 
-        directiveLine "Selection:" >> applyDoc selectionId items
+        comment "Selection:" 
+            ^!^ vcat (List.map selectionId items)
        
     let descriptiveHeaderRow (entityType : EntityType) 
                              (headers : HeaderRow) : Doc = 
         let decode = decodeAcronym entityType >> Option.defaultValue ""
-        let titles = headers.Columns |> List.map  (decode >> writeText)
-        writeText "*" >> intersperse "\t" titles >> newline
+        let titles = headers.Columns |> List.map  (decode >> text)
+        text "*" ^^ punctuate tab titles
 
 
     let headerRow (headers : HeaderRow) : Doc = 
-        let titles = headers.Columns |> List.map  writeText
-        writeText "*" >> intersperse "\t" titles >> newline
+        let titles = headers.Columns |> List.map text
+        text "*" ^^ punctuate tab titles
             
 
     // DataRow ends with tab
     let dataRow (row : DataRow) : Doc = 
-        let cells = row.Cells |> List.map writeText
-        intersperse "\t" cells >> tab >> newline
+        let cells = row.Cells |> List.map text
+        punctuate tab cells >> tab
 
     let dataRows (rows : DataRow list)  : Doc = 
-        applyDoc dataRow rows
+        vcat <| List.map dataRow rows
 
     let patchHeader (header : PatchHeader) : Doc = 
-        patchType header.PatchType
-            >> dataModel header.DataModel
-            >> entityType header.EntityType
-            >> variant header.Variant
-            >> user header.User
-            >> dateTime header.DateTime
+        vcat 
+            [ patchType header.PatchType
+            ; dataModel header.DataModel
+            ; entityType header.EntityType
+            ; variant header.Variant
+            ; user header.User
+            ; dateTime header.DateTime ]
 
     let patchToString (patch : PatchFile<'T>) : string = 
         let d1 = 
             patchHeader patch.Header
-                >> selection patch.Selection
-                >> descriptiveHeaderRow patch.Header.EntityType patch.HeaderRow
-                >> headerRow patch.HeaderRow
-                >> dataRows patch.DataRows
-        renderDoc d1
+                ^!^ selection patch.Selection
+                ^!^ descriptiveHeaderRow patch.Header.EntityType patch.HeaderRow
+                ^!^ headerRow patch.HeaderRow
+                ^!^ dataRows patch.DataRows
+                ^!^ empty
+        render d1
 
     let writePatch (outpath : string) (patch : PatchFile<'T>) : unit = 
         let text = patchToString patch
@@ -146,14 +123,14 @@ module Printer =
     let descriptiveHeaderLines (entityType : EntityType) 
                                 (headers : HeaderRow) : Doc = 
         let decode = decodeAcronym entityType >> Option.defaultValue ""
-        let titles = headers.Columns |> List.map  (decode >> writeText)
+        let titles = headers.Columns |> List.map  (decode >> text)
         vcat titles
 
     let writeReceipt (outpath : string) (patch : PatchFile<'T>) : unit = 
         let text = 
-            writeLine "# Variant headings"
-                >> descriptiveHeaderLines patch.Header.EntityType patch.HeaderRow
-                |> renderDoc
+            text "# Variant headings"
+                ^!^ descriptiveHeaderLines patch.Header.EntityType patch.HeaderRow
+                |> render
         IO.File.WriteAllText(path=outpath, contents=text)
 
 

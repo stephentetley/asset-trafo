@@ -23,22 +23,43 @@ module FuncLocPatch =
     let runFLCompiler (action : FLCompiler<'a>) = 
         runCompiler () action
 
-    let private excludeList : string list = 
+    let excludeList : string list = 
         // Field x comment
         [ "JOBJN_FL"        // Magic Number
         ; "FLOC_REF"        // Magic number
         ]
 
+    let selectList : string list = 
+        // Field x comment
+        [ "FUNCLOC"         // Functional Location
+        ; "TXTMI"           // Description (medium text) 
+        ; "BUKRSI"          // CompCode origin #inherit
+        ; "KOKRSI"          // ControlArea origin #inherit
+        ; "USTA_FLOC"       // Display lines for user status
+        ; "FLTYP"           // FuncLocCategory
+        ; "IEQUI"           // Installation allowed
+        ; "SWERKI"          // MaintPlant origin
+        ; "OBJTYFLOC"       // Object Type
+        ; "EQART"           // Object Type        
+        ; "PPSIDI"          // PP WrkCenter origin
+        ; "BEBERI"          // Plant Section Origin               
+        ; "STATTEXT"        // Status
+        ; "USTW_FLOC"       // Status of an object
+        ; "TPLKZ_FLC"       // Structure indicator
+        ; "TPLMA1"          // Superior FL for CR Processing
+        ; "TPLMA"           // Superior FunctLoc
+        ; "LGWIDI"          // Work center origin
+        ]
+
     let private funcLocAssocList (funcLoc : FuncLoc) : FLCompiler<AssocList<string,string>> = 
         compile {
-            let magicFields = [ "JOBJN_FL"; "FLOC_REF" ]
-            let priorities = [ "FUNCLOC"; "CLASSTYPE" ]
+            
             let! parent = liftOption funcLoc.FuncLocPath.Parent
             return 
                 funcLoc.InheritedAttributes
-                    |> AssocList.prioritize priorities
-                    |> AssocList.removes magicFields
                     |> AssocList.update "STATEXT" "UCON"
+                    |> AssocList.update "USTAFLOC" "UCON"
+                    |> AssocList.update "USTW_FLOC" "UCON"                    
                     |> AssocList.update "FUNCLOC" (funcLoc.FuncLocPath.ToString())
                     |> AssocList.update "TXTMI" funcLoc.Description
                     |> AssocList.update "FLTYP" (funcLoc.Level.ToString())
@@ -46,6 +67,7 @@ module FuncLocPatch =
                     |> AssocList.update "EQART" funcLoc.ObjectType
                     |> AssocList.update "TPLMA1" (parent.ToString())
                     |> AssocList.update "TPLMA" (parent.ToString())
+                    |> AssocList.select selectList
         }
 
 
@@ -55,7 +77,7 @@ module FuncLocPatch =
                         (funcLocs : FuncLoc list) : FLCompiler<FuncLocPatch> = 
         compile {
             let! rows = 
-                funcLocs |> List.sort |> mapM  funcLocAssocList 
+                funcLocs |> List.sort |> mapM funcLocAssocList 
             return! makePatch FuncLoc user timestamp rows
         }
 
