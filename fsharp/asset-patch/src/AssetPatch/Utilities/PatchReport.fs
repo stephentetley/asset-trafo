@@ -15,6 +15,7 @@ module PatchReport =
 
     open AssetPatch.Base
     open AssetPatch.Base.Syntax
+    open AssetPatch.Base.Acronyms
     open AssetPatch.Base.Parser
 
 
@@ -135,24 +136,34 @@ module PatchReport =
         h2 (text "Selection")
             ^!!^ selectionTable source.Selection
 
-    let dataAssocTable (source : AssocList<string, string>) : Markdown = 
-        let specs = 
-            [ { ColumnSpec.Width = 10 ; ColumnSpec.Alignment = Alignment.AlignLeft }
-            ; { ColumnSpec.Width = 30 ; ColumnSpec.Alignment = Alignment.AlignLeft }
-            ; { ColumnSpec.Width = 40 ; ColumnSpec.Alignment = Alignment.AlignLeft }
+    let dataAssocTable (entityType : EntityType) 
+                       (source : AssocList<string, string>) : Markdown = 
+        let title = text >> doubleAsterisks >> markdownText
+        let headings =
+            [ alignLeft 10 (title "Index")
+            ; alignLeft 30 (title "Field")
+            ; alignLeft 50 (title "Description")
+            ; alignLeft 40 (title "Value")
             ]
         let makeRow (ix :int) (name, value) : TableRow = 
-            [ ix + 1 |> int32Md |> markdownText ;  name |> cellValue; value |> text |> markdownText ]
+            [ ix + 1 |> int32Md |> markdownText 
+            ; name |> cellValue
+            ; decodeAcronym entityType name 
+                |> Option.defaultValue "" |> text |> markdownText 
+            ; value |> text |> markdownText 
+            ]
         let rows : TableRow list = 
             List.mapi makeRow (AssocList.toList source)
-        makeTableWithoutHeadings specs rows |> gridTable
+        makeTableWithHeadings headings rows |> gridTable
 
     let dataRows (patch : PatchFile<'T>) : Markdown = 
         let makeTable ix (rowAssoc : AssocList<string, string>) = 
             h2 (text "Row" ^+^ int32Md (ix+1))
-                ^!!^ dataAssocTable rowAssoc
+                ^!!^ dataAssocTable patch.Header.EntityType rowAssoc
                 ^!!^ linkToTop
         List.mapi makeTable patch.RowAssocs |> vsep
+
+
 
     let patchToMarkdown (patch : PatchFile<'T>) : Markdown = 
         h1 (text "Patch Report")
