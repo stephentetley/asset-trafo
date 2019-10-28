@@ -13,9 +13,10 @@ module ClassFlocPatch =
 
     open AssetPatch.Base
     open AssetPatch.Base.ChangeFile
+    open AssetPatch.Base.EntityTypes
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.FlocPatch.Common
-    open AssetPatch.FlocPatch.FunctionalLocation
+    
 
     type private Env = Unit
     type CFCompiler<'a> = CompilerMonad<'a, Env>
@@ -76,12 +77,12 @@ module ClassFlocPatch =
 
     let makeClassFlocPatch (user : string) 
                             (timestamp : System.DateTime)
-                            (funcLocs : FunctionalLocation list) : CFCompiler<ChangeFile> = 
+                            (funcLocs : FuncLoc list) : CFCompiler<ChangeFile> = 
         compile {
             let rows = 
                 funcLocs 
-                    |> List.sortBy (fun x -> x.FuncLocPath)
-                    |> List.map (fun x -> x.FuncLocPath.ToString())
+                    |> List.sortBy (fun x -> x.Path)
+                    |> List.map (fun x -> x.Path.ToString())
                     |> makeAllAssocs sampleFlocClasses
             return! makeChangeFile FuncLoc user timestamp rows
         }

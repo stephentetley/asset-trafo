@@ -19,17 +19,19 @@
     <Compile Include="AssetPatch\Utilities\ChangeFileReport.fs" />
     <Compile Include="AssetPatch\Utilities\TidyChangeFile.fs" />
     <Compile Include="AssetPatch\FlocPatch\Common.fs" />
-    <Compile Include="AssetPatch\FlocPatch\FunctionalLocation.fs" />
     <Compile Include="AssetPatch\FlocPatch\FuncLocPatch.fs" />
     <Compile Include="AssetPatch\FlocPatch\ClassFlocPatch.fs" />
     <Compile Include="AssetPatch\FlocPatch\FlocPatchMonad.fs" />
-    <Compile Include="AssetPatch\EquiPatch\EquiPatchMonad.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FParsec" Version="1.0.4-rc3" />
     <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20191014" />
     <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190721" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="AssetPatch\EquiPatch\" />
   </ItemGroup>
 
 </Project>

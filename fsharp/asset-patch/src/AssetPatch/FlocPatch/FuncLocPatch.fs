@@ -13,9 +13,9 @@ module FuncLocPatch =
     open AssetPatch.Base
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.FuncLocPath
+    open AssetPatch.Base.EntityTypes
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.FlocPatch.Common    
-    open AssetPatch.FlocPatch.FunctionalLocation
 
 
     type private Env = Unit
@@ -52,16 +52,16 @@ module FuncLocPatch =
         ; "LGWIDI"          // Work center origin
         ]
 
-    let private funcLocAssocList (funcLoc : FunctionalLocation) : FLCompiler<AssocList<string,string>> = 
+    let private funcLocAssocList (funcLoc : FuncLoc) : FLCompiler<AssocList<string,string>> = 
         compile {
             
-            let! parent = liftOption <| parent funcLoc.FuncLocPath
+            let! parent = liftOption <| parent funcLoc.Path
             return 
-                funcLoc.InheritedAttributes
+                funcLoc.Attributes
                     |> AssocList.update "STATEXT" "UCON"
                     |> AssocList.update "USTAFLOC" "UCON"
                     |> AssocList.update "USTW_FLOC" "UCON"                    
-                    |> AssocList.update "FUNCLOC" (funcLoc.FuncLocPath.ToString())
+                    |> AssocList.update "FUNCLOC" (funcLoc.Path.ToString())
                     |> AssocList.update "TXTMI" funcLoc.Description
                     |> AssocList.update "FLTYP" (funcLoc.Level.ToString())
                     |> AssocList.update "IEQUI" (if funcLoc.Level >= 5 then "X" else "")
@@ -75,7 +75,7 @@ module FuncLocPatch =
 
     let makeFuncLocPatch (user : string) 
                         (timestamp : System.DateTime)
-                        (funcLocs : FunctionalLocation list) : FLCompiler<ChangeFile> = 
+                        (funcLocs : FuncLoc list) : FLCompiler<ChangeFile> = 
         compile {
             let! rows = 
                 funcLocs |> List.sort |> mapM funcLocAssocList 

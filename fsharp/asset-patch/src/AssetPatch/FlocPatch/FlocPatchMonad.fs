@@ -9,11 +9,11 @@ module FlocPatchMonad =
     open System
 
     open AssetPatch.Base
-    open AssetPatch.Base.Common   
+    open AssetPatch.Base.Common
+    open AssetPatch.Base.EntityTypes
+    open AssetPatch.Base.Parser
     open AssetPatch.Base.Printer
-    open AssetPatch.FlocPatch
     open AssetPatch.FlocPatch.Common
-    open AssetPatch.FlocPatch.FunctionalLocation
     open AssetPatch.FlocPatch.FuncLocPatch
     open AssetPatch.FlocPatch.ClassFlocPatch
     
@@ -25,13 +25,13 @@ module FlocPatchMonad =
     /// Floc = F(unctional) Loc(action)
     /// FlocPatch is a Reader-State-Error monad to build patches - change files.
     type FlocPatch<'a> = 
-        FlocPatch of (Env -> FunctionalLocation list -> Result<'a * FunctionalLocation list, ErrMsg>)
+        FlocPatch of (Env -> FuncLoc list -> Result<'a * FuncLoc list, ErrMsg>)
 
 
 
     let inline private apply1 (ma : FlocPatch<'a>) 
                               (env : Env)
-                              (acc : FunctionalLocation list) : Result<'a * FunctionalLocation list, ErrMsg> = 
+                              (acc : FuncLoc list) : Result<'a * FuncLoc list, ErrMsg> = 
         let (FlocPatch fn) = ma in fn env acc
 
     let mreturn (x:'a) : FlocPatch<'a> = 
@@ -68,13 +68,13 @@ module FlocPatchMonad =
 
     let (flocpatch : FlocPatchBuilder) = new FlocPatchBuilder()
 
-    let runFlocPatch (env: Env) (action : FlocPatch<'a> ) : Result<'a * FunctionalLocation list, ErrMsg> = 
+    let runFlocPatch (env: Env) (action : FlocPatch<'a> ) : Result<'a * FuncLoc list, ErrMsg> = 
         let (FlocPatch fn ) = action 
         match fn env [] with
         | Ok ans -> Ok ans
         | Error msg -> Error msg
 
-    let execFlocPatch (env: Env) (action : FlocPatch<'a> ) : Result<FunctionalLocation list, ErrMsg> = 
+    let execFlocPatch (env: Env) (action : FlocPatch<'a> ) : Result<FuncLoc list, ErrMsg> = 
         let (FlocPatch fn ) = action 
         match fn env [] with
         | Ok (_, changes) -> Ok changes /// List.sortWith compareFlocChange flocs |> Ok
@@ -83,20 +83,31 @@ module FlocPatchMonad =
 
     /// Note - there is probably scope to add a phantom type layer over FlocLoc
     /// encoding whether you have a Site, Function, System, etc.
-    let extend (itemCode : string) 
-                (description : string) 
-                (objType : string) 
-                (parent : FunctionalLocation) : FlocPatch<FunctionalLocation> = 
+    let extend (segment: FuncLocSegment) 
+                (parent : FuncLoc) : FlocPatch<FuncLoc> = 
         /// At some point code will be looked up in a table of valid codes...
         FlocPatch <| fun env acc -> 
-            let child : FunctionalLocation = 
-                FunctionalLocation.extend itemCode description objType parent
+            let child : FuncLoc = 
+                EntityTypes.extendFuncLoc segment parent
             Ok (child, child :: acc)
 
 
-    let root (flocCode : string) : FlocPatch<FunctionalLocation> = 
+    /// TODO - rewrite to use failure provided by the monad...
+    let getRootFromPathFile (rootCode : string) (filePath : string) : Result<FuncLoc, string> = 
+        match readChangeFile filePath with
+        | Result.Error msg -> failwith msg
+        | Result.Ok ans ->
+            match ans.TryFindAssoc (fun key value -> key = "FUNCLOC" && value = rootCode) with
+            | None -> Result.Error (sprintf "Could not find root %s" rootCode)
+            | Some ans -> 
+                match FuncLoc.Initial ans with 
+                | Some floc -> Result.Ok floc
+                | None -> Result.Error "Error reading FuncLoc attributes"
+
+
+    let root (flocCode : string) : FlocPatch<FuncLoc> = 
         FlocPatch <| fun env acc -> 
-            match FunctionalLocation.getRootFromPathFile flocCode env.PathToFuncLocDownload with
+            match getRootFromPathFile flocCode env.PathToFuncLocDownload with
             | Error msg -> Error msg
             | Ok root -> Ok (root, acc)
 
