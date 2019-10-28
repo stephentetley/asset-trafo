@@ -6,8 +6,6 @@ namespace AssetPatch.FlocPatch
 [<AutoOpen>]
 module FuncLocPathType =
 
-    open AssetPatch.Base
-    open AssetPatch.Base.Syntax
 
     [<Struct>]
     [<CustomComparison; CustomEquality>]

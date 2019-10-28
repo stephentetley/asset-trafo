@@ -20,7 +20,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Addendum.fs"
 #load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\Common.fs"
-#load "..\src\AssetPatch\Base\Syntax.fs"
+#load "..\src\AssetPatch\Base\ChangeFile.fs"
 #load "..\src\AssetPatch\Base\Acronyms.fs"
 #load "..\src\AssetPatch\Base\AbsPatch.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
@@ -29,10 +29,10 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
 #load "..\src\AssetPatch\Base\QueryPatch.fs"
 #load "..\src\AssetPatch\Utilities\PatchReport.fs"
-#load "..\src\AssetPatch\Utilities\TidyPatch.fs"
+#load "..\src\AssetPatch\Utilities\TidyChangeFile.fs"
 
 open AssetPatch.Utilities.PatchReport
-open AssetPatch.Utilities.TidyPatch
+open AssetPatch.Utilities.TidyChangeFile
 
 
 let outputDirectory () : string = 
@@ -51,10 +51,10 @@ let patchReport01 () =
     Array.iter (patchReport pathToCss (outputDirectory ()) >> ignore) sources
 
 
-let tidyPatch01 () = 
+let tidyChangeFile01 () = 
     let src = @"G:\work\Projects\assets\asset_patch\file_download_edm\ACO01_funcloc_file_download.txt"
     let dest = outputFile "ACO01_funcloc_tidy.txt"
-    tidyPatch ["FUNCLOC"; "TXTMI"] [] src dest
+    tidyChangeFile ["FUNCLOC"; "TXTMI"] [] src dest
 
 
 

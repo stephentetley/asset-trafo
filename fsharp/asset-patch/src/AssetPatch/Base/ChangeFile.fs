@@ -3,7 +3,7 @@
 
 namespace AssetPatch.Base
 
-module Syntax =
+module ChangeFile =
 
     open System
     open AssetPatch.Base
@@ -21,7 +21,7 @@ module Syntax =
             IntegerString(num.ToString())
 
     
-    type PatchType = 
+    type FileType = 
         | Download
 
     type DataModel = 
@@ -102,8 +102,8 @@ module Syntax =
 
     /// Note Patch header is "common information" it does not
     /// strictly correspond to the commented out meta-data in a patch file
-    type PatchHeader = 
-        { PatchType : PatchType 
+    type FileHeader = 
+        { PatchType : FileType 
           DataModel : DataModel
           EntityType : EntityType
           Variant : unit
@@ -112,8 +112,8 @@ module Syntax =
         } 
 
 
-    type PatchFile<'T> = 
-        { Header : PatchHeader
+    type ChangeFile<'T> = 
+        { Header : FileHeader
           Selection : SelectionId list
           HeaderRow : HeaderRow
           DataRows : DataRow list

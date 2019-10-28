@@ -12,7 +12,7 @@ module ClassFlocPatch =
     open FSharp.Core
 
     open AssetPatch.Base
-    open AssetPatch.Base.Syntax
+    open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.Typings
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.FlocPatch.Common
@@ -76,12 +76,12 @@ module ClassFlocPatch =
 
     let makeClassFlocPatch (user : string) 
                             (timestamp : System.DateTime)
-                            (funcLocs : FuncLoc list) : CFCompiler<FuncLocPatch> = 
+                            (funcLocs : FuncLoc list) : CFCompiler<FuncLocChangeFile> = 
         compile {
             let rows = 
                 funcLocs 
                     |> List.sortBy (fun x -> x.FuncLocPath)
                     |> List.map (fun x -> x.FuncLocPath.ToString())
                     |> makeAllAssocs sampleFlocClasses
-            return! makePatch FuncLoc user timestamp rows
+            return! makeChangeFile FuncLoc user timestamp rows
         }

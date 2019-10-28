@@ -20,7 +20,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Addendum.fs"
 #load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\Common.fs"
-#load "..\src\AssetPatch\Base\Syntax.fs"
+#load "..\src\AssetPatch\Base\ChangeFile.fs"
 #load "..\src\AssetPatch\Base\Acronyms.fs"
 #load "..\src\AssetPatch\Base\AbsPatch.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
@@ -36,7 +36,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\FlocPatch\ClassFlocPatch.fs"
 #load "..\src\AssetPatch\FlocPatch\FlocPatchMonad.fs"
 open AssetPatch.Base
-open AssetPatch.Base.Syntax
+open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.Parser
 open AssetPatch.Base.Printer
 open AssetPatch.Base.Typings
@@ -51,8 +51,8 @@ let outputFile (relFileName : string) : string =
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
 let typing01 () = 
-    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Equipment.txt"
-    match readEquiPatch source with
+    let source = @"G:\work\Projects\assets\asset_patch\file_download_edm\Equipment.txt"
+    match readEquiChangeFile source with
     | Error msg -> Error msg
     | Ok patch -> 
         runQuery patch 
@@ -64,30 +64,30 @@ let typing01 () =
 
 
 let demo03 () = 
-    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
-    let outpath = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\fl_out.txt"
-    match readPatch source with
+    let source = @"G:\work\Projects\assets\asset_patch\file_download_edm\Functional_Location.txt"
+    let outpath = @"G:\work\Projects\assets\asset_patch\file_download_edm\fl_out.txt"
+    match readChangeFile source with
     | Result.Error msg -> Result.Error msg
     | Result.Ok ans ->
-        writePatch outpath ans
+        writeChangeFile outpath ans
         // List.iter (printfn "%O") ans.RowAssocs
         Result.Ok ans.RowAssocs
 
 
 let showHeaders (filePath : string) = 
-    match readPatch filePath with
+    match readChangeFile filePath with
     | Result.Error msg -> failwith msg
     | Result.Ok ans ->
         List.iter (printfn "%s") ans.ColumnHeaders
 
 let demo04 () =
-    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Equipment.txt"
+    let source = @"G:\work\Projects\assets\asset_patch\file_download_edm\Equipment.txt"
     showHeaders source        
 
 
 let demo05 () = 
-    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\Functional_Location.txt"
-    match readPatch source with
+    let source = @"G:\work\Projects\assets\asset_patch\file_download_edm\Functional_Location.txt"
+    match readChangeFile source with
     | Result.Error msg -> failwith msg
     | Result.Ok ans ->
         let ix = ans.ColumnIndex "ANLNRI"
@@ -99,7 +99,7 @@ let demo05 () =
 
 
 let compilePatch01 () = 
-    let source = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\aco01_funcloc_file_download.txt"
+    let source = @"G:\work\Projects\assets\asset_patch\file_download_edm\aco01_funcloc_file_download.txt"
     let action = 
         flocpatch {
             let! path =  

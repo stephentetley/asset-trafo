@@ -13,7 +13,7 @@ module Common =
 
     open AssetPatch.Base
     open AssetPatch.Base.Common
-    open AssetPatch.Base.Syntax
+    open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.CompilerMonad
 
 
@@ -47,7 +47,7 @@ module Common =
 
     let private makeHeader (entityType : EntityType) 
                             (user : string) 
-                            (timestamp : System.DateTime) : PatchHeader = 
+                            (timestamp : System.DateTime) : FileHeader = 
         { PatchType = Download 
           DataModel = U1
           EntityType = entityType
@@ -55,10 +55,10 @@ module Common =
           User = user
           DateTime = timestamp }
 
-    let makePatch (entityType : EntityType) 
-                    (user : string) 
-                    (timestamp : System.DateTime)
-                    (rows : AssocList<string, string> list) : CompilerMonad<PatchFile<'x>, 'env> = 
+    let makeChangeFile (entityType : EntityType) 
+                        (user : string) 
+                        (timestamp : System.DateTime)
+                        (rows : AssocList<string, string> list) : CompilerMonad<ChangeFile<'x>, 'env> = 
         compile {
             let! header = getHeaderRow rows
             let! selIds = getSelectionIds rows

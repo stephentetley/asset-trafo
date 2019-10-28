@@ -11,7 +11,7 @@ module FuncLocPatch =
     open FSharp.Core
 
     open AssetPatch.Base
-    open AssetPatch.Base.Syntax
+    open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.Typings
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.FlocPatch.Common
@@ -74,10 +74,10 @@ module FuncLocPatch =
 
     let makeFuncLocPatch (user : string) 
                         (timestamp : System.DateTime)
-                        (funcLocs : FuncLoc list) : FLCompiler<FuncLocPatch> = 
+                        (funcLocs : FuncLoc list) : FLCompiler<FuncLocChangeFile> = 
         compile {
             let! rows = 
                 funcLocs |> List.sort |> mapM funcLocAssocList 
-            return! makePatch FuncLoc user timestamp rows
+            return! makeChangeFile FuncLoc user timestamp rows
         }
 

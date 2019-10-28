@@ -7,13 +7,13 @@ namespace AssetPatch.Base
 module QueryPatch = 
     
     open AssetPatch.Base.Common
-    open AssetPatch.Base.Syntax
+    open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.Typings
     open AssetPatch.Base.CompilerMonad
 
-    type PatchQuery<'a, 'patchType> = CompilerMonad<'a, PatchFile<'patchType>>
+    type PatchQuery<'a, 'patchType> = CompilerMonad<'a, ChangeFile<'patchType>>
 
-    let runQuery (patch: PatchFile<'T>) (action : PatchQuery<'a, 'T> ) : Result<'a, ErrMsg> = 
+    let runQuery (patch: ChangeFile<'T>) (action : PatchQuery<'a, 'T> ) : Result<'a, ErrMsg> = 
         runCompiler patch action
 
 

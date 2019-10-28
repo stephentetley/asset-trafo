@@ -14,7 +14,7 @@ module PatchReport =
     open MarkdownDoc.Pandoc
 
     open AssetPatch.Base
-    open AssetPatch.Base.Syntax
+    open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.Acronyms
     open AssetPatch.Base.Parser
 
@@ -66,7 +66,7 @@ module PatchReport =
         inlineLink "Back to top" "#top" None |> markdownText
 
 
-    let patchType (source : PatchType) : Markdown = 
+    let fileType (source : FileType) : Markdown = 
        match source with
        | Download -> "Download" |> rawtext |> doubleAsterisks |> markdownText
 
@@ -100,7 +100,7 @@ module PatchReport =
         | FuncLocEq x -> text x
 
 
-    let headerTable (source : PatchHeader) : Markdown = 
+    let headerTable (source : FileHeader) : Markdown = 
         let specs = 
             [ { ColumnSpec.Width = 40 ; ColumnSpec.Alignment = Alignment.AlignLeft }
             ; { ColumnSpec.Width = 50 ; ColumnSpec.Alignment = Alignment.AlignLeft }
@@ -108,7 +108,7 @@ module PatchReport =
         let makeRow (name : string) (value : Markdown) : TableRow = 
             [ doubleAsterisks (name |> text) |> markdownText ; value ]
         let rows : TableRow list= 
-            [ [patchType source.PatchType; nbsp]
+            [ [fileType source.PatchType; nbsp]
             ; makeRow "Data Model:"     (dataModel source.DataModel |> markdownText)
             ; makeRow "Entity Type:"    (entityType source.EntityType |> markdownText)
             ; makeRow "Variant:"        (variant source.Variant)
@@ -132,7 +132,7 @@ module PatchReport =
             List.mapi makeRow source
         makeTableWithoutHeadings specs rows |> gridTable
 
-    let selectionSection (source : PatchFile<'T>) : Markdown = 
+    let selectionSection (source : ChangeFile<'T>) : Markdown = 
         h2 (text "Selection")
             ^!!^ selectionTable source.Selection
 
@@ -156,7 +156,7 @@ module PatchReport =
             List.mapi makeRow (AssocList.toList source)
         makeTableWithHeadings headings rows |> gridTable
 
-    let dataRows (patch : PatchFile<'T>) : Markdown = 
+    let dataRows (patch : ChangeFile<'T>) : Markdown = 
         let makeTable ix (rowAssoc : AssocList<string, string>) = 
             h2 (text "Row" ^+^ int32Md (ix+1))
                 ^!!^ dataAssocTable patch.Header.EntityType rowAssoc
@@ -165,7 +165,7 @@ module PatchReport =
 
 
 
-    let patchToMarkdown (patch : PatchFile<'T>) : Markdown = 
+    let patchToMarkdown (patch : ChangeFile<'T>) : Markdown = 
         h1 (text "Patch Report")
             ^!!^ headerTable patch.Header
             ^!!^ selectionSection patch
@@ -175,7 +175,7 @@ module PatchReport =
     let pandocGenHtml (pandocOpts : PandocOptions)
                        (outputDirectory : string)
                        (htmlFileName : string) 
-                       (patch : PatchFile<'T>) : Result<unit, string> = 
+                       (patch : ChangeFile<'T>) : Result<unit, string> = 
         let doc = patchToMarkdown patch 
         writeHtml5Markdown "Patch Summary" pandocOpts outputDirectory htmlFileName doc
 
@@ -187,7 +187,7 @@ module PatchReport =
         let outputHtmlFile = 
             Path.GetFileName(inputPatch) 
                 |> fun s -> Path.ChangeExtension(path = s, extension = "html")
-        match readPatch inputPatch with
+        match readChangeFile inputPatch with
         | Result.Error msg -> Result.Error msg
         | Result.Ok ans -> 
             let opts = pandocHtmlDefaultOptions pathToCssSytlesheet

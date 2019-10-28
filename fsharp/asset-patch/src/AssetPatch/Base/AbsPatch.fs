@@ -8,11 +8,11 @@ namespace AssetPatch.Base
 module AbsPatchType =
 
     open AssetPatch.Base
-    open AssetPatch.Base.Syntax
+    open AssetPatch.Base.ChangeFile
    
 
     type AbsPatch = 
-        { Header : PatchHeader 
+        { Header : FileHeader 
           Rows : AssocList<string, string> list }
 
         member x.Prioritize (keys : string list) : AbsPatch = 
@@ -28,9 +28,9 @@ module AbsPatchType =
 module AbsPatch =
     
     open AssetPatch.Base.Common
-    open AssetPatch.Base.Syntax
+    open AssetPatch.Base.ChangeFile
     
-    let ofPatchFile (patch : PatchFile<'any>) : AbsPatch = 
+    let ofPatchFile (patch : ChangeFile<'any>) : AbsPatch = 
         { Header = patch.Header 
           Rows = patch.RowAssocs
         }
@@ -71,7 +71,7 @@ module AbsPatch =
         | row1 :: _ -> row1 |> AssocList.keys |> HeaderRow |> Some
 
 
-    let toPatchFile (absPatch : AbsPatch) : Result<PatchFile<'any> , ErrMsg> = 
+    let toPatchFile (absPatch : AbsPatch) : Result<ChangeFile<'any> , ErrMsg> = 
         match selectionIds absPatch.Header.EntityType absPatch.Rows, 
                 headerRow absPatch.Rows with
         | Some selIds, Some header -> 

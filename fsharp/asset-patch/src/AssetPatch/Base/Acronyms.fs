@@ -5,7 +5,7 @@ namespace AssetPatch.Base
 
 module Acronyms = 
 
-    open AssetPatch.Base.Syntax
+    open AssetPatch.Base.ChangeFile
 
     // ************************************************************************
     // funcloc fields

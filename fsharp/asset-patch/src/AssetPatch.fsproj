@@ -24,6 +24,7 @@
     <Compile Include="AssetPatch\FlocPatch\FuncLocPatch.fs" />
     <Compile Include="AssetPatch\FlocPatch\ClassFlocPatch.fs" />
     <Compile Include="AssetPatch\FlocPatch\FlocPatchMonad.fs" />
+    <Compile Include="AssetPatch\EquiPatch\EquiPatchMonad.fs" />
   </ItemGroup>
 
   <ItemGroup>

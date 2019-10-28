@@ -8,7 +8,7 @@ module Printer =
     open System
 
     open AssetPatch.Base.Addendum
-    open AssetPatch.Base.Syntax
+    open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.Acronyms
    
 
@@ -26,7 +26,7 @@ module Printer =
     // which tries to fit lines.
 
 
-    let patchType (source : PatchType) : Doc = 
+    let fileType (source : FileType) : Doc = 
         comment <|
             match source with
             | Download -> "Download"
@@ -94,27 +94,28 @@ module Printer =
     let dataRows (rows : DataRow list)  : Doc = 
         vcat <| List.map dataRow rows
 
-    let patchHeader (header : PatchHeader) : Doc = 
+    let fileHeader (header : FileHeader) : Doc = 
         vcat 
-            [ patchType header.PatchType
+            [ fileType header.PatchType
             ; dataModel header.DataModel
             ; entityType header.EntityType
             ; variant header.Variant
             ; user header.User
             ; dateTime header.DateTime ]
 
-    let patchToString (patch : PatchFile<'T>) : string = 
+    let changeFileToString (changeFile : ChangeFile<'T>) : string = 
         let d1 = 
-            patchHeader patch.Header
-                ^!^ selection patch.Selection
-                ^!^ descriptiveHeaderRow patch.Header.EntityType patch.HeaderRow
-                ^!^ headerRow patch.HeaderRow
-                ^!^ dataRows patch.DataRows
+            fileHeader changeFile.Header
+                ^!^ selection changeFile.Selection
+                ^!^ descriptiveHeaderRow changeFile.Header.EntityType changeFile.HeaderRow
+                ^!^ headerRow changeFile.HeaderRow
+                ^!^ dataRows changeFile.DataRows
                 ^!^ empty
         render d1
 
-    let writePatch (outpath : string) (patch : PatchFile<'T>) : unit = 
-        let text = patchToString patch
+    let writeChangeFile (outpath : string) 
+                        (changeFile : ChangeFile<'T>) : unit = 
+        let text = changeFileToString changeFile
         IO.File.WriteAllText(path=outpath, contents=text)
 
     // ************************************************************************
@@ -126,17 +127,18 @@ module Printer =
         let titles = headers.Columns |> List.map  (decode >> text)
         vcat titles
 
-    let writeReceipt (outpath : string) (patch : PatchFile<'T>) : unit = 
+    let writeReceipt (outpath : string) (changeFile : ChangeFile<'T>) : unit = 
         let text = 
             text "# Variant headings"
-                ^!^ descriptiveHeaderLines patch.Header.EntityType patch.HeaderRow
+                ^!^ descriptiveHeaderLines changeFile.Header.EntityType changeFile.HeaderRow
                 |> render
         IO.File.WriteAllText(path=outpath, contents=text)
 
 
 
-    let writePatchAndMetadata (outpath : string) (patch : PatchFile<'T>) : unit = 
+    let writePatchAndMetadata (outpath : string) 
+                              (changeFile : ChangeFile<'T>) : unit = 
         let name1 = IO.Path.GetFileNameWithoutExtension(outpath) + ".variant.txt"
         let variantPath = IO.Path.Combine(IO.Path.GetDirectoryName(outpath), name1)        
-        writeReceipt variantPath patch
-        writePatch outpath patch
+        writeReceipt variantPath changeFile
+        writeChangeFile outpath changeFile

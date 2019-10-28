@@ -5,7 +5,7 @@ namespace AssetPatch.Base
 
 module Typings =
 
-    open AssetPatch.Base.Syntax
+    open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.Parser
 
     
@@ -19,57 +19,57 @@ module Typings =
     type FuncLocPhantom = 
         inherit FuncLocSelectors
     
-    type FuncLocPatch = PatchFile<FuncLocPhantom>
+    type FuncLocChangeFile = ChangeFile<FuncLocPhantom>
 
     
-    let readFuncLocPatch (inputFile : string) : Result<FuncLocPatch, string> = 
-        readPatch inputFile
+    let readFuncLocChangeFile (inputFile : string) : Result<FuncLocChangeFile, string> = 
+        readChangeFile inputFile
 
 
     
     type ClassFlocPhantom =
         inherit FuncLocSelectors
 
-    type ClassFlocPatch = PatchFile<ClassFlocPhantom>
+    type ClassFlocChangeFile = ChangeFile<ClassFlocPhantom>
 
-    let readClassFlocPatch (inputFile : string) : Result<ClassFlocPatch, string> = 
-        readPatch inputFile
+    let readClassFlocChangeFile (inputFile : string) : Result<ClassFlocChangeFile, string> = 
+        readChangeFile inputFile
 
 
     type ValuaFlocPhantom = 
         inherit FuncLocSelectors
     
-    type ValuaFlocPatch = PatchFile<ValuaFlocPhantom>
+    type ValuaFlocChangeFile = ChangeFile<ValuaFlocPhantom>
 
-    let readValuaFlocPatch (inputFile : string) : Result<ValuaFlocPatch, string> = 
-        readPatch inputFile
+    let readValuaFlocChangeFile (inputFile : string) : Result<ValuaFlocChangeFile, string> = 
+        readChangeFile inputFile
 
 
 
     type EquiPhantom = 
         inherit EquiSelectors
 
-    type EquiPatch = PatchFile<EquiPhantom>
+    type EquiChangeFile = ChangeFile<EquiPhantom>
     
-    let readEquiPatch (inputFile : string) : Result<EquiPatch, string> = 
-        readPatch inputFile
+    let readEquiChangeFile (inputFile : string) : Result<EquiChangeFile, string> = 
+        readChangeFile inputFile
     
     type ClassEquiPhantom = 
         inherit EquiSelectors
 
-    type ClassEquiPatch = PatchFile<ClassEquiPhantom>
+    type ClassEquiChangeFile = ChangeFile<ClassEquiPhantom>
     
-    let readClassEquiPatch (inputFile : string) : Result<ClassEquiPatch, string> = 
-        readPatch inputFile
+    let readClassEquiChangeFile (inputFile : string) : Result<ClassEquiChangeFile, string> = 
+        readChangeFile inputFile
     
 
     type ValuaEquiPhantom =
         inherit EquiSelectors
 
-    type ValuaEquiPatch = PatchFile<ValuaEquiPhantom>
+    type ValuaEquiChangeFile = ChangeFile<ValuaEquiPhantom>
     
-    let readValuaEquiPatch (inputFile : string) : Result<ValuaEquiPatch, string> = 
-        readPatch inputFile
+    let readValuaEquiChangeFile (inputFile : string) : Result<ValuaEquiChangeFile, string> = 
+        readChangeFile inputFile
 
 
     

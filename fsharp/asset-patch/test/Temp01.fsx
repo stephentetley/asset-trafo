@@ -75,8 +75,7 @@ let ok01 () : Floc<AnyLevel> list =
 
 // ******************************
 
-let format01 () = 
-    render (format "left=%s" [| "right" :> obj |])
+
 
 
 

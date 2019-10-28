@@ -61,7 +61,7 @@ module FuncLoc =
 
 
     let getRootFromPathFile (rootCode : string) (filePath : string) : Result<FuncLoc, string> = 
-        match readPatch filePath with
+        match readChangeFile filePath with
         | Result.Error msg -> failwith msg
         | Result.Ok ans ->
             match ans.TryFindAssoc (fun key value -> key = "FUNCLOC" && value = rootCode) with

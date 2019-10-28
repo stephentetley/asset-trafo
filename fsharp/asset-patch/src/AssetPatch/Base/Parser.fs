@@ -8,64 +8,64 @@ module Parser =
     open FParsec
     open System
 
-    open AssetPatch.Base.Syntax
+    open AssetPatch.Base.ChangeFile
 
-    type PatchParser<'ans> = Parser<'ans, unit>
+    type ChangeFileParser<'ans> = Parser<'ans, unit>
 
     // ************************************************************************
     // Lexer
 
 
-    let intOfLength (len : int) : PatchParser<int> = 
+    let intOfLength (len : int) : ChangeFileParser<int> = 
         let after (chars : char []) = chars |> System.String |> int
         parray len digit |>> after
 
-    let lexeme (parser : PatchParser<'a>) : PatchParser<'a> = 
+    let lexeme (parser : ChangeFileParser<'a>) : ChangeFileParser<'a> = 
         parser .>> spaces
 
-    let token (str : string) : PatchParser<string> = 
+    let token (str : string) : ChangeFileParser<string> = 
         lexeme (pstring str)
 
-    let charToken (ch : char) : PatchParser<char> = 
+    let charToken (ch : char) : ChangeFileParser<char> = 
         lexeme (pchar ch)
 
-    let directive (parser : PatchParser<'a>) : PatchParser<'a> = 
+    let directive (parser : ChangeFileParser<'a>) : ChangeFileParser<'a> = 
         charToken '*' >>. parser
 
     let named (name : string) 
-              (parser : PatchParser<'a>) : PatchParser<'a> = 
+              (parser : ChangeFileParser<'a>) : ChangeFileParser<'a> = 
         token (name + ":") >>. parser
 
-    let cellValue : PatchParser<string> = 
+    let cellValue : ChangeFileParser<string> = 
         manyChars (noneOf ['\t'; '\n'])
 
 
-    let tab : PatchParser<unit> = 
+    let tab : ChangeFileParser<unit> = 
         pchar '\t' >>. preturn ()
 
     // ************************************************************************
     // Parser
 
-    let pIntegerString : PatchParser<IntegerString> = 
+    let pIntegerString : ChangeFileParser<IntegerString> = 
         many1Chars digit |>> IntegerString |> lexeme
 
 
-    let pFuncLoc : PatchParser<string> = 
+    let pFuncLoc : ChangeFileParser<string> = 
         many1Chars (satisfy (not << Char.IsWhiteSpace)) |> lexeme
 
 
-    let pPatchType : PatchParser<PatchType> =
+    let pFileType : ChangeFileParser<FileType> =
         let inner = 
             choice [ token "Download" >>. preturn Download ]
         directive inner
 
-    let pDataModel : PatchParser<DataModel> =
+    let pDataModel : ChangeFileParser<DataModel> =
         let inner = 
             choice [ token "U1" >>. preturn U1 ]
         directive (named "Data Model" inner)
 
 
-    let pEntityType : PatchParser<EntityType> =
+    let pEntityType : ChangeFileParser<EntityType> =
         let inner = 
             choice 
                 [ token "FUNCLOC"   >>. preturn FuncLoc 
@@ -77,26 +77,26 @@ module Parser =
                 ]
         directive (named "Entity Type" inner)
 
-    let pVariant : PatchParser<unit> =
+    let pVariant : ChangeFileParser<unit> =
         let inner = preturn ()
         directive (named "Variant" inner)
 
-    let pUser : PatchParser<string> =
+    let pUser : ChangeFileParser<string> =
         let inner = restOfLine true |>> (fun s -> s.Trim())
         directive (named "User" inner)
 
 
-    let pDate : PatchParser<int * int * int> =
+    let pDate : ChangeFileParser<int * int * int> =
         let inner = tuple3 (intOfLength 4) (intOfLength 2) (intOfLength 2)
         named "Date" (lexeme inner)
     
-    let pTime : PatchParser<int * int * int> =
+    let pTime : ChangeFileParser<int * int * int> =
         let inner = tuple3 (intOfLength 2) (intOfLength 2) (intOfLength 2)
         named "Time" (lexeme inner)
 
     
 
-    let pDateTime : PatchParser<DateTime> = 
+    let pDateTime : ChangeFileParser<DateTime> = 
         let inner = 
             parse { 
                 let! (yr,mon,day) = pDate
@@ -108,7 +108,7 @@ module Parser =
         directive inner
     
     
-    let pSelectionId : PatchParser<SelectionId> = 
+    let pSelectionId : ChangeFileParser<SelectionId> = 
         let line1 (name : string) parser = 
            token name >>. charToken '|' >>. parser .>> charToken '|'
         
@@ -119,29 +119,29 @@ module Parser =
                 ]
         directive inner
 
-    let pSelectionHeader : PatchParser<unit> =
+    let pSelectionHeader : ChangeFileParser<unit> =
         let inner = preturn ()
         directive (named "Selection" inner)
 
-    let pSelection : PatchParser<SelectionId list> = 
+    let pSelection : ChangeFileParser<SelectionId list> = 
         pSelectionHeader >>. many1 (attempt pSelectionId)
 
-    let pHeaderRow : PatchParser<HeaderRow> = 
+    let pHeaderRow : ChangeFileParser<HeaderRow> = 
         let inner = sepBy cellValue tab |>> (List.toArray >> HeaderRow)
         directive (inner .>> newline)
 
 
-    let pDataRow : PatchParser<DataRow> = 
+    let pDataRow : ChangeFileParser<DataRow> = 
         // Cannot use sepEndBy because we must end with tab.
         let inner = many1 (cellValue .>> tab) |>> (List.toArray >> DataRow)
         inner .>> newline
 
-    let pDataRows : PatchParser<DataRow list> = 
+    let pDataRows : ChangeFileParser<DataRow list> = 
         many1 (attempt pDataRow)
 
-    let pPatchHeader : PatchParser<PatchHeader> = 
+    let pFileHeader : ChangeFileParser<FileHeader> = 
         parse {
-            let! ptype = pPatchType
+            let! ptype = pFileType
             let! dmodel = pDataModel
             let! etype = pEntityType
             let! variant  = pVariant
@@ -155,9 +155,9 @@ module Parser =
                      DateTime = date }
         }
 
-    let parsePatch () : PatchParser<PatchFile<'T>> = 
+    let parseChangeFile () : ChangeFileParser<ChangeFile<'T>> = 
         parse {
-            let! fileHeader = pPatchHeader
+            let! fileHeader = pFileHeader
             let! selection = pSelection
             let! headerRow = pHeaderRow
             let! datas = pDataRows
@@ -168,7 +168,7 @@ module Parser =
         }
 
 
-    let readPatch (inputFile : string) : Result<PatchFile<'T>, string> = 
-        match runParserOnFile (parsePatch ()) () inputFile Text.Encoding.UTF8 with
+    let readChangeFile (inputFile : string) : Result<ChangeFile<'T>, string> = 
+        match runParserOnFile (parseChangeFile ()) () inputFile Text.Encoding.UTF8 with
         | Failure (str,_,_) -> Result.Error str
         | Success (ans,_,_) -> Result.Ok ans
