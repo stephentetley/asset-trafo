@@ -25,7 +25,7 @@ module AbsChangeFile =
             { Header = x.Header; Rows = rows1 }
 
     
-    let ofChangeFile (changeFile : ChangeFile<'any>) : AbsChangeFile = 
+    let ofChangeFile (changeFile : ChangeFile) : AbsChangeFile = 
         { Header = changeFile.Header 
           Rows = changeFile.RowAssocs
         }
@@ -66,7 +66,7 @@ module AbsChangeFile =
         | row1 :: _ -> row1 |> AssocList.keys |> HeaderRow |> Some
 
 
-    let toChangeFile (absChangeFile : AbsChangeFile) : Result<ChangeFile<'any> , ErrMsg> = 
+    let toChangeFile (absChangeFile : AbsChangeFile) : Result<ChangeFile, ErrMsg> = 
         match selectionIds absChangeFile.Header.EntityType absChangeFile.Rows, 
                 headerRow absChangeFile.Rows with
         | Some selIds, Some header -> 

@@ -132,7 +132,7 @@ module PatchReport =
             List.mapi makeRow source
         makeTableWithoutHeadings specs rows |> gridTable
 
-    let selectionSection (source : ChangeFile<'T>) : Markdown = 
+    let selectionSection (source : ChangeFile) : Markdown = 
         h2 (text "Selection")
             ^!!^ selectionTable source.Selection
 
@@ -156,7 +156,7 @@ module PatchReport =
             List.mapi makeRow (AssocList.toList source)
         makeTableWithHeadings headings rows |> gridTable
 
-    let dataRows (patch : ChangeFile<'T>) : Markdown = 
+    let dataRows (patch : ChangeFile) : Markdown = 
         let makeTable ix (rowAssoc : AssocList<string, string>) = 
             h2 (text "Row" ^+^ int32Md (ix+1))
                 ^!!^ dataAssocTable patch.Header.EntityType rowAssoc
@@ -165,7 +165,7 @@ module PatchReport =
 
 
 
-    let patchToMarkdown (patch : ChangeFile<'T>) : Markdown = 
+    let patchToMarkdown (patch : ChangeFile) : Markdown = 
         h1 (text "Patch Report")
             ^!!^ headerTable patch.Header
             ^!!^ selectionSection patch
@@ -175,7 +175,7 @@ module PatchReport =
     let pandocGenHtml (pandocOpts : PandocOptions)
                        (outputDirectory : string)
                        (htmlFileName : string) 
-                       (patch : ChangeFile<'T>) : Result<unit, string> = 
+                       (patch : ChangeFile) : Result<unit, string> = 
         let doc = patchToMarkdown patch 
         writeHtml5Markdown "Patch Summary" pandocOpts outputDirectory htmlFileName doc
 

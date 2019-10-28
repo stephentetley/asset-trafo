@@ -13,9 +13,7 @@
     <Compile Include="AssetPatch\Base\Acronyms.fs" />
     <Compile Include="AssetPatch\Base\Parser.fs" />
     <Compile Include="AssetPatch\Base\Printer.fs" />
-    <Compile Include="AssetPatch\Base\Typings.fs" />
     <Compile Include="AssetPatch\Base\CompilerMonad.fs" />
-    <Compile Include="AssetPatch\Base\QueryPatch.fs" />
     <Compile Include="AssetPatch\Utilities\PatchReport.fs" />
     <Compile Include="AssetPatch\Utilities\TidyChangeFile.fs" />
     <Compile Include="AssetPatch\FlocPatch\Common.fs" />

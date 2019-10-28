@@ -112,7 +112,7 @@ module ChangeFile =
         } 
 
 
-    type ChangeFile<'T> = 
+    type ChangeFile = 
         { Header : FileHeader
           Selection : SelectionId list
           HeaderRow : HeaderRow

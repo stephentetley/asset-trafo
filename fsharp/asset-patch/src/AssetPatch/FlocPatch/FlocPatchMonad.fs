@@ -22,8 +22,7 @@ module FlocPatchMonad =
           }
 
     /// Floc = F(unctional) Loc(action)
-    /// FlocPatch is a Reader-State-Error monad to build trails
-    /// of functional locations to build a structure.
+    /// FlocPatch is a Reader-State-Error monad to build patches - change files.
     type FlocPatch<'a> = 
         FlocPatch of (Env -> FuncLoc list -> Result<'a * FuncLoc list, ErrMsg>)
 

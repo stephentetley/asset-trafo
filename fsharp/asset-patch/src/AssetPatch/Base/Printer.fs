@@ -103,7 +103,7 @@ module Printer =
             ; user header.User
             ; dateTime header.DateTime ]
 
-    let changeFileToString (changeFile : ChangeFile<'T>) : string = 
+    let changeFileToString (changeFile : ChangeFile) : string = 
         let d1 = 
             fileHeader changeFile.Header
                 ^!^ selection changeFile.Selection
@@ -114,7 +114,7 @@ module Printer =
         render d1
 
     let writeChangeFile (outpath : string) 
-                        (changeFile : ChangeFile<'T>) : unit = 
+                        (changeFile : ChangeFile) : unit = 
         let text = changeFileToString changeFile
         IO.File.WriteAllText(path=outpath, contents=text)
 
@@ -127,7 +127,7 @@ module Printer =
         let titles = headers.Columns |> List.map  (decode >> text)
         vcat titles
 
-    let writeReceipt (outpath : string) (changeFile : ChangeFile<'T>) : unit = 
+    let writeReceipt (outpath : string) (changeFile : ChangeFile) : unit = 
         let text = 
             text "# Variant headings"
                 ^!^ descriptiveHeaderLines changeFile.Header.EntityType changeFile.HeaderRow
@@ -137,7 +137,7 @@ module Printer =
 
 
     let writePatchAndMetadata (outpath : string) 
-                              (changeFile : ChangeFile<'T>) : unit = 
+                              (changeFile : ChangeFile) : unit = 
         let name1 = IO.Path.GetFileNameWithoutExtension(outpath) + ".variant.txt"
         let variantPath = IO.Path.Combine(IO.Path.GetDirectoryName(outpath), name1)        
         writeReceipt variantPath changeFile

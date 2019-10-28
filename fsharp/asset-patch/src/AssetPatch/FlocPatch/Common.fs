@@ -58,7 +58,7 @@ module Common =
     let makeChangeFile (entityType : EntityType) 
                         (user : string) 
                         (timestamp : System.DateTime)
-                        (rows : AssocList<string, string> list) : CompilerMonad<ChangeFile<'x>, 'env> = 
+                        (rows : AssocList<string, string> list) : CompilerMonad<ChangeFile, 'env> = 
         compile {
             let! header = getHeaderRow rows
             let! selIds = getSelectionIds rows

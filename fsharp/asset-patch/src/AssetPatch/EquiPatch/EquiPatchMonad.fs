@@ -7,11 +7,12 @@ namespace AssetPatch.EquiPatch
 module EquiPatchMonad =
 
     open AssetPatch.Base.Common
+    open AssetPatch.Base.AbsChangeFile
 
-    /// FlocPatch is a Reader-State-Error monad to build trails
-    /// of functional locations to build a structure.
+    /// PatchMonad is a Reader-State-Error monad to build patches - lists of 
+    /// change files.
     type PatchMonad<'a, 'env> = 
-        PatchMonad of ('env -> FuncLoc list -> Result<'a * FuncLoc list, ErrMsg>)
+        PatchMonad of ('env -> AbsChangeFile list -> Result<'a * AbsChangeFile list, ErrMsg>)
 
     
 

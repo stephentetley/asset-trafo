@@ -25,9 +25,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\AbsChangeFile.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
-#load "..\src\AssetPatch\Base\Typings.fs"
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
-#load "..\src\AssetPatch\Base\QueryPatch.fs"
 #load "..\src\AssetPatch\Utilities\PatchReport.fs"
 #load "..\src\AssetPatch\Utilities\TidyChangeFile.fs"
 

@@ -24,11 +24,8 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\AbsChangeFile.fs"
 #load "..\src\AssetPatch\Base\Acronyms.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
-#load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
-#load "..\src\AssetPatch\Base\Typings.fs"
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
-#load "..\src\AssetPatch\Base\QueryPatch.fs"
 #load "..\src\AssetPatch\FlocPatch\Common.fs"
 #load "..\src\AssetPatch\FlocPatch\FuncLocPath.fs"
 #load "..\src\AssetPatch\FlocPatch\FuncLoc.fs"
@@ -39,8 +36,6 @@ open AssetPatch.Base
 open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.Parser
 open AssetPatch.Base.Printer
-open AssetPatch.Base.Typings
-open AssetPatch.Base.QueryPatch
 open AssetPatch.FlocPatch.FlocPatchMonad
 
 
@@ -49,16 +44,6 @@ let outputDirectory () : string =
 
 let outputFile (relFileName : string) : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
-
-let typing01 () = 
-    let source = @"G:\work\Projects\assets\asset_patch\file_download_edm\Equipment.txt"
-    match readEquiChangeFile source with
-    | Error msg -> Error msg
-    | Ok patch -> 
-        runQuery patch 
-            <| askEquiSelectors () 
-
-
 
 
 

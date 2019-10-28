@@ -155,7 +155,7 @@ module Parser =
                      DateTime = date }
         }
 
-    let parseChangeFile () : ChangeFileParser<ChangeFile<'T>> = 
+    let parseChangeFile () : ChangeFileParser<ChangeFile> = 
         parse {
             let! fileHeader = pFileHeader
             let! selection = pSelection
@@ -168,7 +168,7 @@ module Parser =
         }
 
 
-    let readChangeFile (inputFile : string) : Result<ChangeFile<'T>, string> = 
+    let readChangeFile (inputFile : string) : Result<ChangeFile, string> = 
         match runParserOnFile (parseChangeFile ()) () inputFile Text.Encoding.UTF8 with
         | Failure (str,_,_) -> Result.Error str
         | Success (ans,_,_) -> Result.Ok ans

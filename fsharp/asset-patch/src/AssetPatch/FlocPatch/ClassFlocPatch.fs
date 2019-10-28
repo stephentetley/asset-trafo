@@ -13,7 +13,6 @@ module ClassFlocPatch =
 
     open AssetPatch.Base
     open AssetPatch.Base.ChangeFile
-    open AssetPatch.Base.Typings
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.FlocPatch.Common
 
@@ -76,7 +75,7 @@ module ClassFlocPatch =
 
     let makeClassFlocPatch (user : string) 
                             (timestamp : System.DateTime)
-                            (funcLocs : FuncLoc list) : CFCompiler<FuncLocChangeFile> = 
+                            (funcLocs : FuncLoc list) : CFCompiler<ChangeFile> = 
         compile {
             let rows = 
                 funcLocs 
