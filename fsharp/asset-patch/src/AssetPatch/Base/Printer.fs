@@ -30,6 +30,7 @@ module Printer =
         comment <|
             match source with
             | Download -> "Download"
+            | Upload -> "Upload"
             
     let dataModel (source : DataModel) : Doc = 
         let dmname = 

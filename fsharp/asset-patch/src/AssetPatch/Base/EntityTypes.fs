@@ -8,14 +8,13 @@ namespace AssetPatch.Base
 module EntityTypes =
     
     open AssetPatch.Base
+    open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.FuncLocPath
    
-    type FuncLocSegment = 
-      { Name : string
-        Description : string
-        ObjectType: string 
-      }
+    // ************************************************************************
+    // FuncLoc
 
+    
 
 
     // The other way is to look at differences to an existing root funcloc
@@ -52,9 +51,75 @@ module EntityTypes =
                       }
              | _,_,_ -> None
 
+
+    type FuncLocSegment = 
+        { Name : string
+          Description : string
+          ObjectType: string 
+        }
+
+
     let extendFuncLoc (segment : FuncLocSegment) 
                       (floc: FuncLoc) : FuncLoc = 
         { Path = FuncLocPath.extend segment.Name floc.Path
           Description = segment.Description
           ObjectType = segment.Description
           Attributes = floc.Attributes }
+
+
+
+    // ************************************************************************
+    // ClassFloc
+
+
+    type ClassFloc = 
+      { FuncLoc : FuncLocPath
+        Class : string
+        ClassType : int
+        ClassNumber : int
+        Status : int
+      }
+
+    // ************************************************************************
+    // ValuaFloc
+
+    type ValuaFloc = 
+      { FuncLoc : FuncLocPath
+        ClassType : int
+        CharacteristicID : string
+        CharacteristicValue : string
+        Attributes : AssocList<string, string>
+      }
+
+
+    // ************************************************************************
+    // Equi
+
+    type Equi = 
+      { EquipmentNumber : IntegerString
+        Description : string
+        Attributes : AssocList<string, string>
+      }
+
+    // ************************************************************************
+    // ClassEqui
+    
+    type ClassEqui = 
+        { EquipmentNumber : IntegerString
+          Class : string
+          ClassType : int
+          ClassNumber : int
+          Status : int
+        }
+
+    // ************************************************************************
+    // ValuaEqui
+
+    type ValuaEqui = 
+        { EquipmentNumber : IntegerString
+          ClassType : int
+          CharacteristicID : string
+          CharacteristicValue : string
+          Attributes : AssocList<string, string>
+        }
+

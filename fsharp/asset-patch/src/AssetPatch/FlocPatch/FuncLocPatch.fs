@@ -43,7 +43,8 @@ module FuncLocPatch =
         ; "OBJTYFLOC"       // Object Type
         ; "EQART"           // Object Type        
         ; "PPSIDI"          // PP WrkCenter origin
-        ; "BEBERI"          // Plant Section Origin               
+        ; "BEBERI"          // Plant Section Origin   
+        ; "INBDT"           // Start-up date
         ; "STATTEXT"        // Status
         ; "USTW_FLOC"       // Status of an object
         ; "TPLKZ_FLC"       // Structure indicator

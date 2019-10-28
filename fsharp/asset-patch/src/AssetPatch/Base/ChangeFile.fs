@@ -22,7 +22,7 @@ module ChangeFile =
 
     
     type FileType = 
-        | Download
+        | Download | Upload
 
     type DataModel = 
         | U1

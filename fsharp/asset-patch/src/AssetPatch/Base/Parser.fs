@@ -56,7 +56,9 @@ module Parser =
 
     let pFileType : ChangeFileParser<FileType> =
         let inner = 
-            choice [ token "Download" >>. preturn Download ]
+            choice [ token "Download" >>. preturn Download 
+                   ; token "Upload" >>. preturn Upload
+                   ]
         directive inner
 
     let pDataModel : ChangeFileParser<DataModel> =

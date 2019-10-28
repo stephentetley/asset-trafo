@@ -67,8 +67,11 @@ module ChangeFileReport =
 
 
     let fileType (source : FileType) : Markdown = 
-       match source with
-       | Download -> "Download" |> rawtext |> doubleAsterisks |> markdownText
+        let value = 
+            match source with
+            | Download -> "Download" 
+            | Upload -> "Upload"
+        value |> rawtext |> doubleAsterisks |> markdownText
 
     let dataModel (source : DataModel) : Text = 
         match source with
