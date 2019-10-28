@@ -4,42 +4,37 @@
 namespace AssetPatch.Base
 
 
-[<AutoOpen>]
-module AbsPatchType =
+
+module AbsChangeFile =
 
     open AssetPatch.Base
+    open AssetPatch.Base.Common
     open AssetPatch.Base.ChangeFile
    
 
-    type AbsPatch = 
+    type AbsChangeFile = 
         { Header : FileHeader 
           Rows : AssocList<string, string> list }
 
-        member x.Prioritize (keys : string list) : AbsPatch = 
+        member x.Prioritize (keys : string list) : AbsChangeFile = 
             let rows1 = x.Rows |> List.map (AssocList.prioritize keys) 
             { Header = x.Header; Rows = rows1 }
 
-        member x.Restrict (keys : string list) : AbsPatch = 
+        member x.Restrict (keys : string list) : AbsChangeFile = 
             let rows1 = x.Rows |> List.map (AssocList.removes keys) 
             { Header = x.Header; Rows = rows1 }
 
-
-[<RequireQualifiedAccess>]
-module AbsPatch =
     
-    open AssetPatch.Base.Common
-    open AssetPatch.Base.ChangeFile
-    
-    let ofPatchFile (patch : ChangeFile<'any>) : AbsPatch = 
-        { Header = patch.Header 
-          Rows = patch.RowAssocs
+    let ofChangeFile (changeFile : ChangeFile<'any>) : AbsChangeFile = 
+        { Header = changeFile.Header 
+          Rows = changeFile.RowAssocs
         }
 
 
-    let prioritize (keys : string list) (patch : AbsPatch) : AbsPatch = 
+    let prioritize (keys : string list) (patch : AbsChangeFile) : AbsChangeFile = 
         patch.Prioritize keys
 
-    let restrict (keys : string list) (patch : AbsPatch) : AbsPatch = 
+    let restrict (keys : string list) (patch : AbsChangeFile) : AbsChangeFile = 
         patch.Restrict keys
 
 
@@ -71,14 +66,14 @@ module AbsPatch =
         | row1 :: _ -> row1 |> AssocList.keys |> HeaderRow |> Some
 
 
-    let toPatchFile (absPatch : AbsPatch) : Result<ChangeFile<'any> , ErrMsg> = 
-        match selectionIds absPatch.Header.EntityType absPatch.Rows, 
-                headerRow absPatch.Rows with
+    let toChangeFile (absChangeFile : AbsChangeFile) : Result<ChangeFile<'any> , ErrMsg> = 
+        match selectionIds absChangeFile.Header.EntityType absChangeFile.Rows, 
+                headerRow absChangeFile.Rows with
         | Some selIds, Some header -> 
-            Ok { Header = absPatch.Header
+            Ok { Header = absChangeFile.Header
                  Selection = selIds
                  HeaderRow = header
-                 DataRows = List.map DataRow.FromAssocList absPatch.Rows
+                 DataRows = List.map DataRow.FromAssocList absChangeFile.Rows
                  }
-        | None, _ -> Error "AbsPatch - could not extract selection ids"
-        | _, None -> Error "AbsPatch - could not extract header row"
+        | None, _ -> Error "AbsChangeFile - could not extract selection ids"
+        | _, None -> Error "AbsChangeFile - could not extract header row"

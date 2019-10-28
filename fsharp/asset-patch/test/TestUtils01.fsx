@@ -22,7 +22,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Common.fs"
 #load "..\src\AssetPatch\Base\ChangeFile.fs"
 #load "..\src\AssetPatch\Base\Acronyms.fs"
-#load "..\src\AssetPatch\Base\AbsPatch.fs"
+#load "..\src\AssetPatch\Base\AbsChangeFile.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\Typings.fs"

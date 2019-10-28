@@ -16,10 +16,10 @@ module TidyChangeFile =
                         (sourceFile: string)
                         (destFile : string) : Result<unit, ErrMsg> =
         let transform = 
-            AbsPatch.ofPatchFile 
-                >> AbsPatch.prioritize priorities 
-                >> AbsPatch.restrict removes
-                >> AbsPatch.toPatchFile
+            AbsChangeFile.ofChangeFile 
+                >> AbsChangeFile.prioritize priorities 
+                >> AbsChangeFile.restrict removes
+                >> AbsChangeFile.toChangeFile
         try 
             readChangeFile sourceFile
                 |> Result.bind transform
