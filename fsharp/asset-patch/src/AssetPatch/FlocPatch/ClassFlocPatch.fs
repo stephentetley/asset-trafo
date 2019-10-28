@@ -15,6 +15,7 @@ module ClassFlocPatch =
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.FlocPatch.Common
+    open AssetPatch.FlocPatch.FunctionalLocation
 
     type private Env = Unit
     type CFCompiler<'a> = CompilerMonad<'a, Env>
@@ -75,7 +76,7 @@ module ClassFlocPatch =
 
     let makeClassFlocPatch (user : string) 
                             (timestamp : System.DateTime)
-                            (funcLocs : FuncLoc list) : CFCompiler<ChangeFile> = 
+                            (funcLocs : FunctionalLocation list) : CFCompiler<ChangeFile> = 
         compile {
             let rows = 
                 funcLocs 

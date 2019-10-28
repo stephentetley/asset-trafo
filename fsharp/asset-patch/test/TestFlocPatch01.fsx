@@ -28,7 +28,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
 #load "..\src\AssetPatch\FlocPatch\Common.fs"
 #load "..\src\AssetPatch\FlocPatch\FuncLocPath.fs"
-#load "..\src\AssetPatch\FlocPatch\FuncLoc.fs"
+#load "..\src\AssetPatch\FlocPatch\FunctionalLocation.fs"
 #load "..\src\AssetPatch\FlocPatch\FuncLocPatch.fs"
 #load "..\src\AssetPatch\FlocPatch\ClassFlocPatch.fs"
 #load "..\src\AssetPatch\FlocPatch\FlocPatchMonad.fs"

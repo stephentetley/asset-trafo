@@ -3,7 +3,7 @@
 
 namespace AssetPatch.Utilities
 
-module PatchReport =
+module ChangeFileReport =
 
     open System.IO 
 
@@ -177,13 +177,14 @@ module PatchReport =
                        (htmlFileName : string) 
                        (patch : ChangeFile) : Result<unit, string> = 
         let doc = patchToMarkdown patch 
-        writeHtml5Markdown "Patch Summary" pandocOpts outputDirectory htmlFileName doc
+        let title = sprintf "Patch Summary (%s)" (patch.Header.EntityType.ToString())
+        writeHtml5Markdown title pandocOpts outputDirectory htmlFileName doc
 
 
     
-    let patchReport (pathToCssSytlesheet : string) 
-                    (outputDirectory : string) 
-                    (inputPatch : string)  : Result<unit, string> = 
+    let changeFileReport (pathToCssSytlesheet : string) 
+                         (outputDirectory : string) 
+                         (inputPatch : string)  : Result<unit, string> = 
         let outputHtmlFile = 
             Path.GetFileName(inputPatch) 
                 |> fun s -> Path.ChangeExtension(path = s, extension = "html")

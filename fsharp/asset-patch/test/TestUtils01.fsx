@@ -26,10 +26,10 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
-#load "..\src\AssetPatch\Utilities\PatchReport.fs"
+#load "..\src\AssetPatch\Utilities\ChangeFileReport.fs"
 #load "..\src\AssetPatch\Utilities\TidyChangeFile.fs"
 
-open AssetPatch.Utilities.PatchReport
+open AssetPatch.Utilities.ChangeFileReport
 open AssetPatch.Utilities.TidyChangeFile
 
 
@@ -41,12 +41,12 @@ let outputFile (relFileName : string) : string =
 
 
 
-let patchReport01 () = 
+let changeFileReport01 () = 
     let pathToCss = @"..\..\..\..\..\libs\markdown-css-master\github.css"
     let sources = 
         System.IO.Directory.GetFiles( path = @"G:\work\Projects\assets\asset_patch\file_download_edm"
                                     , searchPattern = "*.txt")
-    Array.iter (patchReport pathToCss (outputDirectory ()) >> ignore) sources
+    Array.iter (changeFileReport pathToCss (outputDirectory ()) >> ignore) sources
 
 
 let tidyChangeFile01 () = 

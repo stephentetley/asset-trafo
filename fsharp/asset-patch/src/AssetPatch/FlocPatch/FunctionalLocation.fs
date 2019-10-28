@@ -4,11 +4,11 @@
 namespace AssetPatch.FlocPatch
 
 
-[<AutoOpen>]
-module FuncLocType =
+module FunctionalLocation =
     
     open AssetPatch.Base
-    open AssetPatch.FlocPatch
+    open AssetPatch.Base.Parser
+    open AssetPatch.FlocPatch.FuncLocPath
     
     /// The other way is to look at differences to an existing root funcloc
     /// Then only 8 fields change:
@@ -26,7 +26,7 @@ module FuncLocType =
     
     
     
-    type FuncLoc = 
+    type FunctionalLocation = 
         { 
             FuncLocPath : FuncLocPath
             Description : string 
@@ -36,7 +36,7 @@ module FuncLocType =
             
         member x.Level with get () : int = x.FuncLocPath.Level
 
-        static member Initial (attributes : AssocList<string, string>) : FuncLoc option = 
+        static member Initial (attributes : AssocList<string, string>) : FunctionalLocation option = 
             match AssocList.tryFind "FUNCLOC" attributes, 
                     AssocList.tryFind "TXTMI" attributes, 
                     AssocList.tryFind "EQART" attributes with
@@ -48,26 +48,15 @@ module FuncLocType =
                       }
              | _,_,_ -> None
 
-                
-            
-    
-    
-[<RequireQualifiedAccess>]
-module FuncLoc =
-    
-    open FSharp.Core
 
-    open AssetPatch.Base.Parser
-
-
-    let getRootFromPathFile (rootCode : string) (filePath : string) : Result<FuncLoc, string> = 
+    let getRootFromPathFile (rootCode : string) (filePath : string) : Result<FunctionalLocation, string> = 
         match readChangeFile filePath with
         | Result.Error msg -> failwith msg
         | Result.Ok ans ->
             match ans.TryFindAssoc (fun key value -> key = "FUNCLOC" && value = rootCode) with
             | None -> Result.Error (sprintf "Could not find root %s" rootCode)
             | Some ans -> 
-                match FuncLoc.Initial ans with 
+                match FunctionalLocation.Initial ans with 
                 | Some floc -> Result.Ok floc
                 | None -> Result.Error "Error reading FuncLoc attributes"
 
@@ -76,7 +65,7 @@ module FuncLoc =
     let extend (itemCode : string) 
                 (description : string) 
                 (objType: string) 
-                (floc: FuncLoc) : FuncLoc = 
+                (floc: FunctionalLocation) : FunctionalLocation = 
         { FuncLocPath = FuncLocPath.extend itemCode floc.FuncLocPath
           Description = description
           ObjectType = objType
