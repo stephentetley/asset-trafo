@@ -12,9 +12,9 @@ module FuncLocPatch =
 
     open AssetPatch.Base
     open AssetPatch.Base.ChangeFile
+    open AssetPatch.Base.FuncLocPath
     open AssetPatch.Base.CompilerMonad
-    open AssetPatch.FlocPatch.Common
-    open AssetPatch.FlocPatch.FuncLocPath
+    open AssetPatch.FlocPatch.Common    
     open AssetPatch.FlocPatch.FunctionalLocation
 
 

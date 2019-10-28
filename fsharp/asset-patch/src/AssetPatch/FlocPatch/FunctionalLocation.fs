@@ -7,8 +7,9 @@ namespace AssetPatch.FlocPatch
 module FunctionalLocation =
     
     open AssetPatch.Base
+    open AssetPatch.Base.FuncLocPath
     open AssetPatch.Base.Parser
-    open AssetPatch.FlocPatch.FuncLocPath
+    
     
     /// The other way is to look at differences to an existing root funcloc
     /// Then only 8 fields change:
