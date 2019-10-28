@@ -35,13 +35,12 @@ module PatchReport =
 
     let writeHtml5Markdown (pageTitle : string)
                             (pandocOpts : PandocOptions)
-                            (outputHtmlFile : string) 
+                            (outputDirectory : string) 
+                            (htmlFileName : string) 
                             (report: Markdown) : Result<unit, string> = 
-        
-        let mdFileAbsPath = Path.ChangeExtension(outputHtmlFile, "md") 
-        let mdFileName = Path.GetFileName(mdFileAbsPath)
-        let htmlFileName = Path.GetFileName(outputHtmlFile)
-        let outputDirectory = Path.GetDirectoryName(outputHtmlFile)
+        let mdFileName = Path.ChangeExtension(htmlFileName, "md")       
+        let mdFileAbsPath =
+            Path.Combine(outputDirectory, mdFileName)
         /// Need a pretty wide page width...
         writeMarkdown 260 report mdFileAbsPath
         let retCode = 
@@ -163,26 +162,24 @@ module PatchReport =
             ^!!^ emptyMarkdown
 
     let pandocGenHtml (pandocOpts : PandocOptions)
-                       (outputHtmlFile : string) 
+                       (outputDirectory : string)
+                       (htmlFileName : string) 
                        (patch : PatchFile<'T>) : Result<unit, string> = 
         let doc = patchToMarkdown patch 
-        writeHtml5Markdown "Patch Summary" pandocOpts outputHtmlFile doc
+        writeHtml5Markdown "Patch Summary" pandocOpts outputDirectory htmlFileName doc
 
 
     
     let patchReport (pathToCssSytlesheet : string) 
-                    (outputFile : string option) 
+                    (outputDirectory : string) 
                     (inputPatch : string)  : Result<unit, string> = 
         let outputHtmlFile = 
-            match outputFile with
-            | Some path -> path
-            | None -> 
-                Path.GetFileName(inputPatch) 
-                    |> fun s -> Path.ChangeExtension(path = s, extension = "html")
+            Path.GetFileName(inputPatch) 
+                |> fun s -> Path.ChangeExtension(path = s, extension = "html")
         match readPatch inputPatch with
         | Result.Error msg -> Result.Error msg
         | Result.Ok ans -> 
             let opts = pandocHtmlDefaultOptions pathToCssSytlesheet
-            pandocGenHtml opts outputHtmlFile ans
+            pandocGenHtml opts outputDirectory outputHtmlFile ans
             
         

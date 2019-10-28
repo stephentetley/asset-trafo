@@ -46,13 +46,13 @@ let outputFile (relFileName : string) : string =
 let patchReport01 () = 
     let pathToCss = @"..\..\..\..\..\libs\markdown-css-master\github.css"
     let sources = 
-        System.IO.Directory.GetFiles( path = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm"
+        System.IO.Directory.GetFiles( path = @"G:\work\Projects\assets\asset_patch\file_download_edm"
                                     , searchPattern = "*.txt")
-    Array.iter (patchReport pathToCss None >> ignore) sources
+    Array.iter (patchReport pathToCss (outputDirectory ()) >> ignore) sources
 
 
 let tidyPatch01 () = 
-    let src = @"G:\work\Projects\asset_sync\asset_patch\file_download_edm\ACO01_funcloc_file_download.txt"
+    let src = @"G:\work\Projects\assets\asset_patch\file_download_edm\ACO01_funcloc_file_download.txt"
     let dest = outputFile "ACO01_funcloc_tidy.txt"
     tidyPatch ["FUNCLOC"; "TXTMI"] [] src dest
 
