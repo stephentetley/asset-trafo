@@ -26,48 +26,51 @@ module ClassFlocPatch =
         runCompiler () () action
             |> Result.map fst
     
-    type FlocClass = 
+
+    /// CLASSTYPE is 002 for Equi or 003 for Floc so don't store 
+    /// this in the object.
+    type S4Class = 
         { ClassName : string
-          ClassType : int
-          ClInt : int
+          ClInt : uint32
         }
 
-    let flocClassToAssocs (flocClass : FlocClass) : AssocList<string, string> =         
-        [ ("CLASS", flocClass.ClassName)
-        ; ("CLASSTYPE", sprintf "%03i" flocClass.ClassType)
-        ; ("CLINT", sprintf "%010i" flocClass.ClInt)
+    let s4ClassToAssocs (entityType: EntityType) (s4Class : S4Class) : AssocList<string, string> =         
+        let classtype = 
+            match entityType with
+            | FuncLoc | ClassFloc | ValuaFloc -> "003"
+            | Equi | ClassEqui | ValuaEqui -> "002"
+        [ ("CLASS",     s4Class.ClassName)
+        ; ("CLASSTYPE", classtype)
+        ; ("CLINT",     IntegerString.Create(10, s4Class.ClInt).Number)
         ] |> AssocList.ofList 
 
-    let clAIB_REFERENCE : FlocClass =
+    let clAIB_REFERENCE : S4Class =
         { ClassName = "AIB_REFERENCE"
-          ClassType = 3
-          ClInt = 850}
+          ClInt = 850u }
     
-    let clEAST_NORTH : FlocClass =
+    let clEAST_NORTH : S4Class =
         { ClassName = "EAST_NORTH"
-          ClassType = 3
-          ClInt = 379 }
+          ClInt = 379u }
 
-    let clUNICLASS_CODE : FlocClass =
+    let clUNICLASS_CODE : S4Class =
         { ClassName = "UNICLASS_CODE"
-          ClassType = 3
-          ClInt = 905 }
+          ClInt = 905u }
 
-    let makeClassAssocs (flocClass : FlocClass) (funcLocs : string list) : AssocList<string, string> list = 
+    let makeClassAssocs (s4Class : S4Class) (funcLocs : string list) : AssocList<string, string> list = 
         let make1 funcLoc = 
-            flocClassToAssocs flocClass 
+           s4ClassToAssocs ClassFloc s4Class 
                 |> AssocList.cons "FUNCLOC" funcLoc
                 |> fun xs -> AssocList.snoc xs "CLSTATUS1" "1"
         List.map make1 funcLocs
 
-    let makeAllAssocs (flocClasses : FlocClass list) (funcLocs : string list) : AssocList<string, string> list = 
+    let makeAllAssocs (flocClasses : S4Class list) (funcLocs : string list) : AssocList<string, string> list = 
         List.map (fun x -> makeClassAssocs x funcLocs) flocClasses 
             |> List.concat
 
 
     /// TODO - this is a simplification, some flocs will require 
     /// different classes...
-    let sampleFlocClasses = 
+    let sampleS4Classes = 
         [ clAIB_REFERENCE 
         ; clEAST_NORTH
         ; clUNICLASS_CODE
@@ -82,7 +85,6 @@ module ClassFlocPatch =
                 funcLocs 
                     |> List.sortBy (fun x -> x.Path)
                     |> List.map (fun x -> x.Path.ToString())
-                    |> makeAllAssocs sampleFlocClasses
-
+                    |> makeAllAssocs sampleS4Classes
             return! makeChangeFile ClassFloc user timestamp rows
         }

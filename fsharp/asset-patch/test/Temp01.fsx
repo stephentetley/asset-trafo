@@ -1,6 +1,6 @@
 ﻿#r "netstandard"
 #r "System.Text.Encoding.dll"
-open System.IO
+open System.Text.RegularExpressions
 
 #I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\netstandard1.6"
 #r "FParsec"
@@ -30,6 +30,9 @@ open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.EntityTypes
 
+let endsInLoop (s : string) : bool = 
+    Regex.IsMatch(input = s, pattern = "Loop$")
+
 
 /// Apply a rewrite to ``TXTMI - Description (medium text)``
 let temp01 () = 
@@ -37,8 +40,10 @@ let temp01 () =
     
     execCompiler () () <| 
         compile {
-            let! rows = readEquiChangeFile source
-            do! forMz rows (fun row -> printfn "%s" (row.EquipmentNumber.Number); mreturn())
+            let! rows = 
+                readEquiChangeFile source 
+                    |>> List.filter (fun x -> not (endsInLoop x.Description))
+            do! forMz rows (fun row -> printfn "%s" (row.Description); mreturn())
             return ()
         }
 

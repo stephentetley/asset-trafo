@@ -167,7 +167,7 @@ module EntityTypes =
 
     let assocsToEqui (attributes : AssocList<string, string>) : Result<Equi, ErrMsg> = 
         match AssocList.tryFind3 "EQUI" "TXTMI" "TPLN_EILO" attributes with
-        | Some (number, funcloc, desc) -> 
+        | Some (number, desc, funcloc) -> 
             Ok { EquipmentNumber = IntegerString.OfString number
                  Description = desc
                  FuncLoc = FuncLocPath.Create funcloc 
@@ -244,7 +244,7 @@ module EntityTypes =
                  Attributes = attributes }
          | None -> Error "Could not find required fields for a ValuaEqui"
 
-    /// Note - CharacteristicValue is used three times.
+    /// Note - CharacteristicValue is used twice.
     let valuaEquiToAssocs (valuaEqui: ValuaEqui) : AssocList<string, string> = 
         valuaEqui.Attributes
             |> AssocList.update "EQUI"          valuaEqui.EquipmentNumber.Number
@@ -252,7 +252,7 @@ module EntityTypes =
             |> AssocList.update "CHARID"        valuaEqui.CharacteristicID
             |> AssocList.update "ATWRT"         valuaEqui.CharacteristicValue
             |> AssocList.update "TEXTBEZ"       valuaEqui.CharacteristicValue
-            |> AssocList.update "ATFLV"         valuaEqui.CharacteristicValue
+            // |> AssocList.update "ATFLV"         valuaEqui.CharacteristicValue
 
     let readValuaEquiChangeFile (inputFile : string) : CompilerMonad<ValuaEqui list, 'env, 'acc> = 
         compile { 

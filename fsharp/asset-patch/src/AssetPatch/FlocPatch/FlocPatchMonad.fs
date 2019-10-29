@@ -10,9 +10,9 @@ module FlocPatchMonad =
 
     open AssetPatch.Base
     open AssetPatch.Base.Common
-    open AssetPatch.Base.EntityTypes
-    open AssetPatch.Base.Parser
+    open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.Printer
+    open AssetPatch.Base.EntityTypes
     open AssetPatch.FlocPatch.Common
     open AssetPatch.FlocPatch.FuncLocPatch
     open AssetPatch.FlocPatch.ClassFlocPatch
@@ -22,6 +22,8 @@ module FlocPatchMonad =
         { PathToFuncLocDownload : string
           }
 
+
+    /// TODO - FlocPatch is could be the CompilerMonad with a specific 'env and 'acc 
     /// Floc = F(unctional) Loc(action)
     /// FlocPatch is a Reader-State-Error monad to build patches - change files.
     type FlocPatch<'a> = 
@@ -93,18 +95,18 @@ module FlocPatchMonad =
 
 
     /// TODO - rewrite to use failure provided by the monad...
-    let getRootFromPathFile (rootCode : string) (filePath : string) : Result<FuncLoc, string> = 
-        match readChangeFile filePath with
-        | Result.Error msg -> failwith msg
-        | Result.Ok ans ->
-            match ans.TryFindAssoc (fun key value -> key = "FUNCLOC" && value = rootCode) with
-            | None -> Result.Error (sprintf "Could not find root %s" rootCode)
-            | Some attrs -> assocsToFuncLoc attrs 
-
+    let getRootFromPathFile (rootCode : string) 
+                            (filePath : string) : CompilerMonad<FuncLoc, 'env, 'acc> = 
+        compile {
+            let! flocs = readFuncLocChangeFile filePath
+            match flocs |> List.tryFind (fun (row : FuncLoc)-> row.Path.ToString() = rootCode) with
+            | None -> return! throwError (sprintf "Could not find root %s" rootCode)
+            | Some floc -> return floc
+        }
 
     let root (flocCode : string) : FlocPatch<FuncLoc> = 
         FlocPatch <| fun env acc -> 
-            match getRootFromPathFile flocCode env.PathToFuncLocDownload with
+            match evalCompiler () () <| getRootFromPathFile flocCode env.PathToFuncLocDownload with
             | Error msg -> Error msg
             | Ok root -> Ok (root, acc)
 

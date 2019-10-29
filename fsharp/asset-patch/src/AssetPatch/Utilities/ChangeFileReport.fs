@@ -134,8 +134,9 @@ module ChangeFileReport =
         makeTableWithHeadings headings rows |> gridTable
 
     let dataRows (patch : ChangeFile) : Markdown = 
+        let rowCount = patch.RowAssocs.Length
         let makeTable ix (rowAssoc : AssocList<string, string>) = 
-            h2 (text "Row" ^+^ int32Md (ix+1))
+            h2 (text "Row" ^+^ int32Md (ix+1) ^+^ text "of" ^+^ int32Md rowCount)
                 ^!!^ dataAssocTable patch.Header.EntityType rowAssoc
                 ^!!^ linkToTop
         List.mapi makeTable patch.RowAssocs |> vsep

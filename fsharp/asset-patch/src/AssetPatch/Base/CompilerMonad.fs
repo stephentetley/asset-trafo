@@ -610,3 +610,22 @@ module CompilerMonad =
         mapiMz fn xs
 
 
+    /// Implemented in CPS 
+    let filterM (mf: 'a -> CompilerMonad<bool, 'env, 'acc>) 
+                (source : 'a list) : CompilerMonad<'a list, 'env, 'acc> = 
+        CompilerMonad <| fun env accum -> 
+            let rec work (xs : 'a list)
+                         (ac : 'acc)
+                         (fk : ErrMsg -> Result<'a list * 'acc, ErrMsg>) 
+                         (sk : 'a list -> 'acc -> Result<'a list * 'acc, ErrMsg>) = 
+                match xs with
+                | [] -> sk [] ac
+                | y :: ys -> 
+                    match apply1 (mf y) env ac with
+                    | Error msg -> fk msg
+                    | Ok (test, ac1)  -> 
+                        work ys ac1 fk (fun vs ac2 ->
+                        let vs1 = if test then (y::vs)  else vs
+                        sk vs1 ac2)
+            work source accum (fun msg -> Error msg) (fun ans ac -> Ok (ans, ac))
+
