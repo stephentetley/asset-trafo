@@ -178,7 +178,3 @@ module Parser =
         | Failure (str,_,_) -> Result.Error str
         | Success (ans,_,_) -> Result.Ok ans
 
-    //let readFuncLocsChangeFile (inputFile : string) : CompilerMonad<FuncLoc list, ErrMsg> = 
-    //    readChangeFile inputFile 
-    //        |> Result.map ofChangeFile
-    //        |> Result.bind (fun x -> x.Rows |> Result. assocsToFuncLoc)

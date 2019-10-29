@@ -18,24 +18,28 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Addendum.fs"
 #load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\Common.fs"
+#load "..\src\AssetPatch\Base\CompilerMonad.fs"
 #load "..\src\AssetPatch\Base\ChangeFile.fs"
 #load "..\src\AssetPatch\Base\Acronyms.fs"
 #load "..\src\AssetPatch\Base\AbsChangeFile.fs"
 #load "..\src\AssetPatch\Base\FuncLocPath.fs"
-#load "..\src\AssetPatch\Base\EntityTypes.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
+#load "..\src\AssetPatch\Base\EntityTypes.fs"
 open AssetPatch.Base.ChangeFile
-open AssetPatch.Base.Parser
-open AssetPatch.Base.Printer
+open AssetPatch.Base.CompilerMonad
+open AssetPatch.Base.EntityTypes
 
 
 /// Apply a rewrite to ``TXTMI - Description (medium text)``
 let temp01 () = 
     let source = @"G:\work\Projects\assets\asset_patch\file_download_edm\equi_hydroranger_200.txt"
-    match readChangeFile source with
-    | Result.Error msg -> failwith msg
-    | Result.Ok ans ->
-        ans.DataRows 
-            |> List.iter (fun row -> printfn "%s" (row.GetItem 0))
+    
+    execCompiler () () <| 
+        compile {
+            let! rows = readEquiChangeFile source
+            do! forMz rows (fun row -> printfn "%s" (row.EquipmentNumber.Number); mreturn())
+            return ()
+        }
+
 
