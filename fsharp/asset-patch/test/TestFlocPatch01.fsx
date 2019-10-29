@@ -21,10 +21,10 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\Common.fs"
 #load "..\src\AssetPatch\Base\ChangeFile.fs"
+#load "..\src\AssetPatch\Base\Acronyms.fs"
 #load "..\src\AssetPatch\Base\AbsChangeFile.fs"
 #load "..\src\AssetPatch\Base\FuncLocPath.fs"
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
-#load "..\src\AssetPatch\Base\Acronyms.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
@@ -32,7 +32,6 @@ open FSharp.Core
 #load "..\src\AssetPatch\FlocPatch\FuncLocPatch.fs"
 #load "..\src\AssetPatch\FlocPatch\ClassFlocPatch.fs"
 #load "..\src\AssetPatch\FlocPatch\FlocPatchMonad.fs"
-open AssetPatch.Base
 open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.Parser
 open AssetPatch.Base.Printer

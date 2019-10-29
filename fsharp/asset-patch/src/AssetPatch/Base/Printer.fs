@@ -65,21 +65,14 @@ module Printer =
                          
 
 
-    let selectionId (source : SelectionId) : Doc = 
-        comment <| 
-            match source with
-            | EquiEq num -> sprintf "EQUI EQ | %s |" num.Number
-            | FuncLocEq floc -> sprintf "FUNCLOC EQ | %s |" floc
+    let selectionItem (source : Selection) : Doc = 
+        comment <| source.Line
 
-    let selection (items : SelectionId list) : Doc = 
+    let selection (items : Selection list) : Doc = 
         comment "Selection:" 
-            ^!^ vcat (List.map selectionId items)
+            ^!^ vcat (List.map selectionItem items)
        
-    let descriptiveHeaderRow (entityType : EntityType) 
-                             (headers : HeaderRow) : Doc = 
-        let decode = decodeAcronym entityType >> Option.defaultValue ""
-        let titles = headers.Columns |> List.map  (decode >> text)
-        text "*" ^^ punctuate tab titles
+
 
 
     let headerRow (headers : HeaderRow) : Doc = 
@@ -97,7 +90,7 @@ module Printer =
 
     let fileHeader (header : FileHeader) : Doc = 
         vcat 
-            [ fileType header.PatchType
+            [ fileType header.FileType
             ; dataModel header.DataModel
             ; entityType header.EntityType
             ; variant header.Variant
@@ -106,12 +99,14 @@ module Printer =
 
     let changeFileToString (changeFile : ChangeFile) : string = 
         let d1 = 
-            fileHeader changeFile.Header
-                ^!^ selection changeFile.Selection
-                ^!^ descriptiveHeaderRow changeFile.Header.EntityType changeFile.HeaderRow
-                ^!^ headerRow changeFile.HeaderRow
-                ^!^ dataRows changeFile.DataRows
-                ^!^ empty
+            [ fileHeader changeFile.Header |> Some
+            ; Option.map selection changeFile.Selection
+            ; Option.map headerRow changeFile.HeaderDescriptions
+            ; headerRow changeFile.HeaderRow |> Some
+            ; dataRows changeFile.DataRows |> Some
+            ]
+                |> List.choose id
+                |> vcat 
         render d1
 
     let writeChangeFile (outpath : string) 

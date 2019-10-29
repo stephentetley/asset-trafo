@@ -1,82 +1,41 @@
-﻿// Copyright (c) Stephen Tetley 2019
-
-#r "netstandard"
+﻿#r "netstandard"
 #r "System.Text.Encoding.dll"
 open System.IO
 
+#I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\netstandard1.6"
+#r "FParsec"
+#r "FParsecCS"
+
+
+open FSharp.Core
+
+#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
+#r "SLFormat.dll"
+
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20191014\lib\netstandard2.0"
+#r "MarkdownDoc.dll"
+
 #load "..\src\AssetPatch\Base\Addendum.fs"
 #load "..\src\AssetPatch\Base\AssocList.fs"
-open AssetPatch.Base.Addendum
-open AssetPatch.Base
+#load "..\src\AssetPatch\Base\Common.fs"
+#load "..\src\AssetPatch\Base\ChangeFile.fs"
+#load "..\src\AssetPatch\Base\AbsChangeFile.fs"
+#load "..\src\AssetPatch\Base\FuncLocPath.fs"
+#load "..\src\AssetPatch\Base\EntityTypes.fs"
+#load "..\src\AssetPatch\Base\Acronyms.fs"
+#load "..\src\AssetPatch\Base\Parser.fs"
+#load "..\src\AssetPatch\Base\Printer.fs"
+open AssetPatch.Base.ChangeFile
+open AssetPatch.Base.Parser
+open AssetPatch.Base.Printer
 
 
-let tryFind01 () : string option = 
-    AssocList.tryFind "FUNCLOC" AssocList.empty
-
-let ofList01 () : AssocList<string,string> = 
-    AssocList.ofList [("A", "one") ; ("B", "too") ; ("C", "three")]
-        |> AssocList.update "B" "two"
-
-let cons01 () : AssocList<string,int> = 
-    AssocList.Cons("A", 12, AssocList.empty)
-
-let toList01 () : (string * int) list = 
-    AssocList.ofList [("A", 65) ; ("B", 66) ; ("C", 67)]
-        |> AssocList.toList
-
-let toListBy01 () : string list = 
-    AssocList.ofList [("A", 65) ; ("B", 66) ; ("C", 67)]
-        |> AssocList.toListBy (fun x i -> sprintf "%s:%i" x i)
-
-
-let prioritize01 () : AssocList<string, int> = 
-    AssocList.ofList [("C", 67); ("D", 68) ; ("A", 65) ; ("B", 66)]
-        |> AssocList.prioritize ["A"; "B"]
-
-
-// Typing experiments
-
-type AnyLevel = interface end
-
-
-type IParent<'T> = interface end
-
-type SiteLevel = interface end
-    
-
-type FunctionLevel = 
-    inherit SiteLevel
-
-    
-type ProcessGroupLevel = 
-    inherit FunctionLevel
-
-type ProcessLevel = 
-    inherit ProcessGroupLevel
-
-
-
-
-type Floc<'level> = Floc of string
-
-let f1 : Floc<ProcessLevel> = Floc "ACO01-EDG-LQD-RGM"
-
-let f2 : Floc<FunctionLevel> = Floc "ACO01-EDG"
-
-//let fail01 () : Bool = 
-//    f1 = f2
-
-let ok01 () : Floc<AnyLevel> list = 
-    let unwrap (fl : Floc<_>) : Floc<AnyLevel> = match f1 with Floc(x) -> Floc(x)        
-    [unwrap f1; unwrap f2]
-
-
-//let typeLevelChild (parent: Floc<'T1>) (child : Floc<'T2>) : bool when 'T2 :> 'T1  = true
-
-// ******************************
-
-
-
-
-
+/// Apply a rewrite to ``TXTMI - Description (medium text)``
+let demo03 () = 
+    let source = @"G:\work\Projects\assets\asset_patch\file_download_edm\equi_hydroranger_200.txt"
+    match readChangeFile source with
+    | Result.Error msg -> failwith msg
+    | Result.Ok ans ->
+        ans.DataRows 
+            |> List.iter (fun row -> printfn "%s" (row.GetItem 0))
 

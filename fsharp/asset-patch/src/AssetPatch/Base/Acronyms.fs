@@ -334,3 +334,9 @@ module Acronyms =
         | ClassEqui -> Map.tryFind acronym classequiColumnAcronyms
         | ValuaEqui -> Map.tryFind acronym valuaequiColumnAcronyms
 
+    let getHeaderDescriptions (entityType : EntityType) 
+                            (headers : HeaderRow) : HeaderRow = 
+        headers.Columns 
+            |> List.map (decodeAcronym entityType >> Option.defaultValue "")
+            |> List.toArray
+            |> HeaderRow

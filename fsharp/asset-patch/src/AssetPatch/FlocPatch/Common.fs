@@ -14,6 +14,7 @@ module Common =
     open AssetPatch.Base
     open AssetPatch.Base.Common
     open AssetPatch.Base.ChangeFile
+    open AssetPatch.Base.Acronyms
     open AssetPatch.Base.CompilerMonad
 
 
@@ -36,19 +37,13 @@ module Common =
         | row1 :: _ -> row1 |> AssocList.keys |> HeaderRow |> mreturn
 
 
-    /// At least one row exists and it must have field ``FUNCLOC``
-    let getSelectionIds (rows : AssocList<string, string> list) : CompilerMonad<SelectionId list, 'env> = 
-        let build1 assocs = 
-            match AssocList.tryFind "FUNCLOC" assocs with
-            | None -> None
-            | Some funcloc -> FuncLocEq funcloc |> Some        
-        mapM (liftOption << build1) rows |>> List.distinct
+
 
 
     let private makeHeader (entityType : EntityType) 
                             (user : string) 
                             (timestamp : System.DateTime) : FileHeader = 
-        { PatchType = Download 
+        { FileType = Download 
           DataModel = U1
           EntityType = entityType
           Variant = ()
@@ -61,9 +56,10 @@ module Common =
                         (rows : AssocList<string, string> list) : CompilerMonad<ChangeFile, 'env> = 
         compile {
             let! header = getHeaderRow rows
-            let! selIds = getSelectionIds rows
             return { Header = makeHeader entityType user timestamp 
-                     Selection = selIds
+                     Selection = None
+                     HeaderDescriptions = 
+                        getHeaderDescriptions entityType header |> Some
                      HeaderRow = header
                      DataRows = List.map DataRow.FromAssocList rows
                    }          

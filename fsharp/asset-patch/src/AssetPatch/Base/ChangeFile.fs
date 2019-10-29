@@ -35,10 +35,12 @@ module ChangeFile =
         | FuncLoc | ClassFloc | ValuaFloc
         | Equi | ClassEqui | ValuaEqui
 
-    type SelectionId = 
-        | EquiEq of IntegerString 
-        | FuncLocEq of string
-
+    [<Struct>]
+    type Selection = 
+        | SelectionLine of String
+        
+        member x.Line 
+            with get() : string = let (SelectionLine s) = x in s
 
     [<Struct>]
     type HeaderRow = 
@@ -107,7 +109,7 @@ module ChangeFile =
     /// Note Patch header is "common information" it does not
     /// strictly correspond to the commented out meta-data in a patch file
     type FileHeader = 
-        { PatchType : FileType 
+        { FileType : FileType 
           DataModel : DataModel
           EntityType : EntityType
           Variant : unit
@@ -118,7 +120,8 @@ module ChangeFile =
 
     type ChangeFile = 
         { Header : FileHeader
-          Selection : SelectionId list
+          Selection : (Selection list) option
+          HeaderDescriptions : HeaderRow option
           HeaderRow : HeaderRow
           DataRows : DataRow list
         }

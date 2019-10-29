@@ -110,23 +110,16 @@ module Parser =
         directive inner
     
     
-    let pSelectionId : ChangeFileParser<SelectionId> = 
-        let line1 (name : string) parser = 
-           token name >>. charToken '|' >>. parser .>> charToken '|'
-        
-        let inner =
-            choice 
-                [ line1 "FUNCLOC EQ" pFuncLoc |>> FuncLocEq 
-                ; line1 "EQUI EQ" pIntegerString |>> EquiEq 
-                ]
-        directive inner
+    let pSelectionItem : ChangeFileParser<Selection> = 
+        let line = regex ".*|.*|.*" |>> SelectionLine
+        directive line
 
     let pSelectionHeader : ChangeFileParser<unit> =
         let inner = preturn ()
         directive (named "Selection" inner)
 
-    let pSelection : ChangeFileParser<SelectionId list> = 
-        pSelectionHeader >>. many1 (attempt pSelectionId)
+    let pSelection : ChangeFileParser<Selection list> = 
+        pSelectionHeader >>. many1 (attempt pSelectionItem)
 
     let pHeaderRow : ChangeFileParser<HeaderRow> = 
         let inner = sepBy cellValue tab |>> (List.toArray >> HeaderRow)
@@ -149,7 +142,7 @@ module Parser =
             let! variant  = pVariant
             let! user = pUser
             let! date = pDateTime
-            return { PatchType = ptype
+            return { FileType = ptype
                      DataModel = dmodel
                      EntityType = etype
                      Variant = variant
@@ -160,11 +153,19 @@ module Parser =
     let parseChangeFile () : ChangeFileParser<ChangeFile> = 
         parse {
             let! fileHeader = pFileHeader
-            let! selection = pSelection
+            let! selection = 
+                match fileHeader.FileType with
+                | Download -> pSelection |>> Some
+                | _ -> preturn None
+            let! headerDescs = 
+                match fileHeader.FileType with
+                | Upload -> pHeaderRow |>> Some
+                | _ -> preturn None
             let! headerRow = pHeaderRow
             let! datas = pDataRows
             return { Header = fileHeader
                      Selection = selection
+                     HeaderDescriptions = headerDescs
                      HeaderRow = headerRow
                      DataRows = datas }
         }

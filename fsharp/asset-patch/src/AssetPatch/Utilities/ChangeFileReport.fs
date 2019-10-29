@@ -92,16 +92,6 @@ module ChangeFileReport =
         nbsp
 
 
-    let selectionIdType (selId : SelectionId) : Text = 
-        match selId with
-        | EquiEq _ -> "EQUI EQ" |> text
-        | FuncLocEq _ -> "FUNCLOC EQ" |> text
-
-    let selectionIdValue (selId : SelectionId) : Text = 
-        match selId with
-        | EquiEq x -> x.Number |> text
-        | FuncLocEq x -> text x
-
 
     let headerTable (source : FileHeader) : Markdown = 
         let specs = 
@@ -111,7 +101,7 @@ module ChangeFileReport =
         let makeRow (name : string) (value : Markdown) : TableRow = 
             [ doubleAsterisks (name |> text) |> markdownText ; value ]
         let rows : TableRow list= 
-            [ [fileType source.PatchType; nbsp]
+            [ [fileType source.FileType; nbsp]
             ; makeRow "Data Model:"     (dataModel source.DataModel |> markdownText)
             ; makeRow "Entity Type:"    (entityType source.EntityType |> markdownText)
             ; makeRow "Variant:"        (variant source.Variant)
@@ -121,23 +111,7 @@ module ChangeFileReport =
             ]
         makeTableWithoutHeadings specs rows |> gridTable
         
-    let selectionTable (source : SelectionId list) : Markdown = 
-        let specs = 
-            [ { ColumnSpec.Width = 10 ; ColumnSpec.Alignment = Alignment.AlignLeft }
-            ; { ColumnSpec.Width = 30 ; ColumnSpec.Alignment = Alignment.AlignLeft }
-            ; { ColumnSpec.Width = 60 ; ColumnSpec.Alignment = Alignment.AlignLeft }
-            ]
-        let makeRow (ix : int) (selId : SelectionId) : TableRow = 
-            [ ix + 1 |> int32Md |> markdownText 
-            ; selectionIdType selId |> markdownText 
-            ; selectionIdValue selId |> markdownText ]
-        let rows : TableRow list = 
-            List.mapi makeRow source
-        makeTableWithoutHeadings specs rows |> gridTable
 
-    let selectionSection (source : ChangeFile) : Markdown = 
-        h2 (text "Selection")
-            ^!!^ selectionTable source.Selection
 
     let dataAssocTable (entityType : EntityType) 
                        (source : AssocList<string, string>) : Markdown = 
@@ -171,7 +145,6 @@ module ChangeFileReport =
     let patchToMarkdown (patch : ChangeFile) : Markdown = 
         h1 (text "Patch Report")
             ^!!^ headerTable patch.Header
-            ^!!^ selectionSection patch
             ^!!^ dataRows patch
             ^!!^ emptyMarkdown
 

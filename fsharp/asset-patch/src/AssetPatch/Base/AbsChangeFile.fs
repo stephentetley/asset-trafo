@@ -10,6 +10,7 @@ module AbsChangeFile =
     open AssetPatch.Base
     open AssetPatch.Base.Common
     open AssetPatch.Base.ChangeFile
+    open AssetPatch.Base.Acronyms
    
 
     type AbsChangeFile = 
@@ -46,17 +47,7 @@ module AbsChangeFile =
 
 
 
-    /// At least one row exists and it must have a field 
-    /// matching ``FUNCLOC`` or ``EQUI``
-    let private selectionIds (entityType : EntityType)
-                             (rows : AssocList<string, string> list) : Option<SelectionId list> = 
-        let key = idField entityType
-        let build1 assocs = 
-            match AssocList.tryFind key assocs with
-            | None -> None
-            | Some funcloc -> FuncLocEq funcloc |> Some        
-        List.map build1 rows 
-            |> allSome
+   
 
 
     /// At least one row exists 
@@ -66,14 +57,18 @@ module AbsChangeFile =
         | row1 :: _ -> row1 |> AssocList.keys |> HeaderRow |> Some
 
 
+    /// Note - Selection data from a Dowload file is not preserved in 
+    /// an AbsChangeFile
     let toChangeFile (absChangeFile : AbsChangeFile) : Result<ChangeFile, ErrMsg> = 
-        match selectionIds absChangeFile.Header.EntityType absChangeFile.Rows, 
-                headerRow absChangeFile.Rows with
-        | Some selIds, Some header -> 
+        let header = { absChangeFile.Header with FileType = Upload }
+        
+        match headerRow absChangeFile.Rows with
+        | Some header -> 
             Ok { Header = absChangeFile.Header
-                 Selection = selIds
+                 Selection = None
+                 HeaderDescriptions = 
+                    getHeaderDescriptions absChangeFile.Header.EntityType header |> Some
                  HeaderRow = header
                  DataRows = List.map DataRow.FromAssocList absChangeFile.Rows
                  }
-        | None, _ -> Error "AbsChangeFile - could not extract selection ids"
-        | _, None -> Error "AbsChangeFile - could not extract header row"
+        | None -> Error "AbsChangeFile - could not extract header row"
