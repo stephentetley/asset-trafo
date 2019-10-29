@@ -32,6 +32,27 @@ module AbsChangeFile =
         }
 
 
+    /// At least one record / row exists 
+    let deriveHeaderRow (rows : AssocList<string, string> list) : HeaderRow option = 
+        match rows with
+        | [] -> None
+        | row1 :: _ -> row1 |> AssocList.keys |> HeaderRow |> Some
+
+    /// Note - Selection data from a Dowload file is not preserved in 
+    /// an AbsChangeFile
+    let toChangeFile (absChangeFile : AbsChangeFile) : Result<ChangeFile, ErrMsg> = 
+        match deriveHeaderRow absChangeFile.Rows with
+        | Some header -> 
+            Ok { Header = { absChangeFile.Header with FileType = Upload }
+                 Selection = None
+                 HeaderDescriptions = 
+                    getHeaderDescriptions absChangeFile.Header.EntityType header |> Some
+                 HeaderRow = header
+                 DataRows = List.map DataRow.FromAssocList absChangeFile.Rows
+                 }
+        | None -> Error "AbsChangeFile - could not extract header row"
+
+
     let prioritize (keys : string list) (patch : AbsChangeFile) : AbsChangeFile = 
         patch.Prioritize keys
 
@@ -50,25 +71,7 @@ module AbsChangeFile =
    
 
 
-    /// At least one row exists 
-    let headerRow (rows : AssocList<string, string> list) : HeaderRow option = 
-        match rows with
-        | [] -> None
-        | row1 :: _ -> row1 |> AssocList.keys |> HeaderRow |> Some
+    
 
 
-    /// Note - Selection data from a Dowload file is not preserved in 
-    /// an AbsChangeFile
-    let toChangeFile (absChangeFile : AbsChangeFile) : Result<ChangeFile, ErrMsg> = 
-        let header = { absChangeFile.Header with FileType = Upload }
-        
-        match headerRow absChangeFile.Rows with
-        | Some header -> 
-            Ok { Header = absChangeFile.Header
-                 Selection = None
-                 HeaderDescriptions = 
-                    getHeaderDescriptions absChangeFile.Header.EntityType header |> Some
-                 HeaderRow = header
-                 DataRows = List.map DataRow.FromAssocList absChangeFile.Rows
-                 }
-        | None -> Error "AbsChangeFile - could not extract header row"
+    

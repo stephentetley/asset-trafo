@@ -19,10 +19,10 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\Common.fs"
 #load "..\src\AssetPatch\Base\ChangeFile.fs"
+#load "..\src\AssetPatch\Base\Acronyms.fs"
 #load "..\src\AssetPatch\Base\AbsChangeFile.fs"
 #load "..\src\AssetPatch\Base\FuncLocPath.fs"
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
-#load "..\src\AssetPatch\Base\Acronyms.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 open AssetPatch.Base.ChangeFile
@@ -31,7 +31,7 @@ open AssetPatch.Base.Printer
 
 
 /// Apply a rewrite to ``TXTMI - Description (medium text)``
-let demo03 () = 
+let temp01 () = 
     let source = @"G:\work\Projects\assets\asset_patch\file_download_edm\equi_hydroranger_200.txt"
     match readChangeFile source with
     | Result.Error msg -> failwith msg

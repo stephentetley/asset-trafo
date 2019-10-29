@@ -31,7 +31,7 @@ module Common =
             |> fun x -> Path.Combine(outputDirectory, x)
 
     /// At least one row exists 
-    let getHeaderRow (rows : AssocList<string, string> list) : CompilerMonad<HeaderRow, 'env> = 
+    let getHeaderRow (rows : AssocList<string, string> list) : CompilerMonad<HeaderRow, 'env, 'acc> = 
         match rows with
         | [] -> throwError "getHeaderRow - empty list"
         | row1 :: _ -> row1 |> AssocList.keys |> HeaderRow |> mreturn
@@ -53,7 +53,7 @@ module Common =
     let makeChangeFile (entityType : EntityType) 
                         (user : string) 
                         (timestamp : System.DateTime)
-                        (rows : AssocList<string, string> list) : CompilerMonad<ChangeFile, 'env> = 
+                        (rows : AssocList<string, string> list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
         compile {
             let! header = getHeaderRow rows
             return { Header = makeHeader entityType user timestamp 

@@ -7,7 +7,7 @@ namespace AssetPatch.Base
 
 module EntityTypes =
     
-    open AssetPatch.Base
+    open AssetPatch.Base.Common
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.FuncLocPath
    
@@ -42,21 +42,15 @@ module EntityTypes =
         
 
 
-    type FuncLocSegment = 
-        { Name : string
-          Description : string
-          ObjectType: string 
-        }
 
-    let tryAssocsToFuncLoc (attributes : AssocList<string, string>) : FuncLoc option = 
+    let assocsToFuncLoc (attributes : AssocList<string, string>) : Result<FuncLoc, ErrMsg> = 
         match AssocList.tryFind3 "FUNCLOC" "TXTMI" "EQART" attributes with
         | Some (funcloc, desc, otype) -> 
-            Some { Path = FuncLocPath.Create funcloc 
-                   Description = desc
-                   ObjectType = otype
-                   Attributes = attributes
-                  }
-         | None -> None
+            Ok { Path = FuncLocPath.Create funcloc 
+                 Description = desc
+                 ObjectType = otype
+                 Attributes = attributes }
+         | None -> Error "Could not find required fields for a FuncLoc"
 
     let funcLocToAssocs (funcLoc: FuncLoc) : AssocList<string, string> = 
         funcLoc.Attributes
@@ -64,6 +58,13 @@ module EntityTypes =
             |> AssocList.update "TXTMI"     funcLoc.Description
             |> AssocList.update "EQART"     funcLoc.ObjectType
 
+
+
+    type FuncLocSegment = 
+        { Name : string
+          Description : string
+          ObjectType: string 
+        }
 
     let extendFuncLoc (segment : FuncLocSegment) 
                       (floc: FuncLoc) : FuncLoc = 

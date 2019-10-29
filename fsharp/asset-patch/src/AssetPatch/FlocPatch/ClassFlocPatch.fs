@@ -19,10 +19,12 @@ module ClassFlocPatch =
     
 
     type private Env = Unit
-    type CFCompiler<'a> = CompilerMonad<'a, Env>
+    type private State = Unit
+    type CFCompiler<'a> = CompilerMonad<'a, Env, State>
 
     let runCFCompiler (action : CFCompiler<'a>) = 
-        runCompiler () action
+        runCompiler () () action
+            |> Result.map fst
     
     type FlocClass = 
         { ClassName : string

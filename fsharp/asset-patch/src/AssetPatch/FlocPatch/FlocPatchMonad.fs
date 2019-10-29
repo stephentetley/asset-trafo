@@ -99,10 +99,7 @@ module FlocPatchMonad =
         | Result.Ok ans ->
             match ans.TryFindAssoc (fun key value -> key = "FUNCLOC" && value = rootCode) with
             | None -> Result.Error (sprintf "Could not find root %s" rootCode)
-            | Some attrs -> 
-                match tryAssocsToFuncLoc attrs with 
-                | Some floc -> Result.Ok floc
-                | None -> Result.Error "Error reading FuncLoc attributes"
+            | Some attrs -> assocsToFuncLoc attrs 
 
 
     let root (flocCode : string) : FlocPatch<FuncLoc> = 
@@ -167,7 +164,7 @@ module FlocPatchMonad =
                         (root : string) 
                         (outputDirectory : string) : Result<'a, ErrMsg> = 
         let fmEnv = { PathToFuncLocDownload = config.PathToFlocFile }
-        CompilerMonad.runCompiler () <|
+        CompilerMonad.evalCompiler () () <|
             CompilerMonad.compile {
                 let! (ans, flocs) = 
                     CompilerMonad.liftResult <| runFlocPatch fmEnv action

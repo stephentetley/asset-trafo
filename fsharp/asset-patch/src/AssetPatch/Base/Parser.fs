@@ -8,7 +8,9 @@ module Parser =
     open FParsec
     open System
 
+    open AssetPatch.Base.Common
     open AssetPatch.Base.ChangeFile
+    //    open AssetPatch.Base.AbsChangeFile
 
     type ChangeFileParser<'ans> = Parser<'ans, unit>
 
@@ -111,7 +113,7 @@ module Parser =
     
     
     let pSelectionItem : ChangeFileParser<Selection> = 
-        let line = regex ".*|.*|.*" |>> SelectionLine
+        let line = regex ".*\|.*\|.*" |>> SelectionLine
         directive line
 
     let pSelectionHeader : ChangeFileParser<unit> =
@@ -171,7 +173,12 @@ module Parser =
         }
 
 
-    let readChangeFile (inputFile : string) : Result<ChangeFile, string> = 
+    let readChangeFile (inputFile : string) : Result<ChangeFile, ErrMsg> = 
         match runParserOnFile (parseChangeFile ()) () inputFile Text.Encoding.UTF8 with
         | Failure (str,_,_) -> Result.Error str
         | Success (ans,_,_) -> Result.Ok ans
+
+    //let readFuncLocsChangeFile (inputFile : string) : CompilerMonad<FuncLoc list, ErrMsg> = 
+    //    readChangeFile inputFile 
+    //        |> Result.map ofChangeFile
+    //        |> Result.bind (fun x -> x.Rows |> Result. assocsToFuncLoc)

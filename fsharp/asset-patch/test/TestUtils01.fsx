@@ -20,12 +20,12 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Addendum.fs"
 #load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\Common.fs"
+#load "..\src\AssetPatch\Base\CompilerMonad.fs"
 #load "..\src\AssetPatch\Base\ChangeFile.fs"
 #load "..\src\AssetPatch\Base\Acronyms.fs"
 #load "..\src\AssetPatch\Base\AbsChangeFile.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
-#load "..\src\AssetPatch\Base\CompilerMonad.fs"
 #load "..\src\AssetPatch\Utilities\ChangeFileReport.fs"
 #load "..\src\AssetPatch\Utilities\TidyChangeFile.fs"
 

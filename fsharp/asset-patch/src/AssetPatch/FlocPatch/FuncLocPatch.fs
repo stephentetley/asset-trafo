@@ -19,10 +19,12 @@ module FuncLocPatch =
 
 
     type private Env = Unit
-    type FLCompiler<'a> = CompilerMonad<'a, Env>
+    type private State = Unit
+    type FLCompiler<'a> = CompilerMonad<'a, Env, State>
 
     let runFLCompiler (action : FLCompiler<'a>) = 
-        runCompiler () action
+        runCompiler () () action 
+            |> Result.map fst
 
     let excludeList : string list = 
         // Field x comment
