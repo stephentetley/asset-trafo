@@ -99,8 +99,8 @@ module FlocPatchMonad =
         | Result.Ok ans ->
             match ans.TryFindAssoc (fun key value -> key = "FUNCLOC" && value = rootCode) with
             | None -> Result.Error (sprintf "Could not find root %s" rootCode)
-            | Some ans -> 
-                match FuncLoc.Initial ans with 
+            | Some attrs -> 
+                match tryAssocsToFuncLoc attrs with 
                 | Some floc -> Result.Ok floc
                 | None -> Result.Error "Error reading FuncLoc attributes"
 

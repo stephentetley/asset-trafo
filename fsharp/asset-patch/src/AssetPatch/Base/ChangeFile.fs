@@ -17,8 +17,12 @@ module ChangeFile =
             with get () : string = 
                 let (IntegerString str) = x in str
 
-        static member Create (num : uint32) : IntegerString = 
-            IntegerString(num.ToString())
+        static member OfString (s : string) : IntegerString = 
+            IntegerString(s)
+
+        static member Create (width: int, num : uint32) : IntegerString = 
+            let s = num.ToString().PadLeft(width, '0')
+            IntegerString(s)
 
     
     type FileType = 
