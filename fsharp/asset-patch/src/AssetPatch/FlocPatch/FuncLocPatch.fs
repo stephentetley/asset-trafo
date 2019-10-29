@@ -56,8 +56,7 @@ module FuncLocPatch =
         ]
 
     let private funcLocAssocList (funcLoc : FuncLoc) : FLCompiler<AssocList<string,string>> = 
-        compile {
-            
+        compile {            
             let! parent = liftOption <| parent funcLoc.Path
             return 
                 funcLoc.Attributes

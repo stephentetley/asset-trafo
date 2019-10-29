@@ -30,37 +30,34 @@ module ClassFlocPatch =
         { ClassName : string
           ClassType : int
           ClInt : int
-          ClStatus1 : int
         }
 
     let flocClassToAssocs (flocClass : FlocClass) : AssocList<string, string> =         
         [ ("CLASS", flocClass.ClassName)
         ; ("CLASSTYPE", sprintf "%03i" flocClass.ClassType)
         ; ("CLINT", sprintf "%010i" flocClass.ClInt)
-        ; ("CLSTATUS1", sprintf "%i" flocClass.ClStatus1)
         ] |> AssocList.ofList 
 
     let clAIB_REFERENCE : FlocClass =
         { ClassName = "AIB_REFERENCE"
           ClassType = 3
-          ClInt = 850
-          ClStatus1 = 1 }
+          ClInt = 850}
     
     let clEAST_NORTH : FlocClass =
         { ClassName = "EAST_NORTH"
           ClassType = 3
-          ClInt = 379
-          ClStatus1 = 1 }
+          ClInt = 379 }
 
     let clUNICLASS_CODE : FlocClass =
         { ClassName = "UNICLASS_CODE"
           ClassType = 3
-          ClInt = 905
-          ClStatus1 = 1 }
+          ClInt = 905 }
 
     let makeClassAssocs (flocClass : FlocClass) (funcLocs : string list) : AssocList<string, string> list = 
         let make1 funcLoc = 
-            AssocList.Cons("FUNCLOC", funcLoc, flocClassToAssocs flocClass)
+            flocClassToAssocs flocClass 
+                |> AssocList.cons "FUNCLOC" funcLoc
+                |> fun xs -> AssocList.snoc xs "CLSTATUS1" "1"
         List.map make1 funcLocs
 
     let makeAllAssocs (flocClasses : FlocClass list) (funcLocs : string list) : AssocList<string, string> list = 
@@ -86,5 +83,6 @@ module ClassFlocPatch =
                     |> List.sortBy (fun x -> x.Path)
                     |> List.map (fun x -> x.Path.ToString())
                     |> makeAllAssocs sampleFlocClasses
-            return! makeChangeFile FuncLoc user timestamp rows
+
+            return! makeChangeFile ClassFloc user timestamp rows
         }

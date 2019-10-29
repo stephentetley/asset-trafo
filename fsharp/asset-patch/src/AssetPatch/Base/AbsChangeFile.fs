@@ -61,17 +61,4 @@ module AbsChangeFile =
 
 
 
-    let private idField (entityType : EntityType) : string = 
-        match entityType with
-        | FuncLoc | ClassFloc | ValuaFloc -> "FUNCLOC"
-        | Equi | ClassEqui | ValuaEqui -> "EQUI"
-
-
-
-   
-
-
-    
-
-
-    
+  

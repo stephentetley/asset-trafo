@@ -30,6 +30,7 @@ module Common =
         sprintf "%s_02_add_valuaflocs.txt" (safeName root)
             |> fun x -> Path.Combine(outputDirectory, x)
 
+
     /// At least one row exists 
     let getHeaderRow (rows : AssocList<string, string> list) : CompilerMonad<HeaderRow, 'env, 'acc> = 
         match rows with
@@ -43,7 +44,7 @@ module Common =
     let private makeHeader (entityType : EntityType) 
                             (user : string) 
                             (timestamp : System.DateTime) : FileHeader = 
-        { FileType = Download 
+        { FileType = Upload 
           DataModel = U1
           EntityType = entityType
           Variant = ()
@@ -61,6 +62,5 @@ module Common =
                      HeaderDescriptions = 
                         getHeaderDescriptions entityType header |> Some
                      HeaderRow = header
-                     DataRows = List.map DataRow.FromAssocList rows
-                   }          
-    }
+                     DataRows = List.map DataRow.FromAssocList rows }          
+        }

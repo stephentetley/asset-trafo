@@ -22,6 +22,13 @@ module AssocList =
     let empty : AssocList<'Key, 'T> = 
         AssocList []
 
+    let cons (key: 'Key) (value: 'T) (assocs : AssocList<'Key, 'T>) : AssocList<'Key, 'T> = 
+        AssocList.Cons(key, value, assocs)
+
+    let snoc (assocs : AssocList<'Key, 'T>) (key: 'Key) (value: 'T)  : AssocList<'Key, 'T> = 
+        let xs = assocs.Assocs
+        AssocList(xs @ [(key, value)])
+
     let ofList (elements: ('Key * 'T) list) : AssocList<'Key, 'T> = 
         AssocList(elements)
 
