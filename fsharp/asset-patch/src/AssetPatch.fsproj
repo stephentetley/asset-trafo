@@ -19,6 +19,7 @@
     <Compile Include="AssetPatch\Utilities\ChangeFileReport.fs" />
     <Compile Include="AssetPatch\Utilities\TidyChangeFile.fs" />
     <Compile Include="AssetPatch\FlocPatch\Common.fs" />
+    <Compile Include="AssetPatch\FlocPatch\S4Class.fs" />
     <Compile Include="AssetPatch\FlocPatch\FuncLocPatch.fs" />
     <Compile Include="AssetPatch\FlocPatch\ClassFlocPatch.fs" />
     <Compile Include="AssetPatch\FlocPatch\FlocPatchMonad.fs" />

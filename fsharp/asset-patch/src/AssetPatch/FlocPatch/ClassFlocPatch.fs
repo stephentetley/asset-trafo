@@ -15,16 +15,11 @@ module ClassFlocPatch =
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.EntityTypes
     open AssetPatch.Base.CompilerMonad
+    open AssetPatch.Base.FuncLocPath
+    open AssetPatch.Base.EntityTypes
     open AssetPatch.FlocPatch.Common
     
 
-    type private Env = Unit
-    type private State = Unit
-    type CFCompiler<'a> = CompilerMonad<'a, Env, State>
-
-    let runCFCompiler (action : CFCompiler<'a>) = 
-        runCompiler () () action
-            |> Result.map fst
     
 
     /// CLASSTYPE is 002 for Equi or 003 for Floc so don't store 
@@ -34,15 +29,19 @@ module ClassFlocPatch =
           ClInt : uint32
         }
 
-    let s4ClassToAssocs (entityType: EntityType) (s4Class : S4Class) : AssocList<string, string> =         
+    let s4ClassToClassFloc (entityType: EntityType) 
+                            (funcLoc : FuncLocPath) 
+                            (s4Class : S4Class) : ClassFloc =         
         let classtype = 
             match entityType with
-            | FuncLoc | ClassFloc | ValuaFloc -> "003"
-            | Equi | ClassEqui | ValuaEqui -> "002"
-        [ ("CLASS",     s4Class.ClassName)
-        ; ("CLASSTYPE", classtype)
-        ; ("CLINT",     IntegerString.Create(10, s4Class.ClInt).Number)
-        ] |> AssocList.ofList 
+            | FuncLoc | ClassFloc | ValuaFloc -> IntegerString.OfString "003"
+            | Equi | ClassEqui | ValuaEqui -> IntegerString.OfString "002"
+        { FuncLoc = funcLoc
+          Class = s4Class.ClassName
+          ClassType = classtype
+          ClassNumber = IntegerString.Create(10, s4Class.ClInt)
+          Status = 1
+        }
 
     let clAIB_REFERENCE : S4Class =
         { ClassName = "AIB_REFERENCE"
@@ -56,15 +55,12 @@ module ClassFlocPatch =
         { ClassName = "UNICLASS_CODE"
           ClInt = 905u }
 
-    let makeClassAssocs (s4Class : S4Class) (funcLocs : string list) : AssocList<string, string> list = 
-        let make1 funcLoc = 
-           s4ClassToAssocs ClassFloc s4Class 
-                |> AssocList.cons "FUNCLOC" funcLoc
-                |> fun xs -> AssocList.snoc xs "CLSTATUS1" "1"
-        List.map make1 funcLocs
+    let makeClassFlocs (funcLoc : FuncLocPath) 
+                        (classes : S4Class list) : ClassFloc list = 
+        List.map (s4ClassToClassFloc ClassFloc funcLoc) classes
 
-    let makeAllAssocs (flocClasses : S4Class list) (funcLocs : string list) : AssocList<string, string> list = 
-        List.map (fun x -> makeClassAssocs x funcLocs) flocClasses 
+    let makeAllClassFlocs (classes : S4Class list) (funcLocs : FuncLocPath list) : ClassFloc list = 
+        List.map (fun x -> makeClassFlocs x classes) funcLocs 
             |> List.concat
 
 
@@ -79,12 +75,11 @@ module ClassFlocPatch =
 
     let makeClassFlocPatch (user : string) 
                             (timestamp : System.DateTime)
-                            (funcLocs : FuncLoc list) : CFCompiler<ChangeFile> = 
+                            (funcLocs : FuncLoc list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
         compile {
-            let rows = 
+            let rows =
                 funcLocs 
-                    |> List.sortBy (fun x -> x.Path)
-                    |> List.map (fun x -> x.Path.ToString())
-                    |> makeAllAssocs sampleS4Classes
-            return! makeChangeFile ClassFloc user timestamp rows
+                    |> List.map (fun x -> x.Path)
+                    |> makeAllClassFlocs sampleS4Classes
+            return! compileClassFlocFile user timestamp rows
         }

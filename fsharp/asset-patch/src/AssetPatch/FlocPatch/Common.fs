@@ -16,6 +16,7 @@ module Common =
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.Acronyms
     open AssetPatch.Base.CompilerMonad
+    open AssetPatch.Base.EntityTypes
 
 
     let filenameFuncLocs (outputDirectory : string) (root : string) : string = 
@@ -51,7 +52,7 @@ module Common =
           User = user
           DateTime = timestamp }
 
-    let makeChangeFile (entityType : EntityType) 
+    let private makeChangeFile (entityType : EntityType) 
                         (user : string) 
                         (timestamp : System.DateTime)
                         (rows : AssocList<string, string> list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
@@ -64,3 +65,64 @@ module Common =
                      HeaderRow = header
                      DataRows = List.map DataRow.FromAssocList rows }          
         }
+
+    // Generate upload change files for each entity type...
+
+    /// Compile a list for FuncLoc changes into a ChangeFile
+    let compileFuncLocFile (user : string) 
+                             (timestamp : System.DateTime)
+                             (rows : FuncLoc list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+        rows
+            |> List.sortBy (fun row -> row.Path.ToString()) 
+            |> List.map funcLocToAssocs     
+            |> makeChangeFile FuncLoc user timestamp
+
+
+    /// Compile a list for ClassFloc changes into a ChangeFile
+    let compileClassFlocFile (user : string) 
+                             (timestamp : System.DateTime)
+                             (rows : ClassFloc list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+        rows
+            |> List.sortBy (fun row -> row.Class + "!" + row.FuncLoc.ToString())
+            |> List.map classFlocToAssocs     
+            |> makeChangeFile ClassFloc user timestamp
+
+
+    /// Compile a list for ValuaFloc changes into a ChangeFile
+    let compileValuaFlocFile (user : string) 
+                             (timestamp : System.DateTime)
+                             (rows : ValuaFloc list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+        rows
+            |> List.sortBy (fun row -> row.FuncLoc.ToString() + "!" + row.CharacteristicID)
+            |> List.map valuaFlocToAssocs     
+            |> makeChangeFile ValuaFloc user timestamp
+
+
+    /// Compile a list for ClassEqui changes into a ChangeFile
+    let compileEquiFile (user : string) 
+                        (timestamp : System.DateTime)
+                         (rows : Equi list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+        rows
+            |> List.sortBy (fun row -> row.EquipmentNumber.ToString())
+            |> List.map equiToAssocs     
+            |> makeChangeFile Equi user timestamp
+
+
+    /// Compile a list for ClassEqui changes into a ChangeFile
+    let compileClassEquiFile (user : string) 
+                             (timestamp : System.DateTime)
+                             (rows : ClassEqui list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+        rows
+            |> List.sortBy (fun row -> row.EquipmentNumber.ToString() + row.Class)
+            |> List.map classEquiToAssocs     
+            |> makeChangeFile ClassEqui user timestamp
+
+
+    /// Compile a list for ValuaEqui changes into a ChangeFile
+    let compileValuaEquiFile (user : string) 
+                             (timestamp : System.DateTime)
+                             (rows : ValuaEqui list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+        rows
+            |> List.sortBy (fun row -> row.EquipmentNumber)
+            |> List.map valuaEquiToAssocs     
+            |> makeChangeFile ValuaEqui user timestamp

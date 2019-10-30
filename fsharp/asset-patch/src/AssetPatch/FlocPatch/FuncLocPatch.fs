@@ -18,13 +18,7 @@ module FuncLocPatch =
     open AssetPatch.FlocPatch.Common    
 
 
-    type private Env = Unit
-    type private State = Unit
-    type FLCompiler<'a> = CompilerMonad<'a, Env, State>
 
-    let runFLCompiler (action : FLCompiler<'a>) = 
-        runCompiler () () action 
-            |> Result.map fst
 
     let excludeList : string list = 
         // Field x comment
@@ -55,32 +49,32 @@ module FuncLocPatch =
         ; "LGWIDI"          // Work center origin
         ]
 
-    let private funcLocAssocList (funcLoc : FuncLoc) : FLCompiler<AssocList<string,string>> = 
-        compile {            
-            let! parent = liftOption <| parent funcLoc.Path
-            return 
-                funcLoc.Attributes
-                    |> AssocList.update "STATEXT" "UCON"
-                    |> AssocList.update "USTAFLOC" "UCON"
-                    |> AssocList.update "USTW_FLOC" "UCON"                    
-                    |> AssocList.update "FUNCLOC" (funcLoc.Path.ToString())
-                    |> AssocList.update "TXTMI" funcLoc.Description
-                    |> AssocList.update "FLTYP" (funcLoc.Level.ToString())
-                    |> AssocList.update "IEQUI" (if funcLoc.Level >= 5 then "X" else "")
-                    |> AssocList.update "EQART" funcLoc.ObjectType
-                    |> AssocList.update "TPLMA1" (parent.ToString())
-                    |> AssocList.update "TPLMA" (parent.ToString())
-                    |> AssocList.select selectList
+    let private funcLocSetAttrs (funcLoc : FuncLoc) : CompilerMonad<FuncLoc, 'env, 'acc>  = 
+        let update flocParent = fun attrs ->
+            attrs
+                |> AssocList.update "STATEXT" "UCON"
+                |> AssocList.update "USTAFLOC" "UCON"
+                |> AssocList.update "USTW_FLOC" "UCON"                    
+                |> AssocList.update "FUNCLOC" (funcLoc.Path.ToString())
+                |> AssocList.update "TXTMI" funcLoc.Description
+                |> AssocList.update "FLTYP" (funcLoc.Level.ToString())
+                |> AssocList.update "IEQUI" (if funcLoc.Level >= 5 then "X" else "")
+                |> AssocList.update "EQART" funcLoc.ObjectType
+                |> AssocList.update "TPLMA1" (flocParent.ToString())
+                |> AssocList.update "TPLMA" (flocParent.ToString())
+                |> AssocList.select selectList
+        compile {
+            let! flocParent = liftOption <| parent funcLoc.Path
+            return { funcLoc with Attributes = update flocParent funcLoc.Attributes }
         }
 
 
 
     let makeFuncLocPatch (user : string) 
                         (timestamp : System.DateTime)
-                        (funcLocs : FuncLoc list) : FLCompiler<ChangeFile> = 
+                        (funcLocs : FuncLoc list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
         compile {
-            let! rows = 
-                funcLocs |> List.sort |> mapM funcLocAssocList 
-            return! makeChangeFile FuncLoc user timestamp rows
+            let! rows = funcLocs |> mapM funcLocSetAttrs 
+            return! compileFuncLocFile user timestamp rows
         }
 

@@ -26,9 +26,12 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
+#load "..\src\AssetPatch\FlocPatch\S4Class.fs"
+open AssetPatch.Base
 open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.EntityTypes
+open AssetPatch.FlocPatch.S4Class
 
 let endsInLoop (s : string) : bool = 
     Regex.IsMatch(input = s, pattern = "Loop$")
@@ -46,5 +49,20 @@ let temp01 () =
             do! forMz rows (fun row -> printfn "%s" (row.Description); mreturn())
             return ()
         }
+
+
+
+
+type IS4Class = 
+    abstract ClassName : string
+    abstract ClInt : uint32
+
+type EAST_NORTH  =
+    { Easting : int
+      Northing : int 
+    }
+    interface IS4Class with
+        member x.ClassName = "EAST_NORTH"
+        member x.ClInt  = 379u
 
 
