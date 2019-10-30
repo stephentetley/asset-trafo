@@ -51,17 +51,12 @@ let temp01 () =
             return ()
         }
 
-
+/// Note - we will be defining named instances for _char _class etc.
 let temp02 () = 
-    { Code = EquipmentCode "101"
-      Description = "Storm Overflow Level Monitor Loop"
-      ObjectType = "LSTN"
-      FuncLoc = readFloc "BIR23-EDC-LQD-RGM-SYS01"
-      Classes = []
-    }
-        <<!< ( { ClassName = "EAST_NORTH"          
-                 ClassInt = 378u
-                 Characteritics = []
-               } 
-                <!< Characteristic("EASTING", "492729")
-                <!< Characteristic("NORTHING", "477323") )
+    _equipment "Storm Overflow Level Monitor Loop" "LSTN"
+        [ _class "EAST_NORTH" 378u
+                [ _char "EASTING" "492729"
+                  _char "NORTHING" "477323"
+                ]        
+        ]
+

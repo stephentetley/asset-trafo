@@ -29,39 +29,44 @@ module Hierarchy =
         
 
 
-    type FuncLoc = 
-        { Path : FuncLocPath
+    type Floc = 
+        { Segment : string
           Description : string
           ObjectType : string
           Classes : Class list
         }
 
-        interface IAddClass<FuncLoc> with
-            member x.AddClass(c1 : Class) = 
-                let cs = x.Classes @ [c1]
-                { x with Classes = cs }
 
-
-    [<Struct>]
     type EquipmentCode = 
         | EquipmentCode of string
+        | EquipmentAnon
 
     type Equipment = 
         { Code : EquipmentCode
-          FuncLoc : FuncLocPath
           Description : string
           ObjectType : string
           Classes : Class list
         }
-        interface IAddClass<Equipment> with
-            member x.AddClass(c1 : Class) = 
-                let cs = x.Classes @ [c1]
-                { x with Classes = cs }
 
 
-    let (<!<) (claz : Class) (charValue : Characteristic) : Class = 
-        let vs = claz.Characteritics @ [charValue]
-        { claz with Characteritics = vs }
+    let _class (name : string) (number : uint32) (values : Characteristic list) : Class = 
+        { ClassName = name
+          ClassInt = number
+          Characteritics = values }
 
-    let (<<!<) (parent : 'T) (claz : Class) : 'T when 'T :> IAddClass<'T> = 
-        (parent :> IAddClass<'T>).AddClass(claz)
+    let _char (name : string) (value : string) : Characteristic = 
+        Characteristic(name, value)
+
+    let _floc (segment: string) (description : string) (objectType : string)
+                (classes : Class list) : Floc = 
+        { Segment = segment
+          Description = description
+          ObjectType = objectType
+          Classes = classes }
+
+    let _equipment (description : string) (objectType : string)
+                    (classes : Class list) : Equipment = 
+        { Code = EquipmentAnon
+          Description = description
+          ObjectType = objectType
+          Classes = classes }

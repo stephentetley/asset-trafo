@@ -7,6 +7,7 @@ namespace AssetPatch.Base
 module FuncLocPath =
 
 
+
     [<Struct>]
     [<CustomComparison; CustomEquality>]
     type FuncLocPath = 

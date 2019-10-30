@@ -17,7 +17,13 @@ module EntityTypes =
     // ************************************************************************
     // FuncLoc
 
-    
+    type FuncLocSegment = 
+        { Name : string
+          Description : string
+          ObjectType: string 
+        }
+
+
 
 
     // The other way is to look at differences to an existing root funcloc
@@ -67,11 +73,7 @@ module EntityTypes =
             return! mapM (liftResult << assocsToFuncLoc) ast.Rows
         }
 
-    type FuncLocSegment = 
-        { Name : string
-          Description : string
-          ObjectType: string 
-        }
+    
 
     let extendFuncLoc (segment : FuncLocSegment) 
                       (floc: FuncLoc) : FuncLoc = 
