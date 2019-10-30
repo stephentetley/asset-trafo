@@ -26,11 +26,13 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
+#load "..\src\AssetPatch\FlocPatch\Common.fs"
 #load "..\src\AssetPatch\FlocPatch\S4Class.fs"
 open AssetPatch.Base
 open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.EntityTypes
+open AssetPatch.FlocPatch.Common
 open AssetPatch.FlocPatch.S4Class
 
 
@@ -69,6 +71,9 @@ let makeASSET_CONDITIONValues (equiNumber : IntegerString) (year : uint32): Valu
 let test01 () = 
     let equipmentIds = 
         [ 101001407u; 101001407u ] |> List.map (fun x -> IntegerString.Create(9, x))
-    equipmentIds 
-        |> List.map makeASSET_CONDITION 
-
+    let values = 
+        equipmentIds 
+            |> List.map (fun x -> makeASSET_CONDITIONValues x 2019u)
+            |> List.concat  
+    evalCompiler () () 
+            <| compileValuaEquiFile "TETLEYS" System.DateTime.Now values

@@ -171,11 +171,11 @@ module FlocPatchMonad =
                 let! (ans, flocs) = 
                     CompilerMonad.liftResult <| runFlocPatch fmEnv action
                 let! flPatch = makeFuncLocPatch config.User config.Timestamp flocs
-                let out1 = filenameFuncLocs outputDirectory root
-                writePatchAndMetadata out1 flPatch
+                let flRoot = sprintf "%s_01_add" root
+                do! writeChangeFileAndMetadata outputDirectory flRoot flPatch
                 let! cfPatch = makeClassFlocPatch config.User config.Timestamp flocs
-                let out2 = filenameClassFlocs outputDirectory root
-                writePatchAndMetadata out2 cfPatch
+                let cfRoot = sprintf "%s_02_add" root
+                do! writeChangeFileAndMetadata outputDirectory cfRoot cfPatch
                 return ans
             }
 

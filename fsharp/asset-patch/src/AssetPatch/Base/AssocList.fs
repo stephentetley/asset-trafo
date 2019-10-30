@@ -29,6 +29,7 @@ module AssocList =
         let xs = assocs.Assocs
         AssocList(xs @ [(key, value)])
 
+    
     let ofList (elements: ('Key * 'T) list) : AssocList<'Key, 'T> = 
         AssocList(elements)
 
@@ -94,6 +95,18 @@ module AssocList =
                     cont (x :: vs))
         work source.Assocs (fun xs -> AssocList(xs))
 
+    let upsert (key: 'Key) (value: 'T) (source: AssocList<'Key, 'T>) : AssocList<'Key, 'T> when 'Key : equality  = 
+        let rec work xs cont = 
+            match xs with 
+            | [] -> cont [(key, value)]
+            | (k1,_) as x :: rest -> 
+                if k1 = key then 
+                    cont ((key,value) :: rest)
+                else
+                    work rest (fun vs -> 
+                    cont (x :: vs))
+        work source.Assocs (fun xs -> AssocList(xs))
+    
     let remove (key : 'Key) 
                 (source: AssocList<'Key, 'T>) : AssocList<'Key, 'T> when 'Key : equality  = 
         source.Assocs 

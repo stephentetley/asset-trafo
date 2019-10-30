@@ -141,12 +141,12 @@ module EntityTypes =
     /// Note - CharacteristicValue is used three times.
     let valuaFlocToAssocs (valuaFloc: ValuaFloc) : AssocList<string, string> = 
         valuaFloc.Attributes
-            |> AssocList.update "FUNCLOC"       (valuaFloc.FuncLoc.ToString())
-            |> AssocList.update "CLASSTYPE"     valuaFloc.ClassType.Number
-            |> AssocList.update "CHARID"        valuaFloc.CharacteristicID
-            |> AssocList.update "ATWRT"         valuaFloc.CharacteristicValue
-            |> AssocList.update "TEXTBEZ"       valuaFloc.CharacteristicValue
-            |> AssocList.update "ATFLV"         valuaFloc.CharacteristicValue
+            |> AssocList.upsert "FUNCLOC"       (valuaFloc.FuncLoc.ToString())
+            |> AssocList.upsert "CLASSTYPE"     valuaFloc.ClassType.Number
+            |> AssocList.upsert "CHARID"        valuaFloc.CharacteristicID
+            |> AssocList.upsert "ATWRT"         valuaFloc.CharacteristicValue
+            |> AssocList.upsert "TEXTBEZ"       valuaFloc.CharacteristicValue
+            |> AssocList.upsert "ATFLV"         valuaFloc.CharacteristicValue
 
 
     let readValuaFlocChangeFile (inputFile : string) : CompilerMonad<ValuaFloc list, 'env, 'acc> = 
@@ -177,9 +177,9 @@ module EntityTypes =
     /// Note - CharacteristicValue is used three times.
     let equiToAssocs (equi: Equi) : AssocList<string, string> = 
         equi.Attributes
-            |> AssocList.update "EQUI"          equi.EquipmentNumber.Number
-            |> AssocList.update "TXTMI"         equi.Description
-            |> AssocList.update "TPLN_EILO"     (equi.FuncLoc.ToString()) 
+            |> AssocList.upsert "EQUI"          equi.EquipmentNumber.Number
+            |> AssocList.upsert "TXTMI"         equi.Description
+            |> AssocList.upsert "TPLN_EILO"     (equi.FuncLoc.ToString()) 
 
     let readEquiChangeFile (inputFile : string) : CompilerMonad<Equi list, 'env, 'acc> = 
         compile { 
@@ -247,11 +247,11 @@ module EntityTypes =
     /// Note - CharacteristicValue is used twice.
     let valuaEquiToAssocs (valuaEqui: ValuaEqui) : AssocList<string, string> = 
         valuaEqui.Attributes
-            |> AssocList.update "EQUI"          valuaEqui.EquipmentNumber.Number
-            |> AssocList.update "CLASSTYPE"     valuaEqui.ClassType.Number
-            |> AssocList.update "CHARID"        valuaEqui.CharacteristicID
-            |> AssocList.update "ATWRT"         valuaEqui.CharacteristicValue
-            |> AssocList.update "TEXTBEZ"       valuaEqui.CharacteristicValue
+            |> AssocList.upsert "EQUI"          valuaEqui.EquipmentNumber.Number
+            |> AssocList.upsert "CLASSTYPE"     valuaEqui.ClassType.Number
+            |> AssocList.upsert "CHARID"        valuaEqui.CharacteristicID
+            |> AssocList.upsert "ATWRT"         valuaEqui.CharacteristicValue
+            |> AssocList.upsert "TEXTBEZ"       valuaEqui.CharacteristicValue
             // |> AssocList.update "ATFLV"         valuaEqui.CharacteristicValue
 
     let readValuaEquiChangeFile (inputFile : string) : CompilerMonad<ValuaEqui list, 'env, 'acc> = 

@@ -16,20 +16,24 @@ module Common =
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.Acronyms
     open AssetPatch.Base.CompilerMonad
+    open AssetPatch.Base.Printer
     open AssetPatch.Base.EntityTypes
 
 
-    let filenameFuncLocs (outputDirectory : string) (root : string) : string = 
-        sprintf "%s_01_add_funclocs.txt" (safeName root)
-            |> fun x -> Path.Combine(outputDirectory, x)
+    let outputFileName (outputDirectory : string) 
+                        (entityType: EntityType) 
+                        (root : string) : string = 
+        let name1 = 
+            match entityType with
+            | FuncLoc -> sprintf "%s_funclocs.txt" (safeName root)
+            | ClassFloc -> sprintf "%s_classflocs.txt" (safeName root)
+            | ValuaFloc -> sprintf "%s_valuaflocs.txt" (safeName root)
+            | Equi -> sprintf "%s_equi.txt" (safeName root)
+            | ClassEqui -> sprintf "%s_classequi.txt" (safeName root)
+            | ValuaEqui -> sprintf "%s_valuaequi.txt" (safeName root)
+        Path.Combine(outputDirectory, name1)
 
-    let filenameClassFlocs (outputDirectory : string) (root : string) : string = 
-        sprintf "%s_02_add_classflocs.txt" (safeName root)
-            |> fun x -> Path.Combine(outputDirectory, x)
 
-    let filenameValuaFlocs (outputDirectory : string) (root : string) : string = 
-        sprintf "%s_02_add_valuaflocs.txt" (safeName root)
-            |> fun x -> Path.Combine(outputDirectory, x)
 
 
     /// At least one row exists 
@@ -126,3 +130,15 @@ module Common =
             |> List.sortBy (fun row -> row.EquipmentNumber)
             |> List.map valuaEquiToAssocs     
             |> makeChangeFile ValuaEqui user timestamp
+
+    let writeChangeFileAndMetadata (outputDirectory : string) 
+                                    (namePrefix : string)
+                                    (changeFile : ChangeFile) : CompilerMonad<unit, 'env, 'acc> =
+        compile {
+            let outpath = outputFileName outputDirectory changeFile.Header.EntityType namePrefix
+            let name1 = Path.GetFileNameWithoutExtension(outpath) + ".variant.txt"
+            let variantPath = Path.Combine(Path.GetDirectoryName(outpath), name1)        
+            writeReceipt variantPath changeFile
+            writeChangeFile outpath changeFile
+            return ()
+        }
