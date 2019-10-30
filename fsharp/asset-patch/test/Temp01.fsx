@@ -26,10 +26,13 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
+
+#load "..\src\AssetPatch\FlocPatch\Hierarchy.fs"
 open AssetPatch.Base
 open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.EntityTypes
+open AssetPatch.FlocPatch.Hierarchy
 
 let endsInLoop (s : string) : bool = 
     Regex.IsMatch(input = s, pattern = "Loop$")
@@ -49,18 +52,16 @@ let temp01 () =
         }
 
 
-
-
-type IS4Class = 
-    abstract ClassName : string
-    abstract ClInt : uint32
-
-type EAST_NORTH  =
-    { Easting : int
-      Northing : int 
+let temp02 () = 
+    { Code = EquipmentCode "101"
+      Description = "Storm Overflow Level Monitor Loop"
+      ObjectType = "LSTN"
+      FuncLoc = readFloc "BIR23-EDC-LQD-RGM-SYS01"
+      Classes = []
     }
-    interface IS4Class with
-        member x.ClassName = "EAST_NORTH"
-        member x.ClInt  = 379u
-
-
+        <<!< ( { ClassName = "EAST_NORTH"          
+                 ClassInt = 378u
+                 Characteritics = []
+               } 
+                <!< Characteristic("EASTING", "492729")
+                <!< Characteristic("NORTHING", "477323") )
