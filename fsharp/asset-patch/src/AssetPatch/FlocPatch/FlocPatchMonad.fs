@@ -7,6 +7,7 @@ namespace AssetPatch.FlocPatch
 module FlocPatchMonad =
 
     open System
+    open System.IO
 
     open AssetPatch.Base
     open AssetPatch.Base.Common
@@ -171,11 +172,11 @@ module FlocPatchMonad =
                 let! (ans, flocs) = 
                     CompilerMonad.liftResult <| runFlocPatch fmEnv action
                 let! flPatch = makeFuncLocPatch config.User config.Timestamp flocs
-                let flRoot = sprintf "%s_01_add" root
-                do! writeChangeFileAndMetadata outputDirectory flRoot flPatch
+                let flFile = Path.Combine(outputDirectory, sprintf "%s_01_add_funclocs.txt" root)
+                do! writeChangeFileAndMetadata flFile flPatch
                 let! cfPatch = makeClassFlocPatch config.User config.Timestamp flocs
-                let cfRoot = sprintf "%s_02_add" root
-                do! writeChangeFileAndMetadata outputDirectory cfRoot cfPatch
+                let cfFile = Path.Combine(outputDirectory, sprintf "%s_02_add_classflocs.txt" root)
+                do! writeChangeFileAndMetadata cfFile cfPatch
                 return ans
             }
 

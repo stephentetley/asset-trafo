@@ -20,21 +20,7 @@ module Common =
     open AssetPatch.Base.EntityTypes
 
 
-    let outputFileName (outputDirectory : string) 
-                        (entityType: EntityType) 
-                        (root : string) : string = 
-        let name1 = 
-            match entityType with
-            | FuncLoc -> sprintf "%s_funclocs.txt" (safeName root)
-            | ClassFloc -> sprintf "%s_classflocs.txt" (safeName root)
-            | ValuaFloc -> sprintf "%s_valuaflocs.txt" (safeName root)
-            | Equi -> sprintf "%s_equi.txt" (safeName root)
-            | ClassEqui -> sprintf "%s_classequi.txt" (safeName root)
-            | ValuaEqui -> sprintf "%s_valuaequi.txt" (safeName root)
-        Path.Combine(outputDirectory, name1)
-
-
-
+   
 
     /// At least one row exists 
     let getHeaderRow (rows : AssocList<string, string> list) : CompilerMonad<HeaderRow, 'env, 'acc> = 
@@ -131,14 +117,13 @@ module Common =
             |> List.map valuaEquiToAssocs     
             |> makeChangeFile ValuaEqui user timestamp
 
-    let writeChangeFileAndMetadata (outputDirectory : string) 
-                                    (namePrefix : string)
+
+    let writeChangeFileAndMetadata (outputPath: string)
                                     (changeFile : ChangeFile) : CompilerMonad<unit, 'env, 'acc> =
         compile {
-            let outpath = outputFileName outputDirectory changeFile.Header.EntityType namePrefix
-            let name1 = Path.GetFileNameWithoutExtension(outpath) + ".variant.txt"
-            let variantPath = Path.Combine(Path.GetDirectoryName(outpath), name1)        
-            writeReceipt variantPath changeFile
-            writeChangeFile outpath changeFile
+            let variant1 = Path.GetFileNameWithoutExtension(outputPath) + ".variant.txt"
+            let variantPath = Path.Combine(Path.GetDirectoryName(outputPath), variant1)        
+            writeChangeFile outputPath changeFile
+            writeReceipt variantPath changeFile            
             return ()
         }

@@ -1,6 +1,7 @@
 ﻿#r "netstandard"
 #r "System.Text.Encoding.dll"
 open System.Text.RegularExpressions
+open System.IO
 
 #I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\netstandard1.6"
 #r "FParsec"
@@ -27,15 +28,15 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
 #load "..\src\AssetPatch\FlocPatch\Common.fs"
-#load "..\src\AssetPatch\FlocPatch\S4Class.fs"
 open AssetPatch.Base
 open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.EntityTypes
 open AssetPatch.FlocPatch.Common
-open AssetPatch.FlocPatch.S4Class
 
 
+let outputFile (relFileName : string) : string = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
 // Adding ASSET_CONDITION ...
 
@@ -47,6 +48,34 @@ open AssetPatch.FlocPatch.S4Class
 // SURVEY_DATE
 // LOADING_FACTOR
 
+/// CLASSTYPE is 002 for Equi or 003 for Floc so don't store 
+/// this in the object.
+type S4Class = 
+    { ClassName : string
+      ClInt : uint32
+      AllowedCharacteristics : string list
+    }
+
+let makeClassEqui (equiNumber : IntegerString)  (s4Class : S4Class) : ClassEqui = 
+    { EquipmentNumber = equiNumber
+      Class = s4Class.ClassName
+      ClassType = IntegerString.OfString "002"
+      ClassNumber = IntegerString.Create(10, s4Class.ClInt)
+      Status = 1
+      }
+
+let clASSET_CONDITION : S4Class =
+    { ClassName = "ASSET_CONDITION"
+      ClInt = 1013u 
+      AllowedCharacteristics  = 
+        [ "PERFORMANCE_GRADE_REASON"
+        ; "LOADING_FACTOR_REASON"
+        ; "CONDITION_GRADE_REASON"
+        ; "CONDITION_GRADE"
+        ; "PERFORMANCE_GRADE"
+        ; "SURVEY_DATE"
+        ; "LOADING_FACTOR" ]
+    }
 let makeASSET_CONDITION (equiNumber : IntegerString) : ClassEqui = 
     makeClassEqui equiNumber clASSET_CONDITION
 
@@ -69,11 +98,17 @@ let makeASSET_CONDITIONValues (equiNumber : IntegerString) (year : uint32): Valu
 
         
 let test01 () = 
+    let outPath = outputFile "asset_condition_01_valua.txt"
     let equipmentIds = 
-        [ 101001407u; 101001407u ] |> List.map (fun x -> IntegerString.Create(9, x))
+        [ 101001407u; 101001410u ] |> List.map (fun x -> IntegerString.Create(9, x))
     let values = 
         equipmentIds 
             |> List.map (fun x -> makeASSET_CONDITIONValues x 2019u)
             |> List.concat  
-    evalCompiler () () 
-            <| compileValuaEquiFile "TETLEYS" System.DateTime.Now values
+    evalCompiler () () <|
+        compile {
+            let! changeFile = compileValuaEquiFile "TETLEYS" System.DateTime.Now values
+            do! writeChangeFileAndMetadata outPath changeFile
+            return ()
+        }
+
