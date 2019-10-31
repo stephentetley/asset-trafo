@@ -44,36 +44,75 @@ module Catalogue =
     // Equipment
 
 
+    let _no_equipment_ : Equipment list = []
+
     let lstn_level_transmitter (name : string) : Class list -> Equipment = 
         _equipment name "LSTN"
+
+    let telemetry_outstation (name : string) : Class list -> Equipment = 
+        _equipment name "NETW"
+
+
+    // ************************************************************************
+    // Component
+
+    let _no_components_ : Component list = []
+
+
+    // ************************************************************************
+    // Item
+
+    let _no_items_ : Item list = []
+
+    // ************************************************************************
+    // Assembly
+
+    let _no_assemblies_ : Assembly list = []
 
 
     // ************************************************************************
     // System
 
+    let _no_systems_ : System list = []
 
-
-    let smon (shortCode : string) (description : string) 
-                : Class list -> Assembly list -> Equipment list -> System =
-        
+    let montoring_system (shortCode : string) (description : string) 
+                : Class list -> Assembly list -> Equipment list -> System =        
         _system shortCode description "SMON"
+
+
+    let telemetry_system (shortCode : string) (description : string)  
+                : Class list -> Assembly list -> Equipment list -> System =    
+        _system shortCode description "CTOS"
 
     // ************************************************************************
     // Process
 
-    let rgm : Class list -> System list -> Process =
+    let _no_processes_ : Process list = []
+
+    let regulatory_monitoring : Class list -> System list -> Process =
         _process "RGM" "Regulatory Monitoring" "RGM"
 
+    let telemetry : Class list -> System list -> Process =
+        _process "TEL" "Telemetry" "TEL"
 
     // ************************************************************************
     // Process Group
 
-    let lqd : Class list -> Process list -> ProcessGroup =
+    let _no_process_groups_ : ProcessGroup list = []
+
+    let liquid_discharge : Class list -> Process list -> ProcessGroup =
         _processGroup "LQD" "Liquid Discharge" "LQD"
+
+    let networks : Class list -> Process list -> ProcessGroup =
+        _processGroup "NET" "Networks" "NET"
 
     // ************************************************************************
     // Function
 
-    let edc : Class list -> ProcessGroup list -> Function =
+    let _no_functions_ : Function list = []
+
+    let environmental_discharge : Class list -> ProcessGroup list -> Function =
         _function "EDC" "Environmental Discharge" "EDC"
 
+    let control_automation : Class list -> ProcessGroup list -> Function =
+        _function "CAA" "Control and Automation" "CAA"

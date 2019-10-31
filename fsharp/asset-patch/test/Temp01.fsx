@@ -39,38 +39,72 @@ let endsInLoop (s : string) : bool =
     Regex.IsMatch(input = s, pattern = "Loop$")
 
 
-/// Apply a rewrite to ``TXTMI - Description (medium text)``
-let temp01 () = 
-    let source = @"G:\work\Projects\assets\asset_patch\file_download_edm\equi_hydroranger_200.txt"
-    
-    execCompiler () () <| 
-        compile {
-            let! rows = 
-                readEquiChangeFile source 
-                    |>> List.filter (fun x -> not (endsInLoop x.Description))
-            do! forMz rows (fun row -> printfn "%s" (row.Description); mreturn())
-            return ()
-        }
 
-let _no_assemblies_ = []
+let temp01 () : Function = 
+    let east_north_common = 
+        east_north [ easting  492729; northing 477323 ]
+    
+    environmental_discharge 
+        [ east_north_common 
+          aib_reference [ s4_aib_reference () ] 
+        ]
+        [ 
+          liquid_discharge
+            [ east_north_common
+              aib_reference [ s4_aib_reference () ] 
+            ]
+            [   
+              regulatory_monitoring
+                [ east_north_common 
+                  aib_reference [ s4_aib_reference () ]    
+                ]
+                [   
+                  montoring_system "SYS01" "EA Event Duration Monitoring"
+                    [ east_north_common 
+                      aib_reference [ s4_aib_reference () ]
+                    ]
+                    _no_assemblies_
+                    [ 
+                      lstn_level_transmitter "Storm Overflow Level Monitor Loop"
+                        [ east_north_common
+                          aib_reference [ s4_aib_reference () ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+
 
 let temp02 () : Function = 
     let east_north_common = 
         east_north [ easting  492729; northing 477323 ]
-    edc 
-        [ east_north_common ]
+    
+    control_automation 
+        [ east_north_common 
+          aib_reference [ s4_aib_reference () ] 
+        ]
         [ 
-            lqd [ east_north_common ]
-                [   rgm [ east_north_common ]    
-                        [   smon "SYS01" "EA Event Duration Monitoring"
-                                [ east_north_common ]
-                                _no_assemblies_
-                                [ lstn_level_transmitter "Storm Overflow Level Monitor Loop"
-                                    [   east_north_common
-                                        aib_reference
-                                            [ s4_aib_reference () ]
-                                    ]
-                                ]
-                        ]
+          networks
+            [ east_north_common
+              aib_reference [ s4_aib_reference () ] 
+            ]
+            [   
+              telemetry
+                [ east_north_common 
+                  aib_reference [ s4_aib_reference () ]    
                 ]
+                [   
+                  telemetry_system "SYS01" "Telemetry Outstation"
+                    [ east_north_common 
+                      aib_reference [ s4_aib_reference () ]
+                    ]
+                    _no_assemblies_
+                    [ 
+                      telemetry_outstation "Telemetry Outstation"
+                        [ east_north_common
+                          aib_reference [ s4_aib_reference () ]
+                        ]
+                    ]
+                ]            
+            ]
         ]
