@@ -67,7 +67,7 @@ module EntityTypes =
             |> AssocList.update "TXTMI"     funcLoc.Description
             |> AssocList.update "EQART"     funcLoc.ObjectType
 
-    let readFuncLocChangeFile (inputFile : string) : CompilerMonad<FuncLoc list, 'env, 'acc> = 
+    let readFuncLocChangeFile (inputFile : string) : CompilerMonad<FuncLoc list, 'env> = 
         compile { 
             let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
             return! mapM (liftResult << assocsToFuncLoc) ast.Rows
@@ -113,7 +113,7 @@ module EntityTypes =
             ; ("CLSTATUS1",     classFloc.Status.ToString())
             ]
 
-    let readClassFlocChangeFile (inputFile : string) : CompilerMonad<ClassFloc list, 'env, 'acc> = 
+    let readClassFlocChangeFile (inputFile : string) : CompilerMonad<ClassFloc list, 'env> = 
         compile { 
             let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
             return! mapM (liftResult << assocsToClassFloc) ast.Rows
@@ -151,7 +151,7 @@ module EntityTypes =
             |> AssocList.upsert "ATFLV"         valuaFloc.CharacteristicValue
 
 
-    let readValuaFlocChangeFile (inputFile : string) : CompilerMonad<ValuaFloc list, 'env, 'acc> = 
+    let readValuaFlocChangeFile (inputFile : string) : CompilerMonad<ValuaFloc list, 'env> = 
         compile { 
             let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
             return! mapM (liftResult << assocsToValuaFloc) ast.Rows
@@ -183,7 +183,7 @@ module EntityTypes =
             |> AssocList.upsert "TXTMI"         equi.Description
             |> AssocList.upsert "TPLN_EILO"     (equi.FuncLoc.ToString()) 
 
-    let readEquiChangeFile (inputFile : string) : CompilerMonad<Equi list, 'env, 'acc> = 
+    let readEquiChangeFile (inputFile : string) : CompilerMonad<Equi list, 'env> = 
         compile { 
             let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
             return! mapM (liftResult << assocsToEqui) ast.Rows
@@ -219,7 +219,7 @@ module EntityTypes =
             ; ("CLSTATUS1",     classEqui.Status.ToString())
             ]
 
-    let readClassEquiChangeFile (inputFile : string) : CompilerMonad<ClassEqui list, 'env, 'acc> = 
+    let readClassEquiChangeFile (inputFile : string) : CompilerMonad<ClassEqui list, 'env> = 
         compile { 
             let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
             return! mapM (liftResult << assocsToClassEqui) ast.Rows
@@ -262,7 +262,7 @@ module EntityTypes =
             |> AssocList.upsert "VALCNT"        (sprintf "04%i" valuaEqui.ValueCount)
             
 
-    let readValuaEquiChangeFile (inputFile : string) : CompilerMonad<ValuaEqui list, 'env, 'acc> = 
+    let readValuaEquiChangeFile (inputFile : string) : CompilerMonad<ValuaEqui list, 'env> = 
         compile { 
             let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
             return! mapM (liftResult << assocsToValuaEqui) ast.Rows

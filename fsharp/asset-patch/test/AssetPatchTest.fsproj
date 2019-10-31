@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <None Include="TestUtils01.fsx" />
-    <None Include="TestFlocPatch01.fsx" />
     <None Include="Hierarchy01.fsx" />
     <None Include="AssetCondition01.fsx" />
   </ItemGroup>

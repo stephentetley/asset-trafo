@@ -23,7 +23,7 @@ module Common =
    
 
     /// At least one row exists 
-    let getHeaderRow (rows : AssocList<string, string> list) : CompilerMonad<HeaderRow, 'env, 'acc> = 
+    let getHeaderRow (rows : AssocList<string, string> list) : CompilerMonad<HeaderRow, 'env> = 
         match rows with
         | [] -> throwError "getHeaderRow - empty list"
         | row1 :: _ -> row1 |> AssocList.keys |> HeaderRow |> mreturn
@@ -45,7 +45,7 @@ module Common =
     let private makeChangeFile (entityType : EntityType) 
                         (user : string) 
                         (timestamp : System.DateTime)
-                        (rows : AssocList<string, string> list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+                        (rows : AssocList<string, string> list) : CompilerMonad<ChangeFile, 'env> = 
         compile {
             let! header = getHeaderRow rows
             return { Header = makeHeader entityType user timestamp 
@@ -61,7 +61,7 @@ module Common =
     /// Compile a list for FuncLoc changes into a ChangeFile
     let compileFuncLocFile (user : string) 
                              (timestamp : System.DateTime)
-                             (rows : FuncLoc list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+                             (rows : FuncLoc list) : CompilerMonad<ChangeFile, 'env> = 
         rows
             |> List.sortBy (fun row -> row.Path.ToString()) 
             |> List.map funcLocToAssocs     
@@ -71,7 +71,7 @@ module Common =
     /// Compile a list for ClassFloc changes into a ChangeFile
     let compileClassFlocFile (user : string) 
                              (timestamp : System.DateTime)
-                             (rows : ClassFloc list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+                             (rows : ClassFloc list) : CompilerMonad<ChangeFile, 'env> = 
         rows
             |> List.sortBy (fun row -> row.Class + "!" + row.FuncLoc.ToString())
             |> List.map classFlocToAssocs     
@@ -81,7 +81,7 @@ module Common =
     /// Compile a list for ValuaFloc changes into a ChangeFile
     let compileValuaFlocFile (user : string) 
                              (timestamp : System.DateTime)
-                             (rows : ValuaFloc list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+                             (rows : ValuaFloc list) : CompilerMonad<ChangeFile, 'env> = 
         rows
             |> List.sortBy (fun row -> row.FuncLoc.ToString() + "!" + row.CharacteristicID)
             |> List.map valuaFlocToAssocs     
@@ -91,7 +91,7 @@ module Common =
     /// Compile a list for ClassEqui changes into a ChangeFile
     let compileEquiFile (user : string) 
                         (timestamp : System.DateTime)
-                         (rows : Equi list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+                         (rows : Equi list) : CompilerMonad<ChangeFile, 'env> = 
         rows
             |> List.sortBy (fun row -> row.EquipmentNumber.ToString())
             |> List.map equiToAssocs     
@@ -101,7 +101,7 @@ module Common =
     /// Compile a list for ClassEqui changes into a ChangeFile
     let compileClassEquiFile (user : string) 
                              (timestamp : System.DateTime)
-                             (rows : ClassEqui list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+                             (rows : ClassEqui list) : CompilerMonad<ChangeFile, 'env> = 
         rows
             |> List.sortBy (fun row -> row.EquipmentNumber.ToString() + row.Class)
             |> List.map classEquiToAssocs     
@@ -111,7 +111,7 @@ module Common =
     /// Compile a list for ValuaEqui changes into a ChangeFile
     let compileValuaEquiFile (user : string) 
                              (timestamp : System.DateTime)
-                             (rows : ValuaEqui list) : CompilerMonad<ChangeFile, 'env, 'acc> = 
+                             (rows : ValuaEqui list) : CompilerMonad<ChangeFile, 'env> = 
         rows
             |> List.sortBy (fun row -> row.EquipmentNumber)
             |> List.map valuaEquiToAssocs     
@@ -119,7 +119,7 @@ module Common =
 
 
     let writeChangeFileAndMetadata (outputPath: string)
-                                    (changeFile : ChangeFile) : CompilerMonad<unit, 'env, 'acc> =
+                                    (changeFile : ChangeFile) : CompilerMonad<unit, 'env> =
         compile {
             let variant1 = Path.GetFileNameWithoutExtension(outputPath) + ".variant.txt"
             let variantPath = Path.Combine(Path.GetDirectoryName(outputPath), variant1)        

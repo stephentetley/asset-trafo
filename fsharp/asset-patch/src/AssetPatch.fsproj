@@ -22,8 +22,6 @@
     <Compile Include="AssetPatch\FlocBuilder\Hierarchy.fs" />
     <Compile Include="AssetPatch\FlocBuilder\Catalogue.fs" />
     <Compile Include="AssetPatch\FlocBuilder\AddEquiClass.fs" />
-    <Compile Include="AssetPatch\FlocBuilder\FuncLocPatch.fs" />
-    <Compile Include="AssetPatch\FlocBuilder\FlocPatchMonad.fs" />
   </ItemGroup>
 
   <ItemGroup>
