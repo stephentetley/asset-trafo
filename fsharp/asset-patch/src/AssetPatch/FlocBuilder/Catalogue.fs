@@ -45,11 +45,14 @@ module Catalogue =
 
 
     let _no_equipment_ : Equipment list = []
+    let _no_subordinate_equipment_ : Equipment list = []
 
-    let lstn_level_transmitter (name : string) : Class list -> Equipment = 
+    let lstn_level_transmitter (name : string) 
+                : Class list -> Equipment list -> Equipment = 
         _equipment name "LSTN"
 
-    let telemetry_outstation (name : string) : Class list -> Equipment = 
+    let telemetry_outstation (name : string) 
+                : Class list -> Equipment list -> Equipment = 
         _equipment name "NETW"
 
 

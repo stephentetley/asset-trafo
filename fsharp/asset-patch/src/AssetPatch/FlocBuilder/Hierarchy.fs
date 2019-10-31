@@ -30,6 +30,7 @@ module Hierarchy =
           Description : string
           ObjectType : string
           Classes : Class list
+          SuboridnateEquipment : Equipment list
         }
 
     
@@ -105,11 +106,13 @@ module Hierarchy =
 
 
     let _equipment (description : string) (objectType : string)
-                    (classes : Class list) : Equipment = 
+                    (classes : Class list) 
+                    (subordinateEquipment : Equipment list) : Equipment = 
         { Code = EquipmentAnon
           Description = description
           ObjectType = objectType
-          Classes = classes }
+          Classes = classes 
+          SuboridnateEquipment = subordinateEquipment }
 
     
     let _component (token : string) (description : string) (objectType : string)

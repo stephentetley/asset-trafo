@@ -69,6 +69,7 @@ let temp01 () : Function =
                         [ east_north_common
                           aib_reference [ s4_aib_reference () ]
                         ]
+                        _no_subordinate_equipment_
                     ]
                 ]
             ]
@@ -94,7 +95,7 @@ let temp02 () : Function =
                   aib_reference [ s4_aib_reference () ]    
                 ]
                 [   
-                  telemetry_system "SYS01" "Telemetry Outstation"
+                  telemetry_system "SYS01" "Telemetry System"
                     [ east_north_common 
                       aib_reference [ s4_aib_reference () ]
                     ]
@@ -104,6 +105,7 @@ let temp02 () : Function =
                         [ east_north_common
                           aib_reference [ s4_aib_reference () ]
                         ]
+                        _no_subordinate_equipment_
                     ]
                 ]            
             ]
