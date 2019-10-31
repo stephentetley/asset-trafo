@@ -112,61 +112,61 @@ module Hierarchy =
           Classes = classes }
 
     
-    let _component (segment: FuncLocSegment) 
+    let _component (token : string) (description : string) (objectType : string)
                    (classes : Class list) (equipment : Equipment list) : Component = 
-        { FuncLocSegment = segment
+        { FuncLocSegment = _segment token description objectType
           Classes = classes 
           Equipment = equipment }
 
-    let _item (segment: FuncLocSegment) 
+    let _item (token : string) (description : string) (objectType : string)
                 (classes : Class list) 
                 (components : Component list) (equipment : Equipment list) : Item = 
-        { FuncLocSegment = segment
+        { FuncLocSegment = _segment token description objectType
           Classes = classes 
           Components = components
           Equipment = equipment }
 
-    let _assembly (segment: FuncLocSegment) 
+    let _assembly (token : string) (description : string) (objectType : string)
                     (classes : Class list) 
                     (items : Item list) (equipment : Equipment list) : Assembly = 
-        { FuncLocSegment = segment
+        { FuncLocSegment = _segment token description objectType
           Classes = classes 
           Items = items
           Equipment = equipment }
 
-    let _system (segment: FuncLocSegment) 
+    let _system (token : string) (description : string) (objectType : string)
                 (classes : Class list) 
                 (assemblies : Assembly list) (equipment : Equipment list) : System = 
-        { FuncLocSegment = segment
+        { FuncLocSegment = _segment token description objectType
           Classes = classes 
           Assemblies = assemblies
           Equipment = equipment }
 
-    let _process (segment: FuncLocSegment) 
+    let _process (token : string) (description : string) (objectType : string)
                     (classes : Class list) 
                     (systems : System list) : Process = 
-        { FuncLocSegment = segment
+        { FuncLocSegment = _segment token description objectType
           Classes = classes 
           Systems = systems }
 
-    let _processGroup (segment: FuncLocSegment) 
+    let _processGroup (token : string) (description : string) (objectType : string)    
                         (classes : Class list) 
                         (processes : Process list) : ProcessGroup = 
-        { FuncLocSegment = segment
+        { FuncLocSegment = _segment token description objectType
           Classes = classes 
           Processes = processes }
 
-    let _function (segment: FuncLocSegment) 
+    let _function (token : string) (description : string) (objectType : string)
                   (classes : Class list) 
                   (processGroups : ProcessGroup list) : Function = 
-        { FuncLocSegment = segment
+        { FuncLocSegment = _segment token description objectType
           Classes = classes 
           ProcessGroups = processGroups }
 
-    let _site (segment: FuncLocSegment) 
+    let _site (token : string) (description : string) (objectType : string)
                 (classes : Class list) 
                 (functions : Function list) : Site = 
-        { FuncLocSegment = segment
+        { FuncLocSegment = _segment token description objectType
           Classes = classes 
           Functions = functions }
 

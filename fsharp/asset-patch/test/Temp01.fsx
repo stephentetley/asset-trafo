@@ -52,12 +52,25 @@ let temp01 () =
             return ()
         }
 
+let _no_assemblies_ = []
 
-let temp02 () = 
-    lstn_level_transmitter "Storm Overflow Level Monitor Loop"
-        [ east_north
-                [ easting 492729
-                  northing 477323
-                ]        
+let temp02 () : Function = 
+    let east_north_common = 
+        east_north [ easting  492729; northing 477323 ]
+    edc 
+        [ east_north_common ]
+        [ 
+            lqd [ east_north_common ]
+                [   rgm [ east_north_common ]    
+                        [   smon "SYS01" "EA Event Duration Monitoring"
+                                [ east_north_common ]
+                                _no_assemblies_
+                                [ lstn_level_transmitter "Storm Overflow Level Monitor Loop"
+                                    [   east_north_common
+                                        aib_reference
+                                            [ s4_aib_reference () ]
+                                    ]
+                                ]
+                        ]
+                ]
         ]
-
