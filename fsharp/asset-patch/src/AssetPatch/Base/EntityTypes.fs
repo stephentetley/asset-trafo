@@ -228,21 +228,26 @@ module EntityTypes =
     // ************************************************************************
     // ValuaEqui
 
+
+    /// ValueCount is the number of instances for this charcteristic 
+    /// in a class.
     type ValuaEqui = 
         { EquipmentNumber : IntegerString
           ClassType : IntegerString
           CharacteristicID : string
           CharacteristicValue : string
+          ValueCount : int
           Attributes : AssocList<string, string>
         }
     
     let assocsToValuaEqui (attributes : AssocList<string, string>) : Result<ValuaEqui, ErrMsg> = 
-        match AssocList.tryFind4 "EQUI" "CLASSTYPE" "CHARID" "ATWRT" attributes with
-        | Some (number, claztype, cid, cvalue) -> 
+        match AssocList.tryFind5 "EQUI" "CLASSTYPE" "CHARID" "ATWRT" "VALCNT" attributes with
+        | Some (number, claztype, cid, cvalue, count) -> 
             Ok { EquipmentNumber = IntegerString.OfString number
                  ClassType = IntegerString.OfString claztype
                  CharacteristicID = cid
                  CharacteristicValue = cvalue
+                 ValueCount = int count
                  Attributes = attributes }
          | None -> Error "Could not find required fields for a ValuaEqui"
 
@@ -254,7 +259,8 @@ module EntityTypes =
             |> AssocList.upsert "CHARID"        valuaEqui.CharacteristicID
             |> AssocList.upsert "ATWRT"         valuaEqui.CharacteristicValue
             |> AssocList.upsert "TEXTBEZ"       valuaEqui.CharacteristicValue
-            // |> AssocList.update "ATFLV"         valuaEqui.CharacteristicValue
+            |> AssocList.upsert "VALCNT"        (sprintf "04%i" valuaEqui.ValueCount)
+            
 
     let readValuaEquiChangeFile (inputFile : string) : CompilerMonad<ValuaEqui list, 'env, 'acc> = 
         compile { 

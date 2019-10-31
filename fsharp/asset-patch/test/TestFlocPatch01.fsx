@@ -30,7 +30,6 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
 #load "..\src\AssetPatch\FlocBuilder\Common.fs"
 #load "..\src\AssetPatch\FlocBuilder\FuncLocPatch.fs"
-#load "..\src\AssetPatch\FlocBuilder\ClassFlocPatch.fs"
 #load "..\src\AssetPatch\FlocBuilder\FlocPatchMonad.fs"
 open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.Parser

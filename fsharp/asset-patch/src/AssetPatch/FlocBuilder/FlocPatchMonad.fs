@@ -3,7 +3,7 @@
 
 namespace AssetPatch.FlocBuilder
 
-
+/// OBSOLETE
 module FlocPatchMonad =
 
     open System
@@ -16,7 +16,6 @@ module FlocPatchMonad =
     open AssetPatch.Base.EntityTypes
     open AssetPatch.FlocBuilder.Common
     open AssetPatch.FlocBuilder.FuncLocPatch
-    open AssetPatch.FlocBuilder.ClassFlocPatch
     
 
     type Env = 
@@ -174,9 +173,9 @@ module FlocPatchMonad =
                 let! flPatch = makeFuncLocPatch config.User config.Timestamp flocs
                 let flFile = Path.Combine(outputDirectory, sprintf "%s_01_add_funclocs.txt" root)
                 do! writeChangeFileAndMetadata flFile flPatch
-                let! cfPatch = makeClassFlocPatch config.User config.Timestamp flocs
-                let cfFile = Path.Combine(outputDirectory, sprintf "%s_02_add_classflocs.txt" root)
-                do! writeChangeFileAndMetadata cfFile cfPatch
+                //let! cfPatch = makeClassFlocPatch config.User config.Timestamp flocs
+                //let cfFile = Path.Combine(outputDirectory, sprintf "%s_02_add_classflocs.txt" root)
+                //do! writeChangeFileAndMetadata cfFile cfPatch
                 return ans
             }
 

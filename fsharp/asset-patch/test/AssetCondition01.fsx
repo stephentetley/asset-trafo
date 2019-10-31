@@ -30,6 +30,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\FlocBuilder\Common.fs"
 #load "..\src\AssetPatch\FlocBuilder\Hierarchy.fs"
 #load "..\src\AssetPatch\FlocBuilder\Catalogue.fs"
+#load "..\src\AssetPatch\FlocBuilder\AddEquiClass.fs"
 open AssetPatch.Base
 open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.CompilerMonad
@@ -37,7 +38,7 @@ open AssetPatch.Base.EntityTypes
 open AssetPatch.FlocBuilder.Common
 open AssetPatch.FlocBuilder.Hierarchy
 open AssetPatch.FlocBuilder.Catalogue
-
+open AssetPatch.FlocBuilder.AddEquiClass
 
 let outputFile (relFileName : string) : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
@@ -53,46 +54,11 @@ let assetConditionTemplate (year : uint32) : Class =
           survey_date year
         ]
 
-let dummy01 () = 
-    assetConditionTemplate 2019u
 
-
-
-let makeClassEqui (equiNumber : IntegerString)  (clazz : Class) : ClassEqui = 
-    { EquipmentNumber = equiNumber
-      Class = clazz.ClassName
-      ClassType = IntegerString.OfString "002"
-      ClassNumber = IntegerString.Create(10, clazz.ClassInt)
-      Status = 1
-      }
-
-let makeValuaEqui (equiNumber : IntegerString) (charac : Characteristic) : ValuaEqui = 
-    { EquipmentNumber = equiNumber
-      ClassType = IntegerString.OfString "002"
-      CharacteristicID = charac.Name
-      CharacteristicValue = charac.Value
-      Attributes = AssocList.empty
-    }
-
-let translate (equiNumber : IntegerString)  (clazz : Class) : ClassEqui * ValuaEqui list = 
-    let ce = makeClassEqui equiNumber clazz
-    (ce, [])
 
         
 let test01 () = 
-    let outPath1 = outputFile "asset_condition_01_classequi.txt"
-    let outPath2 = outputFile "asset_condition_02_valuaequi.txt"
-    let equipmentIds = 
-        [ 101001407u; 101001410u ] |> List.map (fun x -> IntegerString.Create(9, x))
-    let classes = 
-        List.map (fun uid -> makeClassEqui uid (assetConditionTemplate 2019u)) equipmentIds
-            
-
-    evalCompiler () () <|
-        compile {
-            // let! changeFile = compileValuaEquiFile "TETLEYS" System.DateTime.Now values
-            let! classChangeFile = compileClassEquiFile "TETLEYS" System.DateTime.Now classes
-            do! writeChangeFileAndMetadata outPath1 classChangeFile
-            return ()
-        }
-
+    let classEquiFile = outputFile "asset_condition_01_classequi.txt"
+    let valuaEquiFile = outputFile "asset_condition_02_valuaequi.txt"
+    let equi = IntegerString.OfString "101001407"
+    makeAddPatches classEquiFile valuaEquiFile "TETLEYS" equi (assetConditionTemplate 2019u)
