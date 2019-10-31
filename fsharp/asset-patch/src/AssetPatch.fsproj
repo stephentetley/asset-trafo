@@ -20,6 +20,7 @@
     <Compile Include="AssetPatch\Utilities\TidyChangeFile.fs" />
     <Compile Include="AssetPatch\FlocBuilder\Common.fs" />
     <Compile Include="AssetPatch\FlocBuilder\Hierarchy.fs" />
+    <Compile Include="AssetPatch\FlocBuilder\Catalogue.fs" />
     <Compile Include="AssetPatch\FlocBuilder\FuncLocPatch.fs" />
     <Compile Include="AssetPatch\FlocBuilder\ClassFlocPatch.fs" />
     <Compile Include="AssetPatch\FlocBuilder\FlocPatchMonad.fs" />

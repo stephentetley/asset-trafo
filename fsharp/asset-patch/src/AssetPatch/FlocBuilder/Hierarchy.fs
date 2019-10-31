@@ -11,9 +11,6 @@ module Hierarchy =
     open AssetPatch.Base.EntityTypes
     
 
-    let readFloc (s : string) : FuncLocPath = 
-        FuncLocPath.Create(s)
-
     type Characteristic = 
         | Characteristic of name : string * value : string
 
@@ -23,10 +20,6 @@ module Hierarchy =
           ClassInt : uint32
           Characteritics : Characteristic list
         }
-
-      
-
-
 
     type EquipmentCode = 
         | EquipmentCode of string
@@ -39,13 +32,6 @@ module Hierarchy =
           Classes : Class list
         }
 
-
-    //type Floc = 
-    //    { Segment : string
-    //      Description : string
-    //      ObjectType : string
-    //      Classes : Class list
-    //    }
     
     type Component = 
         { FuncLocSegment : FuncLocSegment
@@ -131,3 +117,56 @@ module Hierarchy =
         { FuncLocSegment = segment
           Classes = classes 
           Equipment = equipment }
+
+    let _item (segment: FuncLocSegment) 
+                (classes : Class list) 
+                (components : Component list) (equipment : Equipment list) : Item = 
+        { FuncLocSegment = segment
+          Classes = classes 
+          Components = components
+          Equipment = equipment }
+
+    let _assembly (segment: FuncLocSegment) 
+                    (classes : Class list) 
+                    (items : Item list) (equipment : Equipment list) : Assembly = 
+        { FuncLocSegment = segment
+          Classes = classes 
+          Items = items
+          Equipment = equipment }
+
+    let _system (segment: FuncLocSegment) 
+                (classes : Class list) 
+                (assemblies : Assembly list) (equipment : Equipment list) : System = 
+        { FuncLocSegment = segment
+          Classes = classes 
+          Assemblies = assemblies
+          Equipment = equipment }
+
+    let _process (segment: FuncLocSegment) 
+                    (classes : Class list) 
+                    (systems : System list) : Process = 
+        { FuncLocSegment = segment
+          Classes = classes 
+          Systems = systems }
+
+    let _processGroup (segment: FuncLocSegment) 
+                        (classes : Class list) 
+                        (processes : Process list) : ProcessGroup = 
+        { FuncLocSegment = segment
+          Classes = classes 
+          Processes = processes }
+
+    let _function (segment: FuncLocSegment) 
+                  (classes : Class list) 
+                  (processGroups : ProcessGroup list) : Function = 
+        { FuncLocSegment = segment
+          Classes = classes 
+          ProcessGroups = processGroups }
+
+    let _site (segment: FuncLocSegment) 
+                (classes : Class list) 
+                (functions : Function list) : Site = 
+        { FuncLocSegment = segment
+          Classes = classes 
+          Functions = functions }
+
