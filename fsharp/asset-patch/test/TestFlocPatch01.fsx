@@ -28,14 +28,14 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\FuncLocPath.fs"
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
-#load "..\src\AssetPatch\FlocPatch\Common.fs"
-#load "..\src\AssetPatch\FlocPatch\FuncLocPatch.fs"
-#load "..\src\AssetPatch\FlocPatch\ClassFlocPatch.fs"
-#load "..\src\AssetPatch\FlocPatch\FlocPatchMonad.fs"
+#load "..\src\AssetPatch\FlocBuilder\Common.fs"
+#load "..\src\AssetPatch\FlocBuilder\FuncLocPatch.fs"
+#load "..\src\AssetPatch\FlocBuilder\ClassFlocPatch.fs"
+#load "..\src\AssetPatch\FlocBuilder\FlocPatchMonad.fs"
 open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.Parser
 open AssetPatch.Base.Printer
-open AssetPatch.FlocPatch.FlocPatchMonad
+open AssetPatch.FlocBuilder.FlocPatchMonad
 
 
 let outputDirectory () : string = 

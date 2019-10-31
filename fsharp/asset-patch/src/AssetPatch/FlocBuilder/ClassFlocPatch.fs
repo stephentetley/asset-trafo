@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.FlocPatch
+namespace AssetPatch.FlocBuilder
 
 
 
@@ -17,7 +17,7 @@ module ClassFlocPatch =
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.Base.EntityTypes
-    open AssetPatch.FlocPatch.Common
+    open AssetPatch.FlocBuilder.Common
     
 
     

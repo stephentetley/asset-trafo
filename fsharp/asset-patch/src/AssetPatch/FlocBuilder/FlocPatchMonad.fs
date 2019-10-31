@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.FlocPatch
+namespace AssetPatch.FlocBuilder
 
 
 module FlocPatchMonad =
@@ -14,9 +14,9 @@ module FlocPatchMonad =
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.Printer
     open AssetPatch.Base.EntityTypes
-    open AssetPatch.FlocPatch.Common
-    open AssetPatch.FlocPatch.FuncLocPatch
-    open AssetPatch.FlocPatch.ClassFlocPatch
+    open AssetPatch.FlocBuilder.Common
+    open AssetPatch.FlocBuilder.FuncLocPatch
+    open AssetPatch.FlocBuilder.ClassFlocPatch
     
 
     type Env = 

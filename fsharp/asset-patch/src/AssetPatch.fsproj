@@ -18,11 +18,11 @@
     <Compile Include="AssetPatch\Base\EntityTypes.fs" />
     <Compile Include="AssetPatch\Utilities\ChangeFileReport.fs" />
     <Compile Include="AssetPatch\Utilities\TidyChangeFile.fs" />
-    <Compile Include="AssetPatch\FlocPatch\Common.fs" />
-    <Compile Include="AssetPatch\FlocPatch\Hierarchy.fs" />
-    <Compile Include="AssetPatch\FlocPatch\FuncLocPatch.fs" />
-    <Compile Include="AssetPatch\FlocPatch\ClassFlocPatch.fs" />
-    <Compile Include="AssetPatch\FlocPatch\FlocPatchMonad.fs" />
+    <Compile Include="AssetPatch\FlocBuilder\Common.fs" />
+    <Compile Include="AssetPatch\FlocBuilder\Hierarchy.fs" />
+    <Compile Include="AssetPatch\FlocBuilder\FuncLocPatch.fs" />
+    <Compile Include="AssetPatch\FlocBuilder\ClassFlocPatch.fs" />
+    <Compile Include="AssetPatch\FlocBuilder\FlocPatchMonad.fs" />
   </ItemGroup>
 
   <ItemGroup>
