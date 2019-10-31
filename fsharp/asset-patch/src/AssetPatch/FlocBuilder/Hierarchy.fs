@@ -12,8 +12,9 @@ module Hierarchy =
     
 
     type Characteristic = 
-        | Characteristic of name : string * value : string
-
+        { Name : string
+          Value : string 
+        }
 
     type Class = 
         { ClassName : string          
@@ -97,7 +98,9 @@ module Hierarchy =
         }
     
     let _char (name : string) (value : string) : Characteristic = 
-        Characteristic(name, value)
+        { Name = name
+          Value = value
+        }
 
     let _class (name : string) (number : uint32) (values : Characteristic list) : Class = 
         { ClassName = name

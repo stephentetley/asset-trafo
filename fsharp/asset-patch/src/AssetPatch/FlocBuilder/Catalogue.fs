@@ -26,6 +26,70 @@ module Catalogue =
         _char "S4_AIB_REFERENCE" ""
 
 
+    /// ASSET_CONDITION
+    let asset_condition : Characteristic list -> Class = 
+        _class "ASSET_CONDITION" 1013u
+
+    // ASSET_CONDITION:ConditionGrade
+    type ConditionGrade = 
+        | Good 
+
+        override x.ToString() = 
+            match x with
+            | Good -> "1 - GOOD"
+
+            
+    /// ASSET_CONDITION:CONDITION_GRADE
+    let condition_grade (v : ConditionGrade) : Characteristic = 
+        _char "CONDITION_GRADE" (v.ToString())
+
+
+    /// ASSET_CONDITION:CONDITION_GRADE_REASON
+    let condition_grade_reason (v : string) : Characteristic = 
+           _char "CONDITION_GRADE_REASON" (v.ToUpper())
+
+    /// ASSET_CONDITION:PerformanceGrade
+    type PerformanceGrade = 
+        | Availability_95 
+
+        override x.ToString() = 
+            match x with
+            | Availability_95 -> "1 - AVAILABILITY 95%"
+
+
+    /// ASSET_CONDITION:PERFORMANCE_GRADE
+    let performance_grade (v : PerformanceGrade) : Characteristic = 
+        _char "PERFORMANCE_GRADE" (v.ToString())
+
+
+    /// ASSET_CONDITION:PERFORMANCE_GRADE_REASON
+    let performance_grade_reason (v : string) : Characteristic = 
+        _char "PERFORMANCE_GRADE_REASON" (v.ToUpper())
+
+
+    /// ASSET_CONDITION:LoadingFactor
+    type LoadingFactor = 
+        | Satisfactory 
+
+        override x.ToString() = 
+            match x with
+            | Satisfactory -> "3 - SATISFACTORY"
+
+    /// ASSET_CONDITION:LOADING_FACTOR
+    let loading_factor (v : LoadingFactor) : Characteristic = 
+        _char "LOADING_FACTOR" (v.ToString())
+
+
+    /// ASSET_CONDITION:LOADING_FACTOR_REASON
+    let loading_factor_reason (v : string) : Characteristic = 
+         _char "LOADING_FACTOR_REASON" (v.ToUpper())
+
+
+    /// ASSET_CONDITION:SURVEY_DATE
+    let survey_date (v : uint32) : Characteristic = 
+        _char "LOADING_FACTOR_REASON" (v.ToString())
+
+
     /// EAST_NORTH
     let east_north : Characteristic list -> Class = 
         _class "EAST_NORTH" 379u 

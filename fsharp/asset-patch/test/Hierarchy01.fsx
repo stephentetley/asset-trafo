@@ -42,7 +42,7 @@ let endsInLoop (s : string) : bool =
 
 let temp01 () : Function = 
     let east_north_common = 
-        east_north [ easting  492729; northing 477323 ]
+        east_north [ easting 492729; northing 477323 ]
     
     environmental_discharge 
         [ east_north_common 
