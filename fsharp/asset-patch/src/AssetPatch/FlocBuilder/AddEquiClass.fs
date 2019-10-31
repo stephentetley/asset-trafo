@@ -19,7 +19,8 @@ module AddEquiClass =
     open AssetPatch.FlocBuilder.Hierarchy
     
 
-    let private makeValuaEqui (equiNumber : IntegerString) (count : int) (charac : Characteristic) : ValuaEqui = 
+    let private makeValuaEqui (equiNumber : IntegerString) 
+                                (count : int) (charac : Characteristic) : ValuaEqui = 
         { EquipmentNumber = equiNumber
           ClassType = IntegerString.OfString "002"
           CharacteristicID = charac.Name
@@ -48,7 +49,7 @@ module AddEquiClass =
         let vs : ValuaEqui list  = 
             clazz.Characteritics 
                 |> List.sortBy (fun x -> x.Name)
-                |> List.groupBy (fun x -> x.Name)
+                |> List.groupBy (fun x -> x.Name)               
                 |> List.map (snd >> makeGrouped)
                 |> List.concat
         (ce, vs)
@@ -57,7 +58,7 @@ module AddEquiClass =
                         (valuaequiFile : string) 
                         (user: string) 
                         (equiNumber : IntegerString)  
-                        (clazz : Class) : CompilerMonad<unit, 'env, 'acc> = 
+                        (clazz : Class) : CompilerMonad<unit, 'env> = 
         compile {
             let (ce, vs) = makeEntities equiNumber clazz
             let! classChanges = compileClassEquiFile user DateTime.Now [ce]
@@ -72,6 +73,6 @@ module AddEquiClass =
                         (user: string) 
                         (equiNumber : IntegerString)  
                         (clazz : Class) : Result<unit, ErrMsg> = 
-        runCompiler () () 
+        runCompiler () 
             (makeAddPatches1 classequiFile valuaequiFile user equiNumber clazz)
-                |> Result.map fst
+

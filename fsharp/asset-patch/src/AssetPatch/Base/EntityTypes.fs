@@ -259,7 +259,7 @@ module EntityTypes =
             |> AssocList.upsert "CHARID"        valuaEqui.CharacteristicID
             |> AssocList.upsert "ATWRT"         valuaEqui.CharacteristicValue
             |> AssocList.upsert "TEXTBEZ"       valuaEqui.CharacteristicValue
-            |> AssocList.upsert "VALCNT"        (sprintf "04%i" valuaEqui.ValueCount)
+            |> AssocList.upsert "VALCNT"        (sprintf "%04i" valuaEqui.ValueCount)
             
 
     let readValuaEquiChangeFile (inputFile : string) : CompilerMonad<ValuaEqui list, 'env> = 

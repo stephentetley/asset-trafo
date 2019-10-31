@@ -87,7 +87,7 @@ module Catalogue =
 
     /// ASSET_CONDITION:SURVEY_DATE
     let survey_date (v : uint32) : Characteristic = 
-        _char "LOADING_FACTOR_REASON" (v.ToString())
+        _char "SURVEY_DATE" (v.ToString())
 
 
     /// EAST_NORTH

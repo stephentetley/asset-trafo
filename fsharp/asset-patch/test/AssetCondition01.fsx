@@ -31,11 +31,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\FlocBuilder\Hierarchy.fs"
 #load "..\src\AssetPatch\FlocBuilder\Catalogue.fs"
 #load "..\src\AssetPatch\FlocBuilder\AddEquiClass.fs"
-open AssetPatch.Base
 open AssetPatch.Base.ChangeFile
-open AssetPatch.Base.CompilerMonad
-open AssetPatch.Base.EntityTypes
-open AssetPatch.FlocBuilder.Common
 open AssetPatch.FlocBuilder.Hierarchy
 open AssetPatch.FlocBuilder.Catalogue
 open AssetPatch.FlocBuilder.AddEquiClass
