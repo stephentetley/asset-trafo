@@ -34,7 +34,7 @@ module ClassAddPatcher =
                             (elements : (IntegerString * Class) list) : CompilerMonad<unit, 'env> = 
         compile {
             let (cs, vs) = 
-                elements |> List.map (fun (x,c) -> makeEquiAttributes x c) |> collectLists
+                elements |> List.map (fun (x,c) -> makeEquiProperties1 x c) |> collectLists
             let! classChanges = compileClassEquiFile user DateTime.Now cs
             let! valuaChanges = compileValuaEquiFile user DateTime.Now vs
             do! writeChangeFileAndMetadata classEquiFile classChanges
@@ -59,7 +59,7 @@ module ClassAddPatcher =
                             (elements : (FuncLocPath * Class) list)  : CompilerMonad<unit, 'env> = 
         compile {
             let (cs, vs) = 
-                elements |> List.map (fun (x,c) ->  makeFlocAttributes x c) |> collectLists
+                elements |> List.map (fun (x,c) ->  makeFlocProperties1 x c) |> collectLists
             let! classChanges = compileClassFlocFile user DateTime.Now cs
             let! valuaChanges = compileValuaFlocFile user DateTime.Now vs
             do! writeChangeFileAndMetadata classFlocFile classChanges

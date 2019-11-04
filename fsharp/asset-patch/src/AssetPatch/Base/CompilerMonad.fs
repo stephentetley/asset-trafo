@@ -13,33 +13,40 @@ module CompilerMonad =
     open AssetPatch.Base.Common
 
 
-    /// CompilerMonad is a Reader-Error monad.
+    type NameSupply = 
+        { EquipmentIndex: int        
+        }
+
+    type State = NameSupply
+
+    /// CompilerMonad is a Reader-Error-State(name supply) monad.
     type CompilerMonad<'a, 'env> = 
-        CompilerMonad of ('env -> Result<'a, ErrMsg>)
+        CompilerMonad of ('env -> State -> Result<'a * State, ErrMsg>)
 
     let inline private apply1 (ma : CompilerMonad<'a, 'env>) 
-                                (env : 'env) : Result<'a, ErrMsg> = 
-        let (CompilerMonad fn) = ma in fn env
+                                (env : 'env) 
+                                (st : NameSupply) : Result<'a * NameSupply, ErrMsg> = 
+        let (CompilerMonad fn) = ma in fn env st
 
     let mreturn (x:'a) : CompilerMonad<'a, 'env> = 
-        CompilerMonad <| fun _ -> Ok x
+        CompilerMonad <| fun _ st -> Ok (x, st)
 
     let inline private bindM (ma : CompilerMonad<'a, 'env>) 
                              (fn : 'a -> CompilerMonad<'b, 'env>) : CompilerMonad<'b, 'env> =
-        CompilerMonad <| fun env -> 
-            match apply1 ma env with
-            | Ok a -> apply1 (fn a) env
+        CompilerMonad <| fun env st -> 
+            match apply1 ma env st with
+            | Ok(a, st1) -> apply1 (fn a) env st1
             | Error msg -> Error msg
 
     let failM (msg:string) : CompilerMonad<'a, 'env> = 
-        CompilerMonad (fun _ -> Error msg)
+        CompilerMonad (fun _ _ -> Error msg)
     
     let inline private altM  (ma : CompilerMonad<'a, 'env>) 
                              (mb : CompilerMonad<'a, 'env>) : CompilerMonad<'a, 'env> = 
-        CompilerMonad <| fun env -> 
-            match apply1 ma env with
+        CompilerMonad <| fun env st -> 
+            match apply1 ma env st with
             | Ok ans -> Ok ans
-            | Error _ -> apply1 mb env
+            | Error _ -> apply1 mb env st
     
     
     let inline private delayM (fn : unit -> CompilerMonad<'a, 'env>) : CompilerMonad<'a, 'env> = 
@@ -59,7 +66,11 @@ module CompilerMonad =
 
     let runCompiler (env: 'env) 
                     (action : CompilerMonad<'a, 'env> ) : Result<'a, ErrMsg> = 
-        apply1 action env 
+        let stateZero = 
+            { EquipmentIndex = 1 }
+        apply1 action env stateZero |> Result.map fst
+
+
     // ************************************************************************
     // Usual monadic operations
 
@@ -67,10 +78,9 @@ module CompilerMonad =
     // Common operations
     let fmapM (update : 'a -> 'b) 
               (action : CompilerMonad<'a, 'env>) : CompilerMonad<'b, 'env> = 
-        CompilerMonad <| fun env ->
-            match apply1 action env with
-            | Ok a -> Ok (update a)
-            | Error msg -> Error msg
+        CompilerMonad <| fun env st ->
+            apply1 action env st |> Result.map (fun (a,st1) -> (update a, st1))
+            
        
     /// Operator for fmap.
     let ( |>> ) (action : CompilerMonad<'a, 'env>) 
@@ -175,15 +185,14 @@ module CompilerMonad =
     // Errors
 
     let throwError (msg : string) : CompilerMonad<'a, 'env> = 
-        CompilerMonad <| fun _-> Error msg
+        CompilerMonad <| fun _ _ -> Error msg
 
 
     let swapError (newMessage : string) 
                   (ma : CompilerMonad<'a, 'env>) : CompilerMonad<'a, 'env> = 
-        CompilerMonad <| fun env -> 
-            match apply1 ma env with
-            | Ok a -> Ok a
-            | Error _ -> Error newMessage
+        CompilerMonad <| fun env st -> 
+            apply1 ma env st |> Result.mapError (fun _ -> newMessage)
+            
 
     /// Operator for flip swapError
     let ( <?> ) (action : CompilerMonad<'a, 'env>) (msg : string) : CompilerMonad<'a, 'env> = 
@@ -191,22 +200,30 @@ module CompilerMonad =
     
     let augmentError (update : string -> string) 
                      (action : CompilerMonad<'a, 'env>) : CompilerMonad<'a, 'env> = 
-        CompilerMonad <| fun env ->
-            match apply1 action env with
-            | Ok a -> Ok a
-            | Error msg -> Error (update msg)
+        CompilerMonad <| fun env st ->
+            apply1 action env st |> Result.mapError update
+
 
 
     // ************************************************************************
     // Reader operations
 
     let ask () : CompilerMonad<'env, 'env> = 
-        CompilerMonad <| fun env -> Ok env
+        CompilerMonad <| fun env st -> Ok (env, st)
 
     let asks (projection : 'env -> 'ans) : CompilerMonad<'ans, 'env> = 
-        CompilerMonad <| fun env -> Ok (projection env)
+        CompilerMonad <| fun env st -> Ok (projection env, st)
+
+    // ************************************************************************
+    // Name Supply 
+
+    let newEquipmentName () : CompilerMonad<string, 'env> = 
+        CompilerMonad <| fun env st -> 
+            let name = sprintf "MAGIC$%06i" st.EquipmentIndex
+            Ok (name, {st with EquipmentIndex = st.EquipmentIndex + 1})
 
 
+ 
 
 
     // ************************************************************************
@@ -239,10 +256,10 @@ module CompilerMonad =
     /// On failure, recover or throw again with the handler.
     let attempt (action : CompilerMonad<'a, 'env>) 
                 (handler : ErrMsg -> CompilerMonad<'a, 'env>) : CompilerMonad<'a, 'env> = 
-        CompilerMonad <| fun env ->
-            match apply1 action env with
+        CompilerMonad <| fun env st ->
+            match apply1 action env st with
             | Ok ans -> Ok ans
-            | Error msg -> apply1 (handler msg) env
+            | Error msg -> apply1 (handler msg) env st
 
     /// Run a potentially failing action. If it succeeds the answer
     /// is wrapped in ``Some``. 
@@ -263,12 +280,13 @@ module CompilerMonad =
 
 
     let choice (actions : CompilerMonad<'a, 'env> list) : CompilerMonad<'a, 'env> = 
-        CompilerMonad <| fun env -> 
+        CompilerMonad <| fun env state -> 
+            /// State doesn't need to be in the worker
             let rec work acts cont = 
                 match acts with 
                 | [] -> Error "choice"
                 | action1 :: rest ->
-                    match apply1 action1 env with
+                    match apply1 action1 env state with
                     | Ok ans -> cont (Ok ans)
                     | Error _ -> work rest cont
             work actions (fun x -> x)
@@ -421,19 +439,20 @@ module CompilerMonad =
     /// Implemented in CPS 
     let mapM (mf: 'a -> CompilerMonad<'b, 'env>) 
              (source : 'a list) : CompilerMonad<'b list, 'env> = 
-        CompilerMonad <| fun env -> 
-            let rec work (xs : 'a list)                       
-                         (fk : ErrMsg -> Result<'b list, ErrMsg>) 
-                         (sk : 'b list -> Result<'b list, ErrMsg>) = 
+        CompilerMonad <| fun env state -> 
+            let rec work (xs : 'a list)   
+                         (st : State)
+                         (fk : ErrMsg -> Result<'b list * State, ErrMsg>) 
+                         (sk : 'b list -> State -> Result<'b list * State, ErrMsg>) = 
                 match xs with
-                | [] -> sk []
-                | y :: ys -> 
-                    match apply1 (mf y) env with
+                | [] -> sk [] st
+                | x :: rest -> 
+                    match apply1 (mf x) env st with
                     | Error msg -> fk msg
-                    | Ok v1 -> 
-                        work ys fk (fun vs ->
+                    | Ok (v1, st1) -> 
+                        work rest st1 fk (fun vs ->
                         sk (v1::vs))
-            work source (fun msg -> Error msg) (fun ans -> Ok ans)
+            work source state (fun msg -> Error msg) (fun ans st -> Ok (ans,st))
 
     let forM (xs : 'a list) 
              (fn : 'a -> CompilerMonad<'b, 'env>) : CompilerMonad<'b list, 'env> = 
@@ -443,59 +462,62 @@ module CompilerMonad =
     /// Implemented in CPS 
     let mapMz (mf: 'a -> CompilerMonad<'b, 'env>) 
               (source : 'a list) : CompilerMonad<unit, 'env> = 
-        CompilerMonad <| fun env -> 
+        CompilerMonad <| fun env state -> 
             let rec work (xs : 'a list)
-                         (fk : ErrMsg -> Result<unit, ErrMsg>) 
-                         (sk : unit -> Result<unit, ErrMsg>) = 
+                         (st : State)
+                         (fk : ErrMsg -> Result<unit * State, ErrMsg>) 
+                         (sk : State -> Result<unit * State, ErrMsg>) = 
                 match xs with
-                | [] -> sk ()
-                | y :: ys -> 
-                    match apply1 (mf y) env with
+                | [] -> sk st
+                | x :: rest ->
+                    match apply1 (mf x) env st with
                     | Error msg -> fk msg
-                    | Ok _ -> 
-                        work ys fk sk
-            work source (fun msg -> Error msg) (fun _ -> Ok ())
+                    | Ok (_, st1) -> 
+                        work rest st1 fk sk
+            work source state (fun msg -> Error msg) (fun st -> Ok ((), st))
 
 
     let forMz (xs : 'a list) 
               (fn : 'a -> CompilerMonad<'b, 'env>) : CompilerMonad<unit, 'env> = 
         mapMz fn xs
 
-    let foldM (action : 'state -> 'a -> CompilerMonad<'state, 'env>) 
-                (state : 'state)
-                (source : 'a list) : CompilerMonad<'state, 'env> = 
-        CompilerMonad <| fun env -> 
-            let rec work (st : 'state) 
+    let foldM (action : 'acc -> 'a -> CompilerMonad<'acc, 'env>) 
+                (initial : 'acc)
+                (source : 'a list) : CompilerMonad<'acc, 'env> = 
+        CompilerMonad <| fun env state -> 
+            let rec work (acc : 'acc) 
                             (xs : 'a list) 
-                            (fk : ErrMsg -> Result<'state, ErrMsg>) 
-                            (sk : 'state -> Result<'state, ErrMsg>) = 
+                            (st : State)
+                            (fk : ErrMsg -> Result<'acc * State, ErrMsg>) 
+                            (sk : 'acc -> State -> Result<'acc * State, ErrMsg>) = 
                 match xs with
-                | [] -> sk st
+                | [] -> sk acc st
                 | x1 :: rest -> 
-                    match apply1 (action st x1) env with
+                    match apply1 (action acc x1) env st with
                     | Error msg -> fk msg
-                    | Ok st1 -> 
-                        work st1 rest fk sk
-            work state source (fun msg -> Error msg) (fun st -> Ok st)
+                    | Ok (acc1, st1) -> 
+                        work acc1 rest st1 fk sk
+            work initial source state (fun msg -> Error msg) (fun a st -> Ok (a,st))
 
 
 
     let smapM (action : 'a -> CompilerMonad<'b, 'env>) 
                 (source : seq<'a>) : CompilerMonad<seq<'b>, 'env> = 
-        CompilerMonad <| fun env ->
+        CompilerMonad <| fun env state ->
             let sourceEnumerator = source.GetEnumerator()
-            let rec work (fk : ErrMsg -> Result<seq<'b>, ErrMsg>) 
-                         (sk : seq<'b> -> Result<seq<'b>, ErrMsg>) = 
+            let rec work (st : State) 
+                         (fk : ErrMsg -> Result<seq<'b> * State, ErrMsg>) 
+                         (sk : seq<'b> -> State -> Result<seq<'b> * State, ErrMsg>) = 
                 if not (sourceEnumerator.MoveNext()) then 
-                    sk Seq.empty
+                    sk Seq.empty st
                 else
                     let a1 = sourceEnumerator.Current
-                    match apply1 (action a1) env with
+                    match apply1 (action a1) env st with
                     | Error msg -> fk msg
-                    | Ok b1 -> 
-                        work fk (fun sx -> 
-                        sk (seq { yield b1; yield! sx }))
-            work (fun msg -> Error msg) (fun ans -> Ok ans)
+                    | Ok (b1,st1) -> 
+                        work st1 fk (fun sx st2 -> 
+                        sk (seq { yield b1; yield! sx }) st2)
+            work state (fun msg -> Error msg) (fun a st -> Ok (a, st))
 
     let sforM (sx : seq<'a>) 
               (fn : 'a -> CompilerMonad<'b, 'env>) : CompilerMonad<seq<'b>, 'env> = 
@@ -503,19 +525,20 @@ module CompilerMonad =
     
     let smapMz (action : 'a -> CompilerMonad<'b, 'env>) 
                 (source : seq<'a>) : CompilerMonad<unit, 'env> = 
-        CompilerMonad <| fun env ->
+        CompilerMonad <| fun env state ->
             let sourceEnumerator = source.GetEnumerator()
-            let rec work (fk : ErrMsg -> Result<unit, ErrMsg>) 
-                            (sk : unit -> Result<unit, ErrMsg>) = 
+            let rec work (st : State) 
+                            (fk : ErrMsg -> Result<unit * State, ErrMsg>) 
+                            (sk : State -> Result<unit * State, ErrMsg>) = 
                 if not (sourceEnumerator.MoveNext()) then 
-                    sk ()
+                    sk st
                 else
                     let a1 = sourceEnumerator.Current
-                    match apply1 (action a1) env with
+                    match apply1 (action a1) env st with
                     | Error msg -> fk msg
-                    | Ok _ -> 
-                        work fk sk
-            work (fun msg -> Error msg) (fun _ -> Ok ())
+                    | Ok (_, st1) -> 
+                        work st1 fk sk
+            work state (fun msg -> Error msg) (fun st -> Ok ((), st))
 
     
     let sforMz (source : seq<'a>) 
@@ -523,60 +546,62 @@ module CompilerMonad =
         smapMz action source
 
         
-    let sfoldM (action : 'state -> 'a -> CompilerMonad<'state, 'env>) 
-                (state : 'state)
-                (source : seq<'a>) : CompilerMonad<'state, 'env> = 
-        CompilerMonad <| fun env ->
+    let sfoldM (action : 'acc -> 'a -> CompilerMonad<'acc, 'env>) 
+                (initial : 'acc)
+                (source : seq<'a>) : CompilerMonad<'acc, 'env> = 
+        CompilerMonad <| fun env state ->
             let sourceEnumerator = source.GetEnumerator()
-            let rec work (st : 'state) 
-                            (fk : ErrMsg -> Result<'state, ErrMsg>) 
-                            (sk : 'state -> Result<'state, ErrMsg>) = 
+            let rec work (acc : 'acc) 
+                            (st : State)
+                            (fk : ErrMsg -> Result<'acc * State, ErrMsg>) 
+                            (sk : 'acc -> State -> Result<'acc * State, ErrMsg>) = 
                 if not (sourceEnumerator.MoveNext()) then 
-                    sk st
+                    sk acc st
                 else
-                    let x1 = sourceEnumerator.Current
-                    match apply1 (action st x1) env with
+                    let x = sourceEnumerator.Current
+                    match apply1 (action acc x) env st with
                     | Error msg -> fk msg
-                    | Ok st1 -> 
-                        work st1 fk sk
-            work state (fun msg -> Error msg) (fun ans -> Ok ans)
+                    | Ok (acc1, st1) -> work acc1 st1 fk sk
+            work initial state (fun msg -> Error msg) (fun acc st -> Ok (acc, st))
 
 
     /// Implemented in CPS 
     let mapiM (mf : int -> 'a -> CompilerMonad<'b, 'env>) 
                 (source : 'a list) : CompilerMonad<'b list, 'env> = 
-        CompilerMonad <| fun env -> 
+        CompilerMonad <| fun env state -> 
             let rec work (xs : 'a list)
                          (count : int)
-                         (fk : ErrMsg -> Result<'b list, ErrMsg>) 
-                         (sk : 'b list -> Result<'b list, ErrMsg>) = 
+                         (st : State)
+                         (fk : ErrMsg -> Result<'b list * State, ErrMsg>) 
+                         (sk : 'b list -> State -> Result<'b list * State, ErrMsg>) = 
                 match xs with
-                | [] -> sk []
+                | [] -> sk [] st
                 | y :: ys -> 
-                    match apply1 (mf count y) env with
+                    match apply1 (mf count y) env st with
                     | Error msg -> fk msg
-                    | Ok v1 -> 
-                        work ys (count+1) fk (fun vs ->
-                        sk (v1::vs))
-            work source 0 (fun msg -> Error msg) (fun ans -> Ok ans)
+                    | Ok (v1, st1) -> 
+                        work ys (count+1) st1 fk (fun vs st2 ->
+                        sk (v1::vs) st2)
+            work source 0 state (fun msg -> Error msg) (fun a st -> Ok (a, st))
 
 
     /// Implemented in CPS 
     let mapiMz (mf : int -> 'a -> CompilerMonad<'b, 'env>) 
                 (source : 'a list) : CompilerMonad<unit, 'env> = 
-        CompilerMonad <| fun env -> 
+        CompilerMonad <| fun env state -> 
             let rec work (xs : 'a list) 
                          (count : int)
-                         (fk : ErrMsg -> Result<unit, ErrMsg>) 
-                         (sk : unit -> Result<unit, ErrMsg>) = 
+                         (st : State)
+                         (fk : ErrMsg -> Result<unit * State, ErrMsg>) 
+                         (sk : State -> Result<unit * State, ErrMsg>) = 
                 match xs with
-                | [] -> sk ()
+                | [] -> sk st
                 | y :: ys -> 
-                    match apply1 (mf count y) env with
+                    match apply1 (mf count y) env st with
                     | Error msg -> fk msg
-                    | Ok _ -> 
-                        work ys (count+1) fk sk
-            work source 0 (fun msg -> Error msg) (fun _ -> Ok ())
+                    | Ok (_, st1) -> 
+                        work ys (count+1) st1 fk sk
+            work source 0 state (fun msg -> Error msg) (fun st -> Ok ((), st))
 
     
 
@@ -592,18 +617,19 @@ module CompilerMonad =
     /// Implemented in CPS 
     let filterM (mf: 'a -> CompilerMonad<bool, 'env>) 
                 (source : 'a list) : CompilerMonad<'a list, 'env> = 
-        CompilerMonad <| fun env -> 
+        CompilerMonad <| fun env state -> 
             let rec work (xs : 'a list)
-                         (fk : ErrMsg -> Result<'a list, ErrMsg>) 
-                         (sk : 'a list -> Result<'a list, ErrMsg>) = 
+                         (st : State)
+                         (fk : ErrMsg -> Result<'a list * State, ErrMsg>) 
+                         (sk : 'a list -> State -> Result<'a list * State, ErrMsg>) = 
                 match xs with
-                | [] -> sk []
+                | [] -> sk [] st
                 | y :: ys -> 
-                    match apply1 (mf y) env with
+                    match apply1 (mf y) env st with
                     | Error msg -> fk msg
-                    | Ok test -> 
-                        work ys fk (fun vs ->
+                    | Ok (test, st1) -> 
+                        work ys st1 fk (fun vs st2 ->
                         let vs1 = if test then (y::vs) else vs
-                        sk vs1)
-            work source (fun msg -> Error msg) (fun ans -> Ok ans)
+                        sk vs1 st2)
+            work source state (fun msg -> Error msg) (fun a st -> Ok (a,st))
 
