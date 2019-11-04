@@ -14,45 +14,12 @@ module AddEquiClass =
     open AssetPatch.Base.EntityTypes
     open AssetPatch.Base.CompilerMonad
     
-    open AssetPatch.Base.EntityTypes
     open AssetPatch.FlocBuilder.Common
     open AssetPatch.FlocBuilder.Hierarchy
+    open AssetPatch.FlocBuilder.BuildCommon
     
 
-    let private makeValuaEqui (equiNumber : IntegerString) 
-                                (count : int) (charac : Characteristic) : ValuaEqui = 
-        { EquipmentNumber = equiNumber
-          ClassType = IntegerString.OfString "002"
-          CharacteristicID = charac.Name
-          CharacteristicValue = charac.Value
-          ValueCount = count
-          Attributes = AssocList.empty
-        }
-    
-    let private makeClassEqui (equiNumber : IntegerString)  (clazz : Class) : ClassEqui = 
-        { EquipmentNumber = equiNumber
-          Class = clazz.ClassName
-          ClassType = IntegerString.OfString "002"
-          ClassNumber = IntegerString.Create(10, clazz.ClassInt)
-          Status = 1
-          }
-    
-    
-    
-    let private makeEntities (equiNumber : IntegerString)  
-                             (clazz : Class) : ClassEqui * ValuaEqui list =
-        
-        let makeGrouped (characs : Characteristic list) : ValuaEqui list = 
-            characs |> List.mapi (fun i x -> makeValuaEqui equiNumber (i+1) x)
 
-        let ce : ClassEqui = makeClassEqui equiNumber clazz
-        let vs : ValuaEqui list  = 
-            clazz.Characteritics 
-                |> List.sortBy (fun x -> x.Name)
-                |> List.groupBy (fun x -> x.Name)               
-                |> List.map (snd >> makeGrouped)
-                |> List.concat
-        (ce, vs)
     
     let makeAddPatches1 (classequiFile : string) 
                         (valuaequiFile : string) 
@@ -60,7 +27,7 @@ module AddEquiClass =
                         (equiNumber : IntegerString)  
                         (clazz : Class) : CompilerMonad<unit, 'env> = 
         compile {
-            let (ce, vs) = makeEntities equiNumber clazz
+            let (ce, vs) = makeEquiAttributes equiNumber clazz
             let! classChanges = compileClassEquiFile user DateTime.Now [ce]
             let! valuaChanges = compileValuaEquiFile user DateTime.Now vs
             do! writeChangeFileAndMetadata classequiFile classChanges

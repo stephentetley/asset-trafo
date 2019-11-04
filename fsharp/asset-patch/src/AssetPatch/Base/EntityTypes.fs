@@ -39,7 +39,9 @@ module EntityTypes =
     // 94  TPLMA1
     // 95  TPLMA
     
-
+    /// Note - including uninterpreted attributes is probably not a 
+    /// good idea. We should look to finding out exactly what values 
+    /// are needed for an upload file.
     type FuncLoc = 
       { Path : FuncLocPath
         Description : string
@@ -127,28 +129,31 @@ module EntityTypes =
         ClassType : IntegerString
         CharacteristicID : string
         CharacteristicValue : string
+        ValueCount : int
         Attributes : AssocList<string, string>
       }
 
     let assocsToValuaFloc (attributes : AssocList<string, string>) : Result<ValuaFloc, ErrMsg> = 
-        match AssocList.tryFind4 "FUNCLOC" "CLASSTYPE" "CHARID" "ATWRT" attributes with
-        | Some (funcloc, claztype, cid, cvalue) -> 
+        match AssocList.tryFind5 "FUNCLOC" "CLASSTYPE" "CHARID" "ATWRT" "VALCNT" attributes with
+        | Some (funcloc, claztype, cid, cvalue, count) -> 
             Ok { FuncLoc = FuncLocPath.Create funcloc 
                  ClassType = IntegerString.OfString claztype
                  CharacteristicID = cid
                  CharacteristicValue = cvalue
+                 ValueCount = int count
                  Attributes = attributes }
          | None -> Error "Could not find required fields for a ValuaFloc"
 
     /// Note - CharacteristicValue is used three times.
-    let valuaFlocToAssocs (valuaFloc: ValuaFloc) : AssocList<string, string> = 
-        valuaFloc.Attributes
-            |> AssocList.upsert "FUNCLOC"       (valuaFloc.FuncLoc.ToString())
-            |> AssocList.upsert "CLASSTYPE"     valuaFloc.ClassType.Number
-            |> AssocList.upsert "CHARID"        valuaFloc.CharacteristicID
-            |> AssocList.upsert "ATWRT"         valuaFloc.CharacteristicValue
-            |> AssocList.upsert "TEXTBEZ"       valuaFloc.CharacteristicValue
-            |> AssocList.upsert "ATFLV"         valuaFloc.CharacteristicValue
+    let valuaFlocToAssocs (valua: ValuaFloc) : AssocList<string, string> = 
+        valua.Attributes
+            |> AssocList.upsert "FUNCLOC"       (valua.FuncLoc.ToString())
+            |> AssocList.upsert "CLASSTYPE"     valua.ClassType.Number
+            |> AssocList.upsert "CHARID"        valua.CharacteristicID
+            |> AssocList.upsert "ATWRT"         valua.CharacteristicValue
+            |> AssocList.upsert "TEXTBEZ"       valua.CharacteristicValue
+            |> AssocList.upsert "ATFLV"         valua.CharacteristicValue
+            |> AssocList.upsert "VALCNT"        (sprintf "%04i" valua.ValueCount)
 
 
     let readValuaFlocChangeFile (inputFile : string) : CompilerMonad<ValuaFloc list, 'env> = 
@@ -252,14 +257,14 @@ module EntityTypes =
          | None -> Error "Could not find required fields for a ValuaEqui"
 
     /// Note - CharacteristicValue is used twice.
-    let valuaEquiToAssocs (valuaEqui: ValuaEqui) : AssocList<string, string> = 
-        valuaEqui.Attributes
-            |> AssocList.upsert "EQUI"          valuaEqui.EquipmentNumber.Number
-            |> AssocList.upsert "CLASSTYPE"     valuaEqui.ClassType.Number
-            |> AssocList.upsert "CHARID"        valuaEqui.CharacteristicID
-            |> AssocList.upsert "ATWRT"         valuaEqui.CharacteristicValue
-            |> AssocList.upsert "TEXTBEZ"       valuaEqui.CharacteristicValue
-            |> AssocList.upsert "VALCNT"        (sprintf "%04i" valuaEqui.ValueCount)
+    let valuaEquiToAssocs (valua: ValuaEqui) : AssocList<string, string> = 
+        valua.Attributes
+            |> AssocList.upsert "EQUI"          valua.EquipmentNumber.Number
+            |> AssocList.upsert "CLASSTYPE"     valua.ClassType.Number
+            |> AssocList.upsert "CHARID"        valua.CharacteristicID
+            |> AssocList.upsert "ATWRT"         valua.CharacteristicValue
+            |> AssocList.upsert "TEXTBEZ"       valua.CharacteristicValue
+            |> AssocList.upsert "VALCNT"        (sprintf "%04i" valua.ValueCount)
             
 
     let readValuaEquiChangeFile (inputFile : string) : CompilerMonad<ValuaEqui list, 'env> = 

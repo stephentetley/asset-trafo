@@ -30,6 +30,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\FlocBuilder\Common.fs"
 #load "..\src\AssetPatch\FlocBuilder\Hierarchy.fs"
 #load "..\src\AssetPatch\FlocBuilder\Catalogue.fs"
+#load "..\src\AssetPatch\FlocBuilder\BuildCommon.fs"
 #load "..\src\AssetPatch\FlocBuilder\AddEquiClass.fs"
 open AssetPatch.Base.ChangeFile
 open AssetPatch.FlocBuilder.Hierarchy

@@ -21,6 +21,7 @@
     <Compile Include="AssetPatch\FlocBuilder\Common.fs" />
     <Compile Include="AssetPatch\FlocBuilder\Hierarchy.fs" />
     <Compile Include="AssetPatch\FlocBuilder\Catalogue.fs" />
+    <Compile Include="AssetPatch\FlocBuilder\BuildCommon.fs" />
     <Compile Include="AssetPatch\FlocBuilder\AddEquiClass.fs" />
   </ItemGroup>
 
