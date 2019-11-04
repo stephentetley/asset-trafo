@@ -21,7 +21,8 @@
     <Compile Include="AssetPatch\PatchBuilder\Common.fs" />
     <Compile Include="AssetPatch\PatchBuilder\Hierarchy.fs" />
     <Compile Include="AssetPatch\PatchBuilder\Catalogue.fs" />
-    <Compile Include="AssetPatch\PatchBuilder\BuildCommon.fs" />
+    <Compile Include="AssetPatch\PatchBuilder\Renamer.fs" />
+    <Compile Include="AssetPatch\PatchBuilder\Emitter.fs" />
     <Compile Include="AssetPatch\PatchBuilder\ClassAddPatcher.fs" />
   </ItemGroup>
 

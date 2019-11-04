@@ -30,7 +30,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\PatchBuilder\Common.fs"
 #load "..\src\AssetPatch\PatchBuilder\Hierarchy.fs"
 #load "..\src\AssetPatch\PatchBuilder\Catalogue.fs"
-#load "..\src\AssetPatch\PatchBuilder\BuildCommon.fs"
+#load "..\src\AssetPatch\PatchBuilder\Emitter.fs"
 #load "..\src\AssetPatch\PatchBuilder\ClassAddPatcher.fs"
 open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.FuncLocPath

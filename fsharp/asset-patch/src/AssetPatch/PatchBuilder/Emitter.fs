@@ -4,7 +4,7 @@
 namespace AssetPatch.PatchBuilder
 
 
-module BuildCommon =
+module Emitter =
 
     open AssetPatch.Base
     open AssetPatch.Base.CompilerMonad
@@ -13,6 +13,11 @@ module BuildCommon =
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.PatchBuilder.Hierarchy
     
+    type FlocClassProperties = ClassFloc * ValuaFloc list
+    
+    type EquiClassProperties = ClassEqui * ValuaEqui list
+
+
     let characteristicToValuaFloc (funcLoc : FuncLocPath) 
                                     (count : int) 
                                     (charac : Characteristic) : CompilerMonad<ValuaFloc, 'env> = 
@@ -89,9 +94,12 @@ module BuildCommon =
             return! work equipment.SuboridnateEquipment (fun es -> mreturn (e1 :: es))
         }
 
-    type FlocClassProperties = ClassFloc * ValuaFloc list
     
-    type EquiClassProperties = ClassEqui * ValuaEqui list
+
+
+    
+
+
 
     let sortedCharacteristics (clazz : Class) : (Characteristic list) list= 
         clazz.Characteritics 
@@ -126,5 +134,24 @@ module BuildCommon =
             return (ce, vs)
         } 
     
-    //let equipmentEquiProperties1 (equipment: Equipment) : EquiClassProperties list = 
-    //    makeEquiProperties1 equipment.
+    let equipmentClassProperties1 (code: EquipmentCode) 
+                                  (equipment: Equipment) : CompilerMonad<EquiClassProperties list, 'env> = 
+        forM equipment.Classes (makeEquiProperties1 code)
+
+    //let equipmentClassProperties (code: EquipmentCode)
+    //                             (equipment: Equipment) : CompilerMonad<EquiClassProperties list, 'env> = 
+    //    let rec work (kids : Equipment list) 
+    //                 (cont : Equi list -> CompilerMonad<EquiClassProperties list, 'env>) = 
+    //        match kids with
+    //        | [] -> cont []
+    //        | x :: xs -> 
+    //            compile { 
+    //                let! e1 = makeEquiProperties1 x
+    //                return! work x.SuboridnateEquipment (fun vs1 -> 
+    //                        work xs (fun vs2 -> 
+    //                        cont (e1 :: vs1 @ vs2)))
+    //            } 
+    //    compile { 
+    //        let! e1 = makeEquiProperties1 equipment
+    //        return! work equipment.SuboridnateEquipment (fun es -> mreturn (e1 :: es))
+    //    }

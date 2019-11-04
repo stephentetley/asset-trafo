@@ -16,7 +16,7 @@ module ClassAddPatcher =
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.PatchBuilder.Common
     open AssetPatch.PatchBuilder.Hierarchy
-    open AssetPatch.PatchBuilder.BuildCommon
+    open AssetPatch.PatchBuilder.Emitter
     
 
 
