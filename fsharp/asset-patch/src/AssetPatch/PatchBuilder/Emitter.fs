@@ -17,6 +17,46 @@ module Emitter =
     
     type EquiClassProperties = ClassEqui * ValuaEqui list
 
+  
+
+    type Results = 
+        { Equis : Equi list
+          ClassEquis : ClassEqui list
+          ValuaEquis : ValuaEqui list
+          FuncLocs : FuncLoc list
+          ClassFlocs : ClassFloc list
+          ValuaFlocs : ValuaFloc list
+        }
+
+        static member Empty = 
+            { Equis = []
+              ClassEquis = []
+              ValuaEquis = []
+              FuncLocs = []
+              ClassFlocs = []
+              ValuaFlocs = []
+            }
+
+
+    let collectEquiClassProperties (source:  EquiClassProperties list) :  ClassEqui list * ValuaEqui list =
+        List.foldBack (fun (ce,vs) (cs, valuas) -> (ce :: cs, valuas @ vs)) source ([],[])
+
+    let collectFlocClassProperties (source:  FlocClassProperties list) :  ClassFloc list * ValuaFloc list =
+        List.foldBack (fun (ce,vs) (cs, valuas) -> (ce :: cs, valuas @ vs)) source ([],[])
+
+    let joinResults (a : Results) (b: Results) : Results = 
+        { Equis = a.Equis@ b.Equis
+          ClassEquis = a.ClassEquis @ b.ClassEquis
+          ValuaEquis = a.ValuaEquis @ b.ValuaEquis
+          FuncLocs = a.FuncLocs @ b.FuncLocs
+          ClassFlocs = a.ClassFlocs @ b.ClassFlocs
+          ValuaFlocs = a.ValuaFlocs @ b.ValuaFlocs
+        }
+
+    let concatResults ( source : Results list) : Results = 
+        List.foldBack joinResults  source Results.Empty
+
+
 
     let characteristicToValuaFloc (funcLoc : FuncLocPath) 
                                     (count : int) 
@@ -134,24 +174,184 @@ module Emitter =
             return (ce, vs)
         } 
     
-    let equipmentClassProperties1 (code: EquipmentCode) 
-                                  (equipment: Equipment) : CompilerMonad<EquiClassProperties list, 'env> = 
-        forM equipment.Classes (makeEquiProperties1 code)
+    let equipmentClassProperties1 (equipment: Equipment) : CompilerMonad<EquiClassProperties list, 'env> = 
+        match equipment.MagicNumber with
+        | None -> throwError "Emitter - equipment has not been renamed"
+        | Some magic -> 
+            forM equipment.Classes (makeEquiProperties1 (EquipmentMagic magic))
 
-    //let equipmentClassProperties (code: EquipmentCode)
-    //                             (equipment: Equipment) : CompilerMonad<EquiClassProperties list, 'env> = 
-    //    let rec work (kids : Equipment list) 
-    //                 (cont : Equi list -> CompilerMonad<EquiClassProperties list, 'env>) = 
-    //        match kids with
-    //        | [] -> cont []
-    //        | x :: xs -> 
-    //            compile { 
-    //                let! e1 = makeEquiProperties1 x
-    //                return! work x.SuboridnateEquipment (fun vs1 -> 
-    //                        work xs (fun vs2 -> 
-    //                        cont (e1 :: vs1 @ vs2)))
-    //            } 
-    //    compile { 
-    //        let! e1 = makeEquiProperties1 equipment
-    //        return! work equipment.SuboridnateEquipment (fun es -> mreturn (e1 :: es))
-    //    }
+
+    let equipmentClassProperties (equipment: Equipment) : CompilerMonad<EquiClassProperties list, 'env> = 
+        let rec work (kids : Equipment list) 
+                     (cont : EquiClassProperties list -> CompilerMonad<EquiClassProperties list, 'env>) = 
+            match kids with
+            | [] -> cont []
+            | x :: rest -> 
+                compile { 
+                    let! vs1 = equipmentClassProperties1 x
+                    return! work x.SuboridnateEquipment (fun vs2 -> 
+                            work rest (fun vs3 -> 
+                            cont (vs1 @ vs2 @ vs3)))
+                } 
+        compile { 
+            let! es1 = equipmentClassProperties1 equipment
+            return! work equipment.SuboridnateEquipment (fun es -> mreturn (es1 @ es))
+        }
+
+
+    let equipmentEmit (parent : FuncLocPath) 
+                      (equipment: Equipment) : CompilerMonad<Results, 'env> = 
+        compile {
+            let! es = equipmentToEquis parent equipment
+            let! cps = equipmentClassProperties equipment
+            let (cs,vs) = collectEquiClassProperties cps
+            return {
+                Equis = es
+                ClassEquis = cs
+                ValuaEquis = vs
+                FuncLocs = []
+                ClassFlocs = []
+                ValuaFlocs = []
+            }
+        }
+
+    let funcLocClassProperties (path : FuncLocPath) 
+                                (classes: Class list) : CompilerMonad<FlocClassProperties list, 'env> = 
+        mapM (makeFlocProperties1 path) classes
+
+    let funcLocEmit (funcLoc : FuncLoc) 
+                    (classes: Class list) : CompilerMonad<Results, 'env> = 
+        compile {
+            let! cps = funcLocClassProperties funcLoc.Path classes
+            let (cs, vs) = collectFlocClassProperties cps
+            return { 
+                Equis = []
+                ClassEquis = []
+                ValuaEquis = []
+                FuncLocs = [funcLoc]
+                ClassFlocs = cs
+                ValuaFlocs = vs
+            }
+        }
+
+    let componentEmit (parent : FuncLocPath) 
+                      (compo : Component) : CompilerMonad<Results, 'env> = 
+        let path = extend compo.FuncLocSegment.Name parent
+        let funcLoc = 
+            { Path = path
+              Description = compo.FuncLocSegment.Description
+              ObjectType = compo.FuncLocSegment.ObjectType
+              Attributes = AssocList.empty
+            }
+        compile {
+            let! ansE = mapM (equipmentEmit path) compo.Equipment |>> concatResults
+            let! ansF = funcLocEmit funcLoc compo.Classes
+            return joinResults ansF ansE
+        }
+
+    let itemEmit (parent : FuncLocPath) 
+                 (item : Item) : CompilerMonad<Results, 'env> = 
+        let path = extend item.FuncLocSegment.Name parent
+        let funcLoc = 
+            { Path = path
+              Description = item.FuncLocSegment.Description
+              ObjectType = item.FuncLocSegment.ObjectType
+              Attributes = AssocList.empty
+            }
+        compile {
+            let! ansE = mapM (equipmentEmit path) item.Equipment |>> concatResults
+            let! ansF = funcLocEmit funcLoc item.Classes
+            let! ansK = mapM (componentEmit path) item.Components |>> concatResults
+            return concatResults [ansF; ansE; ansK]
+        }
+
+    let assemblyEmit (parent : FuncLocPath) 
+                     (assembly : Assembly) : CompilerMonad<Results, 'env> = 
+        let path = extend assembly.FuncLocSegment.Name parent
+        let funcLoc = 
+            { Path = path
+              Description = assembly.FuncLocSegment.Description
+              ObjectType = assembly.FuncLocSegment.ObjectType
+              Attributes = AssocList.empty
+            }
+        compile {
+            let! ansE = mapM (equipmentEmit path) assembly.Equipment |>> concatResults
+            let! ansF = funcLocEmit funcLoc assembly.Classes
+            let! ansK = mapM (itemEmit path) assembly.Items |>> concatResults
+            return concatResults [ansF; ansE; ansK]
+        }
+
+    let systemEmit (parent : FuncLocPath) 
+                     (system : System) : CompilerMonad<Results, 'env> = 
+        let path = extend system.FuncLocSegment.Name parent
+        let funcLoc = 
+            { Path = path
+              Description = system.FuncLocSegment.Description
+              ObjectType = system.FuncLocSegment.ObjectType
+              Attributes = AssocList.empty
+            }
+        compile {
+            let! ansE = mapM (equipmentEmit path) system.Equipment |>> concatResults
+            let! ansF = funcLocEmit funcLoc system.Classes
+            let! ansK = mapM (assemblyEmit path) system.Assemblies |>> concatResults
+            return concatResults [ansF; ansE; ansK]
+        }
+
+    let processEmit (parent : FuncLocPath) 
+                    (proc : Process) : CompilerMonad<Results, 'env> = 
+        let path = extend proc.FuncLocSegment.Name parent
+        let funcLoc = 
+            { Path = path
+              Description = proc.FuncLocSegment.Description
+              ObjectType = proc.FuncLocSegment.ObjectType
+              Attributes = AssocList.empty
+            }
+        compile {
+            let! ansF = funcLocEmit funcLoc proc.Classes
+            let! ansK = mapM (systemEmit path) proc.Systems |>> concatResults
+            return joinResults ansF ansK
+        }
+
+    let processGroupEmit (parent : FuncLocPath) 
+                            (procGroup : ProcessGroup) : CompilerMonad<Results, 'env> = 
+        let path = extend procGroup.FuncLocSegment.Name parent
+        let funcLoc = 
+            { Path = path
+              Description = procGroup.FuncLocSegment.Description
+              ObjectType = procGroup.FuncLocSegment.ObjectType
+              Attributes = AssocList.empty
+            }
+        compile {
+            let! ansF = funcLocEmit funcLoc procGroup.Classes
+            let! ansK = mapM (processEmit path) procGroup.Processes |>> concatResults
+            return joinResults ansF ansK
+        }
+
+    let functionEmit (parent : FuncLocPath) 
+                        (func : Function) : CompilerMonad<Results, 'env> = 
+        let path = extend func.FuncLocSegment.Name parent
+        let funcLoc = 
+            { Path = path
+              Description = func.FuncLocSegment.Description
+              ObjectType = func.FuncLocSegment.ObjectType
+              Attributes = AssocList.empty
+            }
+        compile {
+            let! ansF = funcLocEmit funcLoc func.Classes
+            let! ansK = mapM (processGroupEmit path) func.ProcessGroups |>> concatResults
+            return joinResults ansF ansK
+        }
+
+    let siteEmit (site : Site) : CompilerMonad<Results, 'env> = 
+        let path = FuncLocPath.Create site.FuncLocSegment.Name
+        let funcLoc = 
+            { Path = path
+              Description = site.FuncLocSegment.Description
+              ObjectType = site.FuncLocSegment.ObjectType
+              Attributes = AssocList.empty
+            }
+        compile {
+            let! ansF = funcLocEmit funcLoc site.Classes
+            let! ansK = mapM (functionEmit path) site.Functions |>> concatResults
+            return joinResults ansF ansK
+        }

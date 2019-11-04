@@ -31,9 +31,6 @@ open FSharp.Core
 open AssetPatch.PatchBuilder.Hierarchy
 open AssetPatch.PatchBuilder.Catalogue
 
-let endsInLoop (s : string) : bool = 
-    Regex.IsMatch(input = s, pattern = "Loop$")
-
 
 
 let temp01 () : Function = 
