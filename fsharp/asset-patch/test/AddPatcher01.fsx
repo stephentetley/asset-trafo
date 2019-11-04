@@ -58,8 +58,14 @@ let assetConditionTemplate (year : uint32) : Class =
 let test01 () = 
     let classEquiFile = outputFile "asset_condition_01_classequi.txt"
     let valuaEquiFile = outputFile "asset_condition_02_valuaequi.txt"
-    let equis = ["101001407"; "101001409"] |> List.map IntegerString.OfString
-    makeAddEquiPatches classEquiFile valuaEquiFile "TETLEYS" equis (assetConditionTemplate 2019u)
+    let src : (IntegerString * uint32) list= 
+        [ ("101001407", 2019u)
+        ; ("101001409", 2019u)
+        ]   
+        |> List.map (fun (a,b) -> (IntegerString.OfString a, b))
+    makeAddEquiPatches classEquiFile valuaEquiFile "TETLEYS" src assetConditionTemplate
+
+
 
 let aib_reference_template (sai : string) : Class = 
     aib_reference 
@@ -68,8 +74,11 @@ let aib_reference_template (sai : string) : Class =
         ]
 
 let test02 () = 
-    let classFlocFile = outputFile "asset_condition_01_classfloc.txt"
-    let valuaFlocFile = outputFile "asset_condition_02_valuafloc.txt"
-    let flocs = ["KRI03-EDC"] |> List.map FuncLocPath.Create
-    makeAddFlocPatches classFlocFile valuaFlocFile "TETLEYS" flocs (assetConditionTemplate 2019u)
+    let classFlocFile = outputFile "aib_reference_01_classfloc.txt"
+    let valuaFlocFile = outputFile "aib_reference_02_valuafloc.txt"
+    let src = 
+        [ ("KRI03-EDC", "SAI00970234")
+        ] 
+        |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
+    makeAddFlocPatches classFlocFile valuaFlocFile "TETLEYS" src aib_reference_template
 
