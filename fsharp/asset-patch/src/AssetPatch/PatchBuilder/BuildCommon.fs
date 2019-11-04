@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.FlocBuilder
+namespace AssetPatch.PatchBuilder
 
 
 module BuildCommon =
@@ -10,7 +10,7 @@ module BuildCommon =
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.EntityTypes
     open AssetPatch.Base.FuncLocPath
-    open AssetPatch.FlocBuilder.Hierarchy
+    open AssetPatch.PatchBuilder.Hierarchy
     
     let makeValuaFloc (funcLoc : FuncLocPath) 
                         (count : int) (charac : Characteristic) : ValuaFloc = 

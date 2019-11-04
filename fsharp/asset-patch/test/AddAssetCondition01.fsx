@@ -27,15 +27,16 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
-#load "..\src\AssetPatch\FlocBuilder\Common.fs"
-#load "..\src\AssetPatch\FlocBuilder\Hierarchy.fs"
-#load "..\src\AssetPatch\FlocBuilder\Catalogue.fs"
-#load "..\src\AssetPatch\FlocBuilder\BuildCommon.fs"
-#load "..\src\AssetPatch\FlocBuilder\AddEquiClass.fs"
+#load "..\src\AssetPatch\PatchBuilder\Common.fs"
+#load "..\src\AssetPatch\PatchBuilder\Hierarchy.fs"
+#load "..\src\AssetPatch\PatchBuilder\Catalogue.fs"
+#load "..\src\AssetPatch\PatchBuilder\BuildCommon.fs"
+#load "..\src\AssetPatch\PatchBuilder\ClassAddPatcher.fs"
 open AssetPatch.Base.ChangeFile
-open AssetPatch.FlocBuilder.Hierarchy
-open AssetPatch.FlocBuilder.Catalogue
-open AssetPatch.FlocBuilder.AddEquiClass
+open AssetPatch.Base.FuncLocPath
+open AssetPatch.PatchBuilder.Hierarchy
+open AssetPatch.PatchBuilder.Catalogue
+open AssetPatch.PatchBuilder.ClassAddPatcher
 
 let outputFile (relFileName : string) : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
@@ -57,5 +58,18 @@ let assetConditionTemplate (year : uint32) : Class =
 let test01 () = 
     let classEquiFile = outputFile "asset_condition_01_classequi.txt"
     let valuaEquiFile = outputFile "asset_condition_02_valuaequi.txt"
-    let equi = IntegerString.OfString "101001407"
-    makeAddPatches classEquiFile valuaEquiFile "TETLEYS" equi (assetConditionTemplate 2019u)
+    let equis = ["101001407"; "101001409"] |> List.map IntegerString.OfString
+    makeAddEquiPatches classEquiFile valuaEquiFile "TETLEYS" equis (assetConditionTemplate 2019u)
+
+let aib_reference_template (sai : string) : Class = 
+    aib_reference 
+        [ ai2_aib_reference sai
+          s4_aib_reference ()
+        ]
+
+let test02 () = 
+    let classFlocFile = outputFile "asset_condition_01_classfloc.txt"
+    let valuaFlocFile = outputFile "asset_condition_02_valuafloc.txt"
+    let flocs = ["KRI03-EDC"] |> List.map FuncLocPath.Create
+    makeAddFlocPatches classFlocFile valuaFlocFile "TETLEYS" flocs (assetConditionTemplate 2019u)
+

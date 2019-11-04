@@ -7,7 +7,7 @@
   <ItemGroup>
     <None Include="TestUtils01.fsx" />
     <None Include="Hierarchy01.fsx" />
-    <None Include="AssetCondition01.fsx" />
+    <None Include="AddAssetCondition01.fsx" />
   </ItemGroup>
 
   <ItemGroup />

@@ -26,14 +26,10 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
-#load "..\src\AssetPatch\FlocBuilder\Hierarchy.fs"
-#load "..\src\AssetPatch\FlocBuilder\Catalogue.fs"
-open AssetPatch.Base
-open AssetPatch.Base.ChangeFile
-open AssetPatch.Base.CompilerMonad
-open AssetPatch.Base.EntityTypes
-open AssetPatch.FlocBuilder.Hierarchy
-open AssetPatch.FlocBuilder.Catalogue
+#load "..\src\AssetPatch\PatchBuilder\Hierarchy.fs"
+#load "..\src\AssetPatch\PatchBuilder\Catalogue.fs"
+open AssetPatch.PatchBuilder.Hierarchy
+open AssetPatch.PatchBuilder.Catalogue
 
 let endsInLoop (s : string) : bool = 
     Regex.IsMatch(input = s, pattern = "Loop$")

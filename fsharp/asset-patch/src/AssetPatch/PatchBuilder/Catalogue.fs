@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.FlocBuilder
+namespace AssetPatch.PatchBuilder
 
 
 
 module Catalogue =
     
-    open AssetPatch.FlocBuilder.Hierarchy
+    open AssetPatch.PatchBuilder.Hierarchy
     
     // ************************************************************************
     // Classes and characteritics
