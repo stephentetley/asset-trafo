@@ -31,10 +31,10 @@ module ClassAddPatcher =
     let makeAddEquiPatches1 (classEquiFile : string) 
                             (valuaEquiFile : string) 
                             (user: string) 
-                            (elements : (IntegerString * Class) list) : CompilerMonad<unit, 'env> = 
+                            (elements : (EquipmentCode * Class) list) : CompilerMonad<unit, 'env> = 
         compile {
-            let (cs, vs) = 
-                elements |> List.map (fun (x,c) -> makeEquiProperties1 x c) |> collectLists
+            let! (cs, vs) = 
+                forM elements (fun (x,c) -> makeEquiProperties1 x c) |>> collectLists
             let! classChanges = compileClassEquiFile user DateTime.Now cs
             let! valuaChanges = compileValuaEquiFile user DateTime.Now vs
             do! writeChangeFileAndMetadata classEquiFile classChanges
@@ -46,7 +46,7 @@ module ClassAddPatcher =
     let makeAddEquiPatches (classequiFile : string) 
                             (valuaequiFile : string) 
                             (user: string) 
-                            (src : (IntegerString * 'a) list)  
+                            (src : (EquipmentCode * 'a) list)  
                             (template : 'a -> Class) : Result<unit, ErrMsg> = 
         let elements = applyTemplates src template
         runCompiler () 
@@ -58,8 +58,8 @@ module ClassAddPatcher =
                             (user: string) 
                             (elements : (FuncLocPath * Class) list)  : CompilerMonad<unit, 'env> = 
         compile {
-            let (cs, vs) = 
-                elements |> List.map (fun (x,c) ->  makeFlocProperties1 x c) |> collectLists
+            let! (cs, vs) = 
+                forM elements (fun (x,c) ->  makeFlocProperties1 x c) |>> collectLists
             let! classChanges = compileClassFlocFile user DateTime.Now cs
             let! valuaChanges = compileValuaFlocFile user DateTime.Now vs
             do! writeChangeFileAndMetadata classFlocFile classChanges

@@ -22,13 +22,12 @@ module Hierarchy =
           Characteritics : Characteristic list
         }
 
-    type EquipmentCode = 
-        | EquipmentCode of string
-        | EquipmentAnon
+    //type EquipmentCode = 
+    //    | EquipmentCode of string
+    //    | EquipmentAnon
 
     type Equipment = 
-        { Code : EquipmentCode
-          Description : string
+        { Description : string
           ObjectType : string
           Classes : Class list
           SuboridnateEquipment : Equipment list
@@ -111,8 +110,7 @@ module Hierarchy =
     let _equipment (description : string) (objectType : string)
                     (classes : Class list) 
                     (subordinateEquipment : Equipment list) : Equipment = 
-        { Code = EquipmentAnon
-          Description = description
+        { Description = description
           ObjectType = objectType
           Classes = classes 
           SuboridnateEquipment = subordinateEquipment }

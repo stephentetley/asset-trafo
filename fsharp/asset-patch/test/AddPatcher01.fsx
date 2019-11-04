@@ -34,6 +34,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\PatchBuilder\ClassAddPatcher.fs"
 open AssetPatch.Base.ChangeFile
 open AssetPatch.Base.FuncLocPath
+open AssetPatch.Base.EntityTypes
 open AssetPatch.PatchBuilder.Hierarchy
 open AssetPatch.PatchBuilder.Catalogue
 open AssetPatch.PatchBuilder.ClassAddPatcher
@@ -58,11 +59,11 @@ let assetConditionTemplate (year : uint32) : Class =
 let test01 () = 
     let classEquiFile = outputFile "asset_condition_01_classequi.txt"
     let valuaEquiFile = outputFile "asset_condition_02_valuaequi.txt"
-    let src : (IntegerString * uint32) list= 
+    let src : (EquipmentCode * uint32) list= 
         [ ("101001407", 2019u)
         ; ("101001409", 2019u)
         ]   
-        |> List.map (fun (a,b) -> (IntegerString.OfString a, b))
+        |> List.map (fun (a,b) -> (EquipmentCode a, b))
     makeAddEquiPatches classEquiFile valuaEquiFile "TETLEYS" src assetConditionTemplate
 
 

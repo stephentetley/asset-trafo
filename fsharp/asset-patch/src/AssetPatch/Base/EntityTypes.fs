@@ -52,8 +52,6 @@ module EntityTypes =
 
         
 
-
-
     let assocsToFuncLoc (attributes : AssocList<string, string>) : Result<FuncLoc, ErrMsg> = 
         match AssocList.tryFind3 "FUNCLOC" "TXTMI" "EQART" attributes with
         | Some (funcloc, desc, otype) -> 
@@ -83,6 +81,7 @@ module EntityTypes =
           Description = segment.Description
           ObjectType = segment.Description
           Attributes = floc.Attributes }
+
 
     // ************************************************************************
     // ClassFloc
@@ -165,8 +164,21 @@ module EntityTypes =
     // ************************************************************************
     // Equi
 
+    type EquipmentCode = 
+        | EquipmentCode of string
+        | EquipmentMagic of string
+
+        member x.Code 
+            with get () : string = 
+                match x with 
+                | EquipmentCode s -> s
+                | EquipmentMagic s -> s
+
+
+
+
     type Equi = 
-      { EquipmentNumber : IntegerString
+      { EquipmentNumber : EquipmentCode
         Description : string
         FuncLoc : FuncLocPath
         Attributes : AssocList<string, string>
@@ -175,7 +187,7 @@ module EntityTypes =
     let assocsToEqui (attributes : AssocList<string, string>) : Result<Equi, ErrMsg> = 
         match AssocList.tryFind3 "EQUI" "TXTMI" "TPLN_EILO" attributes with
         | Some (number, desc, funcloc) -> 
-            Ok { EquipmentNumber = IntegerString.OfString number
+            Ok { EquipmentNumber = EquipmentCode number
                  Description = desc
                  FuncLoc = FuncLocPath.Create funcloc 
                  Attributes = attributes }
@@ -184,7 +196,7 @@ module EntityTypes =
     /// Note - CharacteristicValue is used three times.
     let equiToAssocs (equi: Equi) : AssocList<string, string> = 
         equi.Attributes
-            |> AssocList.upsert "EQUI"          equi.EquipmentNumber.Number
+            |> AssocList.upsert "EQUI"          equi.EquipmentNumber.Code
             |> AssocList.upsert "TXTMI"         equi.Description
             |> AssocList.upsert "TPLN_EILO"     (equi.FuncLoc.ToString()) 
 
@@ -198,7 +210,7 @@ module EntityTypes =
     // ClassEqui
     
     type ClassEqui = 
-        { EquipmentNumber : IntegerString
+        { EquipmentNumber : EquipmentCode
           Class : string
           ClassType : IntegerString
           ClassNumber : IntegerString
@@ -208,7 +220,7 @@ module EntityTypes =
     let assocsToClassEqui (attributes : AssocList<string, string>) : Result<ClassEqui, ErrMsg> = 
         match AssocList.tryFind5 "EQUI" "CLASS" "CLASSTYPE" "CLINT" "CLSTATUS1" attributes with
         | Some (number, claz, claztype, clint, status) -> 
-            Ok { EquipmentNumber = IntegerString.OfString number
+            Ok { EquipmentNumber = EquipmentCode number
                  Class = claz
                  ClassType = IntegerString.OfString claztype
                  ClassNumber = IntegerString.OfString clint
@@ -217,7 +229,7 @@ module EntityTypes =
 
     let classEquiToAssocs (classEqui: ClassEqui) : AssocList<string, string> = 
         AssocList.ofList
-            [ ("EQUI",          classEqui.EquipmentNumber.Number)
+            [ ("EQUI",          classEqui.EquipmentNumber.Code)
             ; ("CLASS",         classEqui.Class)
             ; ("CLASSTYPE",     classEqui.ClassType.Number)
             ; ("CLINT",         classEqui.ClassNumber.Number)
@@ -237,7 +249,7 @@ module EntityTypes =
     /// ValueCount is the number of instances for this charcteristic 
     /// in a class.
     type ValuaEqui = 
-        { EquipmentNumber : IntegerString
+        { EquipmentNumber : EquipmentCode
           ClassType : IntegerString
           CharacteristicID : string
           CharacteristicValue : string
@@ -248,7 +260,7 @@ module EntityTypes =
     let assocsToValuaEqui (attributes : AssocList<string, string>) : Result<ValuaEqui, ErrMsg> = 
         match AssocList.tryFind5 "EQUI" "CLASSTYPE" "CHARID" "ATWRT" "VALCNT" attributes with
         | Some (number, claztype, cid, cvalue, count) -> 
-            Ok { EquipmentNumber = IntegerString.OfString number
+            Ok { EquipmentNumber = EquipmentCode number
                  ClassType = IntegerString.OfString claztype
                  CharacteristicID = cid
                  CharacteristicValue = cvalue
@@ -259,7 +271,7 @@ module EntityTypes =
     /// Note - CharacteristicValue is used twice.
     let valuaEquiToAssocs (valua: ValuaEqui) : AssocList<string, string> = 
         valua.Attributes
-            |> AssocList.upsert "EQUI"          valua.EquipmentNumber.Number
+            |> AssocList.upsert "EQUI"          valua.EquipmentNumber.Code
             |> AssocList.upsert "CLASSTYPE"     valua.ClassType.Number
             |> AssocList.upsert "CHARID"        valua.CharacteristicID
             |> AssocList.upsert "ATWRT"         valua.CharacteristicValue
