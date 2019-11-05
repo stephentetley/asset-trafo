@@ -6,11 +6,7 @@ namespace AssetPatch.PatchBuilder
 
 module PatchCompiler =
     
-    open System
 
-    open AssetPatch.Base
-    open AssetPatch.Base.Common
-    open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.EntityTypes
     open AssetPatch.Base.CompilerMonad    
     open AssetPatch.Base.FuncLocPath
@@ -22,7 +18,21 @@ module PatchCompiler =
 
     type ClassTemplate<'a> = 'a -> Class
    
+    type ComponentTemplate<'a> = 'a -> Component
+    
+    type ItemTemplate<'a> = 'a -> Item 
+    
+    type AssemblyTemplate<'a> = 'a -> Assembly 
+    
+    type SystemTemplate<'a> = 'a -> System 
+
+    type ProcessTemplate<'a> = 'a -> Process 
+
+    type ProcessGroupTemplate<'a> = 'a -> ProcessGroup 
+    
     type FunctionTemplate<'a> = 'a -> Function 
+    
+    type SiteTemplate<'a> = 'a -> Site
    
     let applyTemplate (xs: ('id * 'b) list ) (template: 'b -> 'c) : ('id * 'c) list = 
         xs |> List.map (fun (name,x) -> (name, template x))
@@ -65,6 +75,89 @@ module PatchCompiler =
             return ()
         }
 
+
+    /// Generate patches for a new level 3 process group and its subordinates
+    let compileHierarchyPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (user : string) 
+                                (compile1 : (FuncLocPath * 'object) -> CompilerMonad<EmitterResults, 'env>)
+                                (template : 'hole -> 'object)
+                                (worklist : (FuncLocPath * 'hole) list) : CompilerMonad<unit, 'env> =         
+        compile {
+            let worklist1 = applyTemplate worklist template
+            let! results =  forM worklist1 compile1
+            do! generatePatches outputDirectory filePrefix user (concatResults results)
+            return ()
+        }
+
+    /// Generate patches for a new level 2 function and its subordinates
+    let compileComponentPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (user : string) 
+                                (template : ComponentTemplate<'hole>)
+                                (worklist : (FuncLocPath * 'hole) list)
+                                            : CompilerMonad<unit, 'env> = 
+        let compile1 (path, func) = componentRename func >>= componentEmit path
+        compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
+
+
+
+    /// Generate patches for a new level 2 function and its subordinates
+    let compileItemPatches (outputDirectory : string)
+                            (filePrefix : string)
+                            (user : string) 
+                            (template : ItemTemplate<'hole>)
+                            (worklist : (FuncLocPath * 'hole) list)
+                                            : CompilerMonad<unit, 'env> = 
+        let compile1 (path, func) = itemRename func >>= itemEmit path
+        compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
+
+
+
+    /// Generate patches for a new level 2 function and its subordinates
+    let compileAssemblyPatches (outputDirectory : string)
+                              (filePrefix : string)
+                              (user : string) 
+                              (template : AssemblyTemplate<'hole>)
+                              (worklist : (FuncLocPath * 'hole) list)
+                                            : CompilerMonad<unit, 'env> = 
+        let compile1 (path, func) = assemblyRename func >>= assemblyEmit path
+        compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
+
+
+    /// Generate patches for a new level 2 function and its subordinates
+    let compileSystemPatches (outputDirectory : string)
+                              (filePrefix : string)
+                              (user : string) 
+                              (template : SystemTemplate<'hole>)
+                              (worklist : (FuncLocPath * 'hole) list)
+                                            : CompilerMonad<unit, 'env> = 
+        let compile1 (path, func) = systemRename func >>= systemEmit path
+        compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
+
+
+    /// Generate patches for a new level 2 function and its subordinates
+    let compileProcessPatches (outputDirectory : string)
+                              (filePrefix : string)
+                              (user : string) 
+                              (template : ProcessTemplate<'hole>)
+                              (worklist : (FuncLocPath * 'hole) list)
+                                            : CompilerMonad<unit, 'env> = 
+        let compile1 (path, func) = processRename func >>= processEmit path
+        compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
+
+
+    /// Generate patches for a new level 2 function and its subordinates
+    let compileProcessGroupPatches (outputDirectory : string)
+                                         (filePrefix : string)
+                                         (user : string) 
+                                         (template : ProcessGroupTemplate<'hole>)
+                                         (worklist : (FuncLocPath * 'hole) list)
+                                            : CompilerMonad<unit, 'env> = 
+        let compile1 (path, func) = processGroupRename func >>= processGroupEmit path
+        compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
+
+
     /// Generate patches for a new level 2 function and its subordinates
     let compileFunctionPatches (outputDirectory : string)
                                          (filePrefix : string)
@@ -72,11 +165,19 @@ module PatchCompiler =
                                          (template : FunctionTemplate<'hole>)
                                          (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit, 'env> = 
-        let compile1 (path, func) = 
-            functionRename func >>= functionEmit path
+        let compile1 (path, func) = functionRename func >>= functionEmit path
+        compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
+
+    /// Generate patches for a new level 1 site and its subordinates
+    let compileSitePatches (outputDirectory : string)
+                                         (filePrefix : string)
+                                         (user : string) 
+                                         (template : SiteTemplate<'hole>)
+                                         (worklist : 'hole list)
+                                            : CompilerMonad<unit, 'env> = 
+        let compile1 = siteRename >=> siteEmit
         compile {
-            let (worklist1 : (FuncLocPath * Function) list) = 
-                applyTemplate worklist template
+            let worklist1=  List.map template worklist
             let! results =  forM worklist1 compile1
             do! generatePatches outputDirectory filePrefix user (concatResults results)
             return ()

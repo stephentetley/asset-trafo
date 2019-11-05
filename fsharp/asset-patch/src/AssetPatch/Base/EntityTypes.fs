@@ -63,9 +63,9 @@ module EntityTypes =
 
     let funcLocToAssocs (funcLoc: FuncLoc) : AssocList<string, string> = 
         funcLoc.Attributes
-            |> AssocList.update "FUNCLOC"   (funcLoc.Path.ToString())
-            |> AssocList.update "TXTMI"     funcLoc.Description
-            |> AssocList.update "EQART"     funcLoc.ObjectType
+            |> AssocList.upsert "FUNCLOC"   (funcLoc.Path.ToString())
+            |> AssocList.upsert "TXTMI"     funcLoc.Description
+            |> AssocList.upsert "EQART"     funcLoc.ObjectType
 
     let readFuncLocChangeFile (inputFile : string) : CompilerMonad<FuncLoc list, 'env> = 
         compile { 
