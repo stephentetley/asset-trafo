@@ -27,19 +27,19 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
-#load "..\src\AssetPatch\PatchBuilder\Hierarchy.fs"
-#load "..\src\AssetPatch\PatchBuilder\Catalogue.fs"
-#load "..\src\AssetPatch\PatchBuilder\Renamer.fs"
-#load "..\src\AssetPatch\PatchBuilder\Emitter.fs"
-#load "..\src\AssetPatch\PatchBuilder\PatchGen.fs"
-#load "..\src\AssetPatch\PatchBuilder\PatchCompiler.fs"
+#load "..\src\AssetPatch\TemplatePatcher\Hierarchy.fs"
+#load "..\src\AssetPatch\TemplatePatcher\Catalogue.fs"
+#load "..\src\AssetPatch\TemplatePatcher\Renamer.fs"
+#load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"
+#load "..\src\AssetPatch\TemplatePatcher\PatchGen.fs"
+#load "..\src\AssetPatch\TemplatePatcher\PatchCompiler.fs"
 open AssetPatch.Base.Common
 open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.FuncLocPath
 open AssetPatch.Base.EntityTypes
-open AssetPatch.PatchBuilder.Hierarchy
-open AssetPatch.PatchBuilder.Catalogue
-open AssetPatch.PatchBuilder.PatchCompiler
+open AssetPatch.TemplatePatcher.Hierarchy
+open AssetPatch.TemplatePatcher.Catalogue
+open AssetPatch.TemplatePatcher.PatchCompiler
 
 let outputDirectory () : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output")

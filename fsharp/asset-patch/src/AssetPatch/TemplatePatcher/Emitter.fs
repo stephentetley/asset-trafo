@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.PatchBuilder
+namespace AssetPatch.TemplatePatcher
 
 
 module Emitter =
@@ -11,7 +11,7 @@ module Emitter =
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.EntityTypes
     open AssetPatch.Base.FuncLocPath
-    open AssetPatch.PatchBuilder.Hierarchy
+    open AssetPatch.TemplatePatcher.Hierarchy
     
     type FlocClassProperties = ClassFloc * ValuaFloc list
     

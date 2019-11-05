@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.PatchBuilder
+namespace AssetPatch.TemplatePatcher
 
 
 
 module Catalogue =
     
-    open AssetPatch.PatchBuilder.Hierarchy
+    open AssetPatch.TemplatePatcher.Hierarchy
     
     // ************************************************************************
     // Classes and characteritics

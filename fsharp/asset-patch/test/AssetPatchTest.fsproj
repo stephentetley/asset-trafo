@@ -8,6 +8,7 @@
     <None Include="TestUtils01.fsx" />
     <None Include="AddPatcher01.fsx" />
     <None Include="FunctionPatcher01.fsx" />
+    <None Include="Rewriter01.fsx" />
   </ItemGroup>
 
   <ItemGroup />

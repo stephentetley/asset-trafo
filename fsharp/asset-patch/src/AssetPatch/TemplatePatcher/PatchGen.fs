@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.PatchBuilder
+namespace AssetPatch.TemplatePatcher
 
 
 
@@ -20,7 +20,7 @@ module PatchGen =
     open AssetPatch.Base.Printer
     open AssetPatch.Base.EntityTypes
     
-    open AssetPatch.PatchBuilder.Emitter
+    open AssetPatch.TemplatePatcher.Emitter
 
     let entityName (entityType : EntityType) : string = 
         match entityType with

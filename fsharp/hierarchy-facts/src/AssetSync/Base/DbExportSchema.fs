@@ -17,7 +17,7 @@ module DbExportSchema =
     let AibFlocTableSchema = 
         "Reference(string),HKey(string),\
          AssetName(string),AssetType(string),\
-         AssetCode(string), Category(string),\
+         AssetCode(string),Category(string),\
          CommonName(string),ParentRef(string)"    
 
     [<Literal>]

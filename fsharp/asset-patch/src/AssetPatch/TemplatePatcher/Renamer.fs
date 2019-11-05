@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.PatchBuilder
+namespace AssetPatch.TemplatePatcher
 
 
 module Renamer =
 
     open AssetPatch.Base
     open AssetPatch.Base.CompilerMonad
-    open AssetPatch.PatchBuilder.Hierarchy
+    open AssetPatch.TemplatePatcher.Hierarchy
     
     
     let equipmentRename (equipment1 : Equipment) : CompilerMonad<Equipment, 'env> = 

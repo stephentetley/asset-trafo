@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.PatchBuilder
+namespace AssetPatch.TemplatePatcher
 
 
 module PatchCompiler =
@@ -10,10 +10,10 @@ module PatchCompiler =
     open AssetPatch.Base.EntityTypes
     open AssetPatch.Base.CompilerMonad    
     open AssetPatch.Base.FuncLocPath
-    open AssetPatch.PatchBuilder.Hierarchy
-    open AssetPatch.PatchBuilder.Renamer
-    open AssetPatch.PatchBuilder.Emitter
-    open AssetPatch.PatchBuilder.PatchGen
+    open AssetPatch.TemplatePatcher.Hierarchy
+    open AssetPatch.TemplatePatcher.Renamer
+    open AssetPatch.TemplatePatcher.Emitter
+    open AssetPatch.TemplatePatcher.PatchGen
     
 
     type ClassTemplate<'a> = 'a -> Class
