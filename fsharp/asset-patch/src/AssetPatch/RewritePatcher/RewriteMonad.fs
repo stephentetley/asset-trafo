@@ -335,3 +335,132 @@ module RewriteMonad =
                 (fn:'a -> 'b -> 'c -> 'd -> 'e -> 'f -> 'x) : Rewriter<'x, 'src> =
         liftM6 fn ma mb mc md me mf
 
+    // ************************************************************************
+    // Recursive functions
+
+    /// Implemented in CPS
+    let sequenceM (actions : Rewriter<'a, 'src> list) : Rewriter<'a list, 'src> =
+        Rewriter <| fun source ->
+            let rec work (rules : Rewriter<'a, 'src> list)
+                         (st : 'src)
+                         (fk : ErrMsg -> Result<'a list * 'src, ErrMsg>)
+                         (sk : 'a list -> 'src -> Result<'a list * 'src, ErrMsg>) =
+                match rules with
+                | [] -> sk [] st
+                | rule1 :: rest ->
+                    match apply1 rule1 st with
+                    | Error msg -> fk msg
+                    | Ok (a1, st1) ->
+                        work rest st1 fk (fun acc st2 ->
+                        sk (a1::acc) st2)
+            work actions source (fun msg -> Error msg) (fun ans st -> Ok (ans, st))
+
+    /// Implemented in CPS
+    let sequenceMz (actions: Rewriter<'a, 'src> list) : Rewriter<unit, 'src> =
+        Rewriter <| fun source ->
+            let rec work (rules : Rewriter<'a, 'src> list)
+                         (st : 'src)
+                         (fk : ErrMsg -> Result<unit * 'src, ErrMsg>)
+                         (sk : 'src -> Result<unit * 'src, ErrMsg>) =
+                match rules with
+                | [] -> sk st
+                | rule1 :: rest ->
+                    match apply1 rule1 st with
+                    | Error msg -> fk msg
+                    | Ok (_, st1) ->
+                        work rest st1 fk sk
+            work actions source (fun msg -> Error msg) (fun st -> Ok ((), st))
+
+
+    /// Implemented in CPS
+    let mapM (mf: 'a -> Rewriter<'b, 'src>)
+             (input : 'a list) : Rewriter<'b list, 'src> =
+        Rewriter <| fun source ->
+            let rec work (xs : 'a list)
+                         (st : 'src)
+                         (fk : ErrMsg -> Result<'b list * 'src, ErrMsg>)
+                         (sk : 'b list -> 'src -> Result<'b list * 'src, ErrMsg>) =
+                match xs with
+                | [] -> sk [] st
+                | y :: ys ->
+                    match apply1 (mf y) st with
+                    | Error msg -> fk msg
+                    | Ok (a1, st1) ->
+                        work ys st1 fk (fun acc st2 ->
+                        sk (a1::acc) st2)
+            work input source (fun msg -> Error msg) (fun ans st -> Ok (ans, st))
+
+    /// Flipped mapM
+    let forM (input : 'a list)
+             (mf: 'a -> Rewriter<'b, 'src>) : Rewriter<'b list, 'src> =
+        mapM mf input
+
+
+    /// Forgetful mapM
+    let mapMz (mf : 'a -> Rewriter<'b, 'src>)
+              (input : 'a list) : Rewriter<unit, 'src> =
+        Rewriter <| fun source ->
+            let rec work (xs : 'a list)
+                         (st : 'src)
+                         (fk : ErrMsg -> Result<unit * 'src, ErrMsg>)
+                         (sk : 'src -> Result<unit * 'src, ErrMsg>) =
+                match xs with
+                | [] -> sk st
+                | y :: ys ->
+                    match apply1 (mf y) st with
+                    | Error msg -> fk msg
+                    | Ok (_, st1) ->
+                        work ys st1 fk sk
+            work input source (fun msg -> Error msg) (fun st -> Ok ((), st))
+
+    /// Flipped mapMz
+    let forMz (input : 'a list)
+              (mf : 'a -> Rewriter<'b, 'src>) : Rewriter<unit, 'src> =
+        mapMz mf input
+
+    /// Implemented in CPS
+    let mapiM (mf :int -> 'a -> Rewriter<'b, 'src>)
+              (input:'a list) : Rewriter<'b list, 'src> =
+        Rewriter <| fun source ->
+            let rec work (xs : 'a list)
+                         (n : int)
+                         (st : 'src)
+                         (fk : ErrMsg -> Result<'b list * 'src, ErrMsg>)
+                         (sk : 'b list -> 'src -> Result<'b list * 'src, ErrMsg>) =
+                match xs with
+                | [] -> sk [] st
+                | y :: ys ->
+                    match apply1 (mf n y) st with
+                    | Error msg -> fk msg
+                    | Ok (a1, st1) ->
+                        work ys (n+1) st1 fk (fun acc st2 ->
+                        sk (a1::acc) st2)
+            work input 0 source (fun msg -> Error msg) (fun ans st -> Ok (ans, st))
+
+    /// Flipped mapMi
+    let foriM (source:'a list)
+              (mf: int -> 'a -> Rewriter<'b, 'src>)  : Rewriter<'b list, 'src> =
+        mapiM mf source
+
+    /// Forgetful mapiM
+    let mapiMz (mf : int -> 'a -> Rewriter<'b, 'src>)
+                (input : 'a list) : Rewriter<unit, 'src> =
+        Rewriter <| fun source ->
+            let rec work (xs : 'a list)
+                         (n : int)
+                         (st : 'src)
+                         (fk : ErrMsg -> Result<unit * 'src, ErrMsg>)
+                         (sk : 'src -> Result<unit * 'src, ErrMsg>) =
+                match xs with
+                | [] -> sk st
+                | y :: ys ->
+                    match apply1 (mf n y) st with
+                    | Error msg -> fk msg
+                    | Ok (_, st1) ->
+                        work ys (n+1) st1 fk sk
+            work input 0 source (fun msg -> Error msg) (fun st -> Ok ((), st))
+
+    /// Flipped mapiMz
+    let foriMz (input : 'a list)
+               (mf: int -> 'a -> Rewriter<'b, 'src>) : Rewriter<unit, 'src> =
+        mapiMz mf input

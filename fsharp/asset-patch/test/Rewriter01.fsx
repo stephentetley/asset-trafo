@@ -26,8 +26,10 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\AbsChangeFile.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
+#load "..\src\AssetPatch\Base\FuncLocPath.fs"
+#load "..\src\AssetPatch\RewritePatcher\Datatypes.fs"
 #load "..\src\AssetPatch\RewritePatcher\RewriteMonad.fs"
-
+open AssetPatch.RewritePatcher.Datatypes
 open AssetPatch.RewritePatcher.RewriteMonad
 
 
