@@ -18,13 +18,12 @@
     <Compile Include="AssetPatch\Base\EntityTypes.fs" />
     <Compile Include="AssetPatch\Utilities\ChangeFileReport.fs" />
     <Compile Include="AssetPatch\Utilities\TidyChangeFile.fs" />
-    <Compile Include="AssetPatch\PatchBuilder\Common.fs" />
     <Compile Include="AssetPatch\PatchBuilder\Hierarchy.fs" />
     <Compile Include="AssetPatch\PatchBuilder\Catalogue.fs" />
     <Compile Include="AssetPatch\PatchBuilder\Renamer.fs" />
     <Compile Include="AssetPatch\PatchBuilder\Emitter.fs" />
     <Compile Include="AssetPatch\PatchBuilder\PatchGen.fs" />
-    <Compile Include="AssetPatch\PatchBuilder\ClassAddPatcher.fs" />
+    <Compile Include="AssetPatch\PatchBuilder\PatchCompiler.fs" />
   </ItemGroup>
 
   <ItemGroup>

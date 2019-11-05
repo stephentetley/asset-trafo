@@ -25,7 +25,7 @@ module Hierarchy =
 
 
     type Equipment = 
-        { MagicNumber : string option
+        { EquipmentId : string option
           Description : string
           ObjectType : string
           Classes : Class list
@@ -110,7 +110,7 @@ module Hierarchy =
                     (classes : Class list) 
                     (subordinateEquipment : Equipment list) : Equipment = 
         // MagicNumber is filled in by a compiler pass
-        { MagicNumber = None
+        { EquipmentId = None
           Description = description
           ObjectType = objectType
           Classes = classes 

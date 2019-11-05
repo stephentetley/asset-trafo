@@ -108,7 +108,7 @@ module Emitter =
         compile {
             let! number = newEquipmentName ()
             return { 
-                EquipmentNumber = EquipmentMagic number
+                EquipmentNumber = EquipmentCode number
                 Description = equipment.Description
                 FuncLoc = funcLoc
                 Attributes = AssocList.empty
@@ -175,10 +175,10 @@ module Emitter =
         } 
     
     let equipmentClassProperties1 (equipment: Equipment) : CompilerMonad<EquiClassProperties list, 'env> = 
-        match equipment.MagicNumber with
+        match equipment.EquipmentId with
         | None -> throwError "Emitter - equipment has not been renamed"
         | Some magic -> 
-            forM equipment.Classes (makeEquiProperties1 (EquipmentMagic magic))
+            forM equipment.Classes (makeEquiProperties1 (EquipmentCode magic))
 
 
     let equipmentClassProperties (equipment: Equipment) : CompilerMonad<EquiClassProperties list, 'env> = 
@@ -196,6 +196,21 @@ module Emitter =
         compile { 
             let! es1 = equipmentClassProperties1 equipment
             return! work equipment.SuboridnateEquipment (fun es -> mreturn (es1 @ es))
+        }
+
+
+    let equipmentEmitClassValuas (equipment: Equipment) : CompilerMonad<EmitterResults, 'env> = 
+        compile {
+            let! cps = equipmentClassProperties equipment
+            let (cs,vs) = collectEquiClassProperties cps
+            return {
+                Equis = []
+                ClassEquis = cs
+                ValuaEquis = vs
+                FuncLocs = []
+                ClassFlocs = []
+                ValuaFlocs = []
+            }
         }
 
 
@@ -218,6 +233,25 @@ module Emitter =
     let funcLocClassProperties (path : FuncLocPath) 
                                 (classes: Class list) : CompilerMonad<FlocClassProperties list, 'env> = 
         mapM (makeFlocProperties1 path) classes
+
+
+
+
+    let funcLocPathEmitClassValuas (funcLocPath : FuncLocPath) 
+                                    (classes: Class list) : CompilerMonad<EmitterResults, 'env> = 
+        compile {
+            let! cps = funcLocClassProperties funcLocPath classes
+            let (cs, vs) = collectFlocClassProperties cps
+            return { 
+                Equis = []
+                ClassEquis = []
+                ValuaEquis = []
+                FuncLocs = []
+                ClassFlocs = cs
+                ValuaFlocs = vs
+            }
+        }
+
 
     let funcLocEmit (funcLoc : FuncLoc) 
                     (classes: Class list) : CompilerMonad<EmitterResults, 'env> = 

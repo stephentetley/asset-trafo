@@ -27,20 +27,22 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
-#load "..\src\AssetPatch\PatchBuilder\Common.fs"
 #load "..\src\AssetPatch\PatchBuilder\Hierarchy.fs"
 #load "..\src\AssetPatch\PatchBuilder\Catalogue.fs"
 #load "..\src\AssetPatch\PatchBuilder\Emitter.fs"
-#load "..\src\AssetPatch\PatchBuilder\ClassAddPatcher.fs"
-open AssetPatch.Base.ChangeFile
+#load "..\src\AssetPatch\PatchBuilder\PatchGen.fs"
+#load "..\src\AssetPatch\PatchBuilder\PatchCompiler.fs"
+open AssetPatch.Base.Common
+open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.FuncLocPath
 open AssetPatch.Base.EntityTypes
 open AssetPatch.PatchBuilder.Hierarchy
 open AssetPatch.PatchBuilder.Catalogue
-open AssetPatch.PatchBuilder.ClassAddPatcher
+open AssetPatch.PatchBuilder.PatchCompiler
 
-let outputFile (relFileName : string) : string = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
+let outputDirectory () : string = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\output")
+
 
 let assetConditionTemplate (year : uint32) : Class = 
     asset_condition 
@@ -53,33 +55,38 @@ let assetConditionTemplate (year : uint32) : Class =
           survey_date year
         ]
 
-
-
-        
-let test01 () = 
-    let classEquiFile = outputFile "asset_condition_01_classequi.txt"
-    let valuaEquiFile = outputFile "asset_condition_02_valuaequi.txt"
-    let src : (EquipmentCode * uint32) list= 
+   
+let test01 () : Result<unit, ErrMsg> = 
+    let worklist : (EquipmentCode * uint32) list= 
         [ ("101001407", 2019u)
         ; ("101001409", 2019u)
         ]   
         |> List.map (fun (a,b) -> (EquipmentCode a, b))
-    makeAddEquiPatches classEquiFile valuaEquiFile "TETLEYS" src assetConditionTemplate
+    runCompiler () 
+        <| compileClassEquiValuaEquiPatches 
+                    (outputDirectory ())
+                    "NEW_asset_condition"
+                    "TETLEYS" 
+                    assetConditionTemplate
+                    worklist
 
 
 
-let aib_reference_template (sai : string) : Class = 
+let aibReferenceTemplate (sai : string) : Class = 
     aib_reference 
         [ ai2_aib_reference sai
           s4_aib_reference ()
         ]
 
 let test02 () = 
-    let classFlocFile = outputFile "aib_reference_01_classfloc.txt"
-    let valuaFlocFile = outputFile "aib_reference_02_valuafloc.txt"
-    let src = 
+    let worklist = 
         [ ("KRI03-EDC", "SAI00970234")
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
-    makeAddFlocPatches classFlocFile valuaFlocFile "TETLEYS" src aib_reference_template
-
+    runCompiler () 
+       <| compileClassFlocValuaFlocPatches 
+                   (outputDirectory ())
+                   "NEW_aib_reference"
+                   "TETLEYS" 
+                   aibReferenceTemplate
+                   worklist

@@ -164,16 +164,15 @@ module EntityTypes =
     // ************************************************************************
     // Equi
 
+    [<Struct>]
     type EquipmentCode = 
         | EquipmentCode of string
-        | EquipmentMagic of string
-
+    
         member x.Code 
             with get () : string = 
                 match x with 
                 | EquipmentCode s -> s
-                | EquipmentMagic s -> s
-
+            
 
 
 
