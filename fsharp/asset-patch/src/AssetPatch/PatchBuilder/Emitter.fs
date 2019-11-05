@@ -19,7 +19,7 @@ module Emitter =
 
   
 
-    type Results = 
+    type EmitterResults = 
         { Equis : Equi list
           ClassEquis : ClassEqui list
           ValuaEquis : ValuaEqui list
@@ -44,7 +44,7 @@ module Emitter =
     let collectFlocClassProperties (source:  FlocClassProperties list) :  ClassFloc list * ValuaFloc list =
         List.foldBack (fun (ce,vs) (cs, valuas) -> (ce :: cs, valuas @ vs)) source ([],[])
 
-    let joinResults (a : Results) (b: Results) : Results = 
+    let joinResults (a : EmitterResults) (b: EmitterResults) : EmitterResults = 
         { Equis = a.Equis@ b.Equis
           ClassEquis = a.ClassEquis @ b.ClassEquis
           ValuaEquis = a.ValuaEquis @ b.ValuaEquis
@@ -53,8 +53,8 @@ module Emitter =
           ValuaFlocs = a.ValuaFlocs @ b.ValuaFlocs
         }
 
-    let concatResults ( source : Results list) : Results = 
-        List.foldBack joinResults  source Results.Empty
+    let concatResults ( source : EmitterResults list) : EmitterResults = 
+        List.foldBack joinResults  source EmitterResults.Empty
 
 
 
@@ -200,7 +200,7 @@ module Emitter =
 
 
     let equipmentEmit (parent : FuncLocPath) 
-                      (equipment: Equipment) : CompilerMonad<Results, 'env> = 
+                      (equipment: Equipment) : CompilerMonad<EmitterResults, 'env> = 
         compile {
             let! es = equipmentToEquis parent equipment
             let! cps = equipmentClassProperties equipment
@@ -220,7 +220,7 @@ module Emitter =
         mapM (makeFlocProperties1 path) classes
 
     let funcLocEmit (funcLoc : FuncLoc) 
-                    (classes: Class list) : CompilerMonad<Results, 'env> = 
+                    (classes: Class list) : CompilerMonad<EmitterResults, 'env> = 
         compile {
             let! cps = funcLocClassProperties funcLoc.Path classes
             let (cs, vs) = collectFlocClassProperties cps
@@ -235,7 +235,7 @@ module Emitter =
         }
 
     let componentEmit (parent : FuncLocPath) 
-                      (compo : Component) : CompilerMonad<Results, 'env> = 
+                      (compo : Component) : CompilerMonad<EmitterResults, 'env> = 
         let path = extend compo.FuncLocSegment.Name parent
         let funcLoc = 
             { Path = path
@@ -250,7 +250,7 @@ module Emitter =
         }
 
     let itemEmit (parent : FuncLocPath) 
-                 (item : Item) : CompilerMonad<Results, 'env> = 
+                 (item : Item) : CompilerMonad<EmitterResults, 'env> = 
         let path = extend item.FuncLocSegment.Name parent
         let funcLoc = 
             { Path = path
@@ -266,7 +266,7 @@ module Emitter =
         }
 
     let assemblyEmit (parent : FuncLocPath) 
-                     (assembly : Assembly) : CompilerMonad<Results, 'env> = 
+                     (assembly : Assembly) : CompilerMonad<EmitterResults, 'env> = 
         let path = extend assembly.FuncLocSegment.Name parent
         let funcLoc = 
             { Path = path
@@ -282,7 +282,7 @@ module Emitter =
         }
 
     let systemEmit (parent : FuncLocPath) 
-                     (system : System) : CompilerMonad<Results, 'env> = 
+                     (system : System) : CompilerMonad<EmitterResults, 'env> = 
         let path = extend system.FuncLocSegment.Name parent
         let funcLoc = 
             { Path = path
@@ -298,7 +298,7 @@ module Emitter =
         }
 
     let processEmit (parent : FuncLocPath) 
-                    (proc : Process) : CompilerMonad<Results, 'env> = 
+                    (proc : Process) : CompilerMonad<EmitterResults, 'env> = 
         let path = extend proc.FuncLocSegment.Name parent
         let funcLoc = 
             { Path = path
@@ -313,7 +313,7 @@ module Emitter =
         }
 
     let processGroupEmit (parent : FuncLocPath) 
-                            (procGroup : ProcessGroup) : CompilerMonad<Results, 'env> = 
+                            (procGroup : ProcessGroup) : CompilerMonad<EmitterResults, 'env> = 
         let path = extend procGroup.FuncLocSegment.Name parent
         let funcLoc = 
             { Path = path
@@ -328,7 +328,7 @@ module Emitter =
         }
 
     let functionEmit (parent : FuncLocPath) 
-                        (func : Function) : CompilerMonad<Results, 'env> = 
+                        (func : Function) : CompilerMonad<EmitterResults, 'env> = 
         let path = extend func.FuncLocSegment.Name parent
         let funcLoc = 
             { Path = path
@@ -342,7 +342,7 @@ module Emitter =
             return joinResults ansF ansK
         }
 
-    let siteEmit (site : Site) : CompilerMonad<Results, 'env> = 
+    let siteEmit (site : Site) : CompilerMonad<EmitterResults, 'env> = 
         let path = FuncLocPath.Create site.FuncLocSegment.Name
         let funcLoc = 
             { Path = path

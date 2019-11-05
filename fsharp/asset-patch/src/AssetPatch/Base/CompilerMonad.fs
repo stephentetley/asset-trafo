@@ -14,7 +14,8 @@ module CompilerMonad =
 
 
     type NameSupply = 
-        { EquipmentIndex: int        
+        { EquipmentIndex : int
+          FileIndex : int
         }
 
     type State = NameSupply
@@ -67,7 +68,8 @@ module CompilerMonad =
     let runCompiler (env: 'env) 
                     (action : CompilerMonad<'a, 'env> ) : Result<'a, ErrMsg> = 
         let stateZero = 
-            { EquipmentIndex = 1 }
+            { EquipmentIndex = 1 
+              FileIndex = 1 }
         apply1 action env stateZero |> Result.map fst
 
 
@@ -218,12 +220,22 @@ module CompilerMonad =
     // Name Supply 
 
     let newEquipmentName () : CompilerMonad<string, 'env> = 
-        CompilerMonad <| fun env st -> 
+        CompilerMonad <| fun _ st -> 
             let name = sprintf "MAGIC$%06i" st.EquipmentIndex
             Ok (name, {st with EquipmentIndex = st.EquipmentIndex + 1})
 
+    let resetEquipmentName () : CompilerMonad<unit, 'env> = 
+        CompilerMonad <| fun _ st -> 
+            Ok ((), {st with EquipmentIndex = 1})
 
- 
+    let newFileIndex () : CompilerMonad<int, 'env> = 
+        CompilerMonad <| fun _ st -> 
+            let index = st.FileIndex
+            Ok (index, {st with FileIndex = st.FileIndex + 1})
+
+    let resetFileIndex () : CompilerMonad<unit, 'env> = 
+        CompilerMonad <| fun _ st -> 
+            Ok ((), {st with FileIndex = 1})
 
 
     // ************************************************************************
