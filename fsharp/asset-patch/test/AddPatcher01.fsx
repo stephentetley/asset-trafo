@@ -65,7 +65,7 @@ let test01 () : Result<unit, ErrMsg> =
     runCompiler () 
         <| compileClassEquiValuaEquiPatches 
                     (outputDirectory ())
-                    "NEW_asset_condition"
+                    "asset_condition"
                     "TETLEYS" 
                     assetConditionTemplate
                     worklist
@@ -86,7 +86,7 @@ let test02 () =
     runCompiler () 
        <| compileClassFlocValuaFlocPatches 
                    (outputDirectory ())
-                   "NEW_aib_reference"
+                   "aib_reference"
                    "TETLEYS" 
                    aibReferenceTemplate
                    worklist

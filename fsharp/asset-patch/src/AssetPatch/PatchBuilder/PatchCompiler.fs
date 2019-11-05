@@ -29,7 +29,8 @@ module PatchCompiler =
 
 
     let private anonEquipment (code : string) (clazz: Class) = 
-        _equipment "" "" [clazz] []
+        let equip1 = _equipment "" "" [clazz] []
+        { equip1 with EquipmentId = Some code }
 
 
 
