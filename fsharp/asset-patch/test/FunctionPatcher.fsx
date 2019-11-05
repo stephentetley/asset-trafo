@@ -1,6 +1,6 @@
 ﻿#r "netstandard"
 #r "System.Text.Encoding.dll"
-open System.Text.RegularExpressions
+open System.IO
 
 #I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\netstandard1.6"
 #r "FParsec"
@@ -28,14 +28,30 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
 #load "..\src\AssetPatch\PatchBuilder\Hierarchy.fs"
 #load "..\src\AssetPatch\PatchBuilder\Catalogue.fs"
+#load "..\src\AssetPatch\PatchBuilder\Renamer.fs"
+#load "..\src\AssetPatch\PatchBuilder\Emitter.fs"
+#load "..\src\AssetPatch\PatchBuilder\PatchGen.fs"
+#load "..\src\AssetPatch\PatchBuilder\PatchCompiler.fs"
+open AssetPatch.Base.Common
+open AssetPatch.Base.CompilerMonad
+open AssetPatch.Base.FuncLocPath
+open AssetPatch.Base.EntityTypes
 open AssetPatch.PatchBuilder.Hierarchy
 open AssetPatch.PatchBuilder.Catalogue
+open AssetPatch.PatchBuilder.PatchCompiler
+
+let outputDirectory () : string = 
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\output")
+
+type GeoParams = 
+    { Easting : int
+      Northing : int
+    }
 
 
-
-let temp01 () : Function = 
+let edgTemplate (parameters : GeoParams) : Function = 
     let east_north_common = 
-        east_north [ easting 492729; northing 477323 ]
+        east_north [ easting parameters.Easting; northing parameters.Northing ]
     
     environmental_discharge 
         [ east_north_common 
@@ -68,10 +84,23 @@ let temp01 () : Function =
             ]
         ]
 
+let test01 () = 
+    let worklist = 
+        [ ("KRI03", {Easting = 492729; Northing = 477323} )
+        ] 
+        |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
+    runCompiler () 
+       <| compileFunctionPatches 
+                   (outputDirectory ())
+                   "env_discharge"
+                   "TETLEYS" 
+                   edgTemplate
+                   worklist
 
-let temp02 () : Function = 
+
+let caaTemplate (parameters : GeoParams) : Function = 
     let east_north_common = 
-        east_north [ easting  492729; northing 477323 ]
+        east_north [ easting parameters.Easting; northing parameters.Northing ]
     
     control_automation 
         [ east_north_common 
@@ -103,3 +132,16 @@ let temp02 () : Function =
                 ]            
             ]
         ]
+
+let test02 () = 
+    let worklist = 
+        [ ("KRI03", {Easting = 492729; Northing = 477323} )
+        ] 
+        |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
+    runCompiler () 
+       <| compileFunctionPatches 
+                   (outputDirectory ())
+                   "control_automation"
+                   "TETLEYS" 
+                   caaTemplate
+                   worklist

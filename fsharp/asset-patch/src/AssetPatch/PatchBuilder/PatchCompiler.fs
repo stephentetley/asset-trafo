@@ -15,14 +15,15 @@ module PatchCompiler =
     open AssetPatch.Base.CompilerMonad    
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.PatchBuilder.Hierarchy
+    open AssetPatch.PatchBuilder.Renamer
     open AssetPatch.PatchBuilder.Emitter
     open AssetPatch.PatchBuilder.PatchGen
     
 
     type ClassTemplate<'a> = 'a -> Class
-    
-    // makeAddEquiPatches classEquiFile valuaEquiFile "TETLEYS" src assetConditionTemplate
-
+   
+    type FunctionTemplate<'a> = 'a -> Function 
+   
     let applyTemplate (xs: ('id * 'b) list ) (template: 'b -> 'c) : ('id * 'c) list = 
         xs |> List.map (fun (name,x) -> (name, template x))
 
@@ -60,6 +61,23 @@ module PatchCompiler =
             let worklist1 = applyTemplate worklist template
             let! results = 
                 forM worklist1 (fun (path, clazz) -> funcLocPathEmitClassValuas path [clazz])
+            do! generatePatches outputDirectory filePrefix user (concatResults results)
+            return ()
+        }
+
+    /// Generate patches for a new level 2 function and its subordinates
+    let compileFunctionPatches (outputDirectory : string)
+                                         (filePrefix : string)
+                                         (user : string) 
+                                         (template : FunctionTemplate<'hole>)
+                                         (worklist : (FuncLocPath * 'hole) list)
+                                            : CompilerMonad<unit, 'env> = 
+        let compile1 (path, func) = 
+            functionRename func >>= functionEmit path
+        compile {
+            let (worklist1 : (FuncLocPath * Function) list) = 
+                applyTemplate worklist template
+            let! results =  forM worklist1 compile1
             do! generatePatches outputDirectory filePrefix user (concatResults results)
             return ()
         }

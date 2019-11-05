@@ -29,6 +29,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
 #load "..\src\AssetPatch\PatchBuilder\Hierarchy.fs"
 #load "..\src\AssetPatch\PatchBuilder\Catalogue.fs"
+#load "..\src\AssetPatch\PatchBuilder\Renamer.fs"
 #load "..\src\AssetPatch\PatchBuilder\Emitter.fs"
 #load "..\src\AssetPatch\PatchBuilder\PatchGen.fs"
 #load "..\src\AssetPatch\PatchBuilder\PatchCompiler.fs"

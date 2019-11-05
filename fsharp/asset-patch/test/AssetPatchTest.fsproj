@@ -6,8 +6,8 @@
 
   <ItemGroup>
     <None Include="TestUtils01.fsx" />
-    <None Include="Hierarchy01.fsx" />
     <None Include="AddPatcher01.fsx" />
+    <None Include="FunctionPatcher01.fsx" />
   </ItemGroup>
 
   <ItemGroup />

@@ -11,24 +11,29 @@ module Renamer =
     open AssetPatch.PatchBuilder.Hierarchy
     
     
-    let equipmentRename (equipment : Equipment) : CompilerMonad<Equipment, 'env> = 
+    let equipmentRename (equipment1 : Equipment) : CompilerMonad<Equipment, 'env> = 
+        let getName (x : Equipment) = 
+            match x.EquipmentId with
+            | None -> newEquipmentName ()
+            | Some a -> mreturn a
+
         let rec work (xs : Equipment list) 
                     (cont : Equipment list -> CompilerMonad<Equipment list, 'env>) = 
             match xs with
             | [] -> mreturn []
             | x :: rest -> 
                 compile {
-                    let! name = newEquipmentName ()
+                    let! name = getName x                        
                     return! 
                         work x.SuboridnateEquipment (fun kids -> 
-                        let e1 = { x with MagicNumber = Some name; SuboridnateEquipment = kids } 
+                        let e1 = { x with EquipmentId = Some name; SuboridnateEquipment = kids } 
                         work rest (fun sibs -> cont (e1 :: sibs)))
                 }
     
         compile {
-            let! name = newEquipmentName ()
-            let! kids = work equipment.SuboridnateEquipment mreturn
-            return { equipment with MagicNumber = Some name; SuboridnateEquipment = kids }
+            let! name = getName equipment1
+            let! kids = work equipment1.SuboridnateEquipment mreturn
+            return { equipment1 with EquipmentId = Some name; SuboridnateEquipment = kids }
         }
     
 
