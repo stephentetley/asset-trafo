@@ -16,8 +16,8 @@ open FSharp.Core
 #r "MarkdownDoc.dll"
 
 #load "..\src\AssetPatch\Base\Addendum.fs"
-#load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\Common.fs"
+#load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
 #load "..\src\AssetPatch\Base\ChangeFile.fs"
 #load "..\src\AssetPatch\Base\Acronyms.fs"
@@ -87,7 +87,7 @@ let test01 () =
         [ ("KRI03", {Easting = 492729; Northing = 477323} )
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
-    runCompiler () 
+    runCompiler (defaultEnv ()) 
        <| compileFunctionPatches 
                    (outputDirectory ())
                    "env_discharge"
@@ -136,7 +136,7 @@ let test02 () =
         [ ("KRI03", {Easting = 492729; Northing = 477323} )
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
-    runCompiler () 
+    runCompiler (defaultEnv ()) 
        <| compileFunctionPatches 
                    (outputDirectory ())
                    "control_automation"

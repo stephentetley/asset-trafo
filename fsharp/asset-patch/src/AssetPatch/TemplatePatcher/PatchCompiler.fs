@@ -51,7 +51,7 @@ module PatchCompiler =
                                          (user : string) 
                                          (template : ClassTemplate<'hole>)
                                          (worklist : (EquipmentCode * 'hole) list)
-                                            : CompilerMonad<unit, 'env> = 
+                                            : CompilerMonad<unit> = 
         compile {
             let worklist1 = applyTemplate worklist template
             let! results = 
@@ -66,7 +66,7 @@ module PatchCompiler =
                                          (user : string) 
                                          (template : ClassTemplate<'hole>)
                                          (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit, 'env> = 
+                                            : CompilerMonad<unit> = 
         compile {
             let worklist1 = applyTemplate worklist template
             let! results = 
@@ -80,9 +80,9 @@ module PatchCompiler =
     let compileHierarchyPatches (outputDirectory : string)
                                 (filePrefix : string)
                                 (user : string) 
-                                (compile1 : (FuncLocPath * 'object) -> CompilerMonad<EmitterResults, 'env>)
+                                (compile1 : (FuncLocPath * 'object) -> CompilerMonad<EmitterResults>)
                                 (template : 'hole -> 'object)
-                                (worklist : (FuncLocPath * 'hole) list) : CompilerMonad<unit, 'env> =         
+                                (worklist : (FuncLocPath * 'hole) list) : CompilerMonad<unit> =         
         compile {
             let worklist1 = applyTemplate worklist template
             let! results =  forM worklist1 compile1
@@ -96,7 +96,7 @@ module PatchCompiler =
                                 (user : string) 
                                 (template : ComponentTemplate<'hole>)
                                 (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit, 'env> = 
+                                            : CompilerMonad<unit> = 
         let compile1 (path, func) = componentRename func >>= componentEmit path
         compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
 
@@ -108,7 +108,7 @@ module PatchCompiler =
                             (user : string) 
                             (template : ItemTemplate<'hole>)
                             (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit, 'env> = 
+                                            : CompilerMonad<unit> = 
         let compile1 (path, func) = itemRename func >>= itemEmit path
         compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
 
@@ -120,7 +120,7 @@ module PatchCompiler =
                               (user : string) 
                               (template : AssemblyTemplate<'hole>)
                               (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit, 'env> = 
+                                            : CompilerMonad<unit> = 
         let compile1 (path, func) = assemblyRename func >>= assemblyEmit path
         compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
 
@@ -131,7 +131,7 @@ module PatchCompiler =
                               (user : string) 
                               (template : SystemTemplate<'hole>)
                               (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit, 'env> = 
+                                            : CompilerMonad<unit> = 
         let compile1 (path, func) = systemRename func >>= systemEmit path
         compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
 
@@ -142,7 +142,7 @@ module PatchCompiler =
                               (user : string) 
                               (template : ProcessTemplate<'hole>)
                               (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit, 'env> = 
+                                            : CompilerMonad<unit> = 
         let compile1 (path, func) = processRename func >>= processEmit path
         compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
 
@@ -153,7 +153,7 @@ module PatchCompiler =
                                          (user : string) 
                                          (template : ProcessGroupTemplate<'hole>)
                                          (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit, 'env> = 
+                                            : CompilerMonad<unit> = 
         let compile1 (path, func) = processGroupRename func >>= processGroupEmit path
         compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
 
@@ -164,7 +164,7 @@ module PatchCompiler =
                                          (user : string) 
                                          (template : FunctionTemplate<'hole>)
                                          (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit, 'env> = 
+                                            : CompilerMonad<unit> = 
         let compile1 (path, func) = functionRename func >>= functionEmit path
         compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
 
@@ -173,8 +173,7 @@ module PatchCompiler =
                                          (filePrefix : string)
                                          (user : string) 
                                          (template : SiteTemplate<'hole>)
-                                         (worklist : 'hole list)
-                                            : CompilerMonad<unit, 'env> = 
+                                         (worklist : 'hole list) : CompilerMonad<unit> = 
         let compile1 = siteRename >=> siteEmit
         compile {
             let worklist1=  List.map template worklist

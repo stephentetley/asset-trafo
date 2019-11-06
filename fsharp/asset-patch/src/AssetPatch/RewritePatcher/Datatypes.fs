@@ -57,7 +57,7 @@ module Datatypes =
 
     // Characteristics
 
-    let assocsToCharacteristic (attributes : AssocList<string, string>) : CompilerMonad<Characteristic, 'env> = 
+    let assocsToCharacteristic (attributes : AssocList<string, string>) : CompilerMonad<Characteristic> = 
         match AssocList.tryFind3 "CLASSTYPE" "CHARID" "TEXTBEZ" attributes with
         | Some (ctype, cid, cvalue) -> 
             mreturn { 
@@ -68,14 +68,14 @@ module Datatypes =
             }
          | None -> throwError "Could not find required fields for a VALUA* element"
 
-    let assocsToFlocCharacteristic (attributes : AssocList<string, string>) : CompilerMonad<FuncLocPath * Characteristic, 'env> = 
+    let assocsToFlocCharacteristic (attributes : AssocList<string, string>) : CompilerMonad<FuncLocPath * Characteristic> = 
         compile {
             let! floc = liftOption (AssocList.tryFind "FUNCLOC" attributes) |>> FuncLocPath.Create
             let! chars = assocsToCharacteristic attributes
             return (floc, chars)
         }
 
-    let assocsToEquiCharacteristic (attributes : AssocList<string, string>) : CompilerMonad<IntegerString * Characteristic, 'env> = 
+    let assocsToEquiCharacteristic (attributes : AssocList<string, string>) : CompilerMonad<IntegerString * Characteristic> = 
         compile {
             let! equi = liftOption (AssocList.tryFind "EQUI" attributes) |>> IntegerString.OfString
             let! char = assocsToCharacteristic attributes
@@ -84,7 +84,7 @@ module Datatypes =
 
     // Classes 
     
-    let assocsToClass (attributes : AssocList<string, string>) : CompilerMonad<Class, 'env> = 
+    let assocsToClass (attributes : AssocList<string, string>) : CompilerMonad<Class> = 
         match AssocList.tryFind3 "CLASS" "CLASSTYPE" "CLINT" attributes with
         | Some (cname, ctype, clint) -> 
             mreturn { 
@@ -94,7 +94,7 @@ module Datatypes =
             }
          | None -> throwError "Could not find required fields for a CLASS* element"
 
-    let assocsToFlocClass (attributes : AssocList<string, string>) : CompilerMonad<FuncLocPath * Class, 'env> = 
+    let assocsToFlocClass (attributes : AssocList<string, string>) : CompilerMonad<FuncLocPath * Class> = 
         compile {
             let! floc = liftOption (AssocList.tryFind "FUNCLOC" attributes) |>> FuncLocPath.Create
             let! clazz = assocsToClass attributes
@@ -102,7 +102,7 @@ module Datatypes =
         }
 
 
-    let assocsToEquiClass (attributes : AssocList<string, string>) : CompilerMonad<IntegerString * Class, 'env> = 
+    let assocsToEquiClass (attributes : AssocList<string, string>) : CompilerMonad<IntegerString * Class> = 
         compile {
             let! equi = liftOption (AssocList.tryFind "EQUI" attributes) |>> IntegerString.OfString
             let! clazz = assocsToClass attributes
@@ -111,7 +111,7 @@ module Datatypes =
 
     // Floc
 
-    let assocsToFloc (attributes : AssocList<string, string>) : CompilerMonad<Floc, 'env> = 
+    let assocsToFloc (attributes : AssocList<string, string>) : CompilerMonad<Floc> = 
         match AssocList.tryFind3 "FUNCLOC" "TXTMI" "EQART" attributes with
         | Some (funcloc, desc, otype) -> 
             mreturn { 
@@ -143,14 +143,14 @@ module Datatypes =
 
     // File reading
 
-    let readValuaFlocFile (inputPath : string) : CompilerMonad<(FuncLocPath * Characteristic) list, 'env> = 
+    let readValuaFlocFile (inputPath : string) : CompilerMonad<(FuncLocPath * Characteristic) list> = 
         compile {
             let! changes = liftResult <| readChangeFile inputPath
             do! assertBool (changes.Header.EntityType = ValuaFloc) "Not a VALUAFLOC file"
             return! mapM assocsToFlocCharacteristic changes.RowAssocs
         }
 
-    let readClassFlocFile (inputPath : string) : CompilerMonad<(FuncLocPath * Class) list, 'env> = 
+    let readClassFlocFile (inputPath : string) : CompilerMonad<(FuncLocPath * Class) list> = 
         compile {
             let! changes = liftResult <| readChangeFile inputPath
             do! assertBool (changes.Header.EntityType = ClassFloc) "Not a CLASSFLOC file"
@@ -158,7 +158,7 @@ module Datatypes =
         }
 
 
-    let readFuncLocFile (inputPath : string) : CompilerMonad<Floc list, 'env> = 
+    let readFuncLocFile (inputPath : string) : CompilerMonad<Floc list> = 
         compile {
             let! changes = liftResult <| readChangeFile inputPath
             do! assertBool (changes.Header.EntityType = FuncLoc) "Not a FUNCLOC file"

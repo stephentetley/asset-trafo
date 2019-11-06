@@ -17,8 +17,8 @@ open FSharp.Core
 #r "MarkdownDoc.dll"
 
 #load "..\src\AssetPatch\Base\Addendum.fs"
-#load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\Common.fs"
+#load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
 #load "..\src\AssetPatch\Base\ChangeFile.fs"
 #load "..\src\AssetPatch\Base\Acronyms.fs"
@@ -63,7 +63,7 @@ let test01 () : Result<unit, ErrMsg> =
         ; ("101001409", 2019u)
         ]   
         |> List.map (fun (a,b) -> (EquipmentCode a, b))
-    runCompiler () 
+    runCompiler (defaultEnv ())
         <| compileClassEquiValuaEquiPatches 
                     (outputDirectory ())
                     "asset_condition"
@@ -84,7 +84,7 @@ let test02 () =
         [ ("KRI03-EDC", "SAI00970234")
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
-    runCompiler () 
+    runCompiler (defaultEnv ())
        <| compileClassFlocValuaFlocPatches 
                    (outputDirectory ())
                    "aib_reference"

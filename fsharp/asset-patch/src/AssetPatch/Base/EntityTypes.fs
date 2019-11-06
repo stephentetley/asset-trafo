@@ -7,6 +7,8 @@ namespace AssetPatch.Base
 
 module EntityTypes =
     
+    open System
+
     open AssetPatch.Base.Common
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.ChangeFile
@@ -14,6 +16,14 @@ module EntityTypes =
     open AssetPatch.Base.Parser
     open AssetPatch.Base.FuncLocPath
    
+    type ObjectStatus = 
+        | Operational
+        | UnderConstruction
+
+    
+    let dateDefault : DateTime = 
+        new DateTime(year = 1970, month = 1, day = 1)
+
     // ************************************************************************
     // FuncLoc
 
@@ -46,7 +56,9 @@ module EntityTypes =
       { Path : FuncLocPath
         Description : string
         ObjectType : string
-        Category: uint32
+        Category : uint32
+        ObjectStatus : string
+        StartupDate : DateTime
         Attributes : AssocList<string, string>
       }
         member x.Level with get () : int = x.Path.Level
@@ -54,24 +66,34 @@ module EntityTypes =
         
 
     let assocsToFuncLoc (attributes : AssocList<string, string>) : Result<FuncLoc, ErrMsg> = 
-        match AssocList.tryFind4 "FUNCLOC" "TXTMI" "FLTYP" "EQART" attributes with
-        | Some (funcloc, desc, category, otype) -> 
+        match AssocList.tryFind5 "FUNCLOC" "TXTMI" "FLTYP" 
+                                    "EQART" "USTW_FLOC" attributes with
+        | Some (funcloc, desc, category, otype, status) -> 
             Ok { Path = FuncLocPath.Create funcloc 
                  Description = desc
                  ObjectType = otype
                  Category = try (uint32 category) with | _ -> 0u
+                 ObjectStatus = status
+                 StartupDate = Option.defaultValue dateDefault <| AssocList.tryFindS4Date "INBDT" attributes
                  Attributes = attributes }
         | None -> Error "Could not find required fields for a FuncLoc"
 
     let funcLocToAssocs (funcLoc: FuncLoc) : AssocList<string, string> = 
+        let parent1 = 
+            match funcLoc.Path |> parent with
+            | None -> ""
+            | Some path -> path.ToString()
         funcLoc.Attributes
             |> AssocList.upsert "FUNCLOC"       (funcLoc.Path.ToString())
             |> AssocList.upsert "TXTMI"         funcLoc.Description
-            |> AssocList.upsert "EQART"         funcLoc.ObjectType
             |> AssocList.upsert "FLTYP"         (funcLoc.Category.ToString())
+            |> AssocList.upsert "EQART"         funcLoc.ObjectType
+            |> AssocList.upsert "INDBT"         (funcLoc.StartupDate |> showS4Date)
+            |> AssocList.upsert "USTW_FLOC"     funcLoc.ObjectStatus
             |> AssocList.upsert "TPLKZ_FLC"     "YW-GS"
+            |> AssocList.upsert "TPLMA"         parent1
 
-    let readFuncLocChangeFile (inputFile : string) : CompilerMonad<FuncLoc list, 'env> = 
+    let readFuncLocChangeFile (inputFile : string) : CompilerMonad<FuncLoc list> = 
         compile { 
             let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
             return! mapM (liftResult << assocsToFuncLoc) ast.Rows
@@ -79,12 +101,15 @@ module EntityTypes =
 
     
 
-    let extendFuncLoc (segment : FuncLocSegment) 
+    let extendFuncLoc (segment : FuncLocSegment)
+                      (startupDate : DateTime)
                       (floc: FuncLoc) : FuncLoc = 
         { Path = FuncLocPath.extend segment.Name floc.Path
           Description = segment.Description
           ObjectType = segment.Description
           Category = floc.Category + 1u
+          ObjectStatus = "UCON"
+          StartupDate = startupDate
           Attributes = floc.Attributes }
 
 
@@ -119,7 +144,7 @@ module EntityTypes =
             ; ("CLSTATUS1",     classFloc.Status.ToString())
             ]
 
-    let readClassFlocChangeFile (inputFile : string) : CompilerMonad<ClassFloc list, 'env> = 
+    let readClassFlocChangeFile (inputFile : string) : CompilerMonad<ClassFloc list> = 
         compile { 
             let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
             return! mapM (liftResult << assocsToClassFloc) ast.Rows
@@ -160,7 +185,7 @@ module EntityTypes =
             |> AssocList.upsert "VALCNT"        (sprintf "%04i" valua.ValueCount)
 
 
-    let readValuaFlocChangeFile (inputFile : string) : CompilerMonad<ValuaFloc list, 'env> = 
+    let readValuaFlocChangeFile (inputFile : string) : CompilerMonad<ValuaFloc list> = 
         compile { 
             let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
             return! mapM (liftResult << assocsToValuaFloc) ast.Rows
@@ -204,7 +229,7 @@ module EntityTypes =
             |> AssocList.upsert "TXTMI"         equi.Description
             |> AssocList.upsert "TPLN_EILO"     (equi.FuncLoc.ToString()) 
 
-    let readEquiChangeFile (inputFile : string) : CompilerMonad<Equi list, 'env> = 
+    let readEquiChangeFile (inputFile : string) : CompilerMonad<Equi list> = 
         compile { 
             let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
             return! mapM (liftResult << assocsToEqui) ast.Rows
@@ -240,7 +265,7 @@ module EntityTypes =
             ; ("CLSTATUS1",     classEqui.Status.ToString())
             ]
 
-    let readClassEquiChangeFile (inputFile : string) : CompilerMonad<ClassEqui list, 'env> = 
+    let readClassEquiChangeFile (inputFile : string) : CompilerMonad<ClassEqui list> = 
         compile { 
             let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
             return! mapM (liftResult << assocsToClassEqui) ast.Rows
@@ -283,7 +308,7 @@ module EntityTypes =
             |> AssocList.upsert "VALCNT"        (sprintf "%04i" valua.ValueCount)
             
 
-    let readValuaEquiChangeFile (inputFile : string) : CompilerMonad<ValuaEqui list, 'env> = 
+    let readValuaEquiChangeFile (inputFile : string) : CompilerMonad<ValuaEqui list> = 
         compile { 
             let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
             return! mapM (liftResult << assocsToValuaEqui) ast.Rows

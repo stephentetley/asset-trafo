@@ -18,8 +18,8 @@ open FSharp.Core
 #r "MarkdownDoc.dll"
 
 #load "..\src\AssetPatch\Base\Addendum.fs"
-#load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\Common.fs"
+#load "..\src\AssetPatch\Base\AssocList.fs"
 #load "..\src\AssetPatch\Base\CompilerMonad.fs"
 #load "..\src\AssetPatch\Base\ChangeFile.fs"
 #load "..\src\AssetPatch\Base\Acronyms.fs"

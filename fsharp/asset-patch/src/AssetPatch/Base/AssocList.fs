@@ -6,6 +6,8 @@ namespace AssetPatch.Base
 [<AutoOpen>]
 module AssocListType = 
 
+    
+
     [<Struct>]
     type AssocList<'Key,'T> = 
         internal | AssocList of ('Key * 'T) list
@@ -18,6 +20,11 @@ module AssocListType =
 
 [<RequireQualifiedAccess>]
 module AssocList =
+
+    open System
+    
+    open AssetPatch.Base.Common
+
 
     let empty : AssocList<'Key, 'T> = 
         AssocList []
@@ -180,3 +187,9 @@ module AssocList =
         List.tryFind (fun x -> fst x = key) source.Assocs
             |> Option.map snd
             |> Option.bind tryCast
+
+    let inline tryFindS4Date (key : 'Key) 
+                            (source : AssocList<'Key, string>) : DateTime option = 
+        List.tryFind (fun x -> fst x = key) source.Assocs
+            |> Option.map snd
+            |> Option.bind readS4Date

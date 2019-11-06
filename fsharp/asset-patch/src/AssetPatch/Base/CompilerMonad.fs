@@ -7,7 +7,7 @@ namespace AssetPatch.Base
 
 module CompilerMonad =
     
-    
+    open System
     open FSharp.Core
 
     open AssetPatch.Base.Common
@@ -20,37 +20,41 @@ module CompilerMonad =
 
     type State = NameSupply
 
-    /// CompilerMonad is a Reader-Error-State(name supply) monad.
-    type CompilerMonad<'a, 'env> = 
-        CompilerMonad of ('env -> State -> Result<'a * State, ErrMsg>)
+    type Env = 
+        { StartupDate : DateTime
+        }
 
-    let inline private apply1 (ma : CompilerMonad<'a, 'env>) 
-                                (env : 'env) 
+    /// CompilerMonad is a Reader-Error-State(name supply) monad.
+    type CompilerMonad<'a> = 
+        CompilerMonad of (Env -> State -> Result<'a * State, ErrMsg>)
+
+    let inline private apply1 (ma : CompilerMonad<'a>) 
+                                (env : Env) 
                                 (st : NameSupply) : Result<'a * NameSupply, ErrMsg> = 
         let (CompilerMonad fn) = ma in fn env st
 
-    let mreturn (x:'a) : CompilerMonad<'a, 'env> = 
+    let mreturn (x:'a) : CompilerMonad<'a> = 
         CompilerMonad <| fun _ st -> Ok (x, st)
 
-    let inline private bindM (ma : CompilerMonad<'a, 'env>) 
-                             (fn : 'a -> CompilerMonad<'b, 'env>) : CompilerMonad<'b, 'env> =
+    let inline private bindM (ma : CompilerMonad<'a>) 
+                             (fn : 'a -> CompilerMonad<'b>) : CompilerMonad<'b> =
         CompilerMonad <| fun env st -> 
             match apply1 ma env st with
             | Ok(a, st1) -> apply1 (fn a) env st1
             | Error msg -> Error msg
 
-    let failM (msg:string) : CompilerMonad<'a, 'env> = 
+    let failM (msg:string) : CompilerMonad<'a> = 
         CompilerMonad (fun _ _ -> Error msg)
     
-    let inline private altM  (ma : CompilerMonad<'a, 'env>) 
-                             (mb : CompilerMonad<'a, 'env>) : CompilerMonad<'a, 'env> = 
+    let inline private altM  (ma : CompilerMonad<'a>) 
+                             (mb : CompilerMonad<'a>) : CompilerMonad<'a> = 
         CompilerMonad <| fun env st -> 
             match apply1 ma env st with
             | Ok ans -> Ok ans
             | Error _ -> apply1 mb env st
     
     
-    let inline private delayM (fn : unit -> CompilerMonad<'a, 'env>) : CompilerMonad<'a, 'env> = 
+    let inline private delayM (fn : unit -> CompilerMonad<'a>) : CompilerMonad<'a> = 
         bindM (mreturn ()) fn 
     
     type CompilerMonadBuilder() = 
@@ -65,8 +69,11 @@ module CompilerMonad =
     let (compile : CompilerMonadBuilder) = new CompilerMonadBuilder()
 
 
-    let runCompiler (env: 'env) 
-                    (action : CompilerMonad<'a, 'env> ) : Result<'a, ErrMsg> = 
+    let defaultEnv () : Env = 
+        { StartupDate = DateTime.Now }
+
+    let runCompiler (env : Env) 
+                    (action : CompilerMonad<'a> ) : Result<'a, ErrMsg> = 
         let stateZero = 
             { EquipmentIndex = 1 
               FileIndex = 1 }
@@ -79,24 +86,24 @@ module CompilerMonad =
 
     // Common operations
     let fmapM (update : 'a -> 'b) 
-              (action : CompilerMonad<'a, 'env>) : CompilerMonad<'b, 'env> = 
+              (action : CompilerMonad<'a>) : CompilerMonad<'b> = 
         CompilerMonad <| fun env st ->
             apply1 action env st |> Result.map (fun (a,st1) -> (update a, st1))
             
        
     /// Operator for fmap.
-    let ( |>> ) (action : CompilerMonad<'a, 'env>) 
-                (update : 'a -> 'b) : CompilerMonad<'b, 'env> = 
+    let ( |>> ) (action : CompilerMonad<'a>) 
+                (update : 'a -> 'b) : CompilerMonad<'b> = 
         fmapM update action
 
     /// Flipped fmap.
     let ( <<| ) (update : 'a -> 'b) 
-                (action : CompilerMonad<'a, 'env>) : CompilerMonad<'b, 'env> = 
+                (action : CompilerMonad<'a>) : CompilerMonad<'b> = 
         fmapM update action
 
     /// Haskell Applicative's (<*>)
-    let apM (mf : CompilerMonad<'a ->'b, 'env>) 
-            (ma : CompilerMonad<'a, 'env>) : CompilerMonad<'b, 'env> = 
+    let apM (mf : CompilerMonad<'a ->'b>) 
+            (ma : CompilerMonad<'a>) : CompilerMonad<'b> = 
         compile { 
             let! fn = mf
             let! a = ma
@@ -104,24 +111,24 @@ module CompilerMonad =
         }
 
     /// Operator for apM
-    let ( <*> ) (ma : CompilerMonad<'a -> 'b, 'env>) 
-                (mb : CompilerMonad<'a, 'env>) : CompilerMonad<'b, 'env> = 
+    let ( <*> ) (ma : CompilerMonad<'a -> 'b>) 
+                (mb : CompilerMonad<'a>) : CompilerMonad<'b> = 
         apM ma mb
 
     /// Bind operator
-    let ( >>= ) (ma : CompilerMonad<'a, 'env>) 
-                (fn : 'a -> CompilerMonad<'b, 'env>) : CompilerMonad<'b, 'env> = 
+    let ( >>= ) (ma : CompilerMonad<'a>) 
+                (fn : 'a -> CompilerMonad<'b>) : CompilerMonad<'b> = 
         bindM ma fn
 
     /// Flipped Bind operator
-    let ( =<< ) (fn : 'a -> CompilerMonad<'b, 'env>) 
-                (ma : CompilerMonad<'a, 'env>) : CompilerMonad<'b, 'env> = 
+    let ( =<< ) (fn : 'a -> CompilerMonad<'b>) 
+                (ma : CompilerMonad<'a>) : CompilerMonad<'b> = 
         bindM ma fn
 
 
-    let kleisliL (mf : 'a -> CompilerMonad<'b, 'env>)
-                 (mg : 'b -> CompilerMonad<'c, 'env>)
-                 (source:'a) : CompilerMonad<'c, 'env> = 
+    let kleisliL (mf : 'a -> CompilerMonad<'b>)
+                 (mg : 'b -> CompilerMonad<'c>)
+                 (source:'a) : CompilerMonad<'c> = 
         compile { 
             let! b = mf source
             let! c = mg b
@@ -129,9 +136,9 @@ module CompilerMonad =
         }
 
     /// Flipped kleisliL
-    let kleisliR (mf : 'b -> CompilerMonad<'c, 'env>)
-                 (mg : 'a -> CompilerMonad<'b, 'env>)
-                 (source:'a) : CompilerMonad<'c, 'env> = 
+    let kleisliR (mf : 'b -> CompilerMonad<'c>)
+                 (mg : 'a -> CompilerMonad<'b>)
+                 (source:'a) : CompilerMonad<'c> = 
         compile { 
             let! b = mg source
             let! c = mf b
@@ -140,22 +147,22 @@ module CompilerMonad =
 
 
     /// Operator for kleisliL
-    let (>=>) (mf : 'a -> CompilerMonad<'b, 'env>)
-              (mg : 'b -> CompilerMonad<'c, 'env>)
-              (source:'a) : CompilerMonad<'c, 'env> = 
+    let (>=>) (mf : 'a -> CompilerMonad<'b>)
+              (mg : 'b -> CompilerMonad<'c>)
+              (source:'a) : CompilerMonad<'c> = 
         kleisliL mf mg source
 
 
     /// Operator for kleisliR
-    let (<=<) (mf : 'b -> CompilerMonad<'c, 'env>)
-              (mg : 'a -> CompilerMonad<'b, 'env>)
-              (source:'a) : CompilerMonad<'c, 'env> = 
+    let (<=<) (mf : 'b -> CompilerMonad<'c>)
+              (mg : 'a -> CompilerMonad<'b>)
+              (source:'a) : CompilerMonad<'c> = 
         kleisliR mf mg source
 
     /// Perform two actions in sequence. 
     /// Ignore the results of the second action if both succeed.
-    let seqL (action1 : CompilerMonad<'a, 'env>) 
-             (action2 : CompilerMonad<'b, 'env>) : CompilerMonad<'a, 'env> = 
+    let seqL (action1 : CompilerMonad<'a>) 
+             (action2 : CompilerMonad<'b>) : CompilerMonad<'a> = 
         compile { 
             let! a = action1
             let! b = action2
@@ -163,14 +170,14 @@ module CompilerMonad =
         }
 
     /// Operator for seqL
-    let (.>>) (action1 : CompilerMonad<'a, 'env>) 
-                (action2 : CompilerMonad<'b, 'env>) : CompilerMonad<'a, 'env> = 
+    let (.>>) (action1 : CompilerMonad<'a>) 
+                (action2 : CompilerMonad<'b>) : CompilerMonad<'a> = 
         seqL action1 action2
 
     /// Perform two actions in sequence. 
     /// Ignore the results of the first action if both succeed.
-    let seqR (action1 : CompilerMonad<'a, 'env>) 
-             (action2 : CompilerMonad<'b, 'env>) : CompilerMonad<'b, 'env> = 
+    let seqR (action1 : CompilerMonad<'a>) 
+             (action2 : CompilerMonad<'b>) : CompilerMonad<'b> = 
         compile { 
             let! a = action1
             let! b = action2
@@ -178,30 +185,30 @@ module CompilerMonad =
         }
 
     /// Operator for seqR
-    let (>>.) (action1 : CompilerMonad<'a, 'env>) 
-              (action2 : CompilerMonad<'b, 'env>) : CompilerMonad<'b, 'env> = 
+    let (>>.) (action1 : CompilerMonad<'a>) 
+              (action2 : CompilerMonad<'b>) : CompilerMonad<'b> = 
         seqR action1 action2
 
 
     // ************************************************************************
     // Errors
 
-    let throwError (msg : string) : CompilerMonad<'a, 'env> = 
+    let throwError (msg : string) : CompilerMonad<'a> = 
         CompilerMonad <| fun _ _ -> Error msg
 
 
     let swapError (newMessage : string) 
-                  (ma : CompilerMonad<'a, 'env>) : CompilerMonad<'a, 'env> = 
+                  (ma : CompilerMonad<'a>) : CompilerMonad<'a> = 
         CompilerMonad <| fun env st -> 
             apply1 ma env st |> Result.mapError (fun _ -> newMessage)
             
 
     /// Operator for flip swapError
-    let ( <?> ) (action : CompilerMonad<'a, 'env>) (msg : string) : CompilerMonad<'a, 'env> = 
+    let ( <?> ) (action : CompilerMonad<'a>) (msg : string) : CompilerMonad<'a> = 
         swapError msg action
     
     let augmentError (update : string -> string) 
-                     (action : CompilerMonad<'a, 'env>) : CompilerMonad<'a, 'env> = 
+                     (action : CompilerMonad<'a>) : CompilerMonad<'a> = 
         CompilerMonad <| fun env st ->
             apply1 action env st |> Result.mapError update
 
@@ -210,30 +217,30 @@ module CompilerMonad =
     // ************************************************************************
     // Reader operations
 
-    let ask () : CompilerMonad<'env, 'env> = 
+    let ask () : CompilerMonad<Env> = 
         CompilerMonad <| fun env st -> Ok (env, st)
 
-    let asks (projection : 'env -> 'ans) : CompilerMonad<'ans, 'env> = 
+    let asks (projection : Env -> 'ans) : CompilerMonad<'ans> = 
         CompilerMonad <| fun env st -> Ok (projection env, st)
 
     // ************************************************************************
     // Name Supply 
 
-    let newEquipmentName () : CompilerMonad<string, 'env> = 
+    let newEquipmentName () : CompilerMonad<string> = 
         CompilerMonad <| fun _ st -> 
             let name = sprintf "MAGIC$%06i" st.EquipmentIndex
             Ok (name, {st with EquipmentIndex = st.EquipmentIndex + 1})
 
-    let resetEquipmentName () : CompilerMonad<unit, 'env> = 
+    let resetEquipmentName () : CompilerMonad<unit> = 
         CompilerMonad <| fun _ st -> 
             Ok ((), {st with EquipmentIndex = 1})
 
-    let newFileIndex () : CompilerMonad<int, 'env> = 
+    let newFileIndex () : CompilerMonad<int> = 
         CompilerMonad <| fun _ st -> 
             let index = st.FileIndex
             Ok (index, {st with FileIndex = st.FileIndex + 1})
 
-    let resetFileIndex () : CompilerMonad<unit, 'env> = 
+    let resetFileIndex () : CompilerMonad<unit> = 
         CompilerMonad <| fun _ st -> 
             Ok ((), {st with FileIndex = 1})
 
@@ -243,22 +250,22 @@ module CompilerMonad =
 
 
 
-    let ( <|> ) (action1 : CompilerMonad<'a, 'env>)  
-                (action2 : CompilerMonad<'a, 'env>) : CompilerMonad<'a, 'env> = 
+    let ( <|> ) (action1 : CompilerMonad<'a>)  
+                (action2 : CompilerMonad<'a>) : CompilerMonad<'a> = 
         altM action1 action2
 
-    let liftOption (opt : Option<'a>) : CompilerMonad<'a, 'env> = 
+    let liftOption (opt : Option<'a>) : CompilerMonad<'a> = 
         match opt with
         | Some ans -> mreturn ans
         | None -> throwError "liftOption None"
 
-    let liftResult (result : Result<'a, ErrMsg>) : CompilerMonad<'a, 'env> = 
+    let liftResult (result : Result<'a, ErrMsg>) : CompilerMonad<'a> = 
         match result with
         | Ok ans -> mreturn ans
         | Error err -> throwError err
 
     let liftResultBy (errProjection : 'Err -> ErrMsg) 
-                     (result : Result<'a, 'Err>) : CompilerMonad<'a, 'env> = 
+                     (result : Result<'a, 'Err>) : CompilerMonad<'a> = 
         match result with
         | Ok ans -> mreturn ans
         | Error err -> throwError (errProjection err)
@@ -266,16 +273,16 @@ module CompilerMonad =
 
     /// Try to run a computation.
     /// On failure, recover or throw again with the handler.
-    let attempt (action : CompilerMonad<'a, 'env>) 
-                (handler : ErrMsg -> CompilerMonad<'a, 'env>) : CompilerMonad<'a, 'env> = 
+    let attempt (action : CompilerMonad<'a>) 
+                (handler : ErrMsg -> CompilerMonad<'a>) : CompilerMonad<'a> = 
         CompilerMonad <| fun env st ->
             match apply1 action env st with
             | Ok ans -> Ok ans
             | Error msg -> apply1 (handler msg) env st
 
 
-    let assertM (cond : CompilerMonad<bool, 'env>) 
-                (errMsg : string) : CompilerMonad<unit, 'env> = 
+    let assertM (cond : CompilerMonad<bool>) 
+                (errMsg : string) : CompilerMonad<unit> = 
         compile {
             match! cond with
             | true -> return ()
@@ -283,7 +290,7 @@ module CompilerMonad =
         }
 
     let assertBool (cond : bool) 
-                    (errMsg : string) : CompilerMonad<unit, 'env> = 
+                    (errMsg : string) : CompilerMonad<unit> = 
         compile {
             match cond with
             | true -> return ()
@@ -293,12 +300,12 @@ module CompilerMonad =
     /// Run a potentially failing action. If it succeeds the answer
     /// is wrapped in ``Some``. 
     /// If it fails trap the error and return ``None``.
-    let optional (action : CompilerMonad<'a, 'env>) : CompilerMonad<'a option, 'env> = 
+    let optional (action : CompilerMonad<'a>) : CompilerMonad<'a option> = 
         attempt (action |>> Some) (fun _ -> mreturn None)
 
     /// Run an optional action - if it returns ``Some a`` return the 
     /// answer. If it returns ``None`` the fail.
-    let getOptional (action : CompilerMonad<'a option, 'env>) : CompilerMonad<'a, 'env> = 
+    let getOptional (action : CompilerMonad<'a option>) : CompilerMonad<'a> = 
         compile { 
             match! action with
             | Some a -> return a
@@ -308,7 +315,7 @@ module CompilerMonad =
 
 
 
-    let choice (actions : CompilerMonad<'a, 'env> list) : CompilerMonad<'a, 'env> = 
+    let choice (actions : CompilerMonad<'a> list) : CompilerMonad<'a> = 
         CompilerMonad <| fun env state -> 
             /// State doesn't need to be in the worker
             let rec work acts cont = 
@@ -325,12 +332,12 @@ module CompilerMonad =
 
     // liftM (which is fmap)
     let liftM (fn : 'a -> 'ans) 
-                (action : CompilerMonad<'a, 'env>) : CompilerMonad<'ans, 'env> = 
+                (action : CompilerMonad<'a>) : CompilerMonad<'ans> = 
         fmapM fn action
 
     let liftM2 (combine : 'a -> 'b -> 'ans) 
-                (action1 : CompilerMonad<'a, 'env>) 
-                (action2 : CompilerMonad<'b, 'env>) : CompilerMonad<'ans, 'env> = 
+                (action1 : CompilerMonad<'a>) 
+                (action2 : CompilerMonad<'b>) : CompilerMonad<'ans> = 
         compile { 
             let! a = action1
             let! b = action2
@@ -338,9 +345,9 @@ module CompilerMonad =
         }
 
     let liftM3 (combine : 'a -> 'b -> 'c -> 'ans) 
-                (action1 : CompilerMonad<'a, 'env>) 
-                (action2 : CompilerMonad<'b, 'env>) 
-                (action3 : CompilerMonad<'c, 'env>) : CompilerMonad<'ans, 'env> = 
+                (action1 : CompilerMonad<'a>) 
+                (action2 : CompilerMonad<'b>) 
+                (action3 : CompilerMonad<'c>) : CompilerMonad<'ans> = 
         compile { 
             let! a = action1
             let! b = action2
@@ -349,10 +356,10 @@ module CompilerMonad =
         }
 
     let liftM4 (combine : 'a -> 'b -> 'c -> 'd -> 'ans) 
-                (action1 : CompilerMonad<'a, 'env>) 
-                (action2 : CompilerMonad<'b, 'env>) 
-                (action3 : CompilerMonad<'c, 'env>) 
-                (action4 : CompilerMonad<'d, 'env>) : CompilerMonad<'ans, 'env> = 
+                (action1 : CompilerMonad<'a>) 
+                (action2 : CompilerMonad<'b>) 
+                (action3 : CompilerMonad<'c>) 
+                (action4 : CompilerMonad<'d>) : CompilerMonad<'ans> = 
         compile { 
             let! a = action1
             let! b = action2
@@ -363,11 +370,11 @@ module CompilerMonad =
 
 
     let liftM5 (combine : 'a -> 'b -> 'c -> 'd -> 'e -> 'ans) 
-                (action1 : CompilerMonad<'a, 'env>) 
-                (action2 : CompilerMonad<'b, 'env>) 
-                (action3 : CompilerMonad<'c, 'env>) 
-                (action4 : CompilerMonad<'d, 'env>) 
-                (action5 : CompilerMonad<'e, 'env>) : CompilerMonad<'ans, 'env> = 
+                (action1 : CompilerMonad<'a>) 
+                (action2 : CompilerMonad<'b>) 
+                (action3 : CompilerMonad<'c>) 
+                (action4 : CompilerMonad<'d>) 
+                (action5 : CompilerMonad<'e>) : CompilerMonad<'ans> = 
         compile { 
             let! a = action1
             let! b = action2
@@ -378,12 +385,12 @@ module CompilerMonad =
         }
 
     let liftM6 (combine : 'a -> 'b -> 'c -> 'd -> 'e -> 'f -> 'ans) 
-                (action1 : CompilerMonad<'a, 'env>) 
-                (action2 : CompilerMonad<'b, 'env>) 
-                (action3 : CompilerMonad<'c, 'env>) 
-                (action4 : CompilerMonad<'d, 'env>) 
-                (action5 : CompilerMonad<'e, 'env>) 
-                (action6 : CompilerMonad<'f, 'env>) : CompilerMonad<'ans, 'env> = 
+                (action1 : CompilerMonad<'a>) 
+                (action2 : CompilerMonad<'b>) 
+                (action3 : CompilerMonad<'c>) 
+                (action4 : CompilerMonad<'d>) 
+                (action5 : CompilerMonad<'e>) 
+                (action6 : CompilerMonad<'f>) : CompilerMonad<'ans> = 
         compile { 
             let! a = action1
             let! b = action2
@@ -394,80 +401,80 @@ module CompilerMonad =
             return (combine a b c d e f)
         }
 
-    let tupleM2 (action1 : CompilerMonad<'a, 'env>) 
-                (action2 : CompilerMonad<'b, 'env>) : CompilerMonad<'a * 'b, 'env> = 
+    let tupleM2 (action1 : CompilerMonad<'a>) 
+                (action2 : CompilerMonad<'b>) : CompilerMonad<'a * 'b> = 
         liftM2 (fun a b -> (a,b)) action1 action2
 
-    let tupleM3 (action1 : CompilerMonad<'a, 'env>) 
-                (action2 : CompilerMonad<'b, 'env>) 
-                (action3 : CompilerMonad<'c, 'env>) : CompilerMonad<'a * 'b * 'c, 'env> = 
+    let tupleM3 (action1 : CompilerMonad<'a>) 
+                (action2 : CompilerMonad<'b>) 
+                (action3 : CompilerMonad<'c>) : CompilerMonad<'a * 'b * 'c> = 
         liftM3 (fun a b c -> (a,b,c)) action1 action2 action3
 
-    let tupleM4 (action1 : CompilerMonad<'a, 'env>) 
-                (action2 : CompilerMonad<'b, 'env>) 
-                (action3 : CompilerMonad<'c, 'env>) 
-                (action4 : CompilerMonad<'d, 'env>) : CompilerMonad<'a * 'b * 'c * 'd, 'env> = 
+    let tupleM4 (action1 : CompilerMonad<'a>) 
+                (action2 : CompilerMonad<'b>) 
+                (action3 : CompilerMonad<'c>) 
+                (action4 : CompilerMonad<'d>) : CompilerMonad<'a * 'b * 'c * 'd> = 
         liftM4 (fun a b c d -> (a,b,c,d)) action1 action2 action3 action4
 
-    let tupleM5 (action1 : CompilerMonad<'a, 'env>) 
-                (action2 : CompilerMonad<'b, 'env>) 
-                (action3 : CompilerMonad<'c, 'env>) 
-                (action4 : CompilerMonad<'d, 'env>) 
-                (action5 : CompilerMonad<'e, 'env>) : CompilerMonad<'a * 'b * 'c * 'd * 'e, 'env> = 
+    let tupleM5 (action1 : CompilerMonad<'a>) 
+                (action2 : CompilerMonad<'b>) 
+                (action3 : CompilerMonad<'c>) 
+                (action4 : CompilerMonad<'d>) 
+                (action5 : CompilerMonad<'e>) : CompilerMonad<'a * 'b * 'c * 'd * 'e> = 
         liftM5 (fun a b c d e -> (a,b,c,d,e)) action1 action2 action3 action4 action5
 
-    let tupleM6 (action1 : CompilerMonad<'a, 'env>) 
-                (action2 : CompilerMonad<'b, 'env>) 
-                (action3 : CompilerMonad<'c, 'env>) 
-                (action4 : CompilerMonad<'d, 'env>) 
-                (action5 : CompilerMonad<'e, 'env>) 
-                (action6 : CompilerMonad<'f, 'env>) : CompilerMonad<'a * 'b * 'c * 'd * 'e * 'f, 'env> = 
+    let tupleM6 (action1 : CompilerMonad<'a>) 
+                (action2 : CompilerMonad<'b>) 
+                (action3 : CompilerMonad<'c>) 
+                (action4 : CompilerMonad<'d>) 
+                (action5 : CompilerMonad<'e>) 
+                (action6 : CompilerMonad<'f>) : CompilerMonad<'a * 'b * 'c * 'd * 'e * 'f> = 
         liftM6 (fun a b c d e f -> (a,b,c,d,e,f)) 
                 action1 action2 action3 action4 action5 action6
 
 
 
-    let pipeM2 (action1 : CompilerMonad<'a, 'env>) 
-               (action2 : CompilerMonad<'b, 'env>) 
-               (combine:'a -> 'b -> 'ans) : CompilerMonad<'ans, 'env> = 
+    let pipeM2 (action1 : CompilerMonad<'a>) 
+               (action2 : CompilerMonad<'b>) 
+               (combine:'a -> 'b -> 'ans) : CompilerMonad<'ans> = 
         liftM2 combine action1 action2
 
-    let pipeM3 (action1 : CompilerMonad<'a, 'env>) 
-               (action2 : CompilerMonad<'b, 'env>) 
-               (action3 : CompilerMonad<'c, 'env>) 
-               (combine : 'a -> 'b -> 'c -> 'ans) : CompilerMonad<'ans, 'env> = 
+    let pipeM3 (action1 : CompilerMonad<'a>) 
+               (action2 : CompilerMonad<'b>) 
+               (action3 : CompilerMonad<'c>) 
+               (combine : 'a -> 'b -> 'c -> 'ans) : CompilerMonad<'ans> = 
         liftM3 combine action1 action2 action3
 
-    let pipeM4 (action1 : CompilerMonad<'a, 'env>) 
-               (action2 : CompilerMonad<'b, 'env>) 
-               (action3 : CompilerMonad<'c, 'env>) 
-               (action4 : CompilerMonad<'d, 'env>) 
-               (combine : 'a -> 'b -> 'c -> 'd -> 'ans) : CompilerMonad<'ans, 'env> = 
+    let pipeM4 (action1 : CompilerMonad<'a>) 
+               (action2 : CompilerMonad<'b>) 
+               (action3 : CompilerMonad<'c>) 
+               (action4 : CompilerMonad<'d>) 
+               (combine : 'a -> 'b -> 'c -> 'd -> 'ans) : CompilerMonad<'ans> = 
         liftM4 combine action1 action2 action3 action4
 
-    let pipeM5 (action1 : CompilerMonad<'a, 'env>) 
-               (action2 : CompilerMonad<'b, 'env>) 
-               (action3 : CompilerMonad<'c, 'env>) 
-               (action4 : CompilerMonad<'d, 'env>) 
-               (action5 : CompilerMonad<'e, 'env>) 
-               (combine : 'a -> 'b -> 'c -> 'd -> 'e -> 'ans) : CompilerMonad<'ans, 'env> = 
+    let pipeM5 (action1 : CompilerMonad<'a>) 
+               (action2 : CompilerMonad<'b>) 
+               (action3 : CompilerMonad<'c>) 
+               (action4 : CompilerMonad<'d>) 
+               (action5 : CompilerMonad<'e>) 
+               (combine : 'a -> 'b -> 'c -> 'd -> 'e -> 'ans) : CompilerMonad<'ans> = 
         liftM5 combine action1 action2 action3 action4 action5
 
-    let pipeM6 (action1 : CompilerMonad<'a, 'env>) 
-               (action2 : CompilerMonad<'b, 'env>) 
-               (action3 : CompilerMonad<'c, 'env>) 
-               (action4 : CompilerMonad<'d, 'env>) 
-               (action5 : CompilerMonad<'e, 'env>) 
-               (action6 : CompilerMonad<'f, 'env>) 
-               (combine : 'a -> 'b -> 'c -> 'd -> 'e -> 'f -> 'ans) : CompilerMonad<'ans, 'env> = 
+    let pipeM6 (action1 : CompilerMonad<'a>) 
+               (action2 : CompilerMonad<'b>) 
+               (action3 : CompilerMonad<'c>) 
+               (action4 : CompilerMonad<'d>) 
+               (action5 : CompilerMonad<'e>) 
+               (action6 : CompilerMonad<'f>) 
+               (combine : 'a -> 'b -> 'c -> 'd -> 'e -> 'f -> 'ans) : CompilerMonad<'ans> = 
         liftM6 combine action1 action2 action3 action4 action5 action6
 
     // ************************************************************************
     // Traversals
 
     /// Implemented in CPS 
-    let mapM (mf: 'a -> CompilerMonad<'b, 'env>) 
-             (source : 'a list) : CompilerMonad<'b list, 'env> = 
+    let mapM (mf: 'a -> CompilerMonad<'b>) 
+             (source : 'a list) : CompilerMonad<'b list> = 
         CompilerMonad <| fun env state -> 
             let rec work (xs : 'a list)   
                          (st : State)
@@ -484,13 +491,13 @@ module CompilerMonad =
             work source state (fun msg -> Error msg) (fun ans st -> Ok (ans,st))
 
     let forM (xs : 'a list) 
-             (fn : 'a -> CompilerMonad<'b, 'env>) : CompilerMonad<'b list, 'env> = 
+             (fn : 'a -> CompilerMonad<'b>) : CompilerMonad<'b list> = 
         mapM fn xs
 
 
     /// Implemented in CPS 
-    let mapMz (mf: 'a -> CompilerMonad<'b, 'env>) 
-              (source : 'a list) : CompilerMonad<unit, 'env> = 
+    let mapMz (mf: 'a -> CompilerMonad<'b>) 
+              (source : 'a list) : CompilerMonad<unit> = 
         CompilerMonad <| fun env state -> 
             let rec work (xs : 'a list)
                          (st : State)
@@ -507,12 +514,12 @@ module CompilerMonad =
 
 
     let forMz (xs : 'a list) 
-              (fn : 'a -> CompilerMonad<'b, 'env>) : CompilerMonad<unit, 'env> = 
+              (fn : 'a -> CompilerMonad<'b>) : CompilerMonad<unit> = 
         mapMz fn xs
 
-    let foldM (action : 'acc -> 'a -> CompilerMonad<'acc, 'env>) 
+    let foldM (action : 'acc -> 'a -> CompilerMonad<'acc>) 
                 (initial : 'acc)
-                (source : 'a list) : CompilerMonad<'acc, 'env> = 
+                (source : 'a list) : CompilerMonad<'acc> = 
         CompilerMonad <| fun env state -> 
             let rec work (acc : 'acc) 
                             (xs : 'a list) 
@@ -530,8 +537,8 @@ module CompilerMonad =
 
 
 
-    let smapM (action : 'a -> CompilerMonad<'b, 'env>) 
-                (source : seq<'a>) : CompilerMonad<seq<'b>, 'env> = 
+    let smapM (action : 'a -> CompilerMonad<'b>) 
+                (source : seq<'a>) : CompilerMonad<seq<'b>> = 
         CompilerMonad <| fun env state ->
             let sourceEnumerator = source.GetEnumerator()
             let rec work (st : State) 
@@ -549,11 +556,11 @@ module CompilerMonad =
             work state (fun msg -> Error msg) (fun a st -> Ok (a, st))
 
     let sforM (sx : seq<'a>) 
-              (fn : 'a -> CompilerMonad<'b, 'env>) : CompilerMonad<seq<'b>, 'env> = 
+              (fn : 'a -> CompilerMonad<'b>) : CompilerMonad<seq<'b>> = 
         smapM fn sx
     
-    let smapMz (action : 'a -> CompilerMonad<'b, 'env>) 
-                (source : seq<'a>) : CompilerMonad<unit, 'env> = 
+    let smapMz (action : 'a -> CompilerMonad<'b>) 
+                (source : seq<'a>) : CompilerMonad<unit> = 
         CompilerMonad <| fun env state ->
             let sourceEnumerator = source.GetEnumerator()
             let rec work (st : State) 
@@ -571,13 +578,13 @@ module CompilerMonad =
 
     
     let sforMz (source : seq<'a>) 
-                (action : 'a -> CompilerMonad<'b, 'env>) : CompilerMonad<unit, 'env> = 
+                (action : 'a -> CompilerMonad<'b>) : CompilerMonad<unit> = 
         smapMz action source
 
         
-    let sfoldM (action : 'acc -> 'a -> CompilerMonad<'acc, 'env>) 
+    let sfoldM (action : 'acc -> 'a -> CompilerMonad<'acc>) 
                 (initial : 'acc)
-                (source : seq<'a>) : CompilerMonad<'acc, 'env> = 
+                (source : seq<'a>) : CompilerMonad<'acc> = 
         CompilerMonad <| fun env state ->
             let sourceEnumerator = source.GetEnumerator()
             let rec work (acc : 'acc) 
@@ -595,8 +602,8 @@ module CompilerMonad =
 
 
     /// Implemented in CPS 
-    let mapiM (mf : int -> 'a -> CompilerMonad<'b, 'env>) 
-                (source : 'a list) : CompilerMonad<'b list, 'env> = 
+    let mapiM (mf : int -> 'a -> CompilerMonad<'b>) 
+                (source : 'a list) : CompilerMonad<'b list> = 
         CompilerMonad <| fun env state -> 
             let rec work (xs : 'a list)
                          (count : int)
@@ -615,8 +622,8 @@ module CompilerMonad =
 
 
     /// Implemented in CPS 
-    let mapiMz (mf : int -> 'a -> CompilerMonad<'b, 'env>) 
-                (source : 'a list) : CompilerMonad<unit, 'env> = 
+    let mapiMz (mf : int -> 'a -> CompilerMonad<'b>) 
+                (source : 'a list) : CompilerMonad<unit> = 
         CompilerMonad <| fun env state -> 
             let rec work (xs : 'a list) 
                          (count : int)
@@ -635,17 +642,17 @@ module CompilerMonad =
     
 
     let foriM (xs : 'a list) 
-              (fn : int -> 'a -> CompilerMonad<'b, 'env>) : CompilerMonad<'b list, 'env> = 
+              (fn : int -> 'a -> CompilerMonad<'b>) : CompilerMonad<'b list> = 
         mapiM fn xs
 
     let foriMz (xs : 'a list) 
-               (fn : int -> 'a -> CompilerMonad<'b, 'env>) : CompilerMonad<unit, 'env> = 
+               (fn : int -> 'a -> CompilerMonad<'b>) : CompilerMonad<unit> = 
         mapiMz fn xs
 
 
     /// Implemented in CPS 
-    let filterM (mf: 'a -> CompilerMonad<bool, 'env>) 
-                (source : 'a list) : CompilerMonad<'a list, 'env> = 
+    let filterM (mf: 'a -> CompilerMonad<bool>) 
+                (source : 'a list) : CompilerMonad<'a list> = 
         CompilerMonad <| fun env state -> 
             let rec work (xs : 'a list)
                          (st : State)

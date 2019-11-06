@@ -6,8 +6,8 @@
 
   <ItemGroup>
     <Compile Include="AssetPatch\Base\Addendum.fs" />
-    <Compile Include="AssetPatch\Base\AssocList.fs" />
     <Compile Include="AssetPatch\Base\Common.fs" />
+    <Compile Include="AssetPatch\Base\AssocList.fs" />
     <Compile Include="AssetPatch\Base\CompilerMonad.fs" />
     <Compile Include="AssetPatch\Base\ChangeFile.fs" />
     <Compile Include="AssetPatch\Base\Acronyms.fs" />
