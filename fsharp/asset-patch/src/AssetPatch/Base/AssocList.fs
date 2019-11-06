@@ -49,6 +49,9 @@ module AssocList =
     let tryFind (key : 'Key) (source : AssocList<'Key, 'T>) : 'T option = 
         List.tryFind (fun x -> fst x = key) source.Assocs
             |> Option.map snd
+
+    
+
             
     let tryFindKey (predicate : 'Key -> 'T -> bool) (source : AssocList<'Key, 'T>) : 'T option = 
         List.tryFind (fun (k,v) -> predicate k v) source.Assocs
@@ -143,3 +146,37 @@ module AssocList =
             | None -> acc
             | Some value -> AssocList.Cons(key, value, acc)                   
         List.foldBack add1 keys empty
+
+
+    let inline tryFindInt (key : 'Key) (source : AssocList<'Key, ^T>) : int option when ^T : (static member op_Explicit : ^T -> int) = 
+        let tryCast s =
+            try 
+                int s |> Some
+            with
+            | _ -> None
+        List.tryFind (fun x -> fst x = key) source.Assocs
+            |> Option.map snd
+            |> Option.bind tryCast
+
+
+    let inline tryFindDecimal (key : 'Key) 
+                       (source : AssocList<'Key, 'T>) : decimal option when 'T : (static member op_Explicit : 'T -> decimal) = 
+        let tryCast s = 
+            try 
+                decimal s |> Some
+            with
+            | _ -> None
+        List.tryFind (fun x -> fst x = key) source.Assocs
+            |> Option.map snd
+            |> Option.bind tryCast
+
+    let inline tryFindUint32 (key : 'Key) 
+                    (source : AssocList<'Key, 'T>) : uint32 option when 'T : (static member op_Explicit : 'T -> uint32) = 
+        let tryCast s = 
+            try 
+                uint32 s |> Some
+            with
+            | _ -> None
+        List.tryFind (fun x -> fst x = key) source.Assocs
+            |> Option.map snd
+            |> Option.bind tryCast

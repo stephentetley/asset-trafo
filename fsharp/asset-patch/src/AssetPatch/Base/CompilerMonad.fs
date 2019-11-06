@@ -273,6 +273,23 @@ module CompilerMonad =
             | Ok ans -> Ok ans
             | Error msg -> apply1 (handler msg) env st
 
+
+    let assertM (cond : CompilerMonad<bool, 'env>) 
+                (errMsg : string) : CompilerMonad<unit, 'env> = 
+        compile {
+            match! cond with
+            | true -> return ()
+            | false -> return! throwError errMsg
+        }
+
+    let assertBool (cond : bool) 
+                    (errMsg : string) : CompilerMonad<unit, 'env> = 
+        compile {
+            match cond with
+            | true -> return ()
+            | false -> return! throwError errMsg
+        }
+
     /// Run a potentially failing action. If it succeeds the answer
     /// is wrapped in ``Some``. 
     /// If it fails trap the error and return ``None``.

@@ -46,6 +46,7 @@ module EntityTypes =
       { Path : FuncLocPath
         Description : string
         ObjectType : string
+        Category: uint32
         Attributes : AssocList<string, string>
       }
         member x.Level with get () : int = x.Path.Level
@@ -53,19 +54,22 @@ module EntityTypes =
         
 
     let assocsToFuncLoc (attributes : AssocList<string, string>) : Result<FuncLoc, ErrMsg> = 
-        match AssocList.tryFind3 "FUNCLOC" "TXTMI" "EQART" attributes with
-        | Some (funcloc, desc, otype) -> 
+        match AssocList.tryFind4 "FUNCLOC" "TXTMI" "FLTYP" "EQART" attributes with
+        | Some (funcloc, desc, category, otype) -> 
             Ok { Path = FuncLocPath.Create funcloc 
                  Description = desc
                  ObjectType = otype
+                 Category = try (uint32 category) with | _ -> 0u
                  Attributes = attributes }
-         | None -> Error "Could not find required fields for a FuncLoc"
+        | None -> Error "Could not find required fields for a FuncLoc"
 
     let funcLocToAssocs (funcLoc: FuncLoc) : AssocList<string, string> = 
         funcLoc.Attributes
-            |> AssocList.upsert "FUNCLOC"   (funcLoc.Path.ToString())
-            |> AssocList.upsert "TXTMI"     funcLoc.Description
-            |> AssocList.upsert "EQART"     funcLoc.ObjectType
+            |> AssocList.upsert "FUNCLOC"       (funcLoc.Path.ToString())
+            |> AssocList.upsert "TXTMI"         funcLoc.Description
+            |> AssocList.upsert "EQART"         funcLoc.ObjectType
+            |> AssocList.upsert "FLTYP"         (funcLoc.Category.ToString())
+            |> AssocList.upsert "TPLKZ_FLC"     "YW-GS"
 
     let readFuncLocChangeFile (inputFile : string) : CompilerMonad<FuncLoc list, 'env> = 
         compile { 
@@ -80,6 +84,7 @@ module EntityTypes =
         { Path = FuncLocPath.extend segment.Name floc.Path
           Description = segment.Description
           ObjectType = segment.Description
+          Category = floc.Category + 1u
           Attributes = floc.Attributes }
 
 

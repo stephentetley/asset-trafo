@@ -173,8 +173,8 @@ module Parser =
         }
 
 
-    let readChangeFile (inputFile : string) : Result<ChangeFile, ErrMsg> = 
-        match runParserOnFile (parseChangeFile ()) () inputFile Text.Encoding.UTF8 with
+    let readChangeFile (inputPath : string) : Result<ChangeFile, ErrMsg> = 
+        match runParserOnFile (parseChangeFile ()) () inputPath Text.Encoding.UTF8 with
         | Failure (str,_,_) -> Result.Error str
         | Success (ans,_,_) -> Result.Ok ans
 

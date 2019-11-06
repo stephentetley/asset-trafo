@@ -275,6 +275,7 @@ module Emitter =
             { Path = path
               Description = compo.FuncLocSegment.Description
               ObjectType = compo.FuncLocSegment.ObjectType
+              Category = 8u
               Attributes = AssocList.empty
             }
         compile {
@@ -290,6 +291,7 @@ module Emitter =
             { Path = path
               Description = item.FuncLocSegment.Description
               ObjectType = item.FuncLocSegment.ObjectType
+              Category = 7u
               Attributes = AssocList.empty
             }
         compile {
@@ -306,6 +308,7 @@ module Emitter =
             { Path = path
               Description = assembly.FuncLocSegment.Description
               ObjectType = assembly.FuncLocSegment.ObjectType
+              Category = 6u
               Attributes = AssocList.empty
             }
         compile {
@@ -322,6 +325,7 @@ module Emitter =
             { Path = path
               Description = system.FuncLocSegment.Description
               ObjectType = system.FuncLocSegment.ObjectType
+              Category = 5u
               Attributes = AssocList.empty
             }
         compile {
@@ -338,6 +342,7 @@ module Emitter =
             { Path = path
               Description = proc.FuncLocSegment.Description
               ObjectType = proc.FuncLocSegment.ObjectType
+              Category = 4u
               Attributes = AssocList.empty
             }
         compile {
@@ -352,7 +357,8 @@ module Emitter =
         let funcLoc = 
             { Path = path
               Description = procGroup.FuncLocSegment.Description
-              ObjectType = procGroup.FuncLocSegment.ObjectType
+              ObjectType = procGroup.FuncLocSegment.ObjectType              
+              Category = 3u
               Attributes = AssocList.empty
             }
         compile {
@@ -367,7 +373,8 @@ module Emitter =
         let funcLoc = 
             { Path = path
               Description = func.FuncLocSegment.Description
-              ObjectType = func.FuncLocSegment.ObjectType
+              ObjectType = func.FuncLocSegment.ObjectType              
+              Category = 2u
               Attributes = AssocList.empty
             }
         compile {
@@ -382,6 +389,7 @@ module Emitter =
             { Path = path
               Description = site.FuncLocSegment.Description
               ObjectType = site.FuncLocSegment.ObjectType
+              Category = 1u
               Attributes = AssocList.empty
             }
         compile {
