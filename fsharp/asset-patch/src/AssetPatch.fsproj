@@ -19,6 +19,7 @@
     <Compile Include="AssetPatch\Utilities\ChangeFileReport.fs" />
     <Compile Include="AssetPatch\Utilities\TidyChangeFile.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Hierarchy.fs" />
+    <Compile Include="AssetPatch\TemplatePatcher\TemplateMonad.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Catalogue.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Renamer.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Emitter.fs" />

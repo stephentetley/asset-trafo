@@ -18,12 +18,12 @@ module Catalogue =
 
     /// AIB_REFERENCE:AI2_AIB_REFERENCE
     let ai2_aib_reference (v : string) : Characteristic = 
-        _char "AI2_AIB_REFERENCE" v
+        _characteristic "AI2_AIB_REFERENCE" v
 
     /// AIB_REFERENCE:S4_AIB_REFERENCE
     /// This is always blank
     let s4_aib_reference () : Characteristic = 
-        _char "S4_AIB_REFERENCE" ""
+        _characteristic "S4_AIB_REFERENCE" ""
 
 
     /// ASSET_CONDITION
@@ -41,12 +41,12 @@ module Catalogue =
             
     /// ASSET_CONDITION:CONDITION_GRADE
     let condition_grade (v : ConditionGrade) : Characteristic = 
-        _char "CONDITION_GRADE" (v.ToString())
+        _characteristic "CONDITION_GRADE" (v.ToString())
 
 
     /// ASSET_CONDITION:CONDITION_GRADE_REASON
     let condition_grade_reason (v : string) : Characteristic = 
-           _char "CONDITION_GRADE_REASON" (v.ToUpper())
+        _characteristic "CONDITION_GRADE_REASON" (v.ToUpper())
 
     /// ASSET_CONDITION:PerformanceGrade
     type PerformanceGrade = 
@@ -59,12 +59,12 @@ module Catalogue =
 
     /// ASSET_CONDITION:PERFORMANCE_GRADE
     let performance_grade (v : PerformanceGrade) : Characteristic = 
-        _char "PERFORMANCE_GRADE" (v.ToString())
+        _characteristic "PERFORMANCE_GRADE" (v.ToString())
 
 
     /// ASSET_CONDITION:PERFORMANCE_GRADE_REASON
     let performance_grade_reason (v : string) : Characteristic = 
-        _char "PERFORMANCE_GRADE_REASON" (v.ToUpper())
+        _characteristic "PERFORMANCE_GRADE_REASON" (v.ToUpper())
 
 
     /// ASSET_CONDITION:LoadingFactor
@@ -77,17 +77,17 @@ module Catalogue =
 
     /// ASSET_CONDITION:LOADING_FACTOR
     let loading_factor (v : LoadingFactor) : Characteristic = 
-        _char "LOADING_FACTOR" (v.ToString())
+        _characteristic "LOADING_FACTOR" (v.ToString())
 
 
     /// ASSET_CONDITION:LOADING_FACTOR_REASON
     let loading_factor_reason (v : string) : Characteristic = 
-         _char "LOADING_FACTOR_REASON" (v.ToUpper())
+         _characteristic "LOADING_FACTOR_REASON" (v.ToUpper())
 
 
     /// ASSET_CONDITION:SURVEY_DATE
     let survey_date (v : uint32) : Characteristic = 
-        _char "SURVEY_DATE" (v.ToString())
+        _characteristic "SURVEY_DATE" (v.ToString())
 
 
     /// EAST_NORTH
@@ -96,11 +96,11 @@ module Catalogue =
 
     /// EAST_NORTH:EASTING
     let easting (v : int) : Characteristic = 
-        _char "EASTING" (v.ToString())
+        _characteristic "EASTING" (v.ToString())
 
     /// EAST_NORTH:NORTHING
     let northing (v : int) : Characteristic = 
-        _char "NORTHING" (v.ToString())
+        _characteristic "NORTHING" (v.ToString())
 
 
     

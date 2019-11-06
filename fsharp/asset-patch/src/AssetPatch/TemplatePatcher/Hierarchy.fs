@@ -88,6 +88,8 @@ module Hierarchy =
           Functions : Function list    
         }
 
+    /// *** If we had monadic templates (Reader) we could have a lot more
+    /// *** flexibility for inheriting attributes
 
     let _segment (token : string) 
                  (description : string) 
@@ -97,7 +99,7 @@ module Hierarchy =
           ObjectType = objectType 
         }
     
-    let _char (name : string) (value : string) : Characteristic = 
+    let _characteristic (name : string) (value : string) : Characteristic = 
         { Name = name
           Value = value
         }
@@ -111,7 +113,7 @@ module Hierarchy =
     let _equipment (description : string) (objectType : string)
                     (classes : Class list) 
                     (subordinateEquipment : Equipment list) : Equipment = 
-        // MagicNumber is filled in by a compiler pass
+        // EquipmentId is filled in by a compiler pass
         { EquipmentId = None
           Description = description
           ObjectType = objectType
