@@ -107,10 +107,17 @@ module Emitter =
                          (equipment: Equipment) : CompilerMonad<Equi> = 
         compile {
             let! number = newEquipmentName ()
+            let! sdate = asks (fun x -> x.StartupDate)
+            let! mplant = asks (fun x -> x.MaintenancePlant)
             return { 
                 EquipmentNumber = EquipmentCode number
                 Description = equipment.Description
                 FuncLoc = funcLoc
+                ObjectType = equipment.ObjectType
+                Manufacturer = Option.defaultValue "TO BE DETERMINED" equipment.Manufacturer
+                Model = Option.defaultValue "TO BE DETERMINED" equipment.Model
+                StartupDate = sdate
+                MaintenancePlant = mplant
                 Attributes = AssocList.empty
             }
         }

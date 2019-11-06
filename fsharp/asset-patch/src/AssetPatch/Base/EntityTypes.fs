@@ -88,7 +88,7 @@ module EntityTypes =
             |> AssocList.upsert "TXTMI"         funcLoc.Description
             |> AssocList.upsert "FLTYP"         (funcLoc.Category.ToString())
             |> AssocList.upsert "EQART"         funcLoc.ObjectType
-            |> AssocList.upsert "INDBT"         (funcLoc.StartupDate |> showS4Date)
+            |> AssocList.upsert "INBDT"         (funcLoc.StartupDate |> showS4Date)
             |> AssocList.upsert "USTW_FLOC"     funcLoc.ObjectStatus
             |> AssocList.upsert "TPLKZ_FLC"     "YW-GS"
             |> AssocList.upsert "TPLMA"         parent1
@@ -210,15 +210,26 @@ module EntityTypes =
       { EquipmentNumber : EquipmentCode
         Description : string
         FuncLoc : FuncLocPath
+        ObjectType : string
+        Manufacturer : string
+        Model : string
+        StartupDate : DateTime
+        MaintenancePlant : uint32
         Attributes : AssocList<string, string>
       }
 
     let assocsToEqui (attributes : AssocList<string, string>) : Result<Equi, ErrMsg> = 
-        match AssocList.tryFind3 "EQUI" "TXTMI" "TPLN_EILO" attributes with
-        | Some (number, desc, funcloc) -> 
+        match AssocList.tryFind6 "EQUI" "TXTMI" "TPLN_EILO" "EQART_EQU" 
+                                "HERST" "TYPBZ" attributes with
+        | Some (number, desc, funcloc, objtype, manufacturer, model) -> 
             Ok { EquipmentNumber = EquipmentCode number
                  Description = desc
                  FuncLoc = FuncLocPath.Create funcloc 
+                 ObjectType = objtype 
+                 Manufacturer = manufacturer
+                 Model = model
+                 StartupDate = Option.defaultValue dateDefault <| AssocList.tryFindS4Date "INBDT" attributes
+                 MaintenancePlant = Option.defaultValue 2100u <| AssocList.tryFindUint32 "SWER_EILO" attributes
                  Attributes = attributes }
          | None -> Error "Could not find required fields for a Equi"
 
@@ -228,6 +239,9 @@ module EntityTypes =
             |> AssocList.upsert "EQUI"          equi.EquipmentNumber.Code
             |> AssocList.upsert "TXTMI"         equi.Description
             |> AssocList.upsert "TPLN_EILO"     (equi.FuncLoc.ToString()) 
+            |> AssocList.upsert "EQART_EQU"     equi.ObjectType
+            |> AssocList.upsert "SWER_EILO"     (equi.MaintenancePlant.ToString())
+            |> AssocList.upsert "INBDT"         (equi.StartupDate |> showS4Date)
 
     let readEquiChangeFile (inputFile : string) : CompilerMonad<Equi list> = 
         compile { 

@@ -93,6 +93,17 @@ module AssocList =
         | Some v1, Some v2, Some v3, Some v4, Some v5-> Some (v1, v2, v3, v4, v5) 
         | _, _, _, _, _ -> None
 
+    let tryFind6 (key1 : 'Key) (key2 : 'Key) (key3 : 'Key) 
+                    (key4: 'Key) (key5: 'Key) (key6: 'Key)
+                    (source : AssocList<'Key, 'T>) : ('T * 'T * 'T * 'T * 'T * 'T) option = 
+        match tryFind key1 source, tryFind key2 source, 
+                tryFind key3 source, tryFind key4 source,
+                tryFind key5 source, tryFind key5 source with
+        | Some v1, Some v2, Some v3, Some v4, Some v5, Some v6 -> 
+            Some (v1, v2, v3, v4, v5, v6) 
+        | _, _, _, _, _, _-> None
+
+
     let update (key: 'Key) (value: 'T) (source: AssocList<'Key, 'T>) : AssocList<'Key, 'T> when 'Key : equality  = 
         let rec work xs cont = 
             match xs with 

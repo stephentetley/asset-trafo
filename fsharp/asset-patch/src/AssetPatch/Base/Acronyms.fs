@@ -242,7 +242,7 @@ module Acronyms =
             ; ("WERK_EQUI", "Plant")
             ; ("BEBE_EILO", "Plant Section")
             ; ("BEBERI", "Plant Section Origin")
-            ; ("WERGW_EQI", "Palnt for WorkCenter")
+            ; ("WERGW_EQI", "Plant for WorkCenter")
             ; ("IWERKI", "Plant plant origin")
             ; ("HEQN_EEQZ", "Position")
             ; ("KRFKZ", "Referenced config.")

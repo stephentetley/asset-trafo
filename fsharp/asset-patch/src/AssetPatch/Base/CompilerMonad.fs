@@ -22,6 +22,7 @@ module CompilerMonad =
 
     type Env = 
         { StartupDate : DateTime
+          MaintenancePlant : uint32
         }
 
     /// CompilerMonad is a Reader-Error-State(name supply) monad.
@@ -70,7 +71,9 @@ module CompilerMonad =
 
 
     let defaultEnv () : Env = 
-        { StartupDate = DateTime.Now }
+        {   StartupDate = DateTime.Now
+            MaintenancePlant = 2100u 
+        }
 
     let runCompiler (env : Env) 
                     (action : CompilerMonad<'a> ) : Result<'a, ErrMsg> = 

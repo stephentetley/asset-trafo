@@ -28,6 +28,8 @@ module Hierarchy =
         { EquipmentId : string option
           Description : string
           ObjectType : string
+          Manufacturer : string option
+          Model : string option
           Classes : Class list
           SuboridnateEquipment : Equipment list
         }
@@ -113,6 +115,8 @@ module Hierarchy =
         { EquipmentId = None
           Description = description
           ObjectType = objectType
+          Manufacturer = None
+          Model = None
           Classes = classes 
           SuboridnateEquipment = subordinateEquipment }
 
