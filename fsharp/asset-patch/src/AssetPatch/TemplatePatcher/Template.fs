@@ -11,7 +11,7 @@ module Template =
 
     open AssetPatch.Base
     open AssetPatch.Base.Common
-    open AssetPatch.Base.EntityTypes
+    open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Hierarchy
     
     /// *** With monadic templates (Reader) we can have a lot more
@@ -253,4 +253,22 @@ module Template =
                 Functions = xs 
             }
         }
+
+    type Class1<'a> = 'a -> Class
+    
+    type Component1<'a> = 'a -> Component
+     
+    type Item1<'a> = 'a -> Item 
+     
+    type Assembly1<'a> = 'a -> Assembly 
+     
+    type System1<'a> = 'a -> System 
+
+    type Process1<'a> = 'a -> Process 
+
+    type ProcessGroup1<'a> = 'a -> ProcessGroup 
+     
+    type Function1<'a> = 'a -> Function 
+     
+    type Site1<'a> = 'a -> Site
 

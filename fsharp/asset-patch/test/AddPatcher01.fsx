@@ -26,7 +26,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\FuncLocPath.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
-#load "..\src\AssetPatch\Base\EntityTypes.fs"
+#load "..\src\AssetPatch\TemplatePatcher\PatchTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Hierarchy.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Renamer.fs"
@@ -37,7 +37,7 @@ open FSharp.Core
 open AssetPatch.Base.Common
 open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.FuncLocPath
-open AssetPatch.Base.EntityTypes
+open AssetPatch.TemplatePatcher.PatchTypes
 open AssetPatch.TemplatePatcher.Template
 open AssetPatch.TemplatePatcher.PatchCompiler
 open AssetPatch.TemplatePatcher.Catalogue
@@ -46,7 +46,7 @@ let outputDirectory () : string =
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output")
 
 
-let assetConditionTemplate (year : uint32) : Class = 
+let assetConditionTemplate : Class1<uint32> = fun year ->
     asset_condition 
         [ condition_grade Good
           condition_grade_reason "NEW"
@@ -74,7 +74,7 @@ let test01 () : Result<unit, ErrMsg> =
 
 
 
-let aibReferenceTemplate (sai : string) : Class = 
+let aibReferenceTemplate : Class1<string> = fun sai ->
     aib_reference 
         [ ai2_aib_reference sai
           s4_aib_reference ()

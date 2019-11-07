@@ -18,8 +18,7 @@ module PatchGen =
     open AssetPatch.Base.Acronyms
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.Printer
-    open AssetPatch.Base.EntityTypes
-    
+    open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Emitter
 
     let entityName (entityType : EntityType) : string = 

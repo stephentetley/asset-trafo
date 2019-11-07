@@ -9,8 +9,8 @@ module Emitter =
     open AssetPatch.Base
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.ChangeFile
-    open AssetPatch.Base.EntityTypes
     open AssetPatch.Base.FuncLocPath
+    open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Hierarchy
     
     type FlocClassProperties = ClassFloc * ValuaFloc list
@@ -275,41 +275,42 @@ module Emitter =
             }
         }
 
+
+    let genFuncLoc (path : FuncLocPath) 
+                    (description : string) 
+                    (objectType : string)  : CompilerMonad<FuncLoc> = 
+        compile {
+            let! startDate = asks (fun x -> x.StartupDate) 
+            let! structInd = asks (fun x -> x.StructureIndicator)
+            let! objStatus = asks (fun x -> x.ObjectStatus)
+            return { 
+                Path = path
+                Description = description
+                ObjectType = objectType
+                Category = uint32 path.Level
+                ObjectStatus = objStatus
+                StartupDate = startDate
+                StructureIndicator = structInd
+                Attributes = AssocList.empty
+            }
+        }
     let componentEmit (parent : FuncLocPath) 
                       (compo : S4Component) : CompilerMonad<EmitterResults> = 
         let path = extend compo.FuncLocSegment.Name parent
-        let funcLoc sdate = 
-            { Path = path
-              Description = compo.FuncLocSegment.Description
-              ObjectType = compo.FuncLocSegment.ObjectType
-              Category = 8u
-              ObjectStatus = "UCON"
-              StartupDate = sdate
-              Attributes = AssocList.empty
-            }
         compile {
-            let! sdate = asks (fun x -> x.StartupDate)
+            let! floc = genFuncLoc path compo.FuncLocSegment.Description compo.FuncLocSegment.ObjectType
             let! ansE = mapM (equipmentEmit path) compo.Equipment |>> concatResults
-            let! ansF = funcLocEmit (funcLoc sdate) compo.Classes
+            let! ansF = funcLocEmit floc compo.Classes
             return joinResults ansF ansE
         }
 
     let itemEmit (parent : FuncLocPath) 
                  (item : S4Item) : CompilerMonad<EmitterResults> = 
         let path = extend item.FuncLocSegment.Name parent
-        let funcLoc sdate = 
-            { Path = path
-              Description = item.FuncLocSegment.Description
-              ObjectType = item.FuncLocSegment.ObjectType
-              Category = 7u
-              ObjectStatus = "UCON"
-              StartupDate = sdate
-              Attributes = AssocList.empty
-            }
         compile {
-            let! sdate = asks (fun x -> x.StartupDate)
+            let! floc = genFuncLoc path item.FuncLocSegment.Description item.FuncLocSegment.ObjectType
             let! ansE = mapM (equipmentEmit path) item.Equipment |>> concatResults
-            let! ansF = funcLocEmit (funcLoc sdate) item.Classes
+            let! ansF = funcLocEmit floc item.Classes
             let! ansK = mapM (componentEmit path) item.Components |>> concatResults
             return concatResults [ansF; ansE; ansK]
         }
@@ -317,19 +318,10 @@ module Emitter =
     let assemblyEmit (parent : FuncLocPath) 
                      (assembly : S4Assembly) : CompilerMonad<EmitterResults> = 
         let path = extend assembly.FuncLocSegment.Name parent
-        let funcLoc sdate = 
-            { Path = path
-              Description = assembly.FuncLocSegment.Description
-              ObjectType = assembly.FuncLocSegment.ObjectType
-              Category = 6u
-              ObjectStatus = "UCON"
-              StartupDate = sdate
-              Attributes = AssocList.empty
-            }
         compile {
-            let! sdate = asks (fun x -> x.StartupDate)
+            let! floc = genFuncLoc path assembly.FuncLocSegment.Description assembly.FuncLocSegment.ObjectType
             let! ansE = mapM (equipmentEmit path) assembly.Equipment |>> concatResults
-            let! ansF = funcLocEmit (funcLoc sdate) assembly.Classes
+            let! ansF = funcLocEmit floc assembly.Classes
             let! ansK = mapM (itemEmit path) assembly.Items |>> concatResults
             return concatResults [ansF; ansE; ansK]
         }
@@ -337,19 +329,10 @@ module Emitter =
     let systemEmit (parent : FuncLocPath) 
                      (system : S4System) : CompilerMonad<EmitterResults> = 
         let path = extend system.FuncLocSegment.Name parent
-        let funcLoc sdate = 
-            { Path = path
-              Description = system.FuncLocSegment.Description
-              ObjectType = system.FuncLocSegment.ObjectType
-              Category = 5u
-              ObjectStatus = "UCON"
-              StartupDate = sdate
-              Attributes = AssocList.empty
-            }
         compile {
-            let! sdate = asks (fun x -> x.StartupDate)
+            let! floc = genFuncLoc path system.FuncLocSegment.Description system.FuncLocSegment.ObjectType
             let! ansE = mapM (equipmentEmit path) system.Equipment |>> concatResults
-            let! ansF = funcLocEmit (funcLoc sdate) system.Classes
+            let! ansF = funcLocEmit floc system.Classes
             let! ansK = mapM (assemblyEmit path) system.Assemblies |>> concatResults
             return concatResults [ansF; ansE; ansK]
         }
@@ -357,18 +340,9 @@ module Emitter =
     let processEmit (parent : FuncLocPath) 
                     (proc : S4Process) : CompilerMonad<EmitterResults> = 
         let path = extend proc.FuncLocSegment.Name parent
-        let funcLoc sdate = 
-            { Path = path
-              Description = proc.FuncLocSegment.Description
-              ObjectType = proc.FuncLocSegment.ObjectType
-              Category = 4u
-              ObjectStatus = "UCON"
-              StartupDate = sdate
-              Attributes = AssocList.empty
-            }
         compile {
-            let! sdate = asks (fun x -> x.StartupDate)
-            let! ansF = funcLocEmit (funcLoc sdate) proc.Classes
+            let! floc = genFuncLoc path proc.FuncLocSegment.Description proc.FuncLocSegment.ObjectType
+            let! ansF = funcLocEmit floc proc.Classes
             let! ansK = mapM (systemEmit path) proc.Systems |>> concatResults
             return joinResults ansF ansK
         }
@@ -376,18 +350,9 @@ module Emitter =
     let processGroupEmit (parent : FuncLocPath) 
                             (procGroup : S4ProcessGroup) : CompilerMonad<EmitterResults> = 
         let path = extend procGroup.FuncLocSegment.Name parent
-        let funcLoc sdate = 
-            { Path = path
-              Description = procGroup.FuncLocSegment.Description
-              ObjectType = procGroup.FuncLocSegment.ObjectType              
-              Category = 3u
-              ObjectStatus = "UCON"
-              StartupDate = sdate
-              Attributes = AssocList.empty
-            }
         compile {
-            let! sdate = asks (fun x -> x.StartupDate)
-            let! ansF = funcLocEmit (funcLoc sdate) procGroup.Classes
+            let! floc = genFuncLoc path procGroup.FuncLocSegment.Description procGroup.FuncLocSegment.ObjectType
+            let! ansF = funcLocEmit floc procGroup.Classes
             let! ansK = mapM (processEmit path) procGroup.Processes |>> concatResults
             return joinResults ansF ansK
         }
@@ -395,36 +360,18 @@ module Emitter =
     let functionEmit (parent : FuncLocPath) 
                         (func : S4Function) : CompilerMonad<EmitterResults> = 
         let path = extend func.FuncLocSegment.Name parent
-        let funcLoc sdate = 
-            { Path = path
-              Description = func.FuncLocSegment.Description
-              ObjectType = func.FuncLocSegment.ObjectType              
-              Category = 2u
-              ObjectStatus = "UCON"
-              StartupDate = sdate
-              Attributes = AssocList.empty
-            }
         compile {
-            let! sdate = asks (fun x -> x.StartupDate)
-            let! ansF = funcLocEmit (funcLoc sdate) func.Classes
+            let! floc = genFuncLoc path func.FuncLocSegment.Description func.FuncLocSegment.ObjectType
+            let! ansF = funcLocEmit floc func.Classes
             let! ansK = mapM (processGroupEmit path) func.ProcessGroups |>> concatResults
             return joinResults ansF ansK
         }
 
     let siteEmit (site : S4Site) : CompilerMonad<EmitterResults> = 
         let path = FuncLocPath.Create site.FuncLocSegment.Name
-        let funcLoc sdate = 
-            { Path = path
-              Description = site.FuncLocSegment.Description
-              ObjectType = site.FuncLocSegment.ObjectType
-              Category = 1u
-              ObjectStatus = "UCON"
-              StartupDate = sdate
-              Attributes = AssocList.empty
-            }
         compile {
-            let! sdate = asks (fun x -> x.StartupDate)
-            let! ansF = funcLocEmit (funcLoc sdate) site.Classes
+            let! floc = genFuncLoc path site.FuncLocSegment.Description site.FuncLocSegment.ObjectType
+            let! ansF = funcLocEmit floc site.Classes
             let! ansK = mapM (functionEmit path) site.Functions |>> concatResults
             return joinResults ansF ansK
         }

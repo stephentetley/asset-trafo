@@ -6,35 +6,19 @@ namespace AssetPatch.TemplatePatcher
 
 module PatchCompiler =
     
+    // Open first so common names get overridden
+    open AssetPatch.TemplatePatcher.Template
 
-    open AssetPatch.Base.EntityTypes
     open AssetPatch.Base.CompilerMonad    
     open AssetPatch.Base.FuncLocPath
-    open AssetPatch.TemplatePatcher
+    open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Hierarchy
-    // open AssetPatch.TemplatePatcher.Template
     open AssetPatch.TemplatePatcher.Renamer
     open AssetPatch.TemplatePatcher.Emitter
     open AssetPatch.TemplatePatcher.PatchGen
     
 
-    type ClassTemplate<'a> = 'a -> Template.Class
-   
-    type ComponentTemplate<'a> = 'a -> Template.Component
     
-    type ItemTemplate<'a> = 'a -> Template.Item 
-    
-    type AssemblyTemplate<'a> = 'a -> Template.Assembly 
-    
-    type SystemTemplate<'a> = 'a -> Template.System 
-
-    type ProcessTemplate<'a> = 'a -> Template.Process 
-
-    type ProcessGroupTemplate<'a> = 'a -> Template.ProcessGroup 
-    
-    type FunctionTemplate<'a> = 'a -> Template.Function 
-    
-    type SiteTemplate<'a> = 'a -> Template.Site
     
     let evalTemplate (code : Template.Template<'a>) : CompilerMonad<'a> = 
         compile {
@@ -68,7 +52,7 @@ module PatchCompiler =
     let compileClassEquiValuaEquiPatches (outputDirectory : string)
                                          (filePrefix : string)
                                          (user : string) 
-                                         (template : ClassTemplate<'hole>)
+                                         (template : Class1<'hole>)
                                          (worklist : (EquipmentCode * 'hole) list)
                                             : CompilerMonad<unit> = 
         compile {
@@ -83,7 +67,7 @@ module PatchCompiler =
     let compileClassFlocValuaFlocPatches (outputDirectory : string)
                                          (filePrefix : string)
                                          (user : string) 
-                                         (template : ClassTemplate<'hole>)
+                                         (template : Class1<'hole>)
                                          (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
         compile {
@@ -113,7 +97,7 @@ module PatchCompiler =
     let compileComponentPatches (outputDirectory : string)
                                 (filePrefix : string)
                                 (user : string) 
-                                (template : ComponentTemplate<'hole>)
+                                (template : Component1<'hole>)
                                 (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
         let compile1 (path, func) = componentRename func >>= componentEmit path
@@ -125,7 +109,7 @@ module PatchCompiler =
     let compileItemPatches (outputDirectory : string)
                             (filePrefix : string)
                             (user : string) 
-                            (template : ItemTemplate<'hole>)
+                            (template : Item1<'hole>)
                             (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
         let compile1 (path, func) = itemRename func >>= itemEmit path
@@ -137,7 +121,7 @@ module PatchCompiler =
     let compileAssemblyPatches (outputDirectory : string)
                               (filePrefix : string)
                               (user : string) 
-                              (template : AssemblyTemplate<'hole>)
+                              (template : Assembly1<'hole>)
                               (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
         let compile1 (path, func) = assemblyRename func >>= assemblyEmit path
@@ -148,7 +132,7 @@ module PatchCompiler =
     let compileSystemPatches (outputDirectory : string)
                               (filePrefix : string)
                               (user : string) 
-                              (template : SystemTemplate<'hole>)
+                              (template : System1<'hole>)
                               (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
         let compile1 (path, func) = systemRename func >>= systemEmit path
@@ -159,7 +143,7 @@ module PatchCompiler =
     let compileProcessPatches (outputDirectory : string)
                               (filePrefix : string)
                               (user : string) 
-                              (template : ProcessTemplate<'hole>)
+                              (template : Process1<'hole>)
                               (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
         let compile1 (path, func) = processRename func >>= processEmit path
@@ -170,7 +154,7 @@ module PatchCompiler =
     let compileProcessGroupPatches (outputDirectory : string)
                                          (filePrefix : string)
                                          (user : string) 
-                                         (template : ProcessGroupTemplate<'hole>)
+                                         (template : ProcessGroup1<'hole>)
                                          (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
         let compile1 (path, func) = processGroupRename func >>= processGroupEmit path
@@ -181,7 +165,7 @@ module PatchCompiler =
     let compileFunctionPatches (outputDirectory : string)
                                          (filePrefix : string)
                                          (user : string) 
-                                         (template : FunctionTemplate<'hole>)
+                                         (template : Function1<'hole>)
                                          (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
         let compile1 (path, func) = functionRename func >>= functionEmit path
@@ -192,7 +176,7 @@ module PatchCompiler =
     let compileSitePatches (outputDirectory : string)
                                          (filePrefix : string)
                                          (user : string) 
-                                         (template : SiteTemplate<'hole>)
+                                         (template : Site1<'hole>)
                                          (worklist : 'hole list) : CompilerMonad<unit> = 
         let compile1 = evalTemplate >=> siteRename >=> siteEmit
         compile {

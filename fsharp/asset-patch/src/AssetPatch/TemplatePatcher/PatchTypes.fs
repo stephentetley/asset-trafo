@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.Base
+namespace AssetPatch.TemplatePatcher
 
 
 
-module EntityTypes =
+module PatchTypes =
     
     open System
 
+    open AssetPatch.Base
     open AssetPatch.Base.Common
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.ChangeFile
@@ -59,6 +60,7 @@ module EntityTypes =
         Category : uint32
         ObjectStatus : string
         StartupDate : DateTime
+        StructureIndicator : string
         Attributes : AssocList<string, string>
       }
         member x.Level with get () : int = x.Path.Level
@@ -66,15 +68,16 @@ module EntityTypes =
         
 
     let assocsToFuncLoc (attributes : AssocList<string, string>) : Result<FuncLoc, ErrMsg> = 
-        match AssocList.tryFind5 "FUNCLOC" "TXTMI" "FLTYP" 
-                                    "EQART" "USTW_FLOC" attributes with
-        | Some (funcloc, desc, category, otype, status) -> 
+        match AssocList.tryFind6 "FUNCLOC" "TXTMI" "FLTYP" 
+                                    "EQART" "USTW_FLOC" "TPLKZ_FLC" attributes with
+        | Some (funcloc, desc, category, otype, status, structInd) -> 
             Ok { Path = FuncLocPath.Create funcloc 
                  Description = desc
                  ObjectType = otype
                  Category = try (uint32 category) with | _ -> 0u
                  ObjectStatus = status
                  StartupDate = Option.defaultValue dateDefault <| AssocList.tryFindS4Date "INBDT" attributes
+                 StructureIndicator = structInd
                  Attributes = attributes }
         | None -> Error "Could not find required fields for a FuncLoc"
 
@@ -90,7 +93,7 @@ module EntityTypes =
             |> AssocList.upsert "EQART"         funcLoc.ObjectType
             |> AssocList.upsert "INBDT"         (funcLoc.StartupDate |> showS4Date)
             |> AssocList.upsert "USTW_FLOC"     funcLoc.ObjectStatus
-            |> AssocList.upsert "TPLKZ_FLC"     "YW-GS"
+            |> AssocList.upsert "TPLKZ_FLC"     funcLoc.StructureIndicator
             |> AssocList.upsert "TPLMA"         parent1
 
     let readFuncLocChangeFile (inputFile : string) : CompilerMonad<FuncLoc list> = 
@@ -110,6 +113,7 @@ module EntityTypes =
           Category = floc.Category + 1u
           ObjectStatus = "UCON"
           StartupDate = startupDate
+          StructureIndicator = floc.StructureIndicator
           Attributes = floc.Attributes }
 
 

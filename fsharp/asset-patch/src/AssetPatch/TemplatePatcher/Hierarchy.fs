@@ -8,7 +8,7 @@ namespace AssetPatch.TemplatePatcher
 module Hierarchy =
     
     open AssetPatch.Base.FuncLocPath
-    open AssetPatch.Base.EntityTypes
+    open AssetPatch.TemplatePatcher.PatchTypes
     
 
     type S4Characteristic = 

@@ -22,7 +22,9 @@ module CompilerMonad =
 
     type TemplateEnv = 
         { StartupDate : DateTime
+          StructureIndicator : string
           MaintenancePlant : uint32
+          ObjectStatus : string
         }
 
     // May get expanded...
@@ -31,7 +33,9 @@ module CompilerMonad =
         
     let defaultEnv () = 
         { StartupDate = DateTime.Now
+          StructureIndicator = "YW-GS"
           MaintenancePlant = 2100u
+          ObjectStatus = "UCON"
         }
 
     /// CompilerMonad is a Reader-Error-State(name supply) monad.
