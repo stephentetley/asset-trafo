@@ -121,6 +121,19 @@ module Template =
             }
           }
 
+    let manufacturerIs (name : String) : Equipment -> Equipment = fun equipment ->
+        template {
+            let! e1 = equipment
+            return { e1 with Manufacturer = Some name }
+        }
+
+    let modelIs (name : String) : Equipment -> Equipment = fun equipment ->
+        template {
+            let! e1 = equipment
+            return { e1 with Model = Some name }
+        }
+
+
     type Component = Template<S4Component>
     
     let _component (token : string) (description : string) (objectType : string)

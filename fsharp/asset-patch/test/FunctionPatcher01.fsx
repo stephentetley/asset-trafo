@@ -49,6 +49,11 @@ type GeoParams =
     }
 
 
+let ( ^!!^ ) (e1 :  Equipment) (fns : (Equipment -> Equipment) list) : Equipment = 
+    List.fold (fun a f -> f a) e1 fns
+    
+
+
 let edgTemplate (parameters : GeoParams) : Function = 
     let east_north_common = 
         east_north [ easting parameters.Easting; northing parameters.Northing ]
@@ -79,10 +84,14 @@ let edgTemplate (parameters : GeoParams) : Function =
                           aib_reference [ s4_aib_reference () ]
                         ]
                         _no_subordinate_equipment_
+                        ^!!^ [ manufacturerIs "SIEMENS"
+                               modelIs "HYDRORANGER 200" ]
                     ]
                 ]
             ]
         ]
+
+
 
 let test01 () = 
     let worklist = 
