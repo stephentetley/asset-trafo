@@ -28,18 +28,19 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\EntityTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Hierarchy.fs"
-#load "..\src\AssetPatch\TemplatePatcher\Catalogue.fs"
+#load "..\src\AssetPatch\TemplatePatcher\Template.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Renamer.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchGen.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchCompiler.fs"
+#load "..\src\AssetPatch\TemplatePatcher\Catalogue.fs"
 open AssetPatch.Base.Common
 open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.FuncLocPath
 open AssetPatch.Base.EntityTypes
-open AssetPatch.TemplatePatcher.Hierarchy
-open AssetPatch.TemplatePatcher.Catalogue
+open AssetPatch.TemplatePatcher.Template
 open AssetPatch.TemplatePatcher.PatchCompiler
+open AssetPatch.TemplatePatcher.Catalogue
 
 let outputDirectory () : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output")

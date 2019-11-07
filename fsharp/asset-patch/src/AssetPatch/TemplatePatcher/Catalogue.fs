@@ -7,7 +7,7 @@ namespace AssetPatch.TemplatePatcher
 
 module Catalogue =
     
-    open AssetPatch.TemplatePatcher.Hierarchy
+    open AssetPatch.TemplatePatcher.Template
     
     // ************************************************************************
     // Classes and characteritics

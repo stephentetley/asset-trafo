@@ -10,38 +10,57 @@ module PatchCompiler =
     open AssetPatch.Base.EntityTypes
     open AssetPatch.Base.CompilerMonad    
     open AssetPatch.Base.FuncLocPath
+    open AssetPatch.TemplatePatcher
     open AssetPatch.TemplatePatcher.Hierarchy
+    // open AssetPatch.TemplatePatcher.Template
     open AssetPatch.TemplatePatcher.Renamer
     open AssetPatch.TemplatePatcher.Emitter
     open AssetPatch.TemplatePatcher.PatchGen
     
 
-    type ClassTemplate<'a> = 'a -> Class
+    type ClassTemplate<'a> = 'a -> Template.Class
    
-    type ComponentTemplate<'a> = 'a -> Component
+    type ComponentTemplate<'a> = 'a -> Template.Component
     
-    type ItemTemplate<'a> = 'a -> Item 
+    type ItemTemplate<'a> = 'a -> Template.Item 
     
-    type AssemblyTemplate<'a> = 'a -> Assembly 
+    type AssemblyTemplate<'a> = 'a -> Template.Assembly 
     
-    type SystemTemplate<'a> = 'a -> System 
+    type SystemTemplate<'a> = 'a -> Template.System 
 
-    type ProcessTemplate<'a> = 'a -> Process 
+    type ProcessTemplate<'a> = 'a -> Template.Process 
 
-    type ProcessGroupTemplate<'a> = 'a -> ProcessGroup 
+    type ProcessGroupTemplate<'a> = 'a -> Template.ProcessGroup 
     
-    type FunctionTemplate<'a> = 'a -> Function 
+    type FunctionTemplate<'a> = 'a -> Template.Function 
     
-    type SiteTemplate<'a> = 'a -> Site
-   
-    let applyTemplate (xs: ('id * 'b) list ) (template: 'b -> 'c) : ('id * 'c) list = 
-        xs |> List.map (fun (name,x) -> (name, template x))
+    type SiteTemplate<'a> = 'a -> Template.Site
+    
+    let evalTemplate (code : Template.Template<'a>) : CompilerMonad<'a> = 
+        compile {
+            let! templateEnv = asks id
+            return! liftResult (Template.runTemplate templateEnv code)
+        }
+
+    let applyTemplate (xs: ('id * 'b) list ) 
+                        (template: 'b -> Template.Template<'c>) : CompilerMonad<('id * 'c) list> = 
+        forM xs (fun (name, x) -> evalTemplate (template x) >>=  fun a -> mreturn (name, a))
 
 
+    
 
-    let private anonEquipment (code : string) (clazz: Class) = 
-        let equip1 = _equipment "" "" [clazz] []
-        { equip1 with EquipmentId = Some code }
+    // This is not printed...
+    let private anonEquipment (code : string) (clazz: S4Class) : S4Equipment= 
+        { 
+            EquipmentId = Some code
+            Description = ""
+            ObjectType = ""
+            Manufacturer = None
+            Model = None
+            Classes = [clazz] 
+            SuboridnateEquipment = [] 
+        }
+
 
 
 
@@ -53,7 +72,7 @@ module PatchCompiler =
                                          (worklist : (EquipmentCode * 'hole) list)
                                             : CompilerMonad<unit> = 
         compile {
-            let worklist1 = applyTemplate worklist template
+            let! worklist1 = applyTemplate worklist template
             let! results = 
                 forM worklist1 (fun (name, clazz) -> equipmentEmitClassValuas (anonEquipment name.Code clazz))
             do! generatePatches outputDirectory filePrefix user (concatResults results)
@@ -68,7 +87,7 @@ module PatchCompiler =
                                          (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
         compile {
-            let worklist1 = applyTemplate worklist template
+            let! worklist1 = applyTemplate worklist template
             let! results = 
                 forM worklist1 (fun (path, clazz) -> funcLocPathEmitClassValuas path [clazz])
             do! generatePatches outputDirectory filePrefix user (concatResults results)
@@ -81,10 +100,10 @@ module PatchCompiler =
                                 (filePrefix : string)
                                 (user : string) 
                                 (compile1 : (FuncLocPath * 'object) -> CompilerMonad<EmitterResults>)
-                                (template : 'hole -> 'object)
+                                (template : 'hole -> Template.Template<'object>)
                                 (worklist : (FuncLocPath * 'hole) list) : CompilerMonad<unit> =         
         compile {
-            let worklist1 = applyTemplate worklist template
+            let! worklist1 = applyTemplate worklist template
             let! results =  forM worklist1 compile1
             do! generatePatches outputDirectory filePrefix user (concatResults results)
             return ()
@@ -168,15 +187,16 @@ module PatchCompiler =
         let compile1 (path, func) = functionRename func >>= functionEmit path
         compileHierarchyPatches outputDirectory filePrefix user compile1 template worklist
 
+
     /// Generate patches for a new level 1 site and its subordinates
     let compileSitePatches (outputDirectory : string)
                                          (filePrefix : string)
                                          (user : string) 
                                          (template : SiteTemplate<'hole>)
                                          (worklist : 'hole list) : CompilerMonad<unit> = 
-        let compile1 = siteRename >=> siteEmit
+        let compile1 = evalTemplate >=> siteRename >=> siteEmit
         compile {
-            let worklist1=  List.map template worklist
+            let worklist1 = List.map template worklist
             let! results =  forM worklist1 compile1
             do! generatePatches outputDirectory filePrefix user (concatResults results)
             return ()

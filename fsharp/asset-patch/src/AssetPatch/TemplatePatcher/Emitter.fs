@@ -60,7 +60,7 @@ module Emitter =
 
     let characteristicToValuaFloc (funcLoc : FuncLocPath) 
                                     (count : int) 
-                                    (charac : Characteristic) : CompilerMonad<ValuaFloc> = 
+                                    (charac : S4Characteristic) : CompilerMonad<ValuaFloc> = 
         mreturn {   
             FuncLoc = funcLoc
             ClassType = IntegerString.OfString "003"
@@ -72,7 +72,7 @@ module Emitter =
 
     let characteristicToValuaEqui (equiNumber : EquipmentCode) 
                                     (count : int) 
-                                    (charac : Characteristic) : CompilerMonad<ValuaEqui> = 
+                                    (charac : S4Characteristic) : CompilerMonad<ValuaEqui> = 
         mreturn { 
             EquipmentNumber = equiNumber
             ClassType = IntegerString.OfString "002"
@@ -83,7 +83,7 @@ module Emitter =
         }
     
 
-    let classToClassFloc (funcLoc : FuncLocPath)  (clazz : Class) : CompilerMonad<ClassFloc> = 
+    let classToClassFloc (funcLoc : FuncLocPath)  (clazz : S4Class) : CompilerMonad<ClassFloc> = 
         mreturn { 
             FuncLoc = funcLoc
             Class = clazz.ClassName
@@ -94,7 +94,7 @@ module Emitter =
 
 
     let classToClassEqui (equiNumber : EquipmentCode)
-                         (clazz : Class) : CompilerMonad<ClassEqui> = 
+                         (clazz : S4Class) : CompilerMonad<ClassEqui> = 
         mreturn { 
             EquipmentNumber = equiNumber
             Class = clazz.ClassName
@@ -104,7 +104,7 @@ module Emitter =
         }
     
     let equipmentToEqui1 (funcLoc : FuncLocPath) 
-                         (equipment: Equipment) : CompilerMonad<Equi> = 
+                         (equipment : S4Equipment) : CompilerMonad<Equi> = 
         compile {
             let! number = newEquipmentName ()
             let! sdate = asks (fun x -> x.StartupDate)
@@ -124,8 +124,8 @@ module Emitter =
         
 
     let equipmentToEquis (funcLoc : FuncLocPath) 
-                         (equipment: Equipment) : CompilerMonad<Equi list> = 
-        let rec work (kids : Equipment list) 
+                         (equipment : S4Equipment) : CompilerMonad<Equi list> = 
+        let rec work (kids : S4Equipment list) 
                      (cont : Equi list -> CompilerMonad<Equi list>) = 
             match kids with
             | [] -> cont []
@@ -148,7 +148,7 @@ module Emitter =
 
 
 
-    let sortedCharacteristics (clazz : Class) : (Characteristic list) list= 
+    let sortedCharacteristics (clazz : S4Class) : (S4Characteristic list) list= 
         clazz.Characteritics 
             |> List.sortBy (fun x -> x.Name)
             |> List.groupBy (fun x -> x.Name)               
@@ -156,9 +156,9 @@ module Emitter =
 
 
     let makeFlocProperties1 (funcLoc : FuncLocPath)  
-                            (clazz : Class) : CompilerMonad<FlocClassProperties> =
+                            (clazz : S4Class) : CompilerMonad<FlocClassProperties> =
         
-        let makeGrouped (chars : Characteristic list) : CompilerMonad<ValuaFloc list> = 
+        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<ValuaFloc list> = 
             foriM chars (fun i x -> characteristicToValuaFloc funcLoc (i+1) x)
 
         compile {
@@ -169,9 +169,9 @@ module Emitter =
         } 
 
     let makeEquiProperties1 (equiNumber : EquipmentCode)  
-                            (clazz : Class) : CompilerMonad<EquiClassProperties> =
+                            (clazz : S4Class) : CompilerMonad<EquiClassProperties> =
         
-        let makeGrouped (chars : Characteristic list) : CompilerMonad<ValuaEqui list> = 
+        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<ValuaEqui list> = 
             foriM chars (fun i x -> characteristicToValuaEqui equiNumber (i+1) x)
 
         compile {
@@ -181,15 +181,15 @@ module Emitter =
             return (ce, vs)
         } 
     
-    let equipmentClassProperties1 (equipment: Equipment) : CompilerMonad<EquiClassProperties list> = 
+    let equipmentClassProperties1 (equipment : S4Equipment) : CompilerMonad<EquiClassProperties list> = 
         match equipment.EquipmentId with
         | None -> throwError "Emitter - equipment has not been renamed"
         | Some magic -> 
             forM equipment.Classes (makeEquiProperties1 (EquipmentCode magic))
 
 
-    let equipmentClassProperties (equipment: Equipment) : CompilerMonad<EquiClassProperties list> = 
-        let rec work (kids : Equipment list) 
+    let equipmentClassProperties (equipment : S4Equipment) : CompilerMonad<EquiClassProperties list> = 
+        let rec work (kids : S4Equipment list) 
                      (cont : EquiClassProperties list -> CompilerMonad<EquiClassProperties list>) = 
             match kids with
             | [] -> cont []
@@ -206,7 +206,7 @@ module Emitter =
         }
 
 
-    let equipmentEmitClassValuas (equipment: Equipment) : CompilerMonad<EmitterResults> = 
+    let equipmentEmitClassValuas (equipment : S4Equipment) : CompilerMonad<EmitterResults> = 
         compile {
             let! cps = equipmentClassProperties equipment
             let (cs,vs) = collectEquiClassProperties cps
@@ -222,7 +222,7 @@ module Emitter =
 
 
     let equipmentEmit (parent : FuncLocPath) 
-                      (equipment: Equipment) : CompilerMonad<EmitterResults> = 
+                      (equipment : S4Equipment) : CompilerMonad<EmitterResults> = 
         compile {
             let! es = equipmentToEquis parent equipment
             let! cps = equipmentClassProperties equipment
@@ -238,14 +238,14 @@ module Emitter =
         }
 
     let funcLocClassProperties (path : FuncLocPath) 
-                                (classes: Class list) : CompilerMonad<FlocClassProperties list> = 
+                                (classes : S4Class list) : CompilerMonad<FlocClassProperties list> = 
         mapM (makeFlocProperties1 path) classes
 
 
 
 
     let funcLocPathEmitClassValuas (funcLocPath : FuncLocPath) 
-                                    (classes: Class list) : CompilerMonad<EmitterResults> = 
+                                    (classes : S4Class list) : CompilerMonad<EmitterResults> = 
         compile {
             let! cps = funcLocClassProperties funcLocPath classes
             let (cs, vs) = collectFlocClassProperties cps
@@ -261,7 +261,7 @@ module Emitter =
 
 
     let funcLocEmit (funcLoc : FuncLoc) 
-                    (classes: Class list) : CompilerMonad<EmitterResults> = 
+                    (classes : S4Class list) : CompilerMonad<EmitterResults> = 
         compile {
             let! cps = funcLocClassProperties funcLoc.Path classes
             let (cs, vs) = collectFlocClassProperties cps
@@ -276,7 +276,7 @@ module Emitter =
         }
 
     let componentEmit (parent : FuncLocPath) 
-                      (compo : Component) : CompilerMonad<EmitterResults> = 
+                      (compo : S4Component) : CompilerMonad<EmitterResults> = 
         let path = extend compo.FuncLocSegment.Name parent
         let funcLoc sdate = 
             { Path = path
@@ -295,7 +295,7 @@ module Emitter =
         }
 
     let itemEmit (parent : FuncLocPath) 
-                 (item : Item) : CompilerMonad<EmitterResults> = 
+                 (item : S4Item) : CompilerMonad<EmitterResults> = 
         let path = extend item.FuncLocSegment.Name parent
         let funcLoc sdate = 
             { Path = path
@@ -315,7 +315,7 @@ module Emitter =
         }
 
     let assemblyEmit (parent : FuncLocPath) 
-                     (assembly : Assembly) : CompilerMonad<EmitterResults> = 
+                     (assembly : S4Assembly) : CompilerMonad<EmitterResults> = 
         let path = extend assembly.FuncLocSegment.Name parent
         let funcLoc sdate = 
             { Path = path
@@ -335,7 +335,7 @@ module Emitter =
         }
 
     let systemEmit (parent : FuncLocPath) 
-                     (system : System) : CompilerMonad<EmitterResults> = 
+                     (system : S4System) : CompilerMonad<EmitterResults> = 
         let path = extend system.FuncLocSegment.Name parent
         let funcLoc sdate = 
             { Path = path
@@ -355,7 +355,7 @@ module Emitter =
         }
 
     let processEmit (parent : FuncLocPath) 
-                    (proc : Process) : CompilerMonad<EmitterResults> = 
+                    (proc : S4Process) : CompilerMonad<EmitterResults> = 
         let path = extend proc.FuncLocSegment.Name parent
         let funcLoc sdate = 
             { Path = path
@@ -374,7 +374,7 @@ module Emitter =
         }
 
     let processGroupEmit (parent : FuncLocPath) 
-                            (procGroup : ProcessGroup) : CompilerMonad<EmitterResults> = 
+                            (procGroup : S4ProcessGroup) : CompilerMonad<EmitterResults> = 
         let path = extend procGroup.FuncLocSegment.Name parent
         let funcLoc sdate = 
             { Path = path
@@ -393,7 +393,7 @@ module Emitter =
         }
 
     let functionEmit (parent : FuncLocPath) 
-                        (func : Function) : CompilerMonad<EmitterResults> = 
+                        (func : S4Function) : CompilerMonad<EmitterResults> = 
         let path = extend func.FuncLocSegment.Name parent
         let funcLoc sdate = 
             { Path = path
@@ -411,7 +411,7 @@ module Emitter =
             return joinResults ansF ansK
         }
 
-    let siteEmit (site : Site) : CompilerMonad<EmitterResults> = 
+    let siteEmit (site : S4Site) : CompilerMonad<EmitterResults> = 
         let path = FuncLocPath.Create site.FuncLocSegment.Name
         let funcLoc sdate = 
             { Path = path

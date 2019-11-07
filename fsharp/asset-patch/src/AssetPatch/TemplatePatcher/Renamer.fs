@@ -11,14 +11,14 @@ module Renamer =
     open AssetPatch.TemplatePatcher.Hierarchy
     
     
-    let equipmentRename (equipment1 : Equipment) : CompilerMonad<Equipment> = 
-        let getName (x : Equipment) = 
+    let equipmentRename (equipment1 : S4Equipment) : CompilerMonad<S4Equipment> = 
+        let getName (x : S4Equipment) = 
             match x.EquipmentId with
             | None -> newEquipmentName ()
             | Some a -> mreturn a
 
-        let rec work (xs : Equipment list) 
-                    (cont : Equipment list -> CompilerMonad<Equipment list>) = 
+        let rec work (xs : S4Equipment list) 
+                    (cont : S4Equipment list -> CompilerMonad<S4Equipment list>) = 
             match xs with
             | [] -> mreturn []
             | x :: rest -> 
@@ -37,14 +37,14 @@ module Renamer =
         }
     
 
-    let componentRename (compo : Component) : CompilerMonad<Component> = 
+    let componentRename (compo : S4Component) : CompilerMonad<S4Component> = 
         compile {
             let! kids = mapM equipmentRename compo.Equipment
             return { compo with Equipment = kids }
         }
 
 
-    let itemRename (item : Item) : CompilerMonad<Item> = 
+    let itemRename (item : S4Item) : CompilerMonad<S4Item> = 
         compile {
             let! components = mapM componentRename item.Components
             let! equipment = mapM equipmentRename item.Equipment
@@ -52,7 +52,7 @@ module Renamer =
         }
     
 
-    let assemblyRename (assembly : Assembly) : CompilerMonad<Assembly> = 
+    let assemblyRename (assembly : S4Assembly) : CompilerMonad<S4Assembly> = 
         compile {
             let! items = mapM itemRename assembly.Items
             let! equipment = mapM equipmentRename assembly.Equipment
@@ -60,7 +60,7 @@ module Renamer =
         }
 
 
-    let systemRename (system : System) : CompilerMonad<System> = 
+    let systemRename (system : S4System) : CompilerMonad<S4System> = 
         compile {
             let! assemblies = mapM assemblyRename system.Assemblies
             let! equipment = mapM equipmentRename system.Equipment
@@ -68,28 +68,28 @@ module Renamer =
         }
 
 
-    let processRename (proc : Process) : CompilerMonad<Process> = 
+    let processRename (proc : S4Process) : CompilerMonad<S4Process> = 
         compile {
             let! systems = mapM systemRename proc.Systems
             return { proc with Systems = systems }
         }
 
 
-    let processGroupRename (procGroup : ProcessGroup) : CompilerMonad<ProcessGroup> = 
+    let processGroupRename (procGroup : S4ProcessGroup) : CompilerMonad<S4ProcessGroup> = 
         compile {
             let! procs = mapM processRename procGroup.Processes
             return { procGroup with Processes = procs }
         }
 
 
-    let functionRename (func : Function) : CompilerMonad<Function> = 
+    let functionRename (func : S4Function) : CompilerMonad<S4Function> = 
         compile {
             let! procGroups = mapM processGroupRename func.ProcessGroups
             return { func with ProcessGroups = procGroups }
         }
 
     
-    let siteRename (site : Site) : CompilerMonad<Site> = 
+    let siteRename (site : S4Site) : CompilerMonad<S4Site> = 
         compile {
             let! funcs = mapM functionRename site.Functions
             return { site with Functions = funcs }

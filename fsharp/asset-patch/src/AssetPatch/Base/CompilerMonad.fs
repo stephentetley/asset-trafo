@@ -20,9 +20,18 @@ module CompilerMonad =
 
     type State = NameSupply
 
-    type Env = 
+    type TemplateEnv = 
         { StartupDate : DateTime
           MaintenancePlant : uint32
+        }
+
+    // May get expanded...
+    type Env = TemplateEnv
+            
+        
+    let defaultEnv () = 
+        { StartupDate = DateTime.Now
+          MaintenancePlant = 2100u
         }
 
     /// CompilerMonad is a Reader-Error-State(name supply) monad.
@@ -70,10 +79,6 @@ module CompilerMonad =
     let (compile : CompilerMonadBuilder) = new CompilerMonadBuilder()
 
 
-    let defaultEnv () : Env = 
-        {   StartupDate = DateTime.Now
-            MaintenancePlant = 2100u 
-        }
 
     let runCompiler (env : Env) 
                     (action : CompilerMonad<'a> ) : Result<'a, ErrMsg> = 
