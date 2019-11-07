@@ -67,7 +67,6 @@ module Emitter =
             CharacteristicID = charac.Name
             CharacteristicValue = charac.Value
             ValueCount = count
-            Attributes = AssocList.empty
         }
 
     let characteristicToValuaEqui (equiNumber : EquipmentCode) 
@@ -118,7 +117,6 @@ module Emitter =
                 Model = Option.defaultValue "TO BE DETERMINED" equipment.Model
                 StartupDate = sdate
                 MaintenancePlant = mplant
-                Attributes = AssocList.empty
             }
         }
         
@@ -291,7 +289,6 @@ module Emitter =
                 ObjectStatus = objStatus
                 StartupDate = startDate
                 StructureIndicator = structInd
-                Attributes = AssocList.empty
             }
         }
     let componentEmit (parent : FuncLocPath) 

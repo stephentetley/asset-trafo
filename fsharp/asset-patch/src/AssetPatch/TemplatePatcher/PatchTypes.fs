@@ -61,32 +61,17 @@ module PatchTypes =
         ObjectStatus : string
         StartupDate : DateTime
         StructureIndicator : string
-        Attributes : AssocList<string, string>
       }
         member x.Level with get () : int = x.Path.Level
 
         
-
-    let assocsToFuncLoc (attributes : AssocList<string, string>) : Result<FuncLoc, ErrMsg> = 
-        match AssocList.tryFind6 "FUNCLOC" "TXTMI" "FLTYP" 
-                                    "EQART" "USTW_FLOC" "TPLKZ_FLC" attributes with
-        | Some (funcloc, desc, category, otype, status, structInd) -> 
-            Ok { Path = FuncLocPath.Create funcloc 
-                 Description = desc
-                 ObjectType = otype
-                 Category = try (uint32 category) with | _ -> 0u
-                 ObjectStatus = status
-                 StartupDate = Option.defaultValue dateDefault <| AssocList.tryFindS4Date "INBDT" attributes
-                 StructureIndicator = structInd
-                 Attributes = attributes }
-        | None -> Error "Could not find required fields for a FuncLoc"
 
     let funcLocToAssocs (funcLoc: FuncLoc) : AssocList<string, string> = 
         let parent1 = 
             match funcLoc.Path |> parent with
             | None -> ""
             | Some path -> path.ToString()
-        funcLoc.Attributes
+        AssocList.empty
             |> AssocList.upsert "FUNCLOC"       (funcLoc.Path.ToString())
             |> AssocList.upsert "TXTMI"         funcLoc.Description
             |> AssocList.upsert "FLTYP"         (funcLoc.Category.ToString())
@@ -96,13 +81,7 @@ module PatchTypes =
             |> AssocList.upsert "TPLKZ_FLC"     funcLoc.StructureIndicator
             |> AssocList.upsert "TPLMA"         parent1
 
-    let readFuncLocChangeFile (inputFile : string) : CompilerMonad<FuncLoc list> = 
-        compile { 
-            let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
-            return! mapM (liftResult << assocsToFuncLoc) ast.Rows
-        }
 
-    
 
     let extendFuncLoc (segment : FuncLocSegment)
                       (startupDate : DateTime)
@@ -113,8 +92,7 @@ module PatchTypes =
           Category = floc.Category + 1u
           ObjectStatus = "UCON"
           StartupDate = startupDate
-          StructureIndicator = floc.StructureIndicator
-          Attributes = floc.Attributes }
+          StructureIndicator = floc.StructureIndicator  }
 
 
     // ************************************************************************
@@ -129,15 +107,6 @@ module PatchTypes =
         Status : int
       }
 
-    let assocsToClassFloc (attributes : AssocList<string, string>) : Result<ClassFloc, ErrMsg> = 
-        match AssocList.tryFind5 "FUNCLOC" "CLASS" "CLASSTYPE" "CLINT" "CLSTATUS1" attributes with
-        | Some (funcloc, claz, claztype, clint, status) -> 
-            Ok { FuncLoc = FuncLocPath.Create funcloc 
-                 Class = claz
-                 ClassType = IntegerString.OfString claztype
-                 ClassNumber = IntegerString.OfString clint
-                 Status = int status }
-         | None -> Error "Could not find required fields for a ClassFloc"
 
     let classFlocToAssocs (classFloc: ClassFloc) : AssocList<string, string> = 
         AssocList.ofList
@@ -148,11 +117,6 @@ module PatchTypes =
             ; ("CLSTATUS1",     classFloc.Status.ToString())
             ]
 
-    let readClassFlocChangeFile (inputFile : string) : CompilerMonad<ClassFloc list> = 
-        compile { 
-            let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
-            return! mapM (liftResult << assocsToClassFloc) ast.Rows
-        }
 
     // ************************************************************************
     // ValuaFloc
@@ -163,23 +127,12 @@ module PatchTypes =
         CharacteristicID : string
         CharacteristicValue : string
         ValueCount : int
-        Attributes : AssocList<string, string>
       }
 
-    let assocsToValuaFloc (attributes : AssocList<string, string>) : Result<ValuaFloc, ErrMsg> = 
-        match AssocList.tryFind5 "FUNCLOC" "CLASSTYPE" "CHARID" "ATWRT" "VALCNT" attributes with
-        | Some (funcloc, claztype, cid, cvalue, count) -> 
-            Ok { FuncLoc = FuncLocPath.Create funcloc 
-                 ClassType = IntegerString.OfString claztype
-                 CharacteristicID = cid
-                 CharacteristicValue = cvalue
-                 ValueCount = int count
-                 Attributes = attributes }
-         | None -> Error "Could not find required fields for a ValuaFloc"
 
     /// Note - CharacteristicValue is used three times.
     let valuaFlocToAssocs (valua: ValuaFloc) : AssocList<string, string> = 
-        valua.Attributes
+        AssocList.empty
             |> AssocList.upsert "FUNCLOC"       (valua.FuncLoc.ToString())
             |> AssocList.upsert "CLASSTYPE"     valua.ClassType.Number
             |> AssocList.upsert "CHARID"        valua.CharacteristicID
@@ -189,11 +142,6 @@ module PatchTypes =
             |> AssocList.upsert "VALCNT"        (sprintf "%04i" valua.ValueCount)
 
 
-    let readValuaFlocChangeFile (inputFile : string) : CompilerMonad<ValuaFloc list> = 
-        compile { 
-            let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
-            return! mapM (liftResult << assocsToValuaFloc) ast.Rows
-        }
 
     // ************************************************************************
     // Equi
@@ -219,27 +167,11 @@ module PatchTypes =
         Model : string
         StartupDate : DateTime
         MaintenancePlant : uint32
-        Attributes : AssocList<string, string>
       }
-
-    let assocsToEqui (attributes : AssocList<string, string>) : Result<Equi, ErrMsg> = 
-        match AssocList.tryFind6 "EQUI" "TXTMI" "TPLN_EILO" "EQART_EQU" 
-                                "HERST" "TYPBZ" attributes with
-        | Some (number, desc, funcloc, objtype, manufacturer, model) -> 
-            Ok { EquipmentNumber = EquipmentCode number
-                 Description = desc
-                 FuncLoc = FuncLocPath.Create funcloc 
-                 ObjectType = objtype 
-                 Manufacturer = manufacturer
-                 Model = model
-                 StartupDate = Option.defaultValue dateDefault <| AssocList.tryFindS4Date "INBDT" attributes
-                 MaintenancePlant = Option.defaultValue 2100u <| AssocList.tryFindUint32 "SWER_EILO" attributes
-                 Attributes = attributes }
-         | None -> Error "Could not find required fields for a Equi"
 
     /// Note - CharacteristicValue is used three times.
     let equiToAssocs (equi: Equi) : AssocList<string, string> = 
-        equi.Attributes
+        AssocList.empty
             |> AssocList.upsert "EQUI"          equi.EquipmentNumber.Code
             |> AssocList.upsert "TXTMI"         equi.Description
             |> AssocList.upsert "TPLN_EILO"     (equi.FuncLoc.ToString()) 
@@ -247,11 +179,6 @@ module PatchTypes =
             |> AssocList.upsert "SWER_EILO"     (equi.MaintenancePlant.ToString())
             |> AssocList.upsert "INBDT"         (equi.StartupDate |> showS4Date)
 
-    let readEquiChangeFile (inputFile : string) : CompilerMonad<Equi list> = 
-        compile { 
-            let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
-            return! mapM (liftResult << assocsToEqui) ast.Rows
-        }
 
     // ************************************************************************
     // ClassEqui
@@ -264,16 +191,6 @@ module PatchTypes =
           Status : int
         }
 
-    let assocsToClassEqui (attributes : AssocList<string, string>) : Result<ClassEqui, ErrMsg> = 
-        match AssocList.tryFind5 "EQUI" "CLASS" "CLASSTYPE" "CLINT" "CLSTATUS1" attributes with
-        | Some (number, claz, claztype, clint, status) -> 
-            Ok { EquipmentNumber = EquipmentCode number
-                 Class = claz
-                 ClassType = IntegerString.OfString claztype
-                 ClassNumber = IntegerString.OfString clint
-                 Status = int status }
-         | None -> Error "Could not find required fields for a ClassEqui"
-
     let classEquiToAssocs (classEqui: ClassEqui) : AssocList<string, string> = 
         AssocList.ofList
             [ ("EQUI",          classEqui.EquipmentNumber.Code)
@@ -283,11 +200,6 @@ module PatchTypes =
             ; ("CLSTATUS1",     classEqui.Status.ToString())
             ]
 
-    let readClassEquiChangeFile (inputFile : string) : CompilerMonad<ClassEqui list> = 
-        compile { 
-            let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
-            return! mapM (liftResult << assocsToClassEqui) ast.Rows
-        }
 
     // ************************************************************************
     // ValuaEqui
@@ -304,16 +216,6 @@ module PatchTypes =
           Attributes : AssocList<string, string>
         }
     
-    let assocsToValuaEqui (attributes : AssocList<string, string>) : Result<ValuaEqui, ErrMsg> = 
-        match AssocList.tryFind5 "EQUI" "CLASSTYPE" "CHARID" "ATWRT" "VALCNT" attributes with
-        | Some (number, claztype, cid, cvalue, count) -> 
-            Ok { EquipmentNumber = EquipmentCode number
-                 ClassType = IntegerString.OfString claztype
-                 CharacteristicID = cid
-                 CharacteristicValue = cvalue
-                 ValueCount = int count
-                 Attributes = attributes }
-         | None -> Error "Could not find required fields for a ValuaEqui"
 
     /// Note - CharacteristicValue is used twice.
     let valuaEquiToAssocs (valua: ValuaEqui) : AssocList<string, string> = 
@@ -325,9 +227,3 @@ module PatchTypes =
             |> AssocList.upsert "TEXTBEZ"       valua.CharacteristicValue
             |> AssocList.upsert "VALCNT"        (sprintf "%04i" valua.ValueCount)
             
-
-    let readValuaEquiChangeFile (inputFile : string) : CompilerMonad<ValuaEqui list> = 
-        compile { 
-            let! ast = liftResult (readChangeFile inputFile) |>> ofChangeFile
-            return! mapM (liftResult << assocsToValuaEqui) ast.Rows
-        }
