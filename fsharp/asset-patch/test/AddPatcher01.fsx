@@ -64,11 +64,10 @@ let test01 () : Result<unit, ErrMsg> =
         ; ("101001409", 2019u)
         ]   
         |> List.map (fun (a,b) -> (EquipmentCode a, b))
-    runCompiler (defaultEnv ())
+    runCompiler (defaultEnv "TETLEYS")
         <| compileClassEquiValuaEquiPatches 
                     (outputDirectory ())
                     "asset_condition"
-                    "TETLEYS" 
                     assetConditionTemplate
                     worklist
 
@@ -85,10 +84,9 @@ let test02 () =
         [ ("KRI03-EDC", "SAI00970234")
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
-    runCompiler (defaultEnv ())
+    runCompiler (defaultEnv "TETLEYS")
        <| compileClassFlocValuaFlocPatches 
                    (outputDirectory ())
                    "aib_reference"
-                   "TETLEYS" 
                    aibReferenceTemplate
                    worklist

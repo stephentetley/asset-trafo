@@ -62,10 +62,10 @@ module PatchGen =
         }
 
     let private makeChangeFile (entityType : EntityType) 
-                                (user : string) 
-                                (timestamp : System.DateTime)
-                                (rows : AssocList<string, string> list) : CompilerMonad<ChangeFile> = 
+                               (rows : AssocList<string, string> list) : CompilerMonad<ChangeFile> = 
         compile {
+            let! user = asks (fun x -> x.UserName)
+            let timestamp = DateTime.Now
             let! headerRow = getHeaderRow rows
             let! header = makeHeader entityType user timestamp 
             return { 
@@ -92,23 +92,20 @@ module PatchGen =
     // FuncLoc file
 
     /// Compile a list for FuncLoc changes into a ChangeFile
-    let compileFuncLocFile (user : string) 
-                             (timestamp : System.DateTime)
-                             (rows : FuncLoc list) : CompilerMonad<ChangeFile> = 
+    let compileFuncLocFile (rows : FuncLoc list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.Path.ToString()) 
             |> List.map funcLocToAssocs     
-            |> makeChangeFile FuncLoc user timestamp
+            |> makeChangeFile FuncLoc
 
     let genFuncLocFile (directory : string) 
                         (filePrefix : string) 
-                        (user : string) 
                         (funcLocs : FuncLoc list) : CompilerMonad<unit> = 
         compile { 
             match funcLocs with
             | [] -> return ()
             | _ -> 
-                let! changes = compileFuncLocFile user DateTime.Now funcLocs
+                let! changes = compileFuncLocFile funcLocs
                 let! outPath = genFileName directory filePrefix FuncLoc
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
@@ -118,23 +115,20 @@ module PatchGen =
     // FuncLoc file
 
     /// Compile a list for ClassFloc changes into a ChangeFile
-    let compileClassFlocFile (user : string) 
-                             (timestamp : System.DateTime)
-                             (rows : ClassFloc list) : CompilerMonad<ChangeFile> = 
+    let compileClassFlocFile (rows : ClassFloc list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.Class + "!" + row.FuncLoc.ToString())
             |> List.map classFlocToAssocs     
-            |> makeChangeFile ClassFloc user timestamp
+            |> makeChangeFile ClassFloc
 
     let genClassFlocFile (directory : string) 
                         (filePrefix : string) 
-                        (user : string) 
                         (classFlocs : ClassFloc list) : CompilerMonad<unit> = 
         compile { 
             match classFlocs with
             | [] -> return ()
             | _ -> 
-                let! changes = compileClassFlocFile user DateTime.Now classFlocs
+                let! changes = compileClassFlocFile classFlocs
                 let! outPath = genFileName directory filePrefix ClassFloc
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
@@ -144,24 +138,21 @@ module PatchGen =
     // ValuaFloc file
 
     /// Compile a list for ValuaFloc changes into a ChangeFile
-    let compileValuaFlocFile (user : string) 
-                             (timestamp : System.DateTime)
-                             (rows : ValuaFloc list) : CompilerMonad<ChangeFile> = 
+    let compileValuaFlocFile (rows : ValuaFloc list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.FuncLoc.ToString() + "!" + row.CharacteristicID)
             |> List.map valuaFlocToAssocs     
-            |> makeChangeFile ValuaFloc user timestamp
+            |> makeChangeFile ValuaFloc
 
 
     let genValuaFlocFile (directory : string) 
                         (filePrefix : string) 
-                        (user : string) 
                         (valuaFlocs : ValuaFloc list) : CompilerMonad<unit> = 
         compile { 
             match valuaFlocs with
             | [] -> return ()
             | _ -> 
-                let! changes = compileValuaFlocFile user DateTime.Now valuaFlocs
+                let! changes = compileValuaFlocFile valuaFlocs
                 let! outPath = genFileName directory filePrefix ValuaFloc
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
@@ -172,24 +163,21 @@ module PatchGen =
     // Equi file
 
     /// Compile a list for ClassEqui changes into a ChangeFile
-    let compileEquiFile (user : string) 
-                        (timestamp : System.DateTime)
-                        (rows : Equi list) : CompilerMonad<ChangeFile> = 
+    let compileEquiFile (rows : Equi list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.EquipmentNumber.ToString())
             |> List.map equiToAssocs     
-            |> makeChangeFile Equi user timestamp
+            |> makeChangeFile Equi
 
 
     let genEquiFile (directory : string) 
                     (filePrefix : string) 
-                    (user: string) 
                     (equis : Equi list) : CompilerMonad<unit> = 
         compile { 
             match equis with
             | [] -> return ()
             | _ -> 
-                let! changes = compileEquiFile user DateTime.Now equis
+                let! changes = compileEquiFile equis
                 let! outPath = genFileName directory filePrefix Equi
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
@@ -200,23 +188,20 @@ module PatchGen =
 
 
     /// Compile a list for ClassEqui changes into a ChangeFile
-    let compileClassEquiFile (user : string) 
-                             (timestamp : System.DateTime)
-                             (rows : ClassEqui list) : CompilerMonad<ChangeFile> = 
+    let compileClassEquiFile (rows : ClassEqui list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.EquipmentNumber.ToString() + row.Class)
             |> List.map classEquiToAssocs     
-            |> makeChangeFile ClassEqui user timestamp
+            |> makeChangeFile ClassEqui
 
     let genClassEquiFile (directory : string) 
                         (filePrefix : string) 
-                        (user: string) 
                         (classEquis : ClassEqui list) : CompilerMonad<unit> = 
         compile { 
             match classEquis with
             | [] -> return ()
             | _ -> 
-                let! changes = compileClassEquiFile user DateTime.Now classEquis
+                let! changes = compileClassEquiFile classEquis
                 let! outPath = genFileName directory filePrefix ClassEqui
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
@@ -226,24 +211,22 @@ module PatchGen =
     // ValuaEqui file
 
     /// Compile a list for ValuaEqui changes into a ChangeFile
-    let compileValuaEquiFile (user : string) 
-                             (timestamp : System.DateTime)
-                             (rows : ValuaEqui list) : CompilerMonad<ChangeFile> = 
+    let compileValuaEquiFile (rows : ValuaEqui list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.EquipmentNumber)
             |> List.map valuaEquiToAssocs     
-            |> makeChangeFile ValuaEqui user timestamp
+            |> makeChangeFile ValuaEqui
 
 
     let genValuaEquiFile (directory : string) 
                         (filePrefix : string) 
-                        (user: string) 
                         (valuaEquis : ValuaEqui list) : CompilerMonad<unit> = 
         compile { 
             match valuaEquis with
             | [] -> return ()
-            | _ -> 
-                let! changes = compileValuaEquiFile user DateTime.Now valuaEquis
+            | _ ->       
+            
+                let! changes = compileValuaEquiFile valuaEquis
                 let! outPath = genFileName directory filePrefix ValuaEqui
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
@@ -254,15 +237,14 @@ module PatchGen =
 
     let generatePatches (directory : string) 
                         (filePrefix : string) 
-                        (user : string) 
                         (results : EmitterResults) : CompilerMonad<unit> = 
         compile {
-            do! genFuncLocFile   directory filePrefix user results.FuncLocs
-            do! genClassFlocFile directory filePrefix user results.ClassFlocs
-            do! genValuaFlocFile directory filePrefix user results.ValuaFlocs
-            do! genEquiFile      directory filePrefix user results.Equis
-            do! genClassEquiFile directory filePrefix user results.ClassEquis
-            do! genValuaEquiFile directory filePrefix user results.ValuaEquis
+            do! genFuncLocFile   directory filePrefix results.FuncLocs
+            do! genClassFlocFile directory filePrefix results.ClassFlocs
+            do! genValuaFlocFile directory filePrefix results.ValuaFlocs
+            do! genEquiFile      directory filePrefix results.Equis
+            do! genClassEquiFile directory filePrefix results.ClassEquis
+            do! genValuaEquiFile directory filePrefix results.ValuaEquis
             return ()
         }
 

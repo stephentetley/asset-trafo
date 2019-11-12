@@ -103,36 +103,57 @@ module Template =
 
     type Equipment = Template<S4Equipment>
     
+    type EquipmentAttribute = Template<S4Equipment -> S4Equipment>
+
+    let private setAttribute (e1 : Equipment) (attrib : EquipmentAttribute) : Equipment = 
+        Template <| fun env -> 
+            match apply1 e1 env with
+            | Ok a -> 
+                match apply1 attrib env with
+                | Ok f -> Ok (f a)
+                | Error msg -> Error msg
+            | Error msg -> Error msg
+
+    let private setAttributes (e1 : Equipment) (attribs : EquipmentAttribute list) : Equipment = 
+        List.fold setAttribute e1 attribs
+    
     let _equipment (description : string) (objectType : string)
                     (classes : Class list) 
-                    (subordinateEquipment : Equipment list) : Equipment = 
+                    (subordinateEquipment : Equipment list) 
+                    (attributes : EquipmentAttribute list) : Equipment = 
         // EquipmentId is filled in by a compiler pass
-        template {
-            let! cs = unlistM classes
-            let! es = unlistM subordinateEquipment
-            return { 
-                EquipmentId = None
-                Description = description
-                ObjectType = objectType
-                Manufacturer = None
-                Model = None
-                Classes = cs 
-                SuboridnateEquipment = es 
-            }
-          }
+        let equip1 = 
+            template {
+                let! cs = unlistM classes
+                let! es = unlistM subordinateEquipment
+                return {
+                    EquipmentId = None
+                    Description = description
+                    ObjectType = objectType
+                    Manufacturer = None
+                    Model = None
+                    SerialNumber = None
+                    Classes = cs 
+                    SuboridnateEquipment = es 
+                }
+            } 
+        setAttributes equip1 attributes
 
-    let manufacturerIs (name : String) : Equipment -> Equipment = fun equipment ->
-        template {
-            let! e1 = equipment
-            return { e1 with Manufacturer = Some name }
-        }
 
-    let modelIs (name : String) : Equipment -> Equipment = fun equipment ->
-        template {
-            let! e1 = equipment
-            return { e1 with Model = Some name }
-        }
+    let internal equipmentAttribute (update : S4Equipment -> S4Equipment) : EquipmentAttribute =
+        Template <| fun env -> Ok update
+            
 
+
+    let manufacturer (name : String) : EquipmentAttribute = 
+        equipmentAttribute <| fun e1 ->  { e1 with Manufacturer = Some name }
+        
+
+    let model (name : String) : EquipmentAttribute =
+        equipmentAttribute <| fun e1 -> { e1 with Model = Some name }
+        
+    let serialNumber (productCode : String) : EquipmentAttribute =
+        equipmentAttribute <| fun e1 -> { e1 with SerialNumber = Some productCode }
 
     type Component = Template<S4Component>
     

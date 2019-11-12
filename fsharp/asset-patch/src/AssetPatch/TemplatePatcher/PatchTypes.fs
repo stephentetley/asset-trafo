@@ -165,6 +165,7 @@ module PatchTypes =
         ObjectType : string
         Manufacturer : string
         Model : string
+        SerialNumber : string
         StartupDate : DateTime
         MaintenancePlant : uint32
       }
@@ -174,9 +175,12 @@ module PatchTypes =
         AssocList.empty
             |> AssocList.upsert "EQUI"          equi.EquipmentNumber.Code
             |> AssocList.upsert "TXTMI"         equi.Description
-            |> AssocList.upsert "TPLN_EILO"     (equi.FuncLoc.ToString()) 
-            |> AssocList.upsert "EQART_EQU"     equi.ObjectType
+            |> AssocList.upsert "TPLN_EILO"     (equi.FuncLoc.ToString())
             |> AssocList.upsert "SWER_EILO"     (equi.MaintenancePlant.ToString())
+            |> AssocList.upsert "HERST"         equi.Manufacturer
+            |> AssocList.upsert "SERNR"         equi.SerialNumber
+            |> AssocList.upsert "TYPBZ"         equi.Model
+            |> AssocList.upsert "EQART_EQU"     equi.ObjectType
             |> AssocList.upsert "INBDT"         (equi.StartupDate |> showS4Date)
 
 

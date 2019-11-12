@@ -21,7 +21,8 @@ module CompilerMonad =
     type State = NameSupply
 
     type TemplateEnv = 
-        { StartupDate : DateTime
+        { UserName : string 
+          StartupDate : DateTime
           StructureIndicator : string
           MaintenancePlant : uint32
           ObjectStatus : string
@@ -31,8 +32,9 @@ module CompilerMonad =
     type Env = TemplateEnv
             
         
-    let defaultEnv () = 
-        { StartupDate = DateTime.Now
+    let defaultEnv (userName : string) = 
+        { UserName = userName
+          StartupDate = DateTime.Now
           StructureIndicator = "YW-GS"
           MaintenancePlant = 2100u
           ObjectStatus = "UCON"

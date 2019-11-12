@@ -115,6 +115,7 @@ module Emitter =
                 ObjectType = equipment.ObjectType
                 Manufacturer = Option.defaultValue "TO BE DETERMINED" equipment.Manufacturer
                 Model = Option.defaultValue "TO BE DETERMINED" equipment.Model
+                SerialNumber = Option.defaultValue "" equipment.SerialNumber
                 StartupDate = sdate
                 MaintenancePlant = mplant
             }

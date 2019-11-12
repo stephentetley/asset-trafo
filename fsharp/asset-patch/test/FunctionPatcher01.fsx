@@ -84,8 +84,9 @@ let edgTemplate (parameters : GeoParams) : Function =
                           aib_reference [ s4_aib_reference () ]
                         ]
                         _no_subordinate_equipment_
-                        ^!!^ [ manufacturerIs "SIEMENS"
-                               modelIs "HYDRORANGER 200" ]
+                        [ manufacturer "SIEMENS"
+                          model "HYDRORANGER 200" 
+                        ]
                     ]
                 ]
             ]
@@ -98,11 +99,10 @@ let test01 () =
         [ ("KRI03", {Easting = 492729; Northing = 477323} )
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
-    runCompiler (defaultEnv ()) 
+    runCompiler (defaultEnv "TETLEYS") 
        <| compileFunctionPatches 
                    (outputDirectory ())
                    "env_discharge"
-                   "TETLEYS" 
                    edgTemplate
                    worklist
 
@@ -137,6 +137,9 @@ let caaTemplate (parameters : GeoParams) : Function =
                           aib_reference [ s4_aib_reference () ]
                         ]
                         _no_subordinate_equipment_
+                        [ manufacturer "METASPHERE"
+                          model "MMIM" 
+                        ]
                     ]
                 ]            
             ]
@@ -147,10 +150,9 @@ let test02 () =
         [ ("KRI03", {Easting = 492729; Northing = 477323} )
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
-    runCompiler (defaultEnv ()) 
+    runCompiler (defaultEnv "TETLEYS") 
        <| compileFunctionPatches 
                    (outputDirectory ())
                    "control_automation"
-                   "TETLEYS" 
                    caaTemplate
                    worklist
