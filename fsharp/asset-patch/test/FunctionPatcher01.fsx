@@ -43,18 +43,19 @@ open AssetPatch.TemplatePatcher.Catalogue
 let outputDirectory () : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output")
 
-type GeoParams = 
+
+type RowParams = 
     { Easting : int
       Northing : int
+      EquiFlocSaiNumber : string option
+      EquiPliNumber : string option
     }
 
 
-let ( ^!!^ ) (e1 :  Equipment) (fns : (Equipment -> Equipment) list) : Equipment = 
-    List.fold (fun a f -> f a) e1 fns
-    
+  
 
 
-let edgTemplate (parameters : GeoParams) : Function = 
+let edgTemplate (parameters : RowParams) : Function = 
     let east_north_common = 
         east_north [ easting parameters.Easting; northing parameters.Northing ]
     
@@ -96,7 +97,7 @@ let edgTemplate (parameters : GeoParams) : Function =
 
 let test01 () = 
     let worklist = 
-        [ ("KRI03", {Easting = 492729; Northing = 477323} )
+        [ ("KRI03", {Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001" } )
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
     runCompiler (defaultEnv "TETLEYS") 
@@ -106,8 +107,13 @@ let test01 () =
                    edgTemplate
                    worklist
 
-
-let caaTemplate (parameters : GeoParams) : Function = 
+// This template has optional elements that are possible but a bit ugly...
+// We have to represent option elements as a list that might have zero-or-one
+// elements then `yield!` them.
+// Single (non-optional) elements need to use `yield` when in the same list.
+// The symbolic combinators (&&=) and (??=) are largely superfluous.
+// 
+let caaTemplate (parameters : RowParams) : Function = 
     let east_north_common = 
         east_north [ easting parameters.Easting; northing parameters.Northing ]
     
@@ -134,11 +140,17 @@ let caaTemplate (parameters : GeoParams) : Function =
                     [ 
                       telemetry_outstation "Telemetry Outstation"
                         [ east_north_common
-                          aib_reference [ s4_aib_reference () ]
+                          aib_reference 
+                            
+                            [ yield  s4_aib_reference  &&= ()
+                              yield! ai2_aib_reference ??= parameters.EquiFlocSaiNumber
+                              yield! ai2_aib_reference ??= parameters.EquiPliNumber
+                            ]
                         ]
                         _no_subordinate_equipment_
                         [ manufacturer "METASPHERE"
                           model "MMIM" 
+                          serialNumber ""
                         ]
                     ]
                 ]            
@@ -147,7 +159,7 @@ let caaTemplate (parameters : GeoParams) : Function =
 
 let test02 () = 
     let worklist = 
-        [ ("KRI03", {Easting = 492729; Northing = 477323} )
+        [ ("KRI03", {Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001"} )
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
     runCompiler (defaultEnv "TETLEYS") 

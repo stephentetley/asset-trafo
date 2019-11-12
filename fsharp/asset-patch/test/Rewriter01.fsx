@@ -38,9 +38,3 @@ let outputDirectory () : string =
 
 let outputFile (relFileName : string) : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
-
-
-
-
-
-

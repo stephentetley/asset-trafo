@@ -70,6 +70,8 @@ module Template =
             work source (fun msg -> Error msg) (fun xs -> Ok xs)
 
 
+
+
     let private _segment (token : string) 
                          (description : string) 
                          (objectType : string) : Template<FuncLocSegment> = 
@@ -79,6 +81,9 @@ module Template =
             ObjectType = objectType 
         }
 
+
+    
+
     type Characteristic = Template<S4Characteristic>
     
     let _characteristic (name : string) (value : string) : Characteristic = 
@@ -86,6 +91,18 @@ module Template =
             Name = name
             Value = value
         }
+
+
+    
+    let ( &&= ) (fn : 'a -> Characteristic)  (value : 'a) : Characteristic = 
+        fn value
+
+
+    let ( ??= ) (fn : 'a -> Characteristic)  (value : Option<'a>) : Characteristic list = 
+        match value with 
+        | None -> []
+        | Some a -> [fn a]
+
 
     type Class = Template<S4Class>
 
@@ -144,16 +161,6 @@ module Template =
         Template <| fun env -> Ok update
             
 
-
-    let manufacturer (name : String) : EquipmentAttribute = 
-        equipmentAttribute <| fun e1 ->  { e1 with Manufacturer = Some name }
-        
-
-    let model (name : String) : EquipmentAttribute =
-        equipmentAttribute <| fun e1 -> { e1 with Model = Some name }
-        
-    let serialNumber (productCode : String) : EquipmentAttribute =
-        equipmentAttribute <| fun e1 -> { e1 with SerialNumber = Some productCode }
 
     type Component = Template<S4Component>
     

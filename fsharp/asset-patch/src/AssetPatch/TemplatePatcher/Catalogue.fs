@@ -8,6 +8,20 @@ namespace AssetPatch.TemplatePatcher
 module Catalogue =
     
     open AssetPatch.TemplatePatcher.Template
+
+    
+    let manufacturer (name : string) : EquipmentAttribute = 
+        equipmentAttribute <| fun e1 ->  { e1 with Manufacturer = Some name }
+        
+
+    let model (name : string) : EquipmentAttribute =
+        equipmentAttribute <| fun e1 -> { e1 with Model = Some name }
+        
+    let serialNumber (productCode : string) : EquipmentAttribute =
+        equipmentAttribute <| fun e1 -> { e1 with SerialNumber = Some productCode }
+
+
+
     
     // ************************************************************************
     // Classes and characteritics
