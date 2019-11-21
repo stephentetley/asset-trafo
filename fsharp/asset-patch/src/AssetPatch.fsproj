@@ -17,6 +17,7 @@
     <Compile Include="AssetPatch\Base\FuncLocPath.fs" />
     <Compile Include="AssetPatch\Utilities\ChangeFileReport.fs" />
     <Compile Include="AssetPatch\Utilities\TidyChangeFile.fs" />
+    <Compile Include="AssetPatch\Uxl\UxlChangeFile.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\PatchTypes.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Hierarchy.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Template.fs" />
@@ -32,6 +33,7 @@
   <ItemGroup>
     <PackageReference Include="FParsec" Version="1.0.4-rc3" />
     <PackageReference Include="MarkdownDoc" Version="1.0.1-alpha-20191014" />
+    <PackageReference Include="SheetDoc" Version="1.0.0-alpha-20191121a" />
     <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190721" />
   </ItemGroup>
 

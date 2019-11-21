@@ -140,8 +140,7 @@ let caaTemplate (parameters : RowParams) : Function =
                     [ 
                       telemetry_outstation "Telemetry Outstation"
                         [ east_north_common
-                          aib_reference 
-                            
+                          aib_reference                             
                             [ yield  s4_aib_reference  &&= ()
                               yield! ai2_aib_reference ??= parameters.EquiFlocSaiNumber
                               yield! ai2_aib_reference ??= parameters.EquiPliNumber
