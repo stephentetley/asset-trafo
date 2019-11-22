@@ -201,18 +201,18 @@ module PatchTypes =
             ; ("BUKR_EILO",     "")
             ; ("KOKR_EILO",     "1000")
             ; ("KOST_EILO",     "150008")       /// <--- This should be _data_
-            ; ("TXTMI",         equi.Description)
-            ; ("USTA_EQUI",     "OPER")
-            ; ("EQUI",          equi.EquipmentNumber.Code)
+            ; ("TXTMI",         equi.Description)       // Description (medium) text
+            ; ("USTA_EQUI",     "OPER")                 // Display lines for user status
+            ; ("EQUI",          equi.EquipmentNumber.Code)      // Equipment
             ; ("EQTYP",         equi.Category)   
             ; ("TPLN_EILO",     equi.FuncLoc.ToString())
             ; ("STOR_EILO",     "")
             ; ("STORTI",        "")
             ; ("ARBP_EEQZ",     "DEFAULT")
             ; ("INGR_EEQZ",     "")
-            ; ("SWER_EILO",     equi.MaintenancePlant.ToString())
-            ; ("HERST",         equi.Manufacturer)
-            ; ("SERNR",         equi.SerialNumber)
+            ; ("SWER_EILO",     equi.MaintenancePlant.ToString())   // Maintenance Plant
+            ; ("SERGE",         equi.SerialNumber)                  // ManufSerialNumber
+            ; ("HERST",         equi.Manufacturer)                  // Manufacturer
             ; ("TYPBZ",         equi.Model)
             ; ("OBJT_EQUI",     "")                     // Object Type
             ; ("EQART_EQU",     equi.ObjectType)        // Object Type

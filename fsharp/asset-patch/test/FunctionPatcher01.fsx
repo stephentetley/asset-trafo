@@ -168,7 +168,6 @@ let test02 () =
     let worklist = 
         [ {Code = "SPT60"; Name = "Stephen SPS"; Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001"} 
         ] 
-        
     runCompiler (defaultEnv "TETLEYS") 
        <| compileSitePatches 
                    (outputDirectory ())

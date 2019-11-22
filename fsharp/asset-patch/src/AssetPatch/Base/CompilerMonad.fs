@@ -93,8 +93,7 @@ module CompilerMonad =
     let runCompiler (env : Env) 
                     (action : CompilerMonad<'a> ) : Result<'a, ErrMsg> = 
         let stateZero = 
-            { EquipmentIndex = 1 
-              FileIndex = 1 }
+            { EquipmentIndex = 19001; FileIndex = 1 }
         apply1 action env stateZero |> Result.map fst
 
 
@@ -246,7 +245,7 @@ module CompilerMonad =
 
     let newEquipmentName () : CompilerMonad<string> = 
         CompilerMonad <| fun _ st -> 
-            let name = sprintf "MAGIC$%06i" st.EquipmentIndex
+            let name = sprintf "$%i" st.EquipmentIndex
             Ok (name, {st with EquipmentIndex = st.EquipmentIndex + 1})
 
     let resetEquipmentName () : CompilerMonad<unit> = 
