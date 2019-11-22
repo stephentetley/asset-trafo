@@ -184,6 +184,7 @@ module PatchTypes =
       { EquipmentNumber : EquipmentCode
         Description : string
         FuncLoc : FuncLocPath
+        Category : string           // e.g. I for instrument
         ObjectType : string
         Manufacturer : string
         Model : string
@@ -194,17 +195,36 @@ module PatchTypes =
 
     /// Note - CharacteristicValue is used three times.
     let equiToAssocs (equi: Equi) : AssocList<string, string> = 
-        AssocList.empty
-            |> AssocList.upsert "EQUI"          equi.EquipmentNumber.Code
-            |> AssocList.upsert "TXTMI"         equi.Description
-            |> AssocList.upsert "TPLN_EILO"     (equi.FuncLoc.ToString())
-            |> AssocList.upsert "SWER_EILO"     (equi.MaintenancePlant.ToString())
-            |> AssocList.upsert "HERST"         equi.Manufacturer
-            |> AssocList.upsert "SERNR"         equi.SerialNumber
-            |> AssocList.upsert "TYPBZ"         equi.Model
-            |> AssocList.upsert "EQART_EQU"     equi.ObjectType
-            |> AssocList.upsert "INBDT"         (equi.StartupDate |> showS4Date)
-
+        AssocList.ofList
+            [ ("ABCK_EILO",     "")
+            ; ("GSBE_EILO",     "")
+            ; ("BUKR_EILO",     "")
+            ; ("KOKR_EILO",     "1000")
+            ; ("KOST_EILO",     "150008")       /// <--- This should be _data_
+            ; ("TXTMI",         equi.Description)
+            ; ("USTA_EQUI",     "OPER")
+            ; ("EQUI",          equi.EquipmentNumber.Code)
+            ; ("EQTYP",         equi.Category)   
+            ; ("TPLN_EILO",     equi.FuncLoc.ToString())
+            ; ("STOR_EILO",     "")
+            ; ("STORTI",        "")
+            ; ("ARBP_EEQZ",     "DEFAULT")
+            ; ("INGR_EEQZ",     "")
+            ; ("SWER_EILO",     equi.MaintenancePlant.ToString())
+            ; ("HERST",         equi.Manufacturer)
+            ; ("SERNR",         equi.SerialNumber)
+            ; ("TYPBZ",         equi.Model)
+            ; ("OBJT_EQUI",     "")                     // Object Type
+            ; ("EQART_EQU",     equi.ObjectType)        // Object Type
+            ; ("PPLA_EEQZ",     "2100")                 // Planning Plant
+            ; ("BEBE_EILO",     "")                     // Planet Section
+            ; ("WERGW_EQI",     "2100")                 // Plant for WorkCenter
+            ; ("INBDT",         equi.StartupDate |> showS4Date)     // Start-up Date
+            ; ("STATTEXT",      "CRTE")                 // Status
+            ; ("USTW_EQUI",     "UCON")                 // Status of an object
+            ; ("USWO_EQUI",     "")                     // Status without status number
+            ; ("PROI_EILO",     "")                     // 	WBS Element 
+            ]
 
     // ************************************************************************
     // ClassEqui
@@ -239,17 +259,17 @@ module PatchTypes =
           CharacteristicID : string
           CharacteristicValue : string
           ValueCount : int
-          Attributes : AssocList<string, string>
         }
     
 
     /// Note - CharacteristicValue is used twice.
     let valuaEquiToAssocs (valua: ValuaEqui) : AssocList<string, string> = 
-        valua.Attributes
-            |> AssocList.upsert "EQUI"          valua.EquipmentNumber.Code
-            |> AssocList.upsert "CLASSTYPE"     valua.ClassType.Number
-            |> AssocList.upsert "CHARID"        valua.CharacteristicID
-            |> AssocList.upsert "ATWRT"         valua.CharacteristicValue
-            |> AssocList.upsert "TEXTBEZ"       valua.CharacteristicValue
-            |> AssocList.upsert "VALCNT"        (sprintf "%04i" valua.ValueCount)
+        AssocList.ofList
+            [ ("EQUI",          valua.EquipmentNumber.Code)
+            ; ("CLASSTYPE",     valua.ClassType.Number)
+            ; ("CHARID",        valua.CharacteristicID)
+            ; ("ATWRT",         valua.CharacteristicValue)
+            ; ("TEXTBEZ",       valua.CharacteristicValue)
+            ; ("VALCNT",        sprintf "%04i" valua.ValueCount)
+            ]
             

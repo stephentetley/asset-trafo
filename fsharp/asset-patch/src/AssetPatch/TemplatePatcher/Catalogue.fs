@@ -127,11 +127,11 @@ module Catalogue =
 
     let lstn_level_transmitter (name : string) 
                 : Class list -> Equipment list -> EquipmentAttribute list -> Equipment = 
-        _equipment name "LSTN"
+        _equipment name "I" "LSTN"
 
     let telemetry_outstation (name : string) 
                 : Class list -> Equipment list -> EquipmentAttribute list -> Equipment = 
-        _equipment name "NETW"
+        _equipment name "I" "NETW"
 
 
     // ************************************************************************

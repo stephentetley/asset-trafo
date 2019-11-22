@@ -78,7 +78,6 @@ module Emitter =
             CharacteristicID = charac.Name
             CharacteristicValue = charac.Value
             ValueCount = count
-            Attributes = AssocList.empty
         }
     
 
@@ -112,6 +111,7 @@ module Emitter =
                 EquipmentNumber = EquipmentCode number
                 Description = equipment.Description
                 FuncLoc = funcLoc
+                Category = equipment.Category
                 ObjectType = equipment.ObjectType
                 Manufacturer = Option.defaultValue "TO BE DETERMINED" equipment.Manufacturer
                 Model = Option.defaultValue "TO BE DETERMINED" equipment.Model

@@ -27,6 +27,7 @@ module Hierarchy =
     type S4Equipment = 
         { EquipmentId : string option
           Description : string
+          Category : string
           ObjectType : string
           Manufacturer : string option
           Model : string option

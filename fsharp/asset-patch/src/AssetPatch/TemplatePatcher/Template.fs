@@ -134,7 +134,8 @@ module Template =
     let private setAttributes (e1 : Equipment) (attribs : EquipmentAttribute list) : Equipment = 
         List.fold setAttribute e1 attribs
     
-    let _equipment (description : string) (objectType : string)
+    let _equipment (description : string) (category : string) 
+                    (objectType : string)
                     (classes : Class list) 
                     (subordinateEquipment : Equipment list) 
                     (attributes : EquipmentAttribute list) : Equipment = 
@@ -146,6 +147,7 @@ module Template =
                 return {
                     EquipmentId = None
                     Description = description
+                    Category = category
                     ObjectType = objectType
                     Manufacturer = None
                     Model = None

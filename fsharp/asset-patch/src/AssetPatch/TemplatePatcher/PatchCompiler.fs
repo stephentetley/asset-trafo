@@ -38,6 +38,7 @@ module PatchCompiler =
         { 
             EquipmentId = Some code
             Description = ""
+            Category = "I"
             ObjectType = ""
             Manufacturer = None
             Model = None
