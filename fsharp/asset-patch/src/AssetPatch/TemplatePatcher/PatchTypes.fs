@@ -67,10 +67,10 @@ module PatchTypes =
         
 
     let funcLocToAssocs (funcLoc: FuncLoc) : AssocList<string, string> = 
-        let parent1 = 
-            match funcLoc.Path |> parent with
-            | None -> ""
-            | Some path -> path.ToString()
+        //let parent1 = 
+        //    match funcLoc.Path |> parent with
+        //    | None -> ""
+        //    | Some path -> path.ToString()
         AssocList.ofList
             [ ("ABCKZFLOC",     "")
             ; ("GSBE_FLOC",     "")
@@ -87,7 +87,7 @@ module PatchTypes =
             ; ("INGR_FLOC",     "")
             ; ("SWERK_FL",      "2100")
             ; ("FLOC_REF",      funcLoc.Path.ToString())
-            ; ("OBJTYFLOC",     "")
+            ; ("OBJTYFLOC",     "A")
             ; ("EQART",         funcLoc.ObjectType)
             ; ("PLNT_FLOC",     "2100")
             ; ("BEBER_FL",      "")
@@ -98,7 +98,6 @@ module PatchTypes =
             ; ("USTW_FLOC",     funcLoc.ObjectStatus)
             ; ("USWO_FLOC",     "")
             ; ("TPLKZ_FLC",     funcLoc.StructureIndicator)
-            ; ("TPLMA",         parent1)
             ; ("PROI_FLOC",     "")
             ]
             
@@ -130,11 +129,12 @@ module PatchTypes =
 
 
     let classFlocToAssocs (classFloc: ClassFloc) : AssocList<string, string> = 
+        // Dont print the CLINT even though we know it!
         AssocList.ofList
             [ ("FUNCLOC",       classFloc.FuncLoc.ToString())
             ; ("CLASS",         classFloc.Class)
             ; ("CLASSTYPE",     classFloc.ClassType.Number)
-            ; ("CLINT",         classFloc.ClassNumber.Number)
+            ; ("CLINT",         "")
             ; ("CLSTATUS1",     classFloc.Status.ToString())
             ]
 
@@ -153,14 +153,15 @@ module PatchTypes =
 
     /// Note - CharacteristicValue is used three times.
     let valuaFlocToAssocs (valua: ValuaFloc) : AssocList<string, string> = 
-        AssocList.empty
-            |> AssocList.upsert "FUNCLOC"       (valua.FuncLoc.ToString())
-            |> AssocList.upsert "CLASSTYPE"     valua.ClassType.Number
-            |> AssocList.upsert "CHARID"        valua.CharacteristicID
-            |> AssocList.upsert "ATWRT"         valua.CharacteristicValue
-            |> AssocList.upsert "TEXTBEZ"       valua.CharacteristicValue
-            |> AssocList.upsert "ATFLV"         valua.CharacteristicValue
-            |> AssocList.upsert "VALCNT"        (sprintf "%04i" valua.ValueCount)
+        AssocList.ofList
+            [ ("FUNCLOC",       valua.FuncLoc.ToString())
+            ; ("CLASSTYPE",     valua.ClassType.Number)
+            ; ("CHARID",        valua.CharacteristicID)
+            ; ("ATWRT",         valua.CharacteristicValue)
+            ; ("TEXTBEZ",       valua.CharacteristicValue)
+            ; ("VALCNT",        sprintf "%04i" valua.ValueCount)
+            ; ("ATFLV",         valua.CharacteristicValue)
+            ]
 
 
 
