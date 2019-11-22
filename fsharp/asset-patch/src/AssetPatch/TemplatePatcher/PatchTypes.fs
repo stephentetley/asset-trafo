@@ -71,16 +71,37 @@ module PatchTypes =
             match funcLoc.Path |> parent with
             | None -> ""
             | Some path -> path.ToString()
-        AssocList.empty
-            |> AssocList.upsert "FUNCLOC"       (funcLoc.Path.ToString())
-            |> AssocList.upsert "TXTMI"         funcLoc.Description
-            |> AssocList.upsert "FLTYP"         (funcLoc.Category.ToString())
-            |> AssocList.upsert "EQART"         funcLoc.ObjectType
-            |> AssocList.upsert "INBDT"         (funcLoc.StartupDate |> showS4Date)
-            |> AssocList.upsert "USTW_FLOC"     funcLoc.ObjectStatus
-            |> AssocList.upsert "TPLKZ_FLC"     funcLoc.StructureIndicator
-            |> AssocList.upsert "TPLMA"         parent1
-
+        AssocList.ofList
+            [ ("ABCKZFLOC",     "")
+            ; ("GSBE_FLOC",     "")
+            ; ("BUKRSFLOC",     "2100")
+            ; ("KOKR_FLOC",     "1000")
+            ; ("KOST_FLOC",     "")    
+            ; ("TXTMI",         funcLoc.Description)
+            ; ("FLTYP",         funcLoc.Category.ToString())
+            ; ("FUNCLOC",       funcLoc.Path.ToString())
+            ; ("IEQUI",         "")
+            ; ("STOR_FLOC",     "")
+            ; ("STORTI",        "D")
+            ; ("GEWRKFLOC",    "DEFAULT")
+            ; ("INGR_FLOC",     "")
+            ; ("SWERK_FL",      "2100")
+            ; ("FLOC_REF",      funcLoc.Path.ToString())
+            ; ("OBJTYFLOC",     "")
+            ; ("EQART",         funcLoc.ObjectType)
+            ; ("PLNT_FLOC",     "2100")
+            ; ("BEBER_FL",      "")
+            ; ("WERGWFLOC",     "2100")
+            ; ("TRPNR",         "")
+            ; ("INBDT",         funcLoc.StartupDate |> showS4Date)
+            ; ("STATTEXT",      "CRTE")
+            ; ("USTW_FLOC",     funcLoc.ObjectStatus)
+            ; ("USWO_FLOC",     "")
+            ; ("TPLKZ_FLC",     funcLoc.StructureIndicator)
+            ; ("TPLMA",         parent1)
+            ; ("PROI_FLOC",     "")
+            ]
+            
 
 
     let extendFuncLoc (segment : FuncLocSegment)

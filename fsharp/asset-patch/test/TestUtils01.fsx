@@ -55,4 +55,10 @@ let tidyChangeFile01 () =
     tidyChangeFile ["FUNCLOC"; "TXTMI"] [] src dest
 
 
+let temp01 () = 
+    let pathToCss = @"..\..\..\..\..\libs\markdown-css-master\github.css"
+    let file = @"G:\work\Projects\assets\asset_patch\file_download_edm\george_successful_upload.txt"
+    changeFileReport pathToCss (outputDirectory ()) file
+
+
 

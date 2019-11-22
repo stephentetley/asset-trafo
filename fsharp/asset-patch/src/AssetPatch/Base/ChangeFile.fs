@@ -112,7 +112,7 @@ module ChangeFile =
         { FileType : FileType 
           DataModel : DataModel
           EntityType : EntityType
-          Variant : unit
+          Variant : string
           User : string
           DateTime : DateTime
         } 

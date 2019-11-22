@@ -88,8 +88,8 @@ module ChangeFileReport =
             | ValuaEqui -> "VALUAEQUI"
         name |> rawtext
     
-    let variant () : Markdown = 
-        nbsp
+    let variant (name : string) : Text = 
+        name |> text
 
 
 
@@ -104,7 +104,7 @@ module ChangeFileReport =
             [ [fileType source.FileType; nbsp]
             ; makeRow "Data Model:"     (dataModel source.DataModel |> markdownText)
             ; makeRow "Entity Type:"    (entityType source.EntityType |> markdownText)
-            ; makeRow "Variant:"        (variant source.Variant)
+            ; makeRow "Variant:"        (variant source.Variant |> markdownText)
             ; makeRow "User:"           (text source.User |> markdownText)            
             ; makeRow "Date:"           (source.DateTime.ToString(format="yyyyMMdd") |> cellValue)
             ; makeRow "Time:"           (source.DateTime.ToString(format="HHmmss") |> cellValue)

@@ -206,32 +206,52 @@ module UxlChangeFile =
         sheet "Functional Location Data" (r0 :: xs)
 
     // ************************************************************************
+    // Fl-Classification
 
 
 
-    //type EquipmentData = 
-    //    { Equipment : string
-    //      DeletionInd : bool
-    //      ActiveInactiveStat : string
-    //      EquipCategory : string
-    //      Description : string
-    //      ValidFrom : DateTime option         
-    //      ObjectType : string
-    //      Manufacturer : string
-    //      ModelNumber : string
-    //    }
+    type FLClassification = 
+        { FunctionalLocation : string
+          Class : string
+          Characteristics : string
+          CharValue : string option
+        }
 
-
-    ///// ClassType is always "003"
-    //type FunctionalLocationClassification = 
-    //    { FunctionalLocation : string 
-    //      DeletionInd : bool
-    //      Class : string
-    //      Status : string
-    //      Characteristics : string
-    //      CharValue : string
-    //    }
+    let private mmopFLClassificationHeaders () : RowDoc = 
+        row [ text "Functional Location"
+            ; text "Deletion Ind"
+            ; text "Active Inactive Stat"
+            ; text "Class Type"
+            ; text "Class"
+            ; text "Status"
+            ; text "Characteristics"
+            ; text "Char Value"
+            ; text "Ch.Deletion Ind."
+            ; text "UoM"
+            ; text "UoM text"
+            ]
     
+    let private mmopFLClassificationRow (flClassification : FLClassification) : RowDoc =  
+        let charValue = 
+            match flClassification.CharValue with
+            | None -> blankCell
+            | Some a -> text a
+        
+        row [ yield text flClassification.FunctionalLocation
+            ; yield blankCell
+            ; yield text "003"
+            ; yield text flClassification.Class
+            ; yield text "1"
+            ; yield text flClassification.Characteristics
+            ; yield charValue
+            ]
+
+    let mmopFLClassification (source : FLClassification list) : SheetDoc =
+        let r0 = mmopFLClassificationHeaders ()
+        let xs = List.map mmopFLClassificationRow source
+        sheet "FL-Classification" (r0 :: xs)
+
+
 
     ///// ClassType is always "002"
     //type EquipmentClassification = 

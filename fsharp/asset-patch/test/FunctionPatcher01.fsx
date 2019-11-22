@@ -45,7 +45,9 @@ let outputDirectory () : string =
 
 
 type RowParams = 
-    { Easting : int
+    { Code : string
+      Name : string 
+      Easting : int
       Northing : int
       EquiFlocSaiNumber : string option
       EquiPliNumber : string option
@@ -97,7 +99,7 @@ let edgTemplate (parameters : RowParams) : Function =
 
 let test01 () = 
     let worklist = 
-        [ ("KRI03", {Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001" } )
+        [ ("KRI03", {Code = "KRI03"; Name = "Kriddle SPS"; Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001" } )
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
     runCompiler (defaultEnv "TETLEYS") 
@@ -113,56 +115,62 @@ let test01 () =
 // Single (non-optional) elements need to use `yield` when in the same list.
 // The symbolic combinators (&&=) and (??=) are largely superfluous.
 // 
-let caaTemplate (parameters : RowParams) : Function = 
+let caaTemplate (parameters : RowParams) : Site = 
     let east_north_common = 
         east_north [ easting parameters.Easting; northing parameters.Northing ]
     
-    control_automation 
+    _site parameters.Code parameters.Name "SITE"
         [ east_north_common 
           aib_reference [ s4_aib_reference () ] 
         ]
-        [ 
-          networks
-            [ east_north_common
-              aib_reference [ s4_aib_reference () ] 
-            ]
-            [   
-              telemetry
+        [
+            control_automation 
                 [ east_north_common 
-                  aib_reference [ s4_aib_reference () ]    
+                  aib_reference [ s4_aib_reference () ] 
                 ]
-                [   
-                  telemetry_system "SYS01" "Telemetry System"
-                    [ east_north_common 
-                      aib_reference [ s4_aib_reference () ]
+                [ 
+                  networks
+                    [ east_north_common
+                      aib_reference [ s4_aib_reference () ] 
                     ]
-                    _no_assemblies_
-                    [ 
-                      telemetry_outstation "Telemetry Outstation"
-                        [ east_north_common
-                          aib_reference                             
-                            [ yield  s4_aib_reference  &&= ()
-                              yield! ai2_aib_reference ??= parameters.EquiFlocSaiNumber
-                              yield! ai2_aib_reference ??= parameters.EquiPliNumber
+                    [   
+                      telemetry
+                        [ east_north_common 
+                          aib_reference [ s4_aib_reference () ]    
+                        ]
+                        [   
+                          telemetry_system "SYS01" "Telemetry System"
+                            [ east_north_common 
+                              aib_reference [ s4_aib_reference () ]
                             ]
-                        ]
-                        _no_subordinate_equipment_
-                        [ manufacturer "METASPHERE"
-                          model "MMIM" 
-                          serialNumber ""
-                        ]
+                            _no_assemblies_
+                            [ 
+                              telemetry_outstation "Telemetry Outstation"
+                                [ east_north_common
+                                  aib_reference                             
+                                    [ yield  s4_aib_reference  &&= ()
+                                      yield! ai2_aib_reference ??= parameters.EquiFlocSaiNumber
+                                      yield! ai2_aib_reference ??= parameters.EquiPliNumber
+                                    ]
+                                ]
+                                _no_subordinate_equipment_
+                                [ manufacturer "METASPHERE"
+                                  model "MMIM" 
+                                  serialNumber ""
+                                ]
+                            ]
+                        ]            
                     ]
-                ]            
+                ]
             ]
-        ]
 
 let test02 () = 
     let worklist = 
-        [ ("KRI03", {Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001"} )
+        [ {Code = "SPT60"; Name = "Stephen SPS"; Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001"} 
         ] 
-        |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
+        
     runCompiler (defaultEnv "TETLEYS") 
-       <| compileFunctionPatches 
+       <| compileSitePatches 
                    (outputDirectory ())
                    "control_automation"
                    caaTemplate

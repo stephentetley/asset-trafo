@@ -26,6 +26,8 @@ module CompilerMonad =
           StructureIndicator : string
           MaintenancePlant : uint32
           ObjectStatus : string
+          FlocVariant : string option
+          EquiVariant : string option
         }
 
     // May get expanded...
@@ -38,6 +40,8 @@ module CompilerMonad =
           StructureIndicator = "YW-GS"
           MaintenancePlant = 2100u
           ObjectStatus = "UCON"
+          FlocVariant = None
+          EquiVariant = None
         }
 
     /// CompilerMonad is a Reader-Error-State(name supply) monad.

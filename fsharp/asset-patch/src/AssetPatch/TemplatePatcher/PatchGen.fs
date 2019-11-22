@@ -41,6 +41,13 @@ module PatchGen =
             return Path.Combine(directory, name1)
         }
 
+    let getVariant (entityType : EntityType) : CompilerMonad<string option> = 
+        match entityType with
+        | FuncLoc -> asks (fun x -> x.FlocVariant)
+        | Equi -> asks (fun x -> x.EquiVariant)
+        | _ -> mreturn None
+        
+
 
     /// At least one row exists 
     let getHeaderRow (rows : AssocList<string, string> list) : CompilerMonad<HeaderRow> = 
@@ -52,13 +59,16 @@ module PatchGen =
     let makeHeader (entityType : EntityType) 
                     (user : string) 
                     (timestamp : DateTime) : CompilerMonad<FileHeader> = 
-        mreturn { 
-            FileType = Upload 
-            DataModel = U1
-            EntityType = entityType
-            Variant = ()
-            User = user
-            DateTime = timestamp 
+        compile {
+            let! variantName = getVariant entityType
+            return { 
+                FileType = Upload 
+                DataModel = U1
+                EntityType = entityType
+                Variant = Option.defaultValue "" variantName
+                User = user
+                DateTime = timestamp 
+            }
         }
 
     let private makeChangeFile (entityType : EntityType) 

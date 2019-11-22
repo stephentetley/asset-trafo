@@ -81,8 +81,8 @@ module Parser =
                 ]
         directive (named "Entity Type" inner)
 
-    let pVariant : ChangeFileParser<unit> =
-        let inner = preturn ()
+    let pVariant : ChangeFileParser<string> =
+        let inner = restOfLine true |>> (fun s -> s.Trim())
         directive (named "Variant" inner)
 
     let pUser : ChangeFileParser<string> =

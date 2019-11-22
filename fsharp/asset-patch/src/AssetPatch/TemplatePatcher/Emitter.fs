@@ -292,6 +292,7 @@ module Emitter =
                 StructureIndicator = structInd
             }
         }
+
     let componentEmit (parent : FuncLocPath) 
                       (compo : S4Component) : CompilerMonad<EmitterResults> = 
         let path = extend compo.FuncLocSegment.Name parent

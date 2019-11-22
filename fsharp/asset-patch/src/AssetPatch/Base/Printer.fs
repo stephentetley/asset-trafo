@@ -51,8 +51,8 @@ module Printer =
             | ValuaEqui -> "VALUAEQUI"
         defines "Entity Type" etname
             
-    let variant () : Doc = 
-        comment "Variant:"
+    let variant (name : string) : Doc = 
+        defines "Variant" name
 
     let user (userName : string) : Doc = 
         defines "User" userName
