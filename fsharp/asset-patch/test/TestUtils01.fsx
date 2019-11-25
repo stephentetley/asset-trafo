@@ -2,12 +2,13 @@
 
 #r "netstandard"
 #r "System.Text.Encoding.dll"
+open System
 open System.IO
 
 #I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\netstandard1.6"
 #r "FParsec"
 #r "FParsecCS"
-
+open FParsec
 
 open FSharp.Core
 
@@ -28,7 +29,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Utilities\ChangeFileReport.fs"
 #load "..\src\AssetPatch\Utilities\TidyChangeFile.fs"
-
+open AssetPatch.Base.Parser
 open AssetPatch.Utilities.ChangeFileReport
 open AssetPatch.Utilities.TidyChangeFile
 
@@ -57,8 +58,19 @@ let tidyChangeFile01 () =
 
 let temp01 () = 
     let pathToCss = @"..\..\..\..\..\libs\markdown-css-master\github.css"
-    let file = @"G:\work\Projects\assets\asset_patch\file_download_edm\george_successful_upload.txt"
+    let file = @"G:\work\Projects\assets\asset_patch\file_download_edm\control_automation_04_equi.txt"
     changeFileReport pathToCss (outputDirectory ()) file
 
+let testParser (file : string) = 
+    match runParserOnFile (parseChangeFile ()) () file Text.Encoding.UTF8 with
+    | FParsec.CharParsers.ParserResult.Failure (str,_,_) -> Result.Error str
+    | FParsec.CharParsers.ParserResult.Success (ans,_,_) -> Result.Ok ans
 
+let temp02 () = 
+    let file = @"G:\work\Projects\assets\asset_patch\file_download_edm\control_automation_04_equi.txt"
+    testParser file
+
+let temp03 () = 
+    let file = @"G:\work\Projects\assets\asset_patch\file_download_edm\ACO01_funcloc_file_download.txt"
+    testParser file
 

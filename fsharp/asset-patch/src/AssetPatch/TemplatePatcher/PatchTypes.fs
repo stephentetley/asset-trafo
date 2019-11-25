@@ -200,7 +200,7 @@ module PatchTypes =
             ; ("GSBE_EILO",     "")
             ; ("BUKR_EILO",     "")
             ; ("KOKR_EILO",     "1000")
-            ; ("KOST_EILO",     "150008")       /// <--- This should be _data_
+            ; ("KOST_EILO",     "150008")               /// <--- This should be _data_
             ; ("TXTMI",         equi.Description)       // Description (medium) text
             ; ("USTA_EQUI",     "OPER")                 // Display lines for user status
             ; ("EQUI",          equi.EquipmentNumber.Code)      // Equipment

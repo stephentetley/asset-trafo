@@ -23,7 +23,8 @@ module Parser =
         parray len digit |>> after
 
     let lexeme (parser : ChangeFileParser<'a>) : ChangeFileParser<'a> = 
-        parser .>> spaces
+        let softSpaces = many (anyOf [' '; '\t'])
+        parser .>> softSpaces
 
     let token (str : string) : ChangeFileParser<string> = 
         lexeme (pstring str)
@@ -32,18 +33,15 @@ module Parser =
         lexeme (pchar ch)
 
     let directive (parser : ChangeFileParser<'a>) : ChangeFileParser<'a> = 
-        charToken '*' >>. parser
+        charToken '*' >>. parser .>> newline
 
     let named (name : string) 
               (parser : ChangeFileParser<'a>) : ChangeFileParser<'a> = 
         token (name + ":") >>. parser
 
-    let cellValue : ChangeFileParser<string> = 
-        manyChars (noneOf ['\t'; '\n'])
+    //let cellValue : ChangeFileParser<string> =
+    //    manyChars (noneOf ['\t'; '\r'; '\n' ])
 
-
-    let tab : ChangeFileParser<unit> = 
-        pchar '\t' >>. preturn ()
 
     // ************************************************************************
     // Parser
@@ -82,11 +80,11 @@ module Parser =
         directive (named "Entity Type" inner)
 
     let pVariant : ChangeFileParser<string> =
-        let inner = restOfLine true |>> (fun s -> s.Trim())
+        let inner = restOfLine false |>> (fun s -> s.Trim())
         directive (named "Variant" inner)
 
     let pUser : ChangeFileParser<string> =
-        let inner = restOfLine true |>> (fun s -> s.Trim())
+        let inner = restOfLine false |>> (fun s -> s.Trim())
         directive (named "User" inner)
 
 
@@ -111,30 +109,36 @@ module Parser =
             }
         directive inner
     
-    
+
     let pSelectionItem : ChangeFileParser<Selection> = 
-        let line = regex ".*\|.*\|.*" |>> SelectionLine
-        directive line
+        let line = regex ".*\|.*\|" |>> SelectionLine
+        attempt (directive line)
 
     let pSelectionHeader : ChangeFileParser<unit> =
         let inner = preturn ()
         directive (named "Selection" inner)
 
+
     let pSelection : ChangeFileParser<Selection list> = 
-        pSelectionHeader >>. many1 (attempt pSelectionItem)
+        pSelectionHeader >>. many pSelectionItem
 
     let pHeaderRow : ChangeFileParser<HeaderRow> = 
-        let inner = sepBy cellValue tab |>> (List.toArray >> HeaderRow)
-        directive (inner .>> newline)
+        let decode (str : string) = str.Split([| '\t' |]) |> HeaderRow
+        let inner = restOfLine false |>> decode
+        directive inner 
 
 
-    let pDataRow : ChangeFileParser<DataRow> = 
-        // Cannot use sepEndBy because we must end with tab.
-        let inner = many1 (cellValue .>> tab) |>> (List.toArray >> DataRow)
-        inner .>> newline
+    let pDataRow (size :int) : ChangeFileParser<DataRow> = 
+        let decode (str : string) = 
+            let arr = str.Split([| '\t' |]) 
+            try 
+                Array.take size arr |> DataRow |> preturn 
+            with 
+            | _ -> fail "bad row"
+        restOfLine true >>= decode
 
-    let pDataRows : ChangeFileParser<DataRow list> = 
-        many1 (attempt pDataRow)
+    let pDataRows (size : int) : ChangeFileParser<DataRow list> = 
+        manyTill (pDataRow size) eof
 
     let pFileHeader : ChangeFileParser<FileHeader> = 
         parse {
@@ -164,7 +168,8 @@ module Parser =
                 | Upload -> pHeaderRow |>> Some
                 | _ -> preturn None
             let! headerRow = pHeaderRow
-            let! datas = pDataRows
+            let size = headerRow.Columns |> List.length
+            let! datas = pDataRows size
             return { Header = fileHeader
                      Selection = selection
                      HeaderDescriptions = headerDescs
