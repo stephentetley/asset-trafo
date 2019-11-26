@@ -11,10 +11,7 @@ module PatchTypes =
 
     open AssetPatch.Base
     open AssetPatch.Base.Common
-    open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.ChangeFile
-    open AssetPatch.Base.AbsChangeFile
-    open AssetPatch.Base.Parser
     open AssetPatch.Base.FuncLocPath
    
     type ObjectStatus = 
@@ -24,6 +21,11 @@ module PatchTypes =
     
     let dateDefault : DateTime = 
         new DateTime(year = 1970, month = 1, day = 1)
+
+    let makeAssocs (items : (string * string * string) list) : AssocList<string,string> = 
+        items |> List.map (fun (x,_,y) -> (x,y)) |> AssocList.ofList
+
+
 
     // ************************************************************************
     // FuncLoc
@@ -67,38 +69,34 @@ module PatchTypes =
         
 
     let funcLocToAssocs (funcLoc: FuncLoc) : AssocList<string, string> = 
-        //let parent1 = 
-        //    match funcLoc.Path |> parent with
-        //    | None -> ""
-        //    | Some path -> path.ToString()
-        AssocList.ofList
-            [ ("ABCKZFLOC",     "")
-            ; ("GSBE_FLOC",     "")
-            ; ("BUKRSFLOC",     "2100")
-            ; ("KOKR_FLOC",     "1000")
-            ; ("KOST_FLOC",     "")    
-            ; ("TXTMI",         funcLoc.Description)
-            ; ("FLTYP",         funcLoc.Category.ToString())
-            ; ("FUNCLOC",       funcLoc.Path.ToString())
-            ; ("IEQUI",         "")
-            ; ("STOR_FLOC",     "")
-            ; ("STORTI",        "D")
-            ; ("GEWRKFLOC",    "DEFAULT")
-            ; ("INGR_FLOC",     "")
-            ; ("SWERK_FL",      "2100")
-            ; ("FLOC_REF",      funcLoc.Path.ToString())
-            ; ("OBJTYFLOC",     "A")
-            ; ("EQART",         funcLoc.ObjectType)
-            ; ("PLNT_FLOC",     "2100")
-            ; ("BEBER_FL",      "")
-            ; ("WERGWFLOC",     "2100")
-            ; ("TRPNR",         "")
-            ; ("INBDT",         funcLoc.StartupDate |> showS4Date)
-            ; ("STATTEXT",      "CRTE")
-            ; ("USTW_FLOC",     funcLoc.ObjectStatus)
-            ; ("USWO_FLOC",     "")
-            ; ("TPLKZ_FLC",     funcLoc.StructureIndicator)
-            ; ("PROI_FLOC",     "")
+        makeAssocs
+            [ ("ABCKZFLOC",     "ABC Indicator",                    "")
+            ; ("GSBE_FLOC",     "Business Area",                    "")
+            ; ("BUKRSFLOC",     "Company Code",                     "2100")
+            ; ("KOKR_FLOC",     "Controlling Area",                 "1000")
+            ; ("KOST_FLOC",     "Cost Center",                      "")    
+            ; ("TXTMI",         "Description (medium text)",        funcLoc.Description)
+            ; ("FLTYP",         "FuncLocCategory",                  funcLoc.Category.ToString())
+            ; ("FUNCLOC",       "Function Location",                funcLoc.Path.ToString())
+            ; ("IEQUI",         "Installation allowed",             "")
+            ; ("STOR_FLOC",     "Location",                         "")
+            ; ("STORTI",        "Location origin",                  "D")
+            ; ("GEWRKFLOC",     "Main work center",                 "DEFAULT")
+            ; ("INGR_FLOC",     "Maint Planner Group",              "")
+            ; ("SWERK_FL",      "Maintenance Plant",                "2100")
+            ; ("FLOC_REF",      "Masked Functional Location",       funcLoc.Path.ToString())
+            ; ("OBJTYFLOC",     "Object Type",                      "A")
+            ; ("EQART",         "Object Type",                      funcLoc.ObjectType)
+            ; ("PLNT_FLOC",     "Planning Plant",                   "2100")
+            ; ("BEBER_FL",      "Plant Section",                    "")
+            ; ("WERGWFLOC",     "Plant for WorkCenter",             "2100")
+            ; ("TRPNR",         "Reference Location",               "")
+            ; ("INBDT",         "Start-up date",                    funcLoc.StartupDate |> showS4Date)
+            ; ("STATTEXT",      "Status",                           "CRTE")
+            ; ("USTW_FLOC",     "Status of an object",              funcLoc.ObjectStatus)
+            ; ("USWO_FLOC",     "Status without status number",     "")
+            ; ("TPLKZ_FLC",     "Structure indicator",              funcLoc.StructureIndicator)
+            ; ("PROI_FLOC",     "WBS Element",                      "")
             ]
             
 
@@ -130,12 +128,12 @@ module PatchTypes =
 
     let classFlocToAssocs (classFloc: ClassFloc) : AssocList<string, string> = 
         // Dont print the CLINT even though we know it!
-        AssocList.ofList
-            [ ("FUNCLOC",       classFloc.FuncLoc.ToString())
-            ; ("CLASS",         classFloc.Class)
-            ; ("CLASSTYPE",     classFloc.ClassType.Number)
-            ; ("CLINT",         "")
-            ; ("CLSTATUS1",     classFloc.Status.ToString())
+        makeAssocs
+            [ ("FUNCLOC",       "Functional Location",      classFloc.FuncLoc.ToString())
+            ; ("CLASS",         "Class",                    classFloc.Class)
+            ; ("CLASSTYPE",     "Class Type",               classFloc.ClassType.Number)
+            ; ("CLINT",         "Internal class no.",       "")
+            ; ("CLSTATUS1",     "Status",                   classFloc.Status.ToString())
             ]
 
 
@@ -153,14 +151,14 @@ module PatchTypes =
 
     /// Note - CharacteristicValue is used three times.
     let valuaFlocToAssocs (valua: ValuaFloc) : AssocList<string, string> = 
-        AssocList.ofList
-            [ ("FUNCLOC",       valua.FuncLoc.ToString())
-            ; ("CLASSTYPE",     valua.ClassType.Number)
-            ; ("CHARID",        valua.CharacteristicID)
-            ; ("ATWRT",         valua.CharacteristicValue)
-            ; ("TEXTBEZ",       valua.CharacteristicValue)
-            ; ("VALCNT",        sprintf "%04i" valua.ValueCount)
-            ; ("ATFLV",         valua.CharacteristicValue)
+        makeAssocs
+            [ ("FUNCLOC",       "Function Location",                valua.FuncLoc.ToString())
+            ; ("CLASSTYPE",     "Class Type",                       valua.ClassType.Number)
+            ; ("CHARID",        "Characteristic ID",                valua.CharacteristicID)
+            ; ("ATWRT",         "Characteristic Value",             valua.CharacteristicValue)
+            ; ("TEXTBEZ",       "Description",                      valua.CharacteristicValue)
+            ; ("VALCNT",        "Int count values",                 sprintf "%04i" valua.ValueCount)
+            ; ("ATFLV",         "Value from",                       valua.CharacteristicValue)
             ]
 
 
@@ -195,35 +193,38 @@ module PatchTypes =
 
     /// Note - CharacteristicValue is used three times.
     let equiToAssocs (equi: Equi) : AssocList<string, string> = 
-        AssocList.ofList
-            [ ("ABCK_EILO",     "")
-            ; ("GSBE_EILO",     "")
-            ; ("BUKR_EILO",     "")
-            ; ("KOKR_EILO",     "1000")
-            ; ("KOST_EILO",     "150008")               /// <--- This should be _data_
-            ; ("TXTMI",         equi.Description)       // Description (medium) text
-            ; ("USTA_EQUI",     "OPER")                 // Display lines for user status
-            ; ("EQUI",          equi.EquipmentNumber.Code)      // Equipment
-            ; ("EQTYP",         equi.Category)   
-            ; ("TPLN_EILO",     equi.FuncLoc.ToString())
-            ; ("STOR_EILO",     "")
-            ; ("STORTI",        "")
-            ; ("ARBP_EEQZ",     "DEFAULT")
-            ; ("INGR_EEQZ",     "")
-            ; ("SWER_EILO",     equi.MaintenancePlant.ToString())   // Maintenance Plant
-            ; ("SERGE",         equi.SerialNumber)                  // ManufSerialNumber
-            ; ("HERST",         equi.Manufacturer)                  // Manufacturer
-            ; ("TYPBZ",         equi.Model)
-            ; ("OBJT_EQUI",     "")                     // Object Type
-            ; ("EQART_EQU",     equi.ObjectType)        // Object Type
-            ; ("PPLA_EEQZ",     "2100")                 // Planning Plant
-            ; ("BEBE_EILO",     "")                     // Planet Section
-            ; ("WERGW_EQI",     "2100")                 // Plant for WorkCenter
-            ; ("INBDT",         equi.StartupDate |> showS4Date)     // Start-up Date
-            ; ("STATTEXT",      "CRTE")                 // Status
-            ; ("USTW_EQUI",     "UCON")                 // Status of an object
-            ; ("USWO_EQUI",     "")                     // Status without status number
-            ; ("PROI_EILO",     "")                     // 	WBS Element 
+        makeAssocs
+            // [ ("ABCK_EILO",     "ABC Indicator",                    "") 
+            // ; ("GSBE_EILO",     "Business Area",                    "")
+            // ; ("BUKR_EILO",     "Company Code",                     "")
+            [ ("BAUMM_EQI",     "Construction month",               equi.StartupDate.Month.ToString())
+            ; ("BAUJJ",         "Construction year",                equi.StartupDate.Year.ToString())
+
+            // ; ("KOKR_EILO",     "Controlling Area",                 "1000")
+            // ; ("KOST_EILO",     "Cost Center",                      "150008")   /// <--- This should be a param
+            ; ("TXTMI",         "Description (medium text)",        equi.Description)  
+            // ; ("USTA_EQUI",     "Display lines for user status",    "OPER")
+            ; ("EQUI",          "Equipment",                        equi.EquipmentNumber.Code)
+            // ; ("EQTYP",         "Equipment category",               equi.Category)   
+            ; ("TPLN_EILO",     "Functional Location",              equi.FuncLoc.ToString())
+            // ; ("STOR_EILO",     "Location",                         "")
+            // ; ("STORTI",        "Location origin",                  "")
+            // ; ("ARBP_EEQZ",     "Main work center",                 "DEFAULT")
+            // ; ("INGR_EEQZ",     "Maint. Planner Group",             "")
+            // ; ("SWER_EILO",     "Maintenance Plant",                equi.MaintenancePlant.ToString()) 
+            ; ("SERGE",         "ManufSerialNumber",                equi.SerialNumber)
+            ; ("HERST",         "Manufacturer",                     equi.Manufacturer)
+            ; ("TYPBZ",         "Model number",                     equi.Model)
+            // ; ("OBJT_EQUI",     "Object Type",                      "")
+            // ; ("EQART_EQU",     "Object Type",                      equi.ObjectType)
+            // ; ("PPLA_EEQZ",     "Planning Plant",                   "2100")
+            // ; ("BEBE_EILO",     "Plant Section",                    "")
+            // ; ("WERGW_EQI",     "Plant for WorkCenter",             "2100")
+            ; ("INBDT",         "Start-up date",                    equi.StartupDate |> showS4Date)
+            //; ("STATTEXT",      "Status",                           "CRTE")
+            ; ("USTW_EQUI",     "Status of an object",              "UCON")
+            // ; ("USWO_EQUI",     "Status without status number",     "")
+            // ; ("PROI_EILO",     "WBS Element",                      "")
             ]
 
     // ************************************************************************
@@ -238,12 +239,12 @@ module PatchTypes =
         }
 
     let classEquiToAssocs (classEqui: ClassEqui) : AssocList<string, string> = 
-        AssocList.ofList
-            [ ("EQUI",          classEqui.EquipmentNumber.Code)
-            ; ("CLASS",         classEqui.Class)
-            ; ("CLASSTYPE",     classEqui.ClassType.Number)
-            ; ("CLINT",         classEqui.ClassNumber.Number)
-            ; ("CLSTATUS1",     classEqui.Status.ToString())
+        makeAssocs
+            [ ("EQUI",          "Equipment",                classEqui.EquipmentNumber.Code)
+            ; ("CLASS",         "Class",                    classEqui.Class)
+            ; ("CLASSTYPE",     "Class Type",               classEqui.ClassType.Number)
+            ; ("CLINT",         "Internal class no",        classEqui.ClassNumber.Number)
+            ; ("CLSTATUS1",     "Status",                   classEqui.Status.ToString())
             ]
 
 
@@ -264,12 +265,12 @@ module PatchTypes =
 
     /// Note - CharacteristicValue is used twice.
     let valuaEquiToAssocs (valua: ValuaEqui) : AssocList<string, string> = 
-        AssocList.ofList
-            [ ("EQUI",          valua.EquipmentNumber.Code)
-            ; ("CLASSTYPE",     valua.ClassType.Number)
-            ; ("CHARID",        valua.CharacteristicID)
-            ; ("ATWRT",         valua.CharacteristicValue)
-            ; ("TEXTBEZ",       valua.CharacteristicValue)
-            ; ("VALCNT",        sprintf "%04i" valua.ValueCount)
+        makeAssocs
+            [ ("EQUI",          "Equipment",                valua.EquipmentNumber.Code)
+            ; ("CLASSTYPE",     "Class Type",               valua.ClassType.Number)
+            ; ("CHARID",        "Characteristic ID",        valua.CharacteristicID)
+            ; ("ATWRT",         "Characteristic Value",     valua.CharacteristicValue)
+            ; ("TEXTBEZ",       "Description",              valua.CharacteristicValue)
+            ; ("VALCNT",        "Int counter values",       sprintf "%04i" valua.ValueCount)
             ]
             
