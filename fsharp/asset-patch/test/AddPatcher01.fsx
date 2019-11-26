@@ -21,10 +21,6 @@ open FSharp.Core
 #I @"C:\Users\stephen\.nuget\packages\DocumentFormat.OpenXml\2.9.1\lib\netstandard1.3"
 #r "DocumentFormat.OpenXml"
 
-#I @"C:\Users\stephen\.nuget\packages\sheetdoc\1.0.0-alpha-20191121a\lib\netstandard2.0"
-#r "SheetDoc.dll"
-open SheetDoc.Internal.Render
-open SheetDoc.SheetDoc
 
 
 #load "..\src\AssetPatch\Base\Addendum.fs"
@@ -37,7 +33,6 @@ open SheetDoc.SheetDoc
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\FuncLocPath.fs"
-#load "..\src\AssetPatch\Uxl\UxlChangeFile.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Hierarchy.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
@@ -49,7 +44,6 @@ open SheetDoc.SheetDoc
 open AssetPatch.Base.Common
 open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.FuncLocPath
-open AssetPatch.Uxl.UxlChangeFile
 open AssetPatch.TemplatePatcher.PatchTypes
 open AssetPatch.TemplatePatcher.Template
 open AssetPatch.TemplatePatcher.PatchCompiler
@@ -107,40 +101,3 @@ let test02 () =
                    aibReferenceTemplate
                    worklist
 
-
-let excel01 () : unit = 
-    let crDetails = 
-        { Description = "CAS14 SWS Copy"
-          TypeOfChangeRequest = "AIWEAM0P"
-          DraftMode = false
-          FlFunctionLocation = [ "BRI02-SSS"; "BRI02-SSS-SWS"; "BRI02-SSS-POW"]
-          EqEquipment = []
-          ProcessRequester = "ASSET DATA"
-        }
-
-    let funcLocs = 
-        [ { FunctionalLocation = "BRI02-SSS"
-            MaskedFuncLoc = "BRI02-SSS"
-            Description = "Site Support Service"
-            FuncLocCat = 2u
-            StrIndicator = "YW-GS"
-            ObjectType = "SSS"
-            StartUpDate = new DateTime(year=2019, month=11, day=20)
-            SupFunctLoc = "BRI02"
-           }
-        ; { FunctionalLocation = "BRI02-SSS-SWS"
-            MaskedFuncLoc = "BRI02-SSS-SWS"
-            Description = "Site Water Services"
-            FuncLocCat = 3u
-            StrIndicator = "YW-GS"
-            ObjectType = "SWS"
-            StartUpDate = new DateTime(year=2019, month=11, day=20)
-            SupFunctLoc = "BRI02-SSS"
-           }
-        ]
-    let doc1 = 
-        spreadsheet 
-            [ mmopChangeRequestDetails crDetails
-            ; mmopFunctionalLocationData funcLocs
-            ]
-    renderSpreadSheetDoc doc1 (outputFile "test01.xlsx")

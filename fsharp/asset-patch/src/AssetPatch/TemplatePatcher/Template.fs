@@ -283,11 +283,11 @@ module Template =
 
     type Site = Template<S4Site>
     
-    let _site (siteCode : string) (description : string) (objectType : string)
+    let _site (siteCode : string) (description : string) 
                 (classes : Class list) 
                 (functions : Function list) : Site = 
         template {
-            let! floc = _segment siteCode description objectType
+            let! floc = _segment siteCode description "SITE"
             let! cs = unlistM classes
             let! xs = unlistM functions
             return { 

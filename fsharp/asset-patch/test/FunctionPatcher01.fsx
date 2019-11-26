@@ -119,7 +119,7 @@ let caaTemplate (parameters : RowParams) : Site =
     let east_north_common = 
         east_north [ easting parameters.Easting; northing parameters.Northing ]
     
-    _site parameters.Code parameters.Name "SITE"
+    _site parameters.Code parameters.Name
         [ east_north_common 
           aib_reference [ s4_aib_reference () ] 
         ]
