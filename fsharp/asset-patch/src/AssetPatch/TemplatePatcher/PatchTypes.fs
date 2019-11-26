@@ -132,7 +132,7 @@ module PatchTypes =
             [ ("FUNCLOC",       "Functional Location",      classFloc.FuncLoc.ToString())
             ; ("CLASS",         "Class",                    classFloc.Class)
             ; ("CLASSTYPE",     "Class Type",               classFloc.ClassType.Number)
-            ; ("CLINT",         "Internal class no.",       "")
+            // ; ("CLINT",         "Internal class no.",       "")
             ; ("CLSTATUS1",     "Status",                   classFloc.Status.ToString())
             ]
 
@@ -191,21 +191,21 @@ module PatchTypes =
         MaintenancePlant : uint32
       }
 
-    /// Note - CharacteristicValue is used three times.
+    /// Note - do not write EQUI to file.
     let equiToAssocs (equi: Equi) : AssocList<string, string> = 
         makeAssocs
             // [ ("ABCK_EILO",     "ABC Indicator",                    "") 
             // ; ("GSBE_EILO",     "Business Area",                    "")
-            // ; ("BUKR_EILO",     "Company Code",                     "")
-            [ ("BAUMM_EQI",     "Construction month",               equi.StartupDate.Month.ToString())
+            [ ("BUKR_EILO",     "Company Code",                     "2100")
+            ; ("BAUMM_EQI",     "Construction month",               equi.StartupDate.Month.ToString())
             ; ("BAUJJ",         "Construction year",                equi.StartupDate.Year.ToString())
 
-            // ; ("KOKR_EILO",     "Controlling Area",                 "1000")
+            ; ("KOKR_EILO",     "Controlling Area",                 "1000")
             // ; ("KOST_EILO",     "Cost Center",                      "150008")   /// <--- This should be a param
             ; ("TXTMI",         "Description (medium text)",        equi.Description)  
             // ; ("USTA_EQUI",     "Display lines for user status",    "OPER")
-            ; ("EQUI",          "Equipment",                        equi.EquipmentNumber.Code)
-            // ; ("EQTYP",         "Equipment category",               equi.Category)   
+            
+            ; ("EQTYP",         "Equipment category",               equi.Category)   
             ; ("TPLN_EILO",     "Functional Location",              equi.FuncLoc.ToString())
             // ; ("STOR_EILO",     "Location",                         "")
             // ; ("STORTI",        "Location origin",                  "")
@@ -215,8 +215,8 @@ module PatchTypes =
             ; ("SERGE",         "ManufSerialNumber",                equi.SerialNumber)
             ; ("HERST",         "Manufacturer",                     equi.Manufacturer)
             ; ("TYPBZ",         "Model number",                     equi.Model)
-            // ; ("OBJT_EQUI",     "Object Type",                      "")
-            // ; ("EQART_EQU",     "Object Type",                      equi.ObjectType)
+            ; ("OBJT_EQUI",     "Object Type",                      "")
+            ; ("EQART_EQU",     "Object Type",                      equi.ObjectType)
             // ; ("PPLA_EEQZ",     "Planning Plant",                   "2100")
             // ; ("BEBE_EILO",     "Plant Section",                    "")
             // ; ("WERGW_EQI",     "Plant for WorkCenter",             "2100")
@@ -243,7 +243,7 @@ module PatchTypes =
             [ ("EQUI",          "Equipment",                classEqui.EquipmentNumber.Code)
             ; ("CLASS",         "Class",                    classEqui.Class)
             ; ("CLASSTYPE",     "Class Type",               classEqui.ClassType.Number)
-            ; ("CLINT",         "Internal class no",        classEqui.ClassNumber.Number)
+            // ; ("CLINT",         "Internal class no",        classEqui.ClassNumber.Number)
             ; ("CLSTATUS1",     "Status",                   classEqui.Status.ToString())
             ]
 

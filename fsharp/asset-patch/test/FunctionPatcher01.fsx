@@ -156,7 +156,7 @@ let caaTemplate (parameters : RowParams) : Site =
                                 _no_subordinate_equipment_
                                 [ manufacturer "METASPHERE"
                                   model "MMIM" 
-                                  serialNumber ""
+                                  serialNumber "TO BE DETERMINED"
                                 ]
                             ]
                         ]            
