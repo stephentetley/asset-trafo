@@ -166,20 +166,9 @@ module PatchTypes =
     // ************************************************************************
     // Equi
 
-    [<Struct>]
-    type EquipmentCode = 
-        | EquipmentCode of string
-    
-        member x.Code 
-            with get () : string = 
-                match x with 
-                | EquipmentCode s -> s
-            
-
-
 
     type Equi = 
-      { EquipmentNumber : EquipmentCode
+      { EquipmentNumber : string     // This is not a valid S4 EQUI code
         Description : string
         FuncLoc : FuncLocPath
         Category : string           // e.g. I for instrument
@@ -231,7 +220,7 @@ module PatchTypes =
     // ClassEqui
     
     type ClassEqui = 
-        { EquipmentNumber : EquipmentCode
+        { EquipmentNumber : string
           Class : string
           ClassType : IntegerString
           ClassNumber : IntegerString
@@ -239,11 +228,11 @@ module PatchTypes =
         }
 
     let classEquiToAssocs (classEqui: ClassEqui) : AssocList<string, string> = 
+        // Don't print CLINT (Internal class no)
         makeAssocs
-            [ ("EQUI",          "Equipment",                classEqui.EquipmentNumber.Code)
+            [ ("EQUI",          "Equipment",                classEqui.EquipmentNumber)
             ; ("CLASS",         "Class",                    classEqui.Class)
             ; ("CLASSTYPE",     "Class Type",               classEqui.ClassType.Number)
-            // ; ("CLINT",         "Internal class no",        classEqui.ClassNumber.Number)
             ; ("CLSTATUS1",     "Status",                   classEqui.Status.ToString())
             ]
 
@@ -255,7 +244,7 @@ module PatchTypes =
     /// ValueCount is the number of instances for this charcteristic 
     /// in a class.
     type ValuaEqui = 
-        { EquipmentNumber : EquipmentCode
+        { EquipmentNumber : string
           ClassType : IntegerString
           CharacteristicID : string
           CharacteristicValue : string
@@ -266,7 +255,7 @@ module PatchTypes =
     /// Note - CharacteristicValue is used twice.
     let valuaEquiToAssocs (valua: ValuaEqui) : AssocList<string, string> = 
         makeAssocs
-            [ ("EQUI",          "Equipment",                valua.EquipmentNumber.Code)
+            [ ("EQUI",          "Equipment",                valua.EquipmentNumber)
             ; ("CLASSTYPE",     "Class Type",               valua.ClassType.Number)
             ; ("CHARID",        "Characteristic ID",        valua.CharacteristicID)
             ; ("ATWRT",         "Characteristic Value",     valua.CharacteristicValue)

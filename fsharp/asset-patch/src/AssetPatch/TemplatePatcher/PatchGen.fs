@@ -20,6 +20,7 @@ module PatchGen =
     open AssetPatch.Base.Printer
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Emitter
+    open AssetPatch.TemplatePatcher.EquiIndexing
 
     let entityName (entityType : EntityType) : string = 
         match entityType with
@@ -193,6 +194,14 @@ module PatchGen =
                 return ()
             }
 
+
+    let genEquiIndexing (directory : string) 
+                        (equis : Equi list) : CompilerMonad<unit> =  
+        compile {
+            let outputPath = Path.Combine(directory, "EquiIndexing.xlsx")
+            return! writeEquiIndexingSheet outputPath equis
+            }
+
     // ************************************************************************
     // ClassEqui file
 
@@ -253,6 +262,7 @@ module PatchGen =
             do! genClassFlocFile directory filePrefix results.ClassFlocs
             do! genValuaFlocFile directory filePrefix results.ValuaFlocs
             do! genEquiFile      directory filePrefix results.Equis
+            do! genEquiIndexing  directory results.Equis
             do! genClassEquiFile directory filePrefix results.ClassEquis
             do! genValuaEquiFile directory filePrefix results.ValuaEquis
             return ()

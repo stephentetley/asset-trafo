@@ -13,7 +13,6 @@ module PatchCompiler =
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Hierarchy
-    open AssetPatch.TemplatePatcher.Renamer
     open AssetPatch.TemplatePatcher.Emitter
     open AssetPatch.TemplatePatcher.PatchGen
     
@@ -36,7 +35,7 @@ module PatchCompiler =
     // This is not printed...
     let private anonEquipment (code : string) (clazz: S4Class) : S4Equipment= 
         { 
-            EquipmentId = Some code
+            EquipmentId = code
             Description = ""
             Category = "I"
             ObjectType = ""
@@ -54,12 +53,12 @@ module PatchCompiler =
     let compileClassEquiValuaEquiPatches (outputDirectory : string)
                                          (filePrefix : string)
                                          (template : Class1<'hole>)
-                                         (worklist : (EquipmentCode * 'hole) list)
+                                         (worklist : (string * 'hole) list)
                                             : CompilerMonad<unit> = 
         compile {
             let! worklist1 = applyTemplate worklist template
             let! results = 
-                forM worklist1 (fun (name, clazz) -> equipmentEmitClassValuas (anonEquipment name.Code clazz))
+                forM worklist1 (fun (name, clazz) -> equipmentEmitClassValuas (anonEquipment name clazz))
             do! generatePatches outputDirectory filePrefix (concatResults results)
             return ()
         }
@@ -98,7 +97,7 @@ module PatchCompiler =
                                 (template : Component1<'hole>)
                                 (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
-        let compile1 (path, func) = componentRename func >>= componentEmit path
+        let compile1 (path, comp) = componentEmit path comp
         compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
 
 
@@ -109,7 +108,7 @@ module PatchCompiler =
                             (template : Item1<'hole>)
                             (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
-        let compile1 (path, func) = itemRename func >>= itemEmit path
+        let compile1 (path, item) = itemEmit path item
         compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
 
 
@@ -120,7 +119,7 @@ module PatchCompiler =
                               (template : Assembly1<'hole>)
                               (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
-        let compile1 (path, func) = assemblyRename func >>= assemblyEmit path
+        let compile1 (path, asmb) = assemblyEmit path asmb
         compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
 
 
@@ -130,7 +129,7 @@ module PatchCompiler =
                               (template : System1<'hole>)
                               (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
-        let compile1 (path, func) = systemRename func >>= systemEmit path
+        let compile1 (path, syst) = systemEmit path syst
         compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
 
 
@@ -140,7 +139,7 @@ module PatchCompiler =
                               (template : Process1<'hole>)
                               (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
-        let compile1 (path, func) = processRename func >>= processEmit path
+        let compile1 (path, prcs) = processEmit path prcs
         compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
 
 
@@ -150,7 +149,7 @@ module PatchCompiler =
                                          (template : ProcessGroup1<'hole>)
                                          (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
-        let compile1 (path, func) = processGroupRename func >>= processGroupEmit path
+        let compile1 (path, prcg) = processGroupEmit path prcg
         compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
 
 
@@ -160,7 +159,7 @@ module PatchCompiler =
                                          (template : Function1<'hole>)
                                          (worklist : (FuncLocPath * 'hole) list)
                                             : CompilerMonad<unit> = 
-        let compile1 (path, func) = functionRename func >>= functionEmit path
+        let compile1 (path, func) = functionEmit path func
         compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
 
 
@@ -169,7 +168,7 @@ module PatchCompiler =
                                          (filePrefix : string)
                                          (template : Site1<'hole>)
                                          (worklist : 'hole list) : CompilerMonad<unit> = 
-        let compile1 = evalTemplate >=> siteRename >=> siteEmit
+        let compile1 = evalTemplate >=> siteEmit
         compile {
             let worklist1 = List.map template worklist
             let! results =  forM worklist1 compile1

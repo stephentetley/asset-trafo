@@ -69,7 +69,7 @@ module Emitter =
             ValueCount = count
         }
 
-    let characteristicToValuaEqui (equiNumber : EquipmentCode) 
+    let characteristicToValuaEqui (equiNumber : string) 
                                     (count : int) 
                                     (charac : S4Characteristic) : CompilerMonad<ValuaEqui> = 
         mreturn { 
@@ -91,7 +91,7 @@ module Emitter =
         }
 
 
-    let classToClassEqui (equiNumber : EquipmentCode)
+    let classToClassEqui (equiNumber : string)
                          (clazz : S4Class) : CompilerMonad<ClassEqui> = 
         mreturn { 
             EquipmentNumber = equiNumber
@@ -104,11 +104,10 @@ module Emitter =
     let equipmentToEqui1 (funcLoc : FuncLocPath) 
                          (equipment : S4Equipment) : CompilerMonad<Equi> = 
         compile {
-            let! number = newEquipmentName ()
             let! sdate = asks (fun x -> x.StartupDate)
             let! mplant = asks (fun x -> x.MaintenancePlant)
             return { 
-                EquipmentNumber = EquipmentCode number
+                EquipmentNumber = equipment.EquipmentId
                 Description = equipment.Description
                 FuncLoc = funcLoc
                 Category = equipment.Category
@@ -167,7 +166,7 @@ module Emitter =
             return (cf, vs)
         } 
 
-    let makeEquiProperties1 (equiNumber : EquipmentCode)  
+    let makeEquiProperties1 (equiNumber : string)  
                             (clazz : S4Class) : CompilerMonad<EquiClassProperties> =
         
         let makeGrouped (chars : S4Characteristic list) : CompilerMonad<ValuaEqui list> = 
@@ -181,10 +180,7 @@ module Emitter =
         } 
     
     let equipmentClassProperties1 (equipment : S4Equipment) : CompilerMonad<EquiClassProperties list> = 
-        match equipment.EquipmentId with
-        | None -> throwError "Emitter - equipment has not been renamed"
-        | Some magic -> 
-            forM equipment.Classes (makeEquiProperties1 (EquipmentCode magic))
+        forM equipment.Classes (makeEquiProperties1 equipment.EquipmentId)
 
 
     let equipmentClassProperties (equipment : S4Equipment) : CompilerMonad<EquiClassProperties list> = 

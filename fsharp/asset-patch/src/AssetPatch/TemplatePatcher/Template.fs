@@ -14,29 +14,38 @@ module Template =
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Hierarchy
     
+
+    type State = 
+        { FreshEquipmentIndex : int
+        }
+
+    let private stateZero : State = 
+        { FreshEquipmentIndex = 1 }
+
+    
     /// *** With monadic templates (Reader) we can have a lot more
     /// *** flexibility for inheriting attributes
 
-
     type Env = CompilerMonad.TemplateEnv
 
-    /// Reader + Error
+    /// State + Reader + Error
     type Template<'a> = 
-        | Template of (Env -> Result<'a, ErrMsg>)
+        | Template of (Env -> State -> Result<'a * State, ErrMsg>)
 
     let inline private apply1 (ma : Template<'a>) 
-                              (env : Env) : Result<'a, ErrMsg> = 
-        let (Template fn) = ma in fn env
+                              (env : Env) 
+                              (st : State) : Result<'a * State, ErrMsg> = 
+        let (Template fn) = ma in fn env st
 
     let mreturn (x:'a) : Template<'a> = 
-        Template <| fun _ -> Ok x
+        Template <| fun _ st -> Ok (x, st)
 
     let inline private bindM (ma : Template<'a>) 
                              (fn : 'a -> Template<'b>) : Template<'b> =
-        Template <| fun env -> 
-            match apply1 ma env with
+        Template <| fun env st -> 
+            match apply1 ma env st with
             | Error msg -> Error msg 
-            | Ok a -> apply1 (fn a) env
+            | Ok (a, st1) -> apply1 (fn a) env st1
          
     let inline private delayM (fn : unit -> Template<'a>) : Template<'a> = 
         bindM (mreturn ()) fn 
@@ -52,22 +61,22 @@ module Template =
 
 
     let runTemplate (env : Env) (code : Template<'a>) : Result<'a, ErrMsg> = 
-        apply1 code env
+        apply1 code env stateZero |> Result.map fst
         
         
     
     let private unlistM (source: Template<'x> list) : Template<'x list> = 
-        Template <| fun env -> 
-            let rec work xs fk sk = 
+        Template <| fun env stzero -> 
+            let rec work xs st fk sk = 
                 match xs with 
-                | [] -> sk []
+                | [] -> sk st []
                 | x :: rest -> 
-                    match apply1 x env with
+                    match apply1 x env st with
                     | Error msg -> fk msg
-                    | Ok a -> 
-                        work rest fk (fun vs -> 
-                        sk (a :: vs))
-            work source (fun msg -> Error msg) (fun xs -> Ok xs)
+                    | Ok (a, st1) -> 
+                        work rest st1 fk (fun st2 vs -> 
+                        sk st2 (a :: vs))
+            work source stzero (fun msg -> Error msg) (fun st xs -> Ok(xs, st))
 
 
 
@@ -123,17 +132,24 @@ module Template =
     type EquipmentAttribute = Template<S4Equipment -> S4Equipment>
 
     let private setAttribute (e1 : Equipment) (attrib : EquipmentAttribute) : Equipment = 
-        Template <| fun env -> 
-            match apply1 e1 env with
-            | Ok a -> 
-                match apply1 attrib env with
-                | Ok f -> Ok (f a)
+        Template <| fun env st -> 
+            match apply1 e1 env st with
+            | Ok (a, st1) -> 
+                match apply1 attrib env st1 with
+                | Ok (f, st2) -> Ok (f a, st2)
                 | Error msg -> Error msg
             | Error msg -> Error msg
 
     let private setAttributes (e1 : Equipment) (attribs : EquipmentAttribute list) : Equipment = 
         List.fold setAttribute e1 attribs
     
+    let private newEquipmentName () : Template<string> = 
+        Template <| fun _ st -> 
+            let name = sprintf "@AP%03i" st.FreshEquipmentIndex
+            Ok (name, {st with FreshEquipmentIndex = st.FreshEquipmentIndex + 1})
+
+
+
     let _equipment (description : string) (category : string) 
                     (objectType : string)
                     (classes : Class list) 
@@ -142,10 +158,11 @@ module Template =
         // EquipmentId is filled in by a compiler pass
         let equip1 = 
             template {
+                let! equiId = newEquipmentName ()
                 let! cs = unlistM classes
                 let! es = unlistM subordinateEquipment
                 return {
-                    EquipmentId = None
+                    EquipmentId = equiId
                     Description = description
                     Category = category
                     ObjectType = objectType
@@ -160,7 +177,7 @@ module Template =
 
 
     let internal equipmentAttribute (update : S4Equipment -> S4Equipment) : EquipmentAttribute =
-        Template <| fun env -> Ok update
+        Template <| fun env st -> Ok (update, st)
             
 
 
