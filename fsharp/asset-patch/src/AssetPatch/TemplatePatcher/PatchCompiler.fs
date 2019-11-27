@@ -6,14 +6,16 @@ namespace AssetPatch.TemplatePatcher
 
 module PatchCompiler =
     
+    open System.IO
+
     // Open first so common names get overridden
     open AssetPatch.TemplatePatcher.Template
 
     open AssetPatch.Base.CompilerMonad    
     open AssetPatch.Base.FuncLocPath
-    open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Hierarchy
     open AssetPatch.TemplatePatcher.Emitter
+    open AssetPatch.TemplatePatcher.EquiIndexing
     open AssetPatch.TemplatePatcher.PatchGen
     
 
@@ -165,13 +167,23 @@ module PatchCompiler =
 
     /// Generate patches for a new level 1 site and its subordinates
     let compileSitePatches (outputDirectory : string)
-                                         (filePrefix : string)
-                                         (template : Site1<'hole>)
-                                         (worklist : 'hole list) : CompilerMonad<unit> = 
+                            (filePrefix : string)
+                            (template : Site1<'hole>)
+                            (worklist : 'hole list) : CompilerMonad<unit> = 
         let compile1 = evalTemplate >=> siteEmit
         compile {
             let worklist1 = List.map template worklist
-            let! results =  forM worklist1 compile1
+            let! results = forM worklist1 compile1
             do! generatePatches outputDirectory filePrefix (concatResults results)
+            return ()
+        }
+
+    /// Generate patches for a new level 1 site and its subordinates
+    let materializeEquiClassValuaPatches (outputDirectory : string) : CompilerMonad<unit> = 
+        compile {
+            let xlsxFile = Path.Combine(outputDirectory, "EquiIndexing.xlsx")
+            let! substs = readEquiIndexingSheet xlsxFile
+            let sources = Directory.GetFiles(path = outputDirectory, searchPattern = "*.apch") |> List.ofArray
+            do! mapMz (materializeEquiFile substs) sources
             return ()
         }

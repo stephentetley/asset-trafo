@@ -1,7 +1,16 @@
 ﻿#r "netstandard"
 #r "System.Text.Encoding.dll"
-open System
+#r "System.Xml.Linq"
+#r "System.Xml.ReaderWriter"
+#r "System.Xml.XDocument"
+#r "System.IO.FileSystem.Primitives"
 open System.IO
+
+#I @"C:\Users\stephen\.nuget\packages\system.io.packaging\4.5.0\lib\netstandard1.3"
+#r "System.IO.Packaging"
+#I @"C:\Users\stephen\.nuget\packages\DocumentFormat.OpenXml\2.9.1\lib\netstandard1.3"
+#r "DocumentFormat.OpenXml"
+
 
 #I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\netstandard1.6"
 #r "FParsec"
@@ -16,10 +25,8 @@ open FSharp.Core
 #I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20191014\lib\netstandard2.0"
 #r "MarkdownDoc.dll"
 
-#I @"C:\Users\stephen\.nuget\packages\system.io.packaging\4.5.0\lib\netstandard1.3"
-#r "System.IO.Packaging"
-#I @"C:\Users\stephen\.nuget\packages\DocumentFormat.OpenXml\2.9.1\lib\netstandard1.3"
-#r "DocumentFormat.OpenXml"
+#I @"C:\Users\stephen\.nuget\packages\sheetdoc\1.0.0-alpha-20191121a\lib\netstandard2.0"
+#r "SheetDoc.dll"
 
 
 
@@ -36,8 +43,8 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\PatchTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Hierarchy.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
-#load "..\src\AssetPatch\TemplatePatcher\Renamer.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchGen.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchCompiler.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Catalogue.fs"
@@ -69,11 +76,10 @@ let assetConditionTemplate : Class1<uint32> = fun year ->
 
    
 let test01 () : Result<unit, ErrMsg> = 
-    let worklist : (EquipmentCode * uint32) list= 
+    let worklist : (string * uint32) list= 
         [ ("101001407", 2019u)
         ; ("101001409", 2019u)
-        ]   
-        |> List.map (fun (a,b) -> (EquipmentCode a, b))
+        ] 
     runCompiler (defaultEnv "TETLEYS")
         <| compileClassEquiValuaEquiPatches 
                     (outputDirectory ())

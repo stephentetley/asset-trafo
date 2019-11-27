@@ -6,6 +6,15 @@
 #r "System.IO.FileSystem.Primitives"
 open System.IO
 
+
+#I @"C:\Users\stephen\.nuget\packages\ExcelProvider\1.0.1\lib\netstandard2.0"
+#r "ExcelProvider.Runtime.dll"
+
+#I @"C:\Users\stephen\.nuget\packages\ExcelProvider\1.0.1\typeproviders\fsharp41\netstandard2.0"
+#r "ExcelDataReader.DataSet.dll"
+#r "ExcelDataReader.dll"
+#r "ExcelProvider.DesignTime.dll"
+
 #I @"C:\Users\stephen\.nuget\packages\system.io.packaging\4.5.0\lib\netstandard1.3"
 #r "System.IO.Packaging"
 #I @"C:\Users\stephen\.nuget\packages\DocumentFormat.OpenXml\2.9.1\lib\netstandard1.3"
@@ -54,8 +63,10 @@ open AssetPatch.TemplatePatcher.PatchCompiler
 open AssetPatch.TemplatePatcher.Catalogue
 
 
-let outputDirectory () : string = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\output")
+let outputDirectory (child : string) : string = 
+    match child with 
+    | null | "" -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output")
+    | _ -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output", child)
 
 
 type RowParams = 
@@ -118,7 +129,7 @@ let test01 () =
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
     runCompiler (defaultEnv "TETLEYS") 
        <| compileFunctionPatches 
-                   (outputDirectory ())
+                   (outputDirectory "edg-patches")
                    "env_discharge"
                    edgTemplate
                    worklist
@@ -184,7 +195,13 @@ let test02 () =
         ] 
     runCompiler (defaultEnv "TETLEYS") 
        <| compileSitePatches 
-                   (outputDirectory ())
+                   (outputDirectory "caa-patches")
                    "control_automation"
                    caaTemplate
                    worklist
+
+
+let test02b () = 
+    runCompiler (defaultEnv "TETLEYS") 
+       <| materializeEquiClassValuaPatches (outputDirectory "caa-patches")
+

@@ -30,6 +30,12 @@ module PatchGen =
         | Equi -> "equi"
         | ClassEqui -> "classequi"
         | ValuaEqui -> "valuaequi"
+
+    let entityExtension (entityType : EntityType) : string = 
+        match entityType with
+        | FuncLoc | ClassFloc | ValuaFloc | Equi -> "txt"
+        | ClassEqui | ValuaEqui -> "apch"
+
         
 
     let genFileName (directory : string) 
@@ -38,7 +44,7 @@ module PatchGen =
         compile {
             let! idx = newFileIndex ()
             let name1 = 
-                sprintf "%s_%02i_%s.txt" (safeName filePrefix) idx (entityName entityType)
+                sprintf "%s_%02i_%s.%s" (safeName filePrefix) idx (entityName entityType) (entityExtension entityType)
             return Path.Combine(directory, name1)
         }
 

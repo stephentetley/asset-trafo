@@ -7,6 +7,9 @@ namespace AssetPatch.TemplatePatcher
 
 module EquiIndexing =
     
+    open System.IO
+
+    open FSharp.Interop.Excel
     
     open SheetDoc.Internal.Syntax       // shouldn't need to do this...
     open SheetDoc.Internal.Render
@@ -29,7 +32,7 @@ module EquiIndexing =
 
     let private makeOutput (rows : seq<IndexingRow>) : SpreadSheetDoc = 
         let headers : RowDoc = 
-            row [ text "Functiona Location"
+            row [ text "Functional Location"
                 ; text "Description"
                 ; text "Asset Patch Id"
                 ; text "S4 Id" ]
@@ -58,7 +61,7 @@ module EquiIndexing =
 
 
 
-    let writeEquiIndexingSheet (outputPath: string)
+    let writeEquiIndexingSheet (outputPath : string)
                                     (rows : Equi list) : CompilerMonad<unit> =
         compile {        
             let doc = rows |> List.map getIndexingRow |> makeOutput
@@ -66,3 +69,42 @@ module EquiIndexing =
             return ()
         }
 
+
+    [<Literal>]
+    let PROVIDERSOURCE = __SOURCE_DIRECTORY__ + @"\..\..\exceldata\EquiIndexing.xlsx"
+
+    type EquiIndexingTable = 
+        ExcelFile< FileName = PROVIDERSOURCE,
+                       SheetName = "Equipment Id",
+                       ForceString = true >
+
+    type EquiIndexingRow = EquiIndexingTable.Row
+
+    
+        
+
+
+    let isBlank (s : string) : bool = 
+        match s with
+        | null | "" -> true
+        | _ -> false
+
+
+    let readEquiIndexingSheet (xlsxPath : string) : CompilerMonad<(string* string) list> =
+        let action () = 
+            let source = (new EquiIndexingTable(filename = xlsxPath)).Data
+            source
+                |> Seq.choose (fun (x : EquiIndexingRow) -> 
+                                if isBlank x.``Functional Location`` then 
+                                    None 
+                                else Some (x.``Asset Patch Id``, x.``S4 Id``))
+                |> Seq.toList
+        liftAction action
+
+    let materializeEquiFile (lookups : (string * string) list) (patchPath : string) : CompilerMonad<unit> = 
+        let action () = 
+            let outputFile = Path.ChangeExtension(patchPath, "txt")
+            let input = File.ReadAllText(patchPath)
+            let text = List.fold (fun (src : string) (target : string, change) -> src.Replace(target, change)) input lookups
+            File.WriteAllText(path = outputFile, contents = text)
+        liftAction action

@@ -145,7 +145,7 @@ module Template =
     
     let private newEquipmentName () : Template<string> = 
         Template <| fun _ st -> 
-            let name = sprintf "@AP%03i" st.FreshEquipmentIndex
+            let name = sprintf "&AP%03i" st.FreshEquipmentIndex
             Ok (name, {st with FreshEquipmentIndex = st.FreshEquipmentIndex + 1})
 
 
