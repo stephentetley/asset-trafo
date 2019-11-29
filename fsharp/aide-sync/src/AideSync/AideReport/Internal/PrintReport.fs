@@ -121,7 +121,8 @@ module PrintReport =
         let makeDoc table = 
             let heading = 
                 htmlAnchorId (md5Hash node.CommonName)
-                            (text node.Reference ^+^ text node.CommonName)
+                             []
+                             (text node.Reference ^+^ text node.CommonName)
                     |> h3
             heading ^!!^ table
         node.ValueChanges 
@@ -143,7 +144,7 @@ module PrintReport =
                     ^+^ int64Md requestId
                     ^+^ text changeRequest.StructureChange.RootLabel.Reference
                     ^+^ text changeRequest.StructureChange.RootLabel.ShortName
-            htmlAnchorId refName titleText
+            htmlAnchorId refName [] titleText
 
         h2 title
             ^!!^ (text "Asset:" ^+^ text changeRequest.StructureChange.RootLabel.CommonName |> markdownText)
@@ -153,7 +154,7 @@ module PrintReport =
             ^!!^ markdownText (text "Comment:" ^+^ text changeRequest.Info.Comment)
 
     let nodespan (colourName : string) (extraAttrs : HtmlAttrs) (body : Text) : Text = 
-        htmlSpan (attrStyle [backgroundColor colourName] :: extraAttrs) body
+        htmlSpan (htmlAttrStyle [backgroundColor colourName] :: extraAttrs) body
 
 
     let drawLabel (isRoot : bool) (item : StructureNode)  : Markdown = 
@@ -185,7 +186,7 @@ module PrintReport =
             List.replicate 5 cellSpec1; 
             
         let colourize (colour : string) (source : string) = 
-            htmlSpan [attrStyle [styleDecl "background-color" colour]] (text source)
+            htmlSpan [htmlAttrStyle [styleDecl "background-color" colour]] (text source)
         let row1 : TableRow = 
             [ markdownText ("Legend:" |> text) 
             ; markdownText ("Added" |> colourize addedGreen)
@@ -221,7 +222,7 @@ module PrintReport =
 
 
     let makeFullChangeReport (changeScheme : ChangeScheme) : Markdown = 
-        h1 (htmlAnchorId "top" (text "AIDE Change Scheme"))
+        h1 (htmlAnchorId "top" [] (text "AIDE Change Scheme"))
             ^!!^ changeSchemeSummaryTable changeScheme
             ^!!^ changeRequestContentsTable changeScheme.ChangeRequests
             ^!!^ vsep (List.map changeRequestSection changeScheme.ChangeRequests)

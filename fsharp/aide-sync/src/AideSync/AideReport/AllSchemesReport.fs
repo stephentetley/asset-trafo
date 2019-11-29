@@ -92,7 +92,7 @@ module AllSchemesReport =
 
 
     let makeAllSchemesReport (changeSchemes : ChangeSchemeInfo list) : Markdown = 
-        h1 (htmlAnchorId "top" (text "AIDE Change Schemes"))
+        h1 (htmlAnchorId "top" [] (text "AIDE Change Schemes"))
             ^!!^ changeSchemeTable changeSchemes
             ^!!^ linkToTop
 
