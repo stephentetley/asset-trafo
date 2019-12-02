@@ -1,0 +1,150 @@
+﻿#r "netstandard"
+#r "System.Text.Encoding.dll"
+#r "System.Xml.Linq"
+#r "System.Xml.ReaderWriter"
+#r "System.Xml.XDocument"
+#r "System.IO.FileSystem.Primitives"
+open System.IO
+
+
+#I @"C:\Users\stephen\.nuget\packages\ExcelProvider\1.0.1\lib\netstandard2.0"
+#r "ExcelProvider.Runtime.dll"
+
+#I @"C:\Users\stephen\.nuget\packages\ExcelProvider\1.0.1\typeproviders\fsharp41\netstandard2.0"
+#r "ExcelDataReader.DataSet.dll"
+#r "ExcelDataReader.dll"
+#r "ExcelProvider.DesignTime.dll"
+
+#I @"C:\Users\stephen\.nuget\packages\system.io.packaging\4.5.0\lib\netstandard1.3"
+#r "System.IO.Packaging"
+#I @"C:\Users\stephen\.nuget\packages\DocumentFormat.OpenXml\2.9.1\lib\netstandard1.3"
+#r "DocumentFormat.OpenXml"
+
+
+#I @"C:\Users\stephen\.nuget\packages\FParsec\1.0.4-rc3\lib\netstandard1.6"
+#r "FParsec"
+#r "FParsecCS"
+
+
+open FSharp.Core
+
+#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
+#r "SLFormat.dll"
+
+#I @"C:\Users\stephen\.nuget\packages\markdowndoc\1.0.1-alpha-20191014\lib\netstandard2.0"
+#r "MarkdownDoc.dll"
+
+#I @"C:\Users\stephen\.nuget\packages\sheetdoc\1.0.0-alpha-20191121a\lib\netstandard2.0"
+#r "SheetDoc.dll"
+
+
+#load "..\src\AssetPatch\Base\Addendum.fs"
+#load "..\src\AssetPatch\Base\Common.fs"
+#load "..\src\AssetPatch\Base\AssocList.fs"
+#load "..\src\AssetPatch\Base\CompilerMonad.fs"
+#load "..\src\AssetPatch\Base\ChangeFile.fs"
+#load "..\src\AssetPatch\Base\Acronyms.fs"
+#load "..\src\AssetPatch\Base\AbsChangeFile.fs"
+#load "..\src\AssetPatch\Base\FuncLocPath.fs"
+#load "..\src\AssetPatch\Base\Parser.fs"
+#load "..\src\AssetPatch\Base\Printer.fs"
+#load "..\src\AssetPatch\TemplatePatcher\PatchTypes.fs"
+#load "..\src\AssetPatch\TemplatePatcher\Hierarchy.fs"
+#load "..\src\AssetPatch\TemplatePatcher\Template.fs"
+#load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
+#load "..\src\AssetPatch\TemplatePatcher\PatchGen.fs"
+#load "..\src\AssetPatch\TemplatePatcher\PatchCompiler.fs"
+#load "..\src\AssetPatch\TemplatePatcher\Catalogue.fs"
+open AssetPatch.Base.CompilerMonad
+open AssetPatch.Base.FuncLocPath
+open AssetPatch.TemplatePatcher.Template
+open AssetPatch.TemplatePatcher.PatchCompiler
+open AssetPatch.TemplatePatcher.Catalogue
+
+#load "EdcPatcher\OSGB36.fs"
+open EdcPatcher.OSGB36
+
+
+let outputDirectory (child : string) : string = 
+    match child with 
+    | null | "" -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output")
+    | _ -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output", child)
+
+
+type RowParams = 
+    { Code : string
+      Name : string 
+      Easting : int
+      Northing : int
+      EquiFlocSaiNumber : string option
+      EquiPliNumber : string option
+    }
+
+
+  
+
+
+let edcTemplate (parameters : RowParams) : Function = 
+    let eastNorth = 
+        east_north [ easting parameters.Easting; northing parameters.Northing ]
+    
+    environmental_discharge 
+        [ eastNorth 
+          aib_reference [ s4_aib_reference () ] 
+        ]
+        [ 
+          liquid_discharge
+            [ eastNorth
+              aib_reference [ s4_aib_reference () ] 
+            ]
+            [   
+              regulatory_monitoring
+                [ eastNorth 
+                  aib_reference [ s4_aib_reference () ]    
+                ]
+                [   
+                  montoring_system "SYS01" "EA Event Duration Monitoring"
+                    [ eastNorth 
+                      aib_reference [ s4_aib_reference () ]
+                    ]
+                    _no_assemblies_
+                    [ 
+                      lstn_level_transmitter "Storm Overflow Level Monitor Loop"
+                        [ eastNorth
+                          aib_reference [ s4_aib_reference () ]
+                        ]
+                        _no_subordinate_equipment_
+                        [ manufacturer "SIEMENS"
+                          model "HYDRORANGER 200" 
+                        ]
+                    ]
+                ]
+            ]
+        ]
+
+
+
+let test01 () = 
+    let worklist = 
+        [ ("KRI03", {Code = "KRI03"; Name = "Kriddle SPS"; Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001" } )
+        ] 
+        |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
+    runCompiler (defaultEnv "TETLEYS") 
+       <| compileFunctionPatches 
+                   (outputDirectory "edg-patches")
+                   "env_discharge"
+                   edcTemplate
+                   worklist
+                   
+
+let temp01 () = 
+    NGR.Create "SE5531115293" 
+        |> Option.map ngrToEastingNorthing
+        |> Option.map eastingNorthingToNGR
+
+
+
+let _Tresco = { Easting = 088383; Northing = 015121 }
+
+let _Thurso = { Easting = 311461; Northing = 968226 }
