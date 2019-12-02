@@ -173,15 +173,15 @@ let caaTemplate (parameters : RowParams) : Site =
                               telemetry_outstation "Telemetry Outstation"
                                 [ east_north_common
                                   aib_reference                             
-                                    [ yield  s4_aib_reference  &&= ()
-                                      yield! ai2_aib_reference ??= parameters.EquiFlocSaiNumber
-                                      yield! ai2_aib_reference ??= parameters.EquiPliNumber
+                                    [ s4_aib_reference ()
+                                      optional ai2_aib_reference parameters.EquiFlocSaiNumber
+                                      optional ai2_aib_reference parameters.EquiPliNumber
                                     ]
                                 ]
                                 _no_subordinate_equipment_
                                 [ manufacturer "METASPHERE"
                                   model "MMIM" 
-                                  serialNumber "TO BE DETERMINED"
+                                  serial_number "TO BE DETERMINED"
                                 ]
                             ]
                         ]            

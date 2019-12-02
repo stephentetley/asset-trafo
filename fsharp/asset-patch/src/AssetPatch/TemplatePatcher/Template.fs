@@ -119,15 +119,12 @@ module Template =
             }
         | None -> blank ()
 
-    
-    let ( &&= ) (fn : 'a -> Characteristic)  (value : 'a) : Characteristic = 
-        fn value
 
 
-    let ( ??= ) (fn : 'a -> Characteristic)  (value : Option<'a>) : Characteristic list = 
+    let optional (fn : 'a -> Characteristic)  (value : Option<'a>) : Characteristic = 
         match value with 
-        | None -> []
-        | Some a -> [fn a]
+        | None -> blank ()
+        | Some a -> fn a
 
 
     type Class = Template<S4Class>
