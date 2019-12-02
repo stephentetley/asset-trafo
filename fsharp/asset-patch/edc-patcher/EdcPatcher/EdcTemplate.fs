@@ -14,6 +14,11 @@ module EdcTemplate =
     open EdcPatcher.InputData
     open EdcPatcher.OSGB36
 
+    let optString (source : string) : string option = 
+        match source with
+        | null | "" -> None
+        |_ -> Some source
+
     /// Note input string might have hh:mm:ss suffix. 
     /// So take first 10 characters.
     let getInstallDate (source : string) : DateTime = 
@@ -36,6 +41,8 @@ module EdcTemplate =
         lstnut
             [ uniclass_code ()
               uniclass_desc ()
+              lstn_transducer_model <| optString parameters.``Transducer Model``
+              lstn_transducer_serial_no <| optString parameters.``Transducer Serial Number``
             ]
 
     let edcTemplate (parameters : WorkListRow) : Function = 

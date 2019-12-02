@@ -131,8 +131,8 @@ module Catalogue =
 
 
     /// ASSET_CONDITION:SURVEY_DATE
-    let survey_date (v : uint32) : Characteristic = 
-        _characteristic "SURVEY_DATE" (v.ToString())
+    let survey_date (year : uint32) : Characteristic = 
+        _characteristic "SURVEY_DATE" (year.ToString())
 
 
     /// Class:EAST_NORTH
@@ -166,22 +166,23 @@ module Catalogue =
             | _ -> None
 
     /// LSTNUT:LSTN_RELAY_ix_FUNCTION
-    let lstn_relay_function (ix : int) (v : RelayFunction) : Characteristic = 
+    let lstn_relay_function (ix : int) (v : RelayFunction option) : Characteristic = 
         let name = sprintf "LSTN_RELAY_%i_FUNCTION" ix
-        _characteristic name (v.ToString())
+        _optional_characteristic name (Option.map (fun x -> x.ToString()) v)
 
 
     /// LSTNUT:LSTN_TRANSDUCER_MODEL
-    let lstn_transducer_model (v : string) : Characteristic =         
-        _characteristic "LSTN_TRANSDUCER_MODEL" v
+    let lstn_transducer_model (v : string option) : Characteristic =         
+        _optional_characteristic "LSTN_TRANSDUCER_MODEL" v
 
     /// LSTNUT:LSTN_TRANSDUCER_SERIAL_NO
-    let lstn_transducer_serial_no (v : string) : Characteristic =         
-        _characteristic "LSTN_TRANSDUCER_SERIAL_NO" v
+    let lstn_transducer_serial_no (v : string option) : Characteristic =         
+        _optional_characteristic "LSTN_TRANSDUCER_SERIAL_NO" v
+
+
 
     // ************************************************************************
     // Equipment
-
 
     let _no_equipment_ : Equipment list = []
     let _no_subordinate_equipment_ : Equipment list = []

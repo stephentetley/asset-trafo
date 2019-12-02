@@ -30,22 +30,26 @@ module Template =
 
     /// State + Reader + Error
     type Template<'a> = 
-        | Template of (Env -> State -> Result<'a * State, ErrMsg>)
+        | Template of (Env -> State -> Result<'a option * State, ErrMsg>)
 
     let inline private apply1 (ma : Template<'a>) 
                               (env : Env) 
-                              (st : State) : Result<'a * State, ErrMsg> = 
+                              (st : State) : Result<'a option * State, ErrMsg> = 
         let (Template fn) = ma in fn env st
 
     let mreturn (x:'a) : Template<'a> = 
-        Template <| fun _ st -> Ok (x, st)
+        Template <| fun _ st -> Ok (Some x, st)
+
+    let blank () : Template<'a> = 
+        Template <| fun _ st -> Ok (None, st)
 
     let inline private bindM (ma : Template<'a>) 
                              (fn : 'a -> Template<'b>) : Template<'b> =
         Template <| fun env st -> 
             match apply1 ma env st with
             | Error msg -> Error msg 
-            | Ok (a, st1) -> apply1 (fn a) env st1
+            | Ok (Some a, st1) -> apply1 (fn a) env st1
+            | Ok (None, st1) -> Ok (None, st1)
          
     let inline private delayM (fn : unit -> Template<'a>) : Template<'a> = 
         bindM (mreturn ()) fn 
@@ -61,7 +65,10 @@ module Template =
 
 
     let runTemplate (env : Env) (code : Template<'a>) : Result<'a, ErrMsg> = 
-        apply1 code env stateZero |> Result.map fst
+        match apply1 code env stateZero |> Result.map fst with
+        | Ok (Some(a)) -> Ok a
+        | Ok None -> Error "Empty result"
+        | Error msg -> Error msg
         
         
     
@@ -75,8 +82,10 @@ module Template =
                     | Error msg -> fk msg
                     | Ok (a, st1) -> 
                         work rest st1 fk (fun st2 vs -> 
-                        sk st2 (a :: vs))
-            work source stzero (fun msg -> Error msg) (fun st xs -> Ok(xs, st))
+                        match a with 
+                        | Some v -> sk st2 (v :: vs)
+                        | None -> sk st2 vs)
+            work source stzero (fun msg -> Error msg) (fun st xs -> Ok(Some(xs), st))
 
 
 
@@ -101,6 +110,14 @@ module Template =
             Value = value
         }
 
+    let _optional_characteristic (name : string) (value : string option) : Characteristic = 
+        match value with
+        | Some v -> 
+            mreturn { 
+                Name = name
+                Value = v
+            }
+        | None -> blank ()
 
     
     let ( &&= ) (fn : 'a -> Characteristic)  (value : 'a) : Characteristic = 
@@ -134,10 +151,12 @@ module Template =
     let private setAttribute (e1 : Equipment) (attrib : EquipmentAttribute) : Equipment = 
         Template <| fun env st -> 
             match apply1 e1 env st with
-            | Ok (a, st1) -> 
+            | Ok (Some a, st1) -> 
                 match apply1 attrib env st1 with
-                | Ok (f, st2) -> Ok (f a, st2)
+                | Ok (Some f, st2) -> Ok (Some(f a), st2)
+                | Ok (None, st2) -> Ok (None, st2)
                 | Error msg -> Error msg
+            | Ok (None, st1) -> Ok (None, st1)
             | Error msg -> Error msg
 
     let private setAttributes (e1 : Equipment) (attribs : EquipmentAttribute list) : Equipment = 
@@ -146,7 +165,7 @@ module Template =
     let private newEquipmentName () : Template<string> = 
         Template <| fun _ st -> 
             let name = sprintf "&AP%03i" st.FreshEquipmentIndex
-            Ok (name, {st with FreshEquipmentIndex = st.FreshEquipmentIndex + 1})
+            Ok (Some(name), {st with FreshEquipmentIndex = st.FreshEquipmentIndex + 1})
 
 
 
@@ -179,7 +198,7 @@ module Template =
 
 
     let internal equipmentAttribute (update : S4Equipment -> S4Equipment) : EquipmentAttribute =
-        Template <| fun env st -> Ok (update, st)
+        Template <| fun env st -> Ok (Some update, st)
             
 
 
