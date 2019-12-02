@@ -83,14 +83,5 @@ let main02 () =
     runEdcPatcherPhase2 options 
 
 
-let temp01 () = 
-    NGR.Create "SE5531115293" 
-        |> Option.map ngrToEastingNorthing
-        |> Option.map eastingNorthingToNGR
 
-
-
-let _Tresco = { Easting = 088383; Northing = 015121 }
-
-let _Thurso = { Easting = 311461; Northing = 968226 }
 

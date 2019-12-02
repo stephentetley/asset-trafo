@@ -31,6 +31,17 @@ module Catalogue =
     // ************************************************************************
     // Classes and characteritics
 
+    /// *:UNICLASS_CODE
+    /// This is currently blank
+    let uniclass_code () : Characteristic = 
+        _characteristic "UNICLASS_CODE" ""
+
+    /// *:UNICLASS_DESC
+    /// This is currently blank
+    let uniclass_desc () : Characteristic = 
+        _characteristic "UNICLASS_DESC" ""
+
+
     /// AIB_REFERENCE
     let aib_reference : Characteristic list -> Class = 
         _class "AIB_REFERENCE" 850u
@@ -57,6 +68,11 @@ module Catalogue =
             match x with
             | Good -> "1 - GOOD"
 
+        static member TryParse (source : string) : ConditionGrade option = 
+            match source.ToUpper() with
+            | "GOOD" -> Some Good 
+            | _ -> None
+
             
     /// ASSET_CONDITION:CONDITION_GRADE
     let condition_grade (v : ConditionGrade) : Characteristic = 
@@ -74,6 +90,11 @@ module Catalogue =
         override x.ToString() = 
             match x with
             | Availability_95 -> "1 - AVAILABILITY 95%"
+
+        static member TryParse (source : string) : PerformanceGrade option = 
+            match source.ToUpper() with
+            | "95%" -> Some Availability_95 
+            | _ -> None
 
 
     /// ASSET_CONDITION:PERFORMANCE_GRADE
@@ -94,6 +115,11 @@ module Catalogue =
             match x with
             | Satisfactory -> "3 - SATISFACTORY"
 
+        static member TryParse (source : string) : LoadingFactor option = 
+            match source.ToUpper() with
+            | "SATISFACTORY" -> Some Satisfactory 
+            | _ -> None
+
     /// ASSET_CONDITION:LOADING_FACTOR
     let loading_factor (v : LoadingFactor) : Characteristic = 
         _characteristic "LOADING_FACTOR" (v.ToString())
@@ -109,7 +135,7 @@ module Catalogue =
         _characteristic "SURVEY_DATE" (v.ToString())
 
 
-    /// EAST_NORTH
+    /// Class:EAST_NORTH
     let east_north : Characteristic list -> Class = 
         _class "EAST_NORTH" 379u 
 
@@ -121,8 +147,38 @@ module Catalogue =
     let northing (v : int) : Characteristic = 
         _characteristic "NORTHING" (v.ToString())
 
-
+    /// Class:LSTNUT
+    let lstnut : Characteristic list -> Class = 
+        _class "LSTNUT" 973u 
     
+
+    /// LSTNUT:RelayFunction
+    type RelayFunction = 
+        | LossOfEcho 
+
+        override x.ToString() = 
+            match x with
+            | LossOfEcho -> "LOSS OF ECHO"
+
+        static member TryParse (source : string) : RelayFunction option = 
+            match source.ToUpper() with
+            | "LOSS OF ECHO" -> Some LossOfEcho 
+            | _ -> None
+
+    /// LSTNUT:LSTN_RELAY_ix_FUNCTION
+    let lstn_relay_function (ix : int) (v : RelayFunction) : Characteristic = 
+        let name = sprintf "LSTN_RELAY_%i_FUNCTION" ix
+        _characteristic name (v.ToString())
+
+
+    /// LSTNUT:LSTN_TRANSDUCER_MODEL
+    let lstn_transducer_model (v : string) : Characteristic =         
+        _characteristic "LSTN_TRANSDUCER_MODEL" v
+
+    /// LSTNUT:LSTN_TRANSDUCER_SERIAL_NO
+    let lstn_transducer_serial_no (v : string) : Characteristic =         
+        _characteristic "LSTN_TRANSDUCER_SERIAL_NO" v
+
     // ************************************************************************
     // Equipment
 

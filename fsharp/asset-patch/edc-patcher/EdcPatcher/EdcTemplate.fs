@@ -25,6 +25,19 @@ module EdcTemplate =
         | false, _ -> 
             new DateTime(year=1970, month=1, day=1)
 
+    let aib_reference_leaf_instance (parameters : WorkListRow) : Class = 
+        aib_reference 
+            [ s4_aib_reference () 
+              ai2_aib_reference parameters.``AI2 Equipment SAI Number``
+              ai2_aib_reference parameters.``AI2 Equipment PLI Code``
+            ]
+
+    let lstnut_leaf_instance (parameters : WorkListRow) : Class = 
+        lstnut
+            [ uniclass_code ()
+              uniclass_desc ()
+            ]
+
     let edcTemplate (parameters : WorkListRow) : Function = 
         let east_north_common = 
             match NGR.Create parameters.NGR |> Option.map ngrToEastingNorthing with
@@ -37,10 +50,11 @@ module EdcTemplate =
             aib_reference 
                 [   s4_aib_reference ()
                     ai2_aib_reference parameters.``AI2 Site Reference``
+                    
                 ]
 
         let installDate = getInstallDate parameters.``Install Date``
-            
+
 
         environmental_discharge 
             [ east_north_common 
@@ -65,11 +79,8 @@ module EdcTemplate =
                         [ 
                           lstn_level_transmitter "Storm Overflow Level Monitor Loop"
                             [ east_north_common
-                              aib_reference 
-                                [ s4_aib_reference () 
-                                  ai2_aib_reference parameters.``AI2 Equipment SAI Number``
-                                  ai2_aib_reference parameters.``AI2 Equipment PLI Code``
-                                ]
+                              aib_reference_leaf_instance parameters
+                              lstnut_leaf_instance parameters
                             ]
                             _no_subordinate_equipment_
                             [ manufacturer parameters.Manufacturer
