@@ -106,7 +106,6 @@ module Emitter =
         compile {
             let! sdate = asks (fun x -> x.StartupDate)
             let! mplant = asks (fun x -> x.MaintenancePlant)
-            printfn "equipmentToEqui1 ConstructionYear - %O" equipment.ConstructionYear
             return { 
                 EquipmentNumber = equipment.EquipmentId
                 Description = equipment.Description

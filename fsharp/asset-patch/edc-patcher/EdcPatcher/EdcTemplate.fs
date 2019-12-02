@@ -14,6 +14,17 @@ module EdcTemplate =
     open EdcPatcher.InputData
     open EdcPatcher.OSGB36
 
+    /// Note input string might have hh:mm:ss suffix. 
+    /// So take first 10 characters.
+    let getInstallDate (source : string) : DateTime = 
+        match DateTime.TryParseExact( s = source.Substring(startIndex=0, length=10)
+                                    , format = "dd/MM/yyyy"
+                                    , provider = Globalization.CultureInfo.InvariantCulture
+                                    , style = Globalization.DateTimeStyles.None) with
+        | true, date -> date
+        | false, _ -> 
+            new DateTime(year=1970, month=1, day=1)
+
     let edcTemplate (parameters : WorkListRow) : Function = 
         let east_north_common = 
             match NGR.Create parameters.NGR |> Option.map ngrToEastingNorthing with
@@ -28,14 +39,8 @@ module EdcTemplate =
                     ai2_aib_reference parameters.``AI2 Site Reference``
                 ]
 
-        let installDate = 
-            printfn "Install Date: %s" parameters.``Install Date``
-            match DateTime.TryParseExact( s = parameters.``Install Date``
-                                        , format="dd/MM/yyyy"
-                                        , provider = Globalization.CultureInfo.InvariantCulture
-                                        , style = Globalization.DateTimeStyles.None) with
-            | true, date -> date
-            | false, _ -> new DateTime(year=1970, month=1, day=1)
+        let installDate = getInstallDate parameters.``Install Date``
+            
 
         environmental_discharge 
             [ east_north_common 
