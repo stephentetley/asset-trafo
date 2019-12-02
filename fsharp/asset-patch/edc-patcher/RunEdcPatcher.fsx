@@ -5,7 +5,7 @@
 #r "System.Xml.XDocument"
 #r "System.IO.FileSystem.Primitives"
 open System.IO
-
+open System
 
 #I @"C:\Users\stephen\.nuget\packages\ExcelProvider\1.0.1\lib\netstandard2.0"
 #r "ExcelProvider.Runtime.dll"
@@ -57,7 +57,6 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\PatchCompiler.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Catalogue.fs"
 
-
 #load "EdcPatcher\OSGB36.fs"
 #load "EdcPatcher\InputData.fs"
 #load "EdcPatcher\EdcTemplate.fs"
@@ -94,3 +93,4 @@ let temp01 () =
 let _Tresco = { Easting = 088383; Northing = 015121 }
 
 let _Thurso = { Easting = 311461; Northing = 968226 }
+

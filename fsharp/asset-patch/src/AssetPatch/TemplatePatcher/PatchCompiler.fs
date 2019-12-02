@@ -44,6 +44,8 @@ module PatchCompiler =
             Manufacturer = None
             Model = None
             SerialNumber = None
+            ConstructionYear = None
+            ConstructionMonth = None
             Classes = [clazz] 
             SuboridnateEquipment = [] 
         }

@@ -32,6 +32,8 @@ module Hierarchy =
           Manufacturer : string option
           Model : string option
           SerialNumber : string option
+          ConstructionYear : uint16 option
+          ConstructionMonth : uint8 option
           Classes : S4Class list
           SuboridnateEquipment : S4Equipment list
         }

@@ -21,7 +21,12 @@ module Catalogue =
         equipmentAttribute <| fun e1 -> { e1 with SerialNumber = Some productCode }
 
 
+    let construction_year (year : uint16) : EquipmentAttribute = 
+        equipmentAttribute <| fun e1 -> { e1 with ConstructionYear = Some year }
+    
 
+    let construction_month (month : uint8) : EquipmentAttribute = 
+        equipmentAttribute <| fun e1 -> { e1 with ConstructionMonth = Some month }
     
     // ************************************************************************
     // Classes and characteritics

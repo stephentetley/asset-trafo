@@ -106,16 +106,22 @@ module Emitter =
         compile {
             let! sdate = asks (fun x -> x.StartupDate)
             let! mplant = asks (fun x -> x.MaintenancePlant)
+            printfn "equipmentToEqui1 ConstructionYear - %O" equipment.ConstructionYear
             return { 
                 EquipmentNumber = equipment.EquipmentId
                 Description = equipment.Description
                 FuncLoc = funcLoc
                 Category = equipment.Category
                 ObjectType = equipment.ObjectType
-                Manufacturer = Option.defaultValue "TO BE DETERMINED" equipment.Manufacturer
+                Manufacturer = 
+                    Option.defaultValue "TO BE DETERMINED" equipment.Manufacturer
                 Model = Option.defaultValue "TO BE DETERMINED" equipment.Model
                 SerialNumber = Option.defaultValue "" equipment.SerialNumber
                 StartupDate = sdate
+                ConstructionYear = 
+                     Option.defaultValue (uint16 sdate.Year) equipment.ConstructionYear
+                ConstructionMonth = 
+                    Option.defaultValue (uint8 sdate.Month) equipment.ConstructionMonth
                 MaintenancePlant = mplant
             }
         }

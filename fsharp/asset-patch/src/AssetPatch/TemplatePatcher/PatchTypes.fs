@@ -176,18 +176,20 @@ module PatchTypes =
         Manufacturer : string
         Model : string
         SerialNumber : string
+        ConstructionYear : uint16
+        ConstructionMonth : uint8
         StartupDate : DateTime
         MaintenancePlant : uint32
       }
 
     /// Note - do not write EQUI to file.
-    let equiToAssocs (equi: Equi) : AssocList<string, string> = 
+    let equiToAssocs (equi: Equi) : AssocList<string, string> =         
         makeAssocs
             // [ ("ABCK_EILO",     "ABC Indicator",                    "") 
             // ; ("GSBE_EILO",     "Business Area",                    "")
             [ ("BUKR_EILO",     "Company Code",                     "2100")
-            ; ("BAUMM_EQI",     "Construction month",               equi.StartupDate.Month.ToString())
-            ; ("BAUJJ",         "Construction year",                equi.StartupDate.Year.ToString())
+            ; ("BAUMM_EQI",     "Construction month",               (sprintf "%02i" equi.ConstructionMonth))
+            ; ("BAUJJ",         "Construction year",                equi.ConstructionYear.ToString())
 
             ; ("KOKR_EILO",     "Controlling Area",                 "1000")
             // ; ("KOST_EILO",     "Cost Center",                      "150008")   /// <--- This should be a param

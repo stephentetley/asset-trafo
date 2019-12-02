@@ -169,6 +169,8 @@ module Template =
                     Manufacturer = None
                     Model = None
                     SerialNumber = None
+                    ConstructionYear = None
+                    ConstructionMonth = None
                     Classes = cs 
                     SuboridnateEquipment = es 
                 }

@@ -31,7 +31,7 @@ module InputData =
             let source = (new WorkListTable(filename = xlsxPath)).Data
             source
                 |> Seq.choose (fun (row : WorkListRow) -> 
-                                if notBlank row.``Root S4 FuncLoc`` then Some row else None)
+                                if notBlank row.``S4 Root FuncLoc`` then Some row else None)
                 |> Seq.toList
         liftAction action
 

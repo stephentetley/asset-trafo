@@ -34,7 +34,7 @@ module EdcPatcher =
         runCompiler (defaultEnv opts.UserName) 
             (compile { 
                 let! worklist = 
-                    readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``Root S4 FuncLoc``, row))
+                    readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
                 
                 do! liftAction (fun () -> makeOutputDirectory opts.OutputDirectory)
 
