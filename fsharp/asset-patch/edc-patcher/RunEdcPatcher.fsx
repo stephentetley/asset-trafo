@@ -63,7 +63,7 @@ open FSharp.Core
 #load "EdcPatcher\EdcTemplate.fs"
 #load "EdcPatcher\EdcPatcher.fs"
 open EdcPatcher.OSGB36
-
+open EdcPatcher.EdcPatcher
 
 let outputDirectory (child : string) : string = 
     match child with 
@@ -71,7 +71,17 @@ let outputDirectory (child : string) : string =
     | _ -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output", child)
 
 
+let options : EdcOptions = 
+    {   UserName = "TETLEYS"
+        OutputDirectory = outputDirectory "edc_patcher"
+        WorkListPath = @"G:\work\Projects\assets\asset_patch\EnvDischarge_Worklist1.xlsx" 
+    }
 
+let main01 () = 
+    runEdcPatcherPhase1 options 
+
+let main02 () = 
+    runEdcPatcherPhase2 options 
 
 
 let temp01 () = 

@@ -6,22 +6,45 @@ namespace EdcPatcher
 
 module EdcPatcher =
     
+    open System.IO
+
+    open AssetPatch.Base.CompilerMonad
+    open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.Template
     open AssetPatch.TemplatePatcher.Catalogue
+    open AssetPatch.TemplatePatcher.PatchCompiler
 
     open EdcPatcher.OSGB36
     open EdcPatcher.InputData
     open EdcPatcher.EdcTemplate
 
+
+    type EdcOptions = 
+        { UserName : string 
+          OutputDirectory : string
+          WorkListPath : string 
+          }
+
+    let internal makeOutputDirectory (dirName : string) : unit = 
+        if not <| Directory.Exists(dirName) then
+            Directory.CreateDirectory(dirName) |> ignore
+        else ()
     
-    //let runEdcPatcher () = 
-    //    let worklist = 
-    //        [ ("KRI03", {Code = "KRI03"; Name = "Kriddle SPS"; Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001" } )
-    //        ] 
-    //        |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
-    //    runCompiler (defaultEnv "TETLEYS") 
-    //       <| compileFunctionPatches 
-    //                   (outputDirectory "edc-patches")
-    //                   "env_discharge"
-    //                   edcTemplate
-    //                   worklist
+    let runEdcPatcherPhase1 (opts : EdcOptions) = 
+        runCompiler (defaultEnv opts.UserName) 
+            (compile { 
+                let! worklist = 
+                    readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``Root S4 FuncLoc``, row))
+                
+                do! liftAction (fun () -> makeOutputDirectory opts.OutputDirectory)
+
+                do! compileFunctionPatches opts.OutputDirectory
+                                "edc_patch"
+                                edcTemplate
+                                worklist
+            })
+
+
+    let runEdcPatcherPhase2 (opts : EdcOptions) = 
+        runCompiler (defaultEnv opts.UserName) 
+            <| materializeEquiClassValuaPatches opts.OutputDirectory

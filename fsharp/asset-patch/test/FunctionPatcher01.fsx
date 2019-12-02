@@ -82,7 +82,7 @@ type RowParams =
   
 
 
-let edgTemplate (parameters : RowParams) : Function = 
+let edcTemplate (parameters : RowParams) : Function = 
     let east_north_common = 
         east_north [ easting parameters.Easting; northing parameters.Northing ]
     
@@ -131,7 +131,7 @@ let test01 () =
        <| compileFunctionPatches 
                    (outputDirectory "edg-patches")
                    "env_discharge"
-                   edgTemplate
+                   edcTemplate
                    worklist
 
 // This template has optional elements that are possible but a bit ugly...

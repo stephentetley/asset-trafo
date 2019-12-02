@@ -17,7 +17,7 @@ module Catalogue =
     let model (name : string) : EquipmentAttribute =
         equipmentAttribute <| fun e1 -> { e1 with Model = Some name }
         
-    let serialNumber (productCode : string) : EquipmentAttribute =
+    let serial_number (productCode : string) : EquipmentAttribute =
         equipmentAttribute <| fun e1 -> { e1 with SerialNumber = Some productCode }
 
 

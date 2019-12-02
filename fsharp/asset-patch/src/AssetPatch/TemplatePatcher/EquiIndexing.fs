@@ -29,6 +29,9 @@ module EquiIndexing =
           S4Ident : unit
         }
 
+    // ************************************************************************
+    // Write spreadsheet
+
 
     let private makeOutput (rows : seq<IndexingRow>) : SpreadSheetDoc = 
         let headers : RowDoc = 
@@ -69,6 +72,8 @@ module EquiIndexing =
             return ()
         }
 
+    // ************************************************************************
+    // Read spreadsheet
 
     [<Literal>]
     let PROVIDERSOURCE = __SOURCE_DIRECTORY__ + @"\..\..\exceldata\EquiIndexing.xlsx"
@@ -80,11 +85,8 @@ module EquiIndexing =
 
     type EquiIndexingRow = EquiIndexingTable.Row
 
-    
-        
-
-
-    let isBlank (s : string) : bool = 
+   
+    let private isBlank (s : string) : bool = 
         match s with
         | null | "" -> true
         | _ -> false
