@@ -3,10 +3,7 @@
 
 namespace EdcPatcher
 
-open System
-open System.Text.RegularExpressions
 
-open Microsoft.FSharp.Core
 
 
 // Coordinate transformations from 
@@ -21,6 +18,8 @@ open Microsoft.FSharp.Core
 
 module OSGB36 = 
 
+    open System.Text.RegularExpressions
+    
     [<Struct>]
     /// Two letters and 10 digits
     type NGR = 

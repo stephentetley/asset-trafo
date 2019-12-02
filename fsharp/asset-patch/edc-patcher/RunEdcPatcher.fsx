@@ -56,13 +56,12 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\PatchGen.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchCompiler.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Catalogue.fs"
-open AssetPatch.Base.CompilerMonad
-open AssetPatch.Base.FuncLocPath
-open AssetPatch.TemplatePatcher.Template
-open AssetPatch.TemplatePatcher.PatchCompiler
-open AssetPatch.TemplatePatcher.Catalogue
+
 
 #load "EdcPatcher\OSGB36.fs"
+#load "EdcPatcher\InputData.fs"
+#load "EdcPatcher\EdcTemplate.fs"
+#load "EdcPatcher\EdcPatcher.fs"
 open EdcPatcher.OSGB36
 
 
@@ -72,71 +71,8 @@ let outputDirectory (child : string) : string =
     | _ -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output", child)
 
 
-type RowParams = 
-    { Code : string
-      Name : string 
-      Easting : int
-      Northing : int
-      EquiFlocSaiNumber : string option
-      EquiPliNumber : string option
-    }
 
 
-  
-
-
-let edcTemplate (parameters : RowParams) : Function = 
-    let eastNorth = 
-        east_north [ easting parameters.Easting; northing parameters.Northing ]
-    
-    environmental_discharge 
-        [ eastNorth 
-          aib_reference [ s4_aib_reference () ] 
-        ]
-        [ 
-          liquid_discharge
-            [ eastNorth
-              aib_reference [ s4_aib_reference () ] 
-            ]
-            [   
-              regulatory_monitoring
-                [ eastNorth 
-                  aib_reference [ s4_aib_reference () ]    
-                ]
-                [   
-                  montoring_system "SYS01" "EA Event Duration Monitoring"
-                    [ eastNorth 
-                      aib_reference [ s4_aib_reference () ]
-                    ]
-                    _no_assemblies_
-                    [ 
-                      lstn_level_transmitter "Storm Overflow Level Monitor Loop"
-                        [ eastNorth
-                          aib_reference [ s4_aib_reference () ]
-                        ]
-                        _no_subordinate_equipment_
-                        [ manufacturer "SIEMENS"
-                          model "HYDRORANGER 200" 
-                        ]
-                    ]
-                ]
-            ]
-        ]
-
-
-
-let test01 () = 
-    let worklist = 
-        [ ("KRI03", {Code = "KRI03"; Name = "Kriddle SPS"; Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001" } )
-        ] 
-        |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
-    runCompiler (defaultEnv "TETLEYS") 
-       <| compileFunctionPatches 
-                   (outputDirectory "edg-patches")
-                   "env_discharge"
-                   edcTemplate
-                   worklist
-                   
 
 let temp01 () = 
     NGR.Create "SE5531115293" 
