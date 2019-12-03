@@ -9,8 +9,6 @@ module AssetCondition =
     
     open AssetPatch.TemplatePatcher.Template
 
-    
-    
 
     /// ASSET_CONDITION
     let asset_condition : Characteristic list -> Class = 
@@ -25,9 +23,12 @@ module AssetCondition =
             | Good -> "1 - GOOD"
 
         static member TryParse (source : string) : ConditionGrade option = 
-            match source.ToUpper() with
-            | "GOOD" -> Some Good 
-            | _ -> None
+            match source with
+            | null | "" -> None
+            | _ -> 
+                match source.ToUpper() with
+                | "GOOD" -> Some Good 
+                | _ -> None
 
             
     /// ASSET_CONDITION:CONDITION_GRADE
@@ -48,9 +49,12 @@ module AssetCondition =
             | Availability_95 -> "1 - AVAILABILITY 95%"
 
         static member TryParse (source : string) : PerformanceGrade option = 
-            match source.ToUpper() with
-            | "95%" -> Some Availability_95 
-            | _ -> None
+            match source with
+            | null | "" -> None
+            | _ -> 
+                match source.ToUpper() with
+                | "95%" -> Some Availability_95 
+                | _ -> None
 
 
     /// ASSET_CONDITION:PERFORMANCE_GRADE
@@ -72,9 +76,12 @@ module AssetCondition =
             | Satisfactory -> "3 - SATISFACTORY"
 
         static member TryParse (source : string) : LoadingFactor option = 
-            match source.ToUpper() with
-            | "SATISFACTORY" -> Some Satisfactory 
-            | _ -> None
+            match source with
+            | null | "" -> None
+            | _ -> 
+                match source.ToUpper() with
+                | "SATISFACTORY" -> Some Satisfactory 
+                | _ -> None
 
     /// ASSET_CONDITION:LOADING_FACTOR
     let loading_factor (v : LoadingFactor) : Characteristic = 
@@ -89,3 +96,15 @@ module AssetCondition =
     /// ASSET_CONDITION:SURVEY_DATE
     let survey_date (year : uint32) : Characteristic = 
         _characteristic "SURVEY_DATE" (year.ToString())
+
+
+    let asset_condition_new_item (year : uint32) : Class = 
+        asset_condition 
+            [   condition_grade Good
+                condition_grade_reason "New"
+                performance_grade Availability_95
+                performance_grade_reason "New"
+                loading_factor Satisfactory
+                loading_factor_reason "New"
+                survey_date year
+            ]

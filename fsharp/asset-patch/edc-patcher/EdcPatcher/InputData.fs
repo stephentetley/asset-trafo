@@ -6,6 +6,7 @@ namespace EdcPatcher
 
 module InputData =
     
+    open System
     open FSharp.Interop.Excel
 
     open AssetPatch.Base.CompilerMonad
@@ -35,3 +36,33 @@ module InputData =
                 |> Seq.toList
         liftAction action
 
+
+    // ************************************************************************
+    // Read cell functions
+
+    let tryGetInt (source : string) : int option = 
+        try
+            int source |> Some
+        with
+        | _ -> None
+
+    let tryGetDecimal (source : string) : decimal option = 
+        try
+            decimal source |> Some
+        with
+        | _ -> None
+
+    let tryGetString (source : string) : string option = 
+        match source with
+        | null -> None
+        | _ -> Some source
+
+    /// Note input string might have hh:mm:ss suffix. 
+    /// So take first 10 characters.
+    let tryGetDate (source : string) : DateTime option = 
+        match DateTime.TryParseExact( s = source.Substring(startIndex=0, length=10)
+                                    , format = "dd/MM/yyyy"
+                                    , provider = Globalization.CultureInfo.InvariantCulture
+                                    , style = Globalization.DateTimeStyles.None) with
+        | true, date -> Some date
+        | false, _ -> None

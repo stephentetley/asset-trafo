@@ -22,13 +22,9 @@ module EdcTemplate =
     /// Note input string might have hh:mm:ss suffix. 
     /// So take first 10 characters.
     let getInstallDate (source : string) : DateTime = 
-        match DateTime.TryParseExact( s = source.Substring(startIndex=0, length=10)
-                                    , format = "dd/MM/yyyy"
-                                    , provider = Globalization.CultureInfo.InvariantCulture
-                                    , style = Globalization.DateTimeStyles.None) with
-        | true, date -> date
-        | false, _ -> 
-            new DateTime(year=1970, month=1, day=1)
+        match tryGetDate source with
+        | Some date -> date
+        | None -> new DateTime(year=1970, month=1, day=1)
 
     let aib_reference_leaf_instance (parameters : WorkListRow) : Class = 
         aib_reference 
@@ -41,10 +37,35 @@ module EdcTemplate =
         lstnut
             [ uniclass_code ()
               uniclass_desc ()
-              optional <| lstn_transducer_model parameters.``Transducer Model``
+              optional <| lstn_transducer_model     parameters.``Transducer Model``
               optional <| lstn_transducer_serial_no parameters.``Transducer Serial Number``
+              applyOptional (lstn_relay_function 1) (RelayFunction.TryParse parameters.``Relay 1 Function``)
+              applyOptional (lstn_relay_on_level 1) (tryGetDecimal parameters.``Relay 1 On``)
+              applyOptional (lstn_relay_off_level 1) (tryGetDecimal parameters.``Relay 1 Off``)
+              
+              applyOptional (lstn_relay_function 2) (RelayFunction.TryParse parameters.``Relay 2 Function``)
+              applyOptional (lstn_relay_on_level 2) (tryGetDecimal parameters.``Relay 2 On``)
+              applyOptional (lstn_relay_off_level 2) (tryGetDecimal parameters.``Relay 2 Off``)
+              
+              applyOptional (lstn_relay_function 3) (RelayFunction.TryParse parameters.``Relay 3 Function``)
+              applyOptional (lstn_relay_on_level 3) (tryGetDecimal parameters.``Relay 3 On``)
+              applyOptional (lstn_relay_off_level 3) (tryGetDecimal parameters.``Relay 3 Off``)
+              
+              applyOptional (lstn_relay_function 4) (RelayFunction.TryParse parameters.``Relay 4 Function``)
+              applyOptional (lstn_relay_on_level 4) (tryGetDecimal parameters.``Relay 4 On``)
+              applyOptional (lstn_relay_off_level 4) (tryGetDecimal parameters.``Relay 4 Off``)
+              
+              applyOptional (lstn_relay_function 5) (RelayFunction.TryParse parameters.``Relay 5 Function``)
+              applyOptional (lstn_relay_on_level 5) (tryGetDecimal parameters.``Relay 5 On``)
+              applyOptional (lstn_relay_off_level 5) (tryGetDecimal parameters.``Relay 5 Off``)
+
               applyOptional (lstn_relay_function 6) (RelayFunction.TryParse parameters.``Relay 6 Function``)
+              applyOptional (lstn_relay_on_level 6) (tryGetDecimal parameters.``Relay 6 On``)
+              applyOptional (lstn_relay_off_level 6) (tryGetDecimal parameters.``Relay 6 Off``)
+              
             ]
+
+
 
     let edcTemplate (parameters : WorkListRow) : Function = 
         let east_north_common = 
@@ -87,6 +108,7 @@ module EdcTemplate =
                             [ east_north_common
                               aib_reference_leaf_instance parameters
                               lstnut_leaf_instance parameters
+                              asset_condition_new_item (uint32 installDate.Year)
                             ]
                             _no_subordinate_equipment_
                             [ manufacturer parameters.Manufacturer
