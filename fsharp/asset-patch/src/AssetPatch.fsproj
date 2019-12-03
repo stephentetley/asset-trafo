@@ -25,6 +25,8 @@
     <Compile Include="AssetPatch\TemplatePatcher\PatchGen.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\PatchCompiler.fs" />
     <Compile Include="AssetPatch\TemplateCatalogue\Base.fs" />
+    <Compile Include="AssetPatch\TemplateCatalogue\AssetCondition.fs" />
+    <Compile Include="AssetPatch\TemplateCatalogue\Lstnut.fs" />
     <Compile Include="AssetPatch\RewritePatcher\Datatypes.fs" />
     <Compile Include="AssetPatch\RewritePatcher\RewriteMonad.fs" />
   </ItemGroup>

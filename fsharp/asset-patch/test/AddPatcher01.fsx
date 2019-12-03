@@ -62,7 +62,7 @@ open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.FuncLocPath
 open AssetPatch.TemplatePatcher.Template
 open AssetPatch.TemplatePatcher.PatchCompiler
-open AssetPatch.TemplateCatalogue.Base
+open AssetPatch.TemplateCatalogue
 
 let outputDirectory () : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output")

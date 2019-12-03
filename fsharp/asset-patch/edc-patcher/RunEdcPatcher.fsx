@@ -56,12 +56,12 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\PatchGen.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchCompiler.fs"
 #load "..\src\AssetPatch\TemplateCatalogue\Base.fs"
-
+#load "..\src\AssetPatch\TemplateCatalogue\AssetCondition.fs"
+#load "..\src\AssetPatch\TemplateCatalogue\Lstnut.fs"
 #load "EdcPatcher\OSGB36.fs"
 #load "EdcPatcher\InputData.fs"
 #load "EdcPatcher\EdcTemplate.fs"
 #load "EdcPatcher\EdcPatcher.fs"
-open EdcPatcher.OSGB36
 open EdcPatcher.EdcPatcher
 
 let outputDirectory (child : string) : string = 

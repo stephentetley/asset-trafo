@@ -9,7 +9,7 @@ module EdcTemplate =
     open System
 
     open AssetPatch.TemplatePatcher.Template
-    open AssetPatch.TemplateCatalogue.Base
+    open AssetPatch.TemplateCatalogue
 
     open EdcPatcher.InputData
     open EdcPatcher.OSGB36
@@ -48,11 +48,9 @@ module EdcTemplate =
 
     let edcTemplate (parameters : WorkListRow) : Function = 
         let east_north_common = 
-            match NGR.Create parameters.NGR |> Option.map ngrToEastingNorthing with
-            | Some eastNorth -> 
-                east_north [ easting eastNorth.Easting; northing eastNorth.Northing ]
-            | None -> 
-                east_north [ easting 0; northing 0 ]
+            match NGR.Create parameters.NGR with
+            | Some eastNorth -> east_north_ngr eastNorth
+            | None ->  east_north [ easting 0; northing 0 ]
 
         let aib_reference_common = 
             aib_reference 
