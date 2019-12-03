@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Stephen Tetley 2019
 // License: BSD 3 Clause
 
-namespace AssetPatch.TemplatePatcher
+namespace AssetPatch.TemplateCatalogue
 
 
 
-module Catalogue =
+module Base =
     
     open AssetPatch.TemplatePatcher.Template
 

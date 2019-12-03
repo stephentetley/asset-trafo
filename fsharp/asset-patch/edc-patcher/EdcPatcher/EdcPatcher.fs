@@ -10,11 +10,8 @@ module EdcPatcher =
 
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.FuncLocPath
-    open AssetPatch.TemplatePatcher.Template
-    open AssetPatch.TemplatePatcher.Catalogue
     open AssetPatch.TemplatePatcher.PatchCompiler
 
-    open EdcPatcher.OSGB36
     open EdcPatcher.InputData
     open EdcPatcher.EdcTemplate
 

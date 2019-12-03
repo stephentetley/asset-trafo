@@ -9,7 +9,7 @@ module EdcTemplate =
     open System
 
     open AssetPatch.TemplatePatcher.Template
-    open AssetPatch.TemplatePatcher.Catalogue
+    open AssetPatch.TemplateCatalogue.Base
 
     open EdcPatcher.InputData
     open EdcPatcher.OSGB36

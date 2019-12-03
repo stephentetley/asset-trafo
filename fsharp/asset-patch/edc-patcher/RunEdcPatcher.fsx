@@ -55,7 +55,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchGen.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchCompiler.fs"
-#load "..\src\AssetPatch\TemplatePatcher\Catalogue.fs"
+#load "..\src\AssetPatch\TemplateCatalogue\Base.fs"
 
 #load "EdcPatcher\OSGB36.fs"
 #load "EdcPatcher\InputData.fs"

@@ -55,12 +55,12 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchGen.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchCompiler.fs"
-#load "..\src\AssetPatch\TemplatePatcher\Catalogue.fs"
+#load "..\src\AssetPatch\TemplateCatalogue\Base.fs"
 open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.FuncLocPath
 open AssetPatch.TemplatePatcher.Template
 open AssetPatch.TemplatePatcher.PatchCompiler
-open AssetPatch.TemplatePatcher.Catalogue
+open AssetPatch.TemplateCatalogue.Base
 
 
 let outputDirectory (child : string) : string = 
@@ -174,8 +174,8 @@ let caaTemplate (parameters : RowParams) : Site =
                                 [ east_north_common
                                   aib_reference                             
                                     [ s4_aib_reference ()
-                                      optional ai2_aib_reference parameters.EquiFlocSaiNumber
-                                      optional ai2_aib_reference parameters.EquiPliNumber
+                                      applyOptional ai2_aib_reference parameters.EquiFlocSaiNumber
+                                      applyOptional ai2_aib_reference parameters.EquiPliNumber
                                     ]
                                 ]
                                 _no_subordinate_equipment_

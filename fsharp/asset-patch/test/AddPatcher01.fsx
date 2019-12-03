@@ -6,6 +6,15 @@
 #r "System.IO.FileSystem.Primitives"
 open System.IO
 
+
+#I @"C:\Users\stephen\.nuget\packages\ExcelProvider\1.0.1\lib\netstandard2.0"
+#r "ExcelProvider.Runtime.dll"
+
+#I @"C:\Users\stephen\.nuget\packages\ExcelProvider\1.0.1\typeproviders\fsharp41\netstandard2.0"
+#r "ExcelDataReader.DataSet.dll"
+#r "ExcelDataReader.dll"
+#r "ExcelProvider.DesignTime.dll"
+
 #I @"C:\Users\stephen\.nuget\packages\system.io.packaging\4.5.0\lib\netstandard1.3"
 #r "System.IO.Packaging"
 #I @"C:\Users\stephen\.nuget\packages\DocumentFormat.OpenXml\2.9.1\lib\netstandard1.3"
@@ -47,14 +56,13 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchGen.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchCompiler.fs"
-#load "..\src\AssetPatch\TemplatePatcher\Catalogue.fs"
+#load "..\src\AssetPatch\TemplateCatalogue\Base.fs"
 open AssetPatch.Base.Common
 open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.FuncLocPath
-open AssetPatch.TemplatePatcher.PatchTypes
 open AssetPatch.TemplatePatcher.Template
 open AssetPatch.TemplatePatcher.PatchCompiler
-open AssetPatch.TemplatePatcher.Catalogue
+open AssetPatch.TemplateCatalogue.Base
 
 let outputDirectory () : string = 
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output")
