@@ -110,18 +110,18 @@ module Template =
             Value = value
         }
 
-    let _optional_characteristic (name : string) (value : string option) : Characteristic = 
-        match value with
-        | Some v -> 
-            mreturn { 
-                Name = name
-                Value = v
-            }
-        | None -> blank ()
 
+    let optional (ma : Characteristic) : Characteristic = 
+        Template <| fun env st -> 
+            match apply1 ma env st with            
+            | Error msg -> Error msg
+            | Ok(None, st1) -> Ok (None, st1)
+            | Ok (Some(c1), st1) -> 
+                match c1.Value with 
+                | null | "" ->  Ok(None, st1)
+                | _ -> Ok (Some(c1), st1)
 
-
-    let optional (fn : 'a -> Characteristic)  (value : Option<'a>) : Characteristic = 
+    let applyOptional (fn : 'a -> Characteristic)  (value : Option<'a>) : Characteristic = 
         match value with 
         | None -> blank ()
         | Some a -> fn a

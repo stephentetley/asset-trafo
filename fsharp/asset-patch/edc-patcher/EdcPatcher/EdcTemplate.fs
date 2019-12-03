@@ -41,8 +41,9 @@ module EdcTemplate =
         lstnut
             [ uniclass_code ()
               uniclass_desc ()
-              lstn_transducer_model <| optString parameters.``Transducer Model``
-              lstn_transducer_serial_no <| optString parameters.``Transducer Serial Number``
+              optional <| lstn_transducer_model parameters.``Transducer Model``
+              optional <| lstn_transducer_serial_no parameters.``Transducer Serial Number``
+              applyOptional (lstn_relay_function 6) (RelayFunction.TryParse parameters.``Relay 6 Function``)
             ]
 
     let edcTemplate (parameters : WorkListRow) : Function = 

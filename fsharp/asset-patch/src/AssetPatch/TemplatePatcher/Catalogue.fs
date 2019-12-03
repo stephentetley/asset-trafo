@@ -166,18 +166,28 @@ module Catalogue =
             | _ -> None
 
     /// LSTNUT:LSTN_RELAY_ix_FUNCTION
-    let lstn_relay_function (ix : int) (v : RelayFunction option) : Characteristic = 
+    let lstn_relay_function (ix : int) (v : RelayFunction) : Characteristic = 
         let name = sprintf "LSTN_RELAY_%i_FUNCTION" ix
-        _optional_characteristic name (Option.map (fun x -> x.ToString()) v)
+        _characteristic name (v.ToString())
 
+
+    /// LSTNUT:LSTN_RELAY_ix_ON_LEVEL_M
+    let lstn_relay_on_level (ix : int) (v : decimal) : Characteristic = 
+        let name = sprintf "LSTN_RELAY_%i_ON_LEVEL_M" ix
+        _characteristic name (sprintf "%M" v)
+
+    /// LSTNUT:LSTN_RELAY_ix_OFF_LEVEL_M
+    let lstn_relay_off_level (ix : int) (v : decimal) : Characteristic = 
+        let name = sprintf "LSTN_RELAY_%i_OFF_LEVEL_M" ix
+        _characteristic name (sprintf "%M" v)
 
     /// LSTNUT:LSTN_TRANSDUCER_MODEL
-    let lstn_transducer_model (v : string option) : Characteristic =         
-        _optional_characteristic "LSTN_TRANSDUCER_MODEL" v
+    let lstn_transducer_model (v : string) : Characteristic =         
+        _characteristic "LSTN_TRANSDUCER_MODEL" v
 
     /// LSTNUT:LSTN_TRANSDUCER_SERIAL_NO
-    let lstn_transducer_serial_no (v : string option) : Characteristic =         
-        _optional_characteristic "LSTN_TRANSDUCER_SERIAL_NO" v
+    let lstn_transducer_serial_no (v : string) : Characteristic =         
+        _characteristic "LSTN_TRANSDUCER_SERIAL_NO" v
 
 
 
