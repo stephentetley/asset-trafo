@@ -77,10 +77,10 @@ let options : EdcOptions =
     }
 
 let main01 () = 
-    runEdcPatcherPhase1 options 
+    runEdcPatcherPhase1 options
 
 let main02 () = 
-    runEdcPatcherPhase2 options 
+    runEdcPatcherPhase2 options
 
 
 

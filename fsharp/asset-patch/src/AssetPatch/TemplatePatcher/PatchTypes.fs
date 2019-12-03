@@ -52,9 +52,8 @@ module PatchTypes =
     // 94  TPLMA1
     // 95  TPLMA
     
-    /// Note - including uninterpreted attributes is probably not a 
-    /// good idea. We should look to finding out exactly what values 
-    /// are needed for an upload file.
+    /// Note - more params need to be added when we understand the data
+    /// e.g CompanyCode, ControllingArea ...
     type FuncLoc = 
       { Path : FuncLocPath
         Description : string
@@ -69,6 +68,10 @@ module PatchTypes =
         
 
     let funcLocToAssocs (funcLoc: FuncLoc) : AssocList<string, string> = 
+        let  parent1 = 
+            match funcLoc.Path |> parent with
+            | None -> ""
+            | Some path -> path.ToString()
         makeAssocs
             [ ("ABCKZFLOC",     "ABC Indicator",                    "")
             ; ("GSBE_FLOC",     "Business Area",                    "")
@@ -77,7 +80,7 @@ module PatchTypes =
             ; ("KOST_FLOC",     "Cost Center",                      "")    
             ; ("TXTMI",         "Description (medium text)",        funcLoc.Description)
             ; ("FLTYP",         "FuncLocCategory",                  funcLoc.Category.ToString())
-            ; ("FUNCLOC",       "Function Location",                funcLoc.Path.ToString())
+            ; ("FUNCLOC",       "Function Location",                "")     // Must be blank
             ; ("IEQUI",         "Installation allowed",             "")
             ; ("STOR_FLOC",     "Location",                         "")
             ; ("STORTI",        "Location origin",                  "D")
@@ -96,6 +99,8 @@ module PatchTypes =
             ; ("USTW_FLOC",     "Status of an object",              funcLoc.ObjectStatus)
             ; ("USWO_FLOC",     "Status without status number",     "")
             ; ("TPLKZ_FLC",     "Structure indicator",              funcLoc.StructureIndicator)
+            ; ("TPLMA1",        "Superior FL for CR Processing",    parent1)
+            ; ("TPLMA",         "Superior FunctLoc",                parent1)
             ; ("PROI_FLOC",     "WBS Element",                      "")
             ]
             
@@ -132,7 +137,6 @@ module PatchTypes =
             [ ("FUNCLOC",       "Functional Location",      classFloc.FuncLoc.ToString())
             ; ("CLASS",         "Class",                    classFloc.Class)
             ; ("CLASSTYPE",     "Class Type",               classFloc.ClassType.Number)
-            // ; ("CLINT",         "Internal class no.",       "")
             ; ("CLSTATUS1",     "Status",                   classFloc.Status.ToString())
             ]
 

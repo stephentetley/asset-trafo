@@ -9,7 +9,107 @@ module Base =
     
     open AssetPatch.TemplatePatcher.Template
 
+    // ************************************************************************
+    // Function
+
+    let _no_functions_ : Function list = []
+
+    let control_automation : Class list -> ProcessGroup list -> Function =
+        _function "CAA" "Control and Automation" "CAA"
+
+    let electrical_power_supply : Class list -> ProcessGroup list -> Function =
+        _function "E" "Electrical Power Supply" "EPS"
+
+    let environmental_discharge : Class list -> ProcessGroup list -> Function =
+        _function "EDC" "Environmental Discharge" "EDC"
+
+    let site_infrastructure : Class list -> ProcessGroup list -> Function =
+        _function "SIF" "Site Infrastructure" "SIF"
+
+
+    // ************************************************************************
+    // Process Group
+
+    let _no_process_groups_ : ProcessGroup list = []
+
+    let control : Class list -> Process list -> ProcessGroup =
+        _processGroup "CON" "Control" "CON"
+
+    let combined_treatment : Class list -> Process list -> ProcessGroup =
+        _processGroup "COT" "Combined Treatment" "COT"
+
+    let liquid_discharge : Class list -> Process list -> ProcessGroup =
+        _processGroup "LQD" "Liquid Discharge" "LQD"
+
+    let networks : Class list -> Process list -> ProcessGroup =
+        _processGroup "NET" "Networks" "NET"
+
+    let waste_water_transfer : Class list -> Process list -> ProcessGroup =
+        _processGroup "WTF" "Waste Water Transfer" "WTF"
+
+
+    // ************************************************************************
+    // Process
+
+    let _no_processes_ : Process list = []
+
+    let pumping : Class list -> System list -> Process =
+        _process "PMG" "Pumping" "PMG"
+
+    let regulatory_monitoring : Class list -> System list -> Process =
+        _process "RGM" "Regulatory Monitoring" "RGM"
+
+    let telemetry : Class list -> System list -> Process =
+        _process "TEL" "Telemetry" "TEL"
+
+    // ************************************************************************
+    // System
+
+    let _no_systems_ : System list = []
+
+    let montoring_system (shortCode : string) (description : string) 
+                : Class list -> Assembly list -> Equipment list -> System =        
+        _system shortCode description "SMON"
+
+
+    let telemetry_system (shortCode : string) (description : string)  
+                : Class list -> Assembly list -> Equipment list -> System =    
+        _system shortCode description "CTOS"
+
     
+    // ************************************************************************
+    // Assembly
+
+    let _no_assemblies_ : Assembly list = []
+    
+    // ************************************************************************
+    // Item
+
+    let _no_items_ : Item list = []
+
+    // ************************************************************************
+    // Component
+
+    let _no_components_ : Component list = []
+
+    
+    // ************************************************************************
+    // Equipment
+
+    let _no_equipment_ : Equipment list = []
+    let _no_subordinate_equipment_ : Equipment list = []
+
+    let lstn_level_transmitter (name : string) 
+                : Class list -> Equipment list -> EquipmentAttribute list -> Equipment = 
+        _equipment name "I" "LSTN"
+
+    let telemetry_outstation (name : string) 
+                : Class list -> Equipment list -> EquipmentAttribute list -> Equipment = 
+        _equipment name "I" "NETW"
+
+    // ************************************************************************
+    // Equipment attributes
+
     let manufacturer (name : string) : EquipmentAttribute = 
         equipmentAttribute <| fun e1 ->  { e1 with Manufacturer = Some name }
         
@@ -75,81 +175,18 @@ module Base =
 
 
 
-    // ************************************************************************
-    // Equipment
-
-    let _no_equipment_ : Equipment list = []
-    let _no_subordinate_equipment_ : Equipment list = []
-
-    let lstn_level_transmitter (name : string) 
-                : Class list -> Equipment list -> EquipmentAttribute list -> Equipment = 
-        _equipment name "I" "LSTN"
-
-    let telemetry_outstation (name : string) 
-                : Class list -> Equipment list -> EquipmentAttribute list -> Equipment = 
-        _equipment name "I" "NETW"
 
 
-    // ************************************************************************
-    // Component
-
-    let _no_components_ : Component list = []
 
 
-    // ************************************************************************
-    // Item
-
-    let _no_items_ : Item list = []
-
-    // ************************************************************************
-    // Assembly
-
-    let _no_assemblies_ : Assembly list = []
 
 
-    // ************************************************************************
-    // System
-
-    let _no_systems_ : System list = []
-
-    let montoring_system (shortCode : string) (description : string) 
-                : Class list -> Assembly list -> Equipment list -> System =        
-        _system shortCode description "SMON"
 
 
-    let telemetry_system (shortCode : string) (description : string)  
-                : Class list -> Assembly list -> Equipment list -> System =    
-        _system shortCode description "CTOS"
+    
 
-    // ************************************************************************
-    // Process
+    
 
-    let _no_processes_ : Process list = []
 
-    let regulatory_monitoring : Class list -> System list -> Process =
-        _process "RGM" "Regulatory Monitoring" "RGM"
 
-    let telemetry : Class list -> System list -> Process =
-        _process "TEL" "Telemetry" "TEL"
-
-    // ************************************************************************
-    // Process Group
-
-    let _no_process_groups_ : ProcessGroup list = []
-
-    let liquid_discharge : Class list -> Process list -> ProcessGroup =
-        _processGroup "LQD" "Liquid Discharge" "LQD"
-
-    let networks : Class list -> Process list -> ProcessGroup =
-        _processGroup "NET" "Networks" "NET"
-
-    // ************************************************************************
-    // Function
-
-    let _no_functions_ : Function list = []
-
-    let environmental_discharge : Class list -> ProcessGroup list -> Function =
-        _function "EDC" "Environmental Discharge" "EDC"
-
-    let control_automation : Class list -> ProcessGroup list -> Function =
-        _function "CAA" "Control and Automation" "CAA"
+   

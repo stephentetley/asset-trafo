@@ -76,7 +76,7 @@ module Acronyms =
             ; ("EQART",         "Object Type")
             ; ("JOBJN_FL",      "Object Number")
             ; ("PPSIDI",        "PP WrkCenter origin")
-            ; ("PLNT_FLOC",     "Planning  Plant")
+            ; ("PLNT_FLOC",     "Planning Plant")
             ; ("BEBER_FL",      "Plant Section")
             ; ("BEBERI",        "Plant Section Origin")
             ; ("WERGWFLOC",     "Plant for WorkCenter")
