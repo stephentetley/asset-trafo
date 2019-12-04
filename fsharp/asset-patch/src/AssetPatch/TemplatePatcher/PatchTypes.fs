@@ -68,10 +68,12 @@ module PatchTypes =
         
 
     let funcLocToAssocs (funcLoc: FuncLoc) : AssocList<string, string> = 
-        let  parent1 = 
+        let parent1 = 
             match funcLoc.Path |> parent with
             | None -> ""
             | Some path -> path.ToString()
+        let installationAllowed = 
+            if funcLoc.Path.Level >= 5 then "X" else ""
         makeAssocs
             [ ("ABCKZFLOC",     "ABC Indicator",                    "")
             ; ("GSBE_FLOC",     "Business Area",                    "")
@@ -79,16 +81,17 @@ module PatchTypes =
             ; ("KOKR_FLOC",     "Controlling Area",                 "1000")
             ; ("KOST_FLOC",     "Cost Center",                      "")    
             ; ("TXTMI",         "Description (medium text)",        funcLoc.Description)
+            ; ("USTA_FLOC",     "Display lines for user status",    "UCON")
             ; ("FLTYP",         "FuncLocCategory",                  funcLoc.Category.ToString())
             ; ("FUNCLOC",       "Function Location",                "")     // Must be blank
-            ; ("IEQUI",         "Installation allowed",             "")
+            ; ("IEQUI",         "Installation allowed",             installationAllowed)
             ; ("STOR_FLOC",     "Location",                         "")
-            ; ("STORTI",        "Location origin",                  "D")
+            // ; ("STORTI",        "Location origin",                  "H")
             ; ("GEWRKFLOC",     "Main work center",                 "DEFAULT")
             ; ("INGR_FLOC",     "Maint Planner Group",              "")
             ; ("SWERK_FL",      "Maintenance Plant",                "2100")
             ; ("FLOC_REF",      "Masked Functional Location",       funcLoc.Path.ToString())
-            ; ("OBJTYFLOC",     "Object Type",                      "A")
+            ; ("OBJTYFLOC",     "Object Type",                      "")
             ; ("EQART",         "Object Type",                      funcLoc.ObjectType)
             ; ("PLNT_FLOC",     "Planning Plant",                   "2100")
             ; ("BEBER_FL",      "Plant Section",                    "")
@@ -96,12 +99,14 @@ module PatchTypes =
             ; ("TRPNR",         "Reference Location",               "")
             ; ("INBDT",         "Start-up date",                    funcLoc.StartupDate |> showS4Date)
             ; ("STATTEXT",      "Status",                           "CRTE")
+            ; ("STSM_FLOC",     "Status Profile",                   "ZFLOCST")
             ; ("USTW_FLOC",     "Status of an object",              funcLoc.ObjectStatus)
             ; ("USWO_FLOC",     "Status without status number",     "")
             ; ("TPLKZ_FLC",     "Structure indicator",              funcLoc.StructureIndicator)
             ; ("TPLMA1",        "Superior FL for CR Processing",    parent1)
             ; ("TPLMA",         "Superior FunctLoc",                parent1)
             ; ("PROI_FLOC",     "WBS Element",                      "")
+            ; ("ARBPLFLOC",     "Work center",                      "DEFAULT")
             ]
             
 
