@@ -29,7 +29,14 @@ module PatchCompiler =
                         (template: 'b -> Template.Template<'c>) : CompilerMonad<('name * 'c) list> = 
         forM xs (fun (name, x) -> cmEvalTemplate (template x) >>=  fun a -> mreturn (name, a))
 
-    
+    let private applyFlocTemplate (xs: (FuncLocPath * 'a) list ) 
+                        (template: 'a -> Template.Template<'b>) : CompilerMonad<'b list> = 
+        forM xs (fun (path, x) -> cmEvalTemplate (rootFloc path (template x)))
+
+
+
+
+
     type EquipmentNumber = string
 
     type ClassEquiWorkList<'hole> = (EquipmentNumber * 'hole) list
@@ -96,7 +103,7 @@ module PatchCompiler =
                                 (template : Component1<'hole>)
                                 (worklist : ComponentWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
-            let! worklist = applyTemplate worklist template |>> List.map snd
+            let! worklist = applyFlocTemplate worklist template
             do! writeComponentPatches outputDirectory filePrefix worklist
             return ()
         }                                                
@@ -123,7 +130,7 @@ module PatchCompiler =
                                 (template : Item1<'hole>)
                                 (worklist : ItemWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
-            let! worklist = applyTemplate worklist template |>> List.map snd
+            let! worklist = applyFlocTemplate worklist template
             do! writeItemPatches outputDirectory filePrefix worklist
             let components = worklist |> List.map (fun x -> x.Components) |> List.concat
             do! writeComponentPatches outputDirectory filePrefix components
@@ -152,7 +159,7 @@ module PatchCompiler =
                                 (template : Assembly1<'hole>)
                                 (worklist : AssemblyWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
-            let! worklist = applyTemplate worklist template |>> List.map snd
+            let! worklist = applyFlocTemplate worklist template
             do! writeAssemblyPatches outputDirectory filePrefix worklist
             let items = worklist |> List.map (fun x -> x.Items) |> List.concat
             do! writeItemPatches outputDirectory filePrefix items
@@ -182,7 +189,7 @@ module PatchCompiler =
                                 (template : System1<'hole>)
                                 (worklist : SystemWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
-            let! worklist = applyTemplate worklist template |>> List.map snd
+            let! worklist = applyFlocTemplate worklist template
             do! writeSystemPatches outputDirectory filePrefix worklist
             let assemblies = worklist |> List.map (fun x -> x.Assemblies) |> List.concat
             do! writeAssemblyPatches outputDirectory filePrefix assemblies
@@ -211,7 +218,7 @@ module PatchCompiler =
                                 (template : Process1<'hole>)
                                 (worklist : ProcessWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
-            let! worklist = applyTemplate worklist template |>> List.map snd
+            let! worklist = applyFlocTemplate worklist template
             do! writeProcessPatches outputDirectory filePrefix worklist
             let systems = worklist |> List.map (fun x -> x.Systems) |> List.concat
             do! writeSystemPatches outputDirectory filePrefix systems
@@ -240,7 +247,7 @@ module PatchCompiler =
                                 (template : ProcessGroup1<'hole>)
                                 (worklist : ProcessGroupWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
-            let! worklist = applyTemplate worklist template |>> List.map snd
+            let! worklist = applyFlocTemplate worklist template
             do! writeProcessGroupPatches outputDirectory filePrefix worklist
             let processes = worklist |> List.map (fun x -> x.Processes) |> List.concat
             do! writeProcessPatches outputDirectory filePrefix processes
@@ -268,7 +275,7 @@ module PatchCompiler =
                                 (template : Function1<'hole>)
                                 (worklist : FunctionWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
-            let! worklist = applyTemplate worklist template |>> List.map snd
+            let! worklist = applyFlocTemplate worklist template
             do! writeFunctionPatches outputDirectory filePrefix worklist
             let processGroups = worklist |> List.map (fun x -> x.ProcessGroups) |> List.concat
             do! writeProcessGroupPatches outputDirectory filePrefix processGroups
@@ -296,7 +303,7 @@ module PatchCompiler =
                                 (template : Site1<'hole>)
                                 (worklist : SiteWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
-            let! worklist = applyTemplate worklist template |>> List.map snd
+            let! worklist = applyFlocTemplate worklist template
             do! writeSitePatches outputDirectory filePrefix worklist
             let functions = worklist |> List.map (fun x -> x.Functions) |> List.concat
             do! writeFunctionPatches outputDirectory filePrefix functions
