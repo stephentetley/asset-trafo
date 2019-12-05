@@ -85,7 +85,7 @@ module PatchCompiler =
 
 
 
-    let private writeComponentPatches (outputDirectory : string)
+    let private recWriteComponents (outputDirectory : string)
                                         (filePrefix : string)
                                         (worklist : S4Component list) : CompilerMonad<unit> = 
         compile {
@@ -104,7 +104,7 @@ module PatchCompiler =
                                 (worklist : ComponentWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! writeComponentPatches outputDirectory filePrefix worklist
+            do! recWriteComponents outputDirectory filePrefix worklist
             return ()
         }                                                
 
@@ -112,13 +112,15 @@ module PatchCompiler =
     // Items
 
 
-    let private writeItemPatches (outputDirectory : string)
+    let private recWriteItems (outputDirectory : string)
                                     (filePrefix : string)
                                     (worklist : S4Item list) : CompilerMonad<unit> = 
         compile {
             let! (fresults, eresults) = itemsEmit worklist
             do! writeFlocResults outputDirectory 7 filePrefix fresults
             do! writeEquiResults outputDirectory 7 filePrefix eresults
+            let components = worklist |> List.map (fun x -> x.Components) |> List.concat
+            do! recWriteComponents outputDirectory filePrefix components
             return ()
         } 
 
@@ -131,9 +133,7 @@ module PatchCompiler =
                                 (worklist : ItemWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! writeItemPatches outputDirectory filePrefix worklist
-            let components = worklist |> List.map (fun x -> x.Components) |> List.concat
-            do! writeComponentPatches outputDirectory filePrefix components
+            do! recWriteItems outputDirectory filePrefix worklist
             return ()
         }  
 
@@ -141,13 +141,15 @@ module PatchCompiler =
     // Assembly
 
 
-    let writeAssemblyPatches (outputDirectory : string)
+    let private recWriteAssemblies (outputDirectory : string)
                                 (filePrefix : string)
                                 (worklist : S4Assembly list) : CompilerMonad<unit> = 
         compile {
             let! (fresults, eresults) = assembliesEmit worklist
             do! writeFlocResults outputDirectory 6 filePrefix fresults
             do! writeEquiResults outputDirectory 6 filePrefix eresults
+            let items = worklist |> List.map (fun x -> x.Items) |> List.concat
+            do! recWriteItems outputDirectory filePrefix items
             return ()
         } 
 
@@ -160,9 +162,7 @@ module PatchCompiler =
                                 (worklist : AssemblyWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! writeAssemblyPatches outputDirectory filePrefix worklist
-            let items = worklist |> List.map (fun x -> x.Items) |> List.concat
-            do! writeItemPatches outputDirectory filePrefix items
+            do! recWriteAssemblies outputDirectory filePrefix worklist
             return ()
         }  
 
@@ -171,13 +171,15 @@ module PatchCompiler =
     // System
 
 
-    let writeSystemPatches (outputDirectory : string)
+    let private recWriteSystems (outputDirectory : string)
                                 (filePrefix : string)
                                 (worklist : S4System list) : CompilerMonad<unit> = 
         compile {
             let! (fresults, eresults) = systemsEmit worklist
             do! writeFlocResults outputDirectory 5 filePrefix fresults
-            do! writeEquiResults outputDirectory 5 filePrefix eresults
+            do! writeEquiResults outputDirectory 5 filePrefix eresults            
+            let assemblies = worklist |> List.map (fun x -> x.Assemblies) |> List.concat
+            do! recWriteAssemblies outputDirectory filePrefix assemblies
             return ()
         } 
 
@@ -190,9 +192,7 @@ module PatchCompiler =
                                 (worklist : SystemWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! writeSystemPatches outputDirectory filePrefix worklist
-            let assemblies = worklist |> List.map (fun x -> x.Assemblies) |> List.concat
-            do! writeAssemblyPatches outputDirectory filePrefix assemblies
+            do! recWriteSystems outputDirectory filePrefix worklist
             return ()
         }
     
@@ -201,12 +201,14 @@ module PatchCompiler =
     // Process
 
 
-    let writeProcessPatches (outputDirectory : string)
+    let private recWriteProcesses (outputDirectory : string)
                                 (filePrefix : string)
                                 (worklist : S4Process list) : CompilerMonad<unit> = 
         compile {
             let! fresults = processesEmit worklist
-            do! writeFlocResults outputDirectory 4 filePrefix fresults
+            do! writeFlocResults outputDirectory 4 filePrefix fresults            
+            let systems = worklist |> List.map (fun x -> x.Systems) |> List.concat
+            do! recWriteSystems outputDirectory filePrefix systems
             return ()
         } 
 
@@ -219,9 +221,7 @@ module PatchCompiler =
                                 (worklist : ProcessWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! writeProcessPatches outputDirectory filePrefix worklist
-            let systems = worklist |> List.map (fun x -> x.Systems) |> List.concat
-            do! writeSystemPatches outputDirectory filePrefix systems
+            do! recWriteProcesses outputDirectory filePrefix worklist
             return ()
         }
 
@@ -230,12 +230,14 @@ module PatchCompiler =
     // ProcessGroups
 
 
-    let writeProcessGroupPatches (outputDirectory : string)
+    let private recWriteProcessGroups (outputDirectory : string)
                                 (filePrefix : string)
                                 (worklist : S4ProcessGroup list) : CompilerMonad<unit> = 
         compile {
             let! fresults = processGroupsEmit worklist
             do! writeFlocResults outputDirectory 3 filePrefix fresults
+            let processes = worklist |> List.map (fun x -> x.Processes) |> List.concat
+            do! recWriteProcesses outputDirectory filePrefix processes
             return ()
         } 
 
@@ -248,9 +250,7 @@ module PatchCompiler =
                                 (worklist : ProcessGroupWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! writeProcessGroupPatches outputDirectory filePrefix worklist
-            let processes = worklist |> List.map (fun x -> x.Processes) |> List.concat
-            do! writeProcessPatches outputDirectory filePrefix processes
+            do! recWriteProcessGroups outputDirectory filePrefix worklist
             return ()
         }
 
@@ -258,12 +258,14 @@ module PatchCompiler =
     // Functions
 
 
-    let writeFunctionPatches (outputDirectory : string)
+    let private recWriteFunctions (outputDirectory : string)
                                 (filePrefix : string)
                                 (worklist : S4Function list) : CompilerMonad<unit> = 
         compile {
             let! fresults = functionsEmit worklist
             do! writeFlocResults outputDirectory 2 filePrefix fresults
+            let processGroups = worklist |> List.map (fun x -> x.ProcessGroups) |> List.concat
+            do! recWriteProcessGroups outputDirectory filePrefix processGroups
             return ()
         } 
 
@@ -276,9 +278,7 @@ module PatchCompiler =
                                 (worklist : FunctionWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! writeFunctionPatches outputDirectory filePrefix worklist
-            let processGroups = worklist |> List.map (fun x -> x.ProcessGroups) |> List.concat
-            do! writeProcessGroupPatches outputDirectory filePrefix processGroups
+            do! recWriteFunctions outputDirectory filePrefix worklist
             return ()
         }
 
@@ -286,12 +286,14 @@ module PatchCompiler =
     // Sites
 
 
-    let writeSitePatches (outputDirectory : string)
+    let private recWriteSites (outputDirectory : string)
                             (filePrefix : string)
                             (worklist : S4Site list) : CompilerMonad<unit> = 
         compile {
             let! fresults = sitesEmit worklist
             do! writeFlocResults outputDirectory 1 filePrefix fresults
+            let functions = worklist |> List.map (fun x -> x.Functions) |> List.concat
+            do! recWriteFunctions outputDirectory filePrefix functions
             return ()
         } 
 
@@ -304,9 +306,7 @@ module PatchCompiler =
                                 (worklist : SiteWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! writeSitePatches outputDirectory filePrefix worklist
-            let functions = worklist |> List.map (fun x -> x.Functions) |> List.concat
-            do! writeFunctionPatches outputDirectory filePrefix functions
+            do! recWriteSites outputDirectory filePrefix worklist
             return ()
         }
 

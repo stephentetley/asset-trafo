@@ -321,7 +321,7 @@ module Template =
                         (processes : Process list) : ProcessGroup = 
         extendFloc token
             <| template {
-                let! floc = asksFloc () |>> extend token 
+                let! floc = asksFloc ()
                 let! cs = unlistM classes
                 let! xs = unlistM processes
                 return { 
