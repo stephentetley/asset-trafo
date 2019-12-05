@@ -18,6 +18,9 @@ module EmitFuncLoc =
         { ClassFlocs : ClassFloc list
           ValuaFlocs : ValuaFloc list
         }
+        member x.IsEmpty 
+            with get () : bool = 
+                x.ClassFlocs.IsEmpty && x.ValuaFlocs.IsEmpty
 
     let collectFlocProperties (source : FlocProperties list) : FlocProperties = 
         let add (r1 : FlocProperties) (acc : FlocProperties) = 
@@ -37,7 +40,9 @@ module EmitFuncLoc =
           ClassFlocs : ClassFloc list
           ValuaFlocs : ValuaFloc list
         }
-
+        member x.IsEmpty 
+            with get () : bool = 
+                x.FuncLocs.IsEmpty &&  x.ClassFlocs.IsEmpty && x.ValuaFlocs.IsEmpty
 
     let collectFuncLocResults (source : FuncLocResult1 list) : FuncLocResults = 
         let add (r1 : FuncLocResult1) (acc : FuncLocResults) = 
@@ -147,19 +152,26 @@ module EmitFuncLoc =
                             (level : int)
                             (filePrefix : string) 
                             (flocProperties : FlocProperties) : CompilerMonad<unit> = 
-        compile {
-            do! writeClassFlocFile directory level filePrefix flocProperties.ClassFlocs
-            do! writeValuaFlocFile directory level filePrefix flocProperties.ValuaFlocs
-            return ()
-        }
+        if flocProperties.IsEmpty then
+            mreturn ()
+        else
+            compile {
+                do! writeClassFlocFile directory level filePrefix flocProperties.ClassFlocs
+                do! writeValuaFlocFile directory level filePrefix flocProperties.ValuaFlocs
+                return ()
+            }
 
     let writeFlocResults (directory : string) 
                             (level : int)
                             (filePrefix : string) 
                             (funcLocResults : FuncLocResults) : CompilerMonad<unit> = 
-        compile {
-            do! writeFuncLocFile directory level filePrefix funcLocResults.FuncLocs
-            do! writeClassFlocFile directory level filePrefix funcLocResults.ClassFlocs
-            do! writeValuaFlocFile directory level filePrefix funcLocResults.ValuaFlocs
-            return ()
-        }
+        
+        if funcLocResults.IsEmpty then
+            mreturn ()
+        else
+            compile {
+                do! writeFuncLocFile directory level filePrefix funcLocResults.FuncLocs
+                do! writeClassFlocFile directory level filePrefix funcLocResults.ClassFlocs
+                do! writeValuaFlocFile directory level filePrefix funcLocResults.ValuaFlocs
+                return ()
+            }

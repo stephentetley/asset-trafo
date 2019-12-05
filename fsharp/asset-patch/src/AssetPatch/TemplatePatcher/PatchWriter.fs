@@ -36,6 +36,28 @@ module PatchWriter =
         | ClassEqui | ValuaEqui -> "apch"
 
         
+    let genSubFolder (directory : string) (level : int) : CompilerMonad<string> =
+        let name1  = 
+            match level with
+            | 1 -> Some "Level_01_sites"
+            | 2 -> Some "Level_02_functions"
+            | 3 -> Some "Level_03_process_groups"
+            | 4 -> Some "Level_04_processes"
+            | 5 -> Some "Level_05_systems"
+            | 6 -> Some "Level_06_assemblies"
+            | 7 -> Some "Level_07_items"
+            | 8 -> Some "Level_08_components"
+            | _ -> None
+        match name1 with
+        | None -> throwError "Unknown Level"
+        | Some name -> 
+                let fullName = Path.Combine(directory, name)
+                if not <| IO.Directory.Exists(fullName) then
+                    IO.Directory.CreateDirectory(fullName) |> ignore
+                else ()
+                mreturn fullName
+
+                    
 
     let private genFileName (directory : string) 
                             (level : int)
@@ -43,9 +65,10 @@ module PatchWriter =
                             (entityType : EntityType) : CompilerMonad<string> = 
         compile {
             let! idx = newFileIndex level
+            let! subdirectory = genSubFolder directory level
             let name1 = 
                 sprintf "%s_level%i_%02i_%s.%s" (safeName filePrefix) level idx (entityName entityType) (entityExtension entityType)
-            return Path.Combine(directory, name1)
+            return Path.Combine(subdirectory, name1)
         }
 
     let getVariant (entityType : EntityType) : CompilerMonad<string option> = 

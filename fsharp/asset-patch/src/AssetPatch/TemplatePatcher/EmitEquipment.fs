@@ -20,6 +20,9 @@ module EmitEquipment =
         { ClassEquis : ClassEqui list
           ValuaEquis : ValuaEqui list
         }
+        member x.IsEmpty 
+            with get () : bool = 
+                x.ClassEquis.IsEmpty && x.ValuaEquis.IsEmpty
 
     let collectEquiProperties (source : EquiProperties list) : EquiProperties = 
         let add (r1 : EquiProperties) (acc : EquiProperties) = 
@@ -40,7 +43,10 @@ module EmitEquipment =
           ClassEquis : ClassEqui list
           ValuaEquis : ValuaEqui list
         }
-
+        member x.IsEmpty 
+            with get () : bool = 
+                x.Equis.IsEmpty &&  x.ClassEquis.IsEmpty && x.ValuaEquis.IsEmpty
+            
 
     let collectEquiResults (source : EquiResult1 list) : EquiResults = 
         let add (r1 : EquiResult1) (acc : EquiResults) = 
@@ -162,20 +168,26 @@ module EmitEquipment =
                             (level : int)
                             (filePrefix : string) 
                             (equiProperties : EquiProperties) : CompilerMonad<unit> = 
-        compile {
-            do! writeClassEquiFile directory level filePrefix equiProperties.ClassEquis
-            do! writeValuaEquiFile directory level filePrefix equiProperties.ValuaEquis
-            return ()
-        }
+        if equiProperties.IsEmpty then
+            mreturn ()
+        else
+            compile {
+                do! writeClassEquiFile directory level filePrefix equiProperties.ClassEquis
+                do! writeValuaEquiFile directory level filePrefix equiProperties.ValuaEquis
+                return ()
+            }
 
     let writeEquiResults (directory : string) 
                             (level : int)
                             (filePrefix : string) 
                             (equiResults : EquiResults) : CompilerMonad<unit> = 
-        compile {
-            do! writeEquiFile directory level filePrefix equiResults.Equis
-            do! writeClassEquiFile directory level filePrefix equiResults.ClassEquis
-            do! writeValuaEquiFile directory level filePrefix equiResults.ValuaEquis
-            return ()
-        }
+        if equiResults.IsEmpty then
+            mreturn ()
+        else
+            compile {
+                do! writeEquiFile directory level filePrefix equiResults.Equis
+                do! writeClassEquiFile directory level filePrefix equiResults.ClassEquis
+                do! writeValuaEquiFile directory level filePrefix equiResults.ValuaEquis
+                return ()
+            }
     
