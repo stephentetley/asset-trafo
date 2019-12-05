@@ -7,6 +7,8 @@ namespace AssetPatch.TemplatePatcher
 
 module Hierarchy =
     
+    open System
+
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.PatchTypes
     
@@ -46,6 +48,11 @@ module Hierarchy =
           SuboridnateEquipment : S4Equipment list
         }
 
+
+    type FlocProperties = 
+        { StartupDate : DateTime
+        
+        }
     
     type S4Component = 
         { FuncLoc : FuncLocPath

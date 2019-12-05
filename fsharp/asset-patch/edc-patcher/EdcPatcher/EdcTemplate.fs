@@ -22,8 +22,8 @@ module EdcTemplate =
     /// Note input string might have hh:mm:ss suffix. 
     /// So take first 10 characters.
     let getInstallDate (source : string) : DateTime = 
-        match tryGetDate source with
-        | Some date -> date
+        match tryGetUSDate source with
+        | Some date -> printfn "Date is %O" date; date
         | None -> new DateTime(year=1970, month=1, day=1)
 
     let aib_reference_leaf_instance (parameters : WorkListRow) : Class = 
@@ -68,6 +68,12 @@ module EdcTemplate =
 
 
     let edcTemplate (parameters : WorkListRow) : Function = 
+
+        let startupDateTrafo : EnvTransformer = 
+            match tryGetUSDate parameters.``Install Date`` with
+            | None -> id
+            | Some date -> printfn "startupDate:%O" date; startupDate date
+
         let east_north_common = 
             match NGR.Create parameters.NGR with
             | Some eastNorth -> east_north_ngr eastNorth
@@ -82,44 +88,44 @@ module EdcTemplate =
 
         let installDate = getInstallDate parameters.``Install Date``
 
-
-        environmental_discharge 
-            [ east_north_common 
-              aib_reference_common
-            ]
-            [ 
-              liquid_discharge
-                [ east_north_common
+        locals [startupDateTrafo]
+            <| environmental_discharge 
+                [ east_north_common 
                   aib_reference_common
                 ]
-                [   
-                  regulatory_monitoring
-                    [ east_north_common 
-                      aib_reference_common   
+                [ 
+                  liquid_discharge
+                    [ east_north_common
+                      aib_reference_common
                     ]
                     [   
-                      montoring_system "SYS01" "EA Event Duration Monitoring"
+                      regulatory_monitoring
                         [ east_north_common 
-                          aib_reference_common
+                          aib_reference_common   
                         ]
-                        _no_assemblies_
-                        [ 
-                          lstn_level_transmitter "Storm Overflow Level Monitor Loop"
-                            [ east_north_common
-                              aib_reference_leaf_instance parameters
-                              lstnut_leaf_instance parameters
-                              asset_condition_new_item (uint32 installDate.Year)
+                        [   
+                          montoring_system "SYS01" "EA Event Duration Monitoring"
+                            [ east_north_common 
+                              aib_reference_common
                             ]
-                            _no_subordinate_equipment_
-                            [ manufacturer parameters.Manufacturer
-                              model parameters.Model
-                              serial_number parameters.``Serial Number``
-                              construction_year (uint16 installDate.Year)
-                              construction_month (uint8 installDate.Month)
+                            _no_assemblies_
+                            [ 
+                              lstn_level_transmitter "Storm Overflow Level Monitor Loop"
+                                [ east_north_common
+                                  aib_reference_leaf_instance parameters
+                                  lstnut_leaf_instance parameters
+                                  asset_condition_new_item (uint32 installDate.Year)
+                                ]
+                                _no_subordinate_equipment_
+                                [ manufacturer parameters.Manufacturer
+                                  model parameters.Model
+                                  serial_number parameters.``Serial Number``
+                                  construction_year (uint16 installDate.Year)
+                                  construction_month (uint8 installDate.Month)
+                                ]
                             ]
                         ]
                     ]
                 ]
-            ]
     
 

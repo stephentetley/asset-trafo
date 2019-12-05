@@ -94,6 +94,7 @@ let test01 () : Result<unit, ErrMsg> =
     runCompiler (defaultEnv "TETLEYS")
         <| compileClassEquiValuaEquiPatches 
                     (outputDirectory ())
+                    5
                     "asset_condition"
                     assetConditionTemplate
                     worklist
@@ -114,6 +115,7 @@ let test02 () =
     runCompiler (defaultEnv "TETLEYS")
        <| compileClassFlocValuaFlocPatches 
                    (outputDirectory ())
+                   5
                    "aib_reference"
                    aibReferenceTemplate
                    worklist

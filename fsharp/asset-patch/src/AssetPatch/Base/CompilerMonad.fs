@@ -244,6 +244,9 @@ module CompilerMonad =
     let asks (projection : Env -> 'ans) : CompilerMonad<'ans> = 
         CompilerMonad <| fun env st -> Ok (projection env, st)
 
+    let local (modify : Env -> Env) (ma : CompilerMonad<'ans>) : CompilerMonad<'ans> = 
+        CompilerMonad <| fun env st -> apply1 ma (modify env) st
+
     // ************************************************************************
     // Name Supply 
 

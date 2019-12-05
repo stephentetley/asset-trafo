@@ -109,7 +109,22 @@ module Template =
 
     let asksFloc () : Template<FuncLocPath> = 
         Template <| fun (_,floc) st -> Ok (Some(floc), st)
+
+    type EnvTransformer = CompilerMonad.Env -> CompilerMonad.Env
+
+    let local (modify : EnvTransformer) (ma : Template<'a>) : Template<'a> = 
+        Template <| fun (e1, floc) st -> 
+            apply1 ma (modify e1, floc) st
+
+    let locals (modifications : EnvTransformer list) (ma : Template<'a>) : Template<'a> = 
+        let trafo = List.foldBack (fun f acc -> acc >> f) modifications id
+        Template <| fun (e1, floc) st -> 
+            apply1 ma (trafo e1, floc) st
+
             
+    let startupDate (date : DateTime) : EnvTransformer = 
+        fun env -> { env with StartupDate = date }
+
 
     let internal extendFloc (levelCode  : string) (ma : Template<'a>) : Template<'a> = 
         Template <| fun (e1,floc) st -> 
