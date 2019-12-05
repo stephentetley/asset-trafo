@@ -10,7 +10,6 @@ module Parser =
 
     open AssetPatch.Base.Common
     open AssetPatch.Base.ChangeFile
-    //    open AssetPatch.Base.AbsChangeFile
 
     type ChangeFileParser<'ans> = Parser<'ans, unit>
 

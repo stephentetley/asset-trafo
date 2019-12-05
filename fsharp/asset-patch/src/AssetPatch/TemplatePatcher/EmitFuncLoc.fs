@@ -7,9 +7,9 @@ namespace AssetPatch.TemplatePatcher
 module EmitFuncLoc =
 
     open AssetPatch.Base
-    open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.FuncLocPath
+    open AssetPatch.TemplatePatcher.CompilerMonad
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Hierarchy
     open AssetPatch.TemplatePatcher.PatchWriter

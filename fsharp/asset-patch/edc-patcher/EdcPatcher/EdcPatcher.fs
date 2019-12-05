@@ -8,8 +8,8 @@ module EdcPatcher =
     
     open System.IO
 
-    open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.FuncLocPath
+    open AssetPatch.TemplatePatcher.CompilerMonad
     open AssetPatch.TemplatePatcher.PatchCompiler
 
     open EdcPatcher.InputData

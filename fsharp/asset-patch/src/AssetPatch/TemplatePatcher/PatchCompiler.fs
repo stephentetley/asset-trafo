@@ -11,8 +11,8 @@ module PatchCompiler =
     // Open first so common names get overridden
     open AssetPatch.TemplatePatcher.Template
 
-    open AssetPatch.Base.CompilerMonad    
     open AssetPatch.Base.FuncLocPath
+    open AssetPatch.TemplatePatcher.CompilerMonad    
     open AssetPatch.TemplatePatcher.Hierarchy
     open AssetPatch.TemplatePatcher.EquiIndexing
     open AssetPatch.TemplatePatcher.EmitEquipment

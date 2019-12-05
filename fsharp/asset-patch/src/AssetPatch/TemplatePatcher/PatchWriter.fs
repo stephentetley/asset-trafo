@@ -16,8 +16,8 @@ module PatchWriter =
     open AssetPatch.Base.Common
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.Acronyms
-    open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.Printer
+    open AssetPatch.TemplatePatcher.CompilerMonad
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.EquiIndexing
 

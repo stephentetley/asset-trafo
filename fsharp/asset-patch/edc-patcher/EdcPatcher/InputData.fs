@@ -9,7 +9,7 @@ module InputData =
     open System
     open FSharp.Interop.Excel
 
-    open AssetPatch.Base.CompilerMonad
+    open AssetPatch.TemplatePatcher.CompilerMonad
 
     [<Literal>]
     let PROVIDERSOURCE = __SOURCE_DIRECTORY__ + @"\..\excel-sample\WorkListSample.xlsx"

@@ -15,9 +15,9 @@ module EquiIndexing =
     open SheetDoc.Internal.Syntax       
     open SheetDoc.Internal.Render
     open SheetDoc.SheetDoc
-
-    open AssetPatch.Base.CompilerMonad
+    
     open AssetPatch.Base.FuncLocPath
+    open AssetPatch.TemplatePatcher.CompilerMonad
     open AssetPatch.TemplatePatcher.PatchTypes
 
     type RowDoc = SheetDoc.Internal.Syntax.RowDoc
