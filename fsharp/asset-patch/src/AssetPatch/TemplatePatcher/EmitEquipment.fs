@@ -6,12 +6,15 @@ namespace AssetPatch.TemplatePatcher
 
 module EmitEquipment =
 
+    open System.IO
+
     open AssetPatch.Base
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Hierarchy
+    open AssetPatch.TemplatePatcher.EquiIndexing
     open AssetPatch.TemplatePatcher.PatchWriter
     
     
@@ -185,6 +188,9 @@ module EmitEquipment =
             mreturn ()
         else
             compile {
+                let! dirName = genSubFolder directory level
+                let equiFile = Path.Combine(dirName, "EquiIndexing.xlsx")
+                do! writeEquiIndexingSheet equiFile equiResults.Equis
                 do! writeEquiFile directory level filePrefix equiResults.Equis
                 do! writeClassEquiFile directory level filePrefix equiResults.ClassEquis
                 do! writeValuaEquiFile directory level filePrefix equiResults.ValuaEquis

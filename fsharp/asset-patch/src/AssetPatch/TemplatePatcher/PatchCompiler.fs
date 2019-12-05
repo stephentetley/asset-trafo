@@ -316,10 +316,12 @@ module PatchCompiler =
 
     /// Generate patches for a new level 1 site and its subordinates
     let materializeEquiClassValuaPatches (outputDirectory : string) : CompilerMonad<unit> = 
-        compile {
-            let xlsxFile = Path.Combine(outputDirectory, "EquiIndexing.xlsx")
-            let! substs = readEquiIndexingSheet xlsxFile
-            let sources = Directory.GetFiles(path = outputDirectory, searchPattern = "*.apch") |> List.ofArray
-            do! mapMz (materializeEquiFile substs) sources
-            return ()
-        }
+        let xlsxFile = Path.Combine(outputDirectory, "EquiIndexing.xlsx")
+        if File.Exists(xlsxFile) then
+            compile {            
+                let! substs = readEquiIndexingSheet xlsxFile
+                let sources = Directory.GetFiles(path = outputDirectory, searchPattern = "*.apch") |> List.ofArray
+                do! mapMz (materializeEquiFile substs) sources
+                return ()
+            }
+        else mreturn ()

@@ -44,4 +44,9 @@ module EdcPatcher =
 
     let runEdcPatcherPhase2 (opts : EdcOptions) = 
         runCompiler (defaultEnv opts.UserName) 
-            <| materializeEquiClassValuaPatches opts.OutputDirectory
+            <| compile {
+                let subfolders = Directory.GetDirectories opts.OutputDirectory |> Array.toList
+                do! mapMz materializeEquiClassValuaPatches subfolders
+                return ()
+            }
+            
