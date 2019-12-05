@@ -159,21 +159,23 @@ module EmitEquipment =
     // Write output
 
     let writeEquiProperties (directory : string) 
+                            (level : int)
                             (filePrefix : string) 
                             (equiProperties : EquiProperties) : CompilerMonad<unit> = 
         compile {
-            do! writeClassEquiFile directory filePrefix equiProperties.ClassEquis
-            do! writeValuaEquiFile directory filePrefix equiProperties.ValuaEquis
+            do! writeClassEquiFile directory level filePrefix equiProperties.ClassEquis
+            do! writeValuaEquiFile directory level filePrefix equiProperties.ValuaEquis
             return ()
         }
 
     let writeEquiResults (directory : string) 
+                            (level : int)
                             (filePrefix : string) 
                             (equiResults : EquiResults) : CompilerMonad<unit> = 
         compile {
-            do! writeEquiFile directory filePrefix equiResults.Equis
-            do! writeClassEquiFile directory filePrefix equiResults.ClassEquis
-            do! writeValuaEquiFile directory filePrefix equiResults.ValuaEquis
+            do! writeEquiFile directory level filePrefix equiResults.Equis
+            do! writeClassEquiFile directory level filePrefix equiResults.ClassEquis
+            do! writeValuaEquiFile directory level filePrefix equiResults.ValuaEquis
             return ()
         }
     

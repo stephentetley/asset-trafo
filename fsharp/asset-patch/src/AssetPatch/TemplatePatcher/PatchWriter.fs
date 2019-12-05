@@ -38,12 +38,13 @@ module PatchWriter =
         
 
     let private genFileName (directory : string) 
+                            (level : int)
                             (filePrefix : string) 
                             (entityType : EntityType) : CompilerMonad<string> = 
         compile {
-            let! idx = newFileIndex ()
+            let! idx = newFileIndex level
             let name1 = 
-                sprintf "%s_%02i_%s.%s" (safeName filePrefix) idx (entityName entityType) (entityExtension entityType)
+                sprintf "%s_level%i_%02i_%s.%s" (safeName filePrefix) level idx (entityName entityType) (entityExtension entityType)
             return Path.Combine(directory, name1)
         }
 
@@ -114,7 +115,9 @@ module PatchWriter =
             |> List.map funcLocToAssocs     
             |> makeChangeFile FuncLoc
 
+    /// Write a list of FuncLoc changes to a ChangeFile
     let writeFuncLocFile (directory : string) 
+                            (level : int)
                             (filePrefix : string) 
                             (funcLocs : FuncLoc list) : CompilerMonad<unit> = 
         compile { 
@@ -122,7 +125,7 @@ module PatchWriter =
             | [] -> return ()
             | _ -> 
                 let! changes = makeFuncLocFile funcLocs
-                let! outPath = genFileName directory filePrefix FuncLoc
+                let! outPath = genFileName directory level filePrefix FuncLoc
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
             }
@@ -137,8 +140,9 @@ module PatchWriter =
             |> List.map classFlocToAssocs     
             |> makeChangeFile ClassFloc
 
-
+    /// Write a list of ClassFloc changes to a ChangeFile
     let writeClassFlocFile (directory : string) 
+                            (level : int)
                             (filePrefix : string) 
                             (classFlocs : ClassFloc list) : CompilerMonad<unit> = 
         compile { 
@@ -146,7 +150,7 @@ module PatchWriter =
             | [] -> return ()
             | _ -> 
                 let! changes = makeClassFlocFile classFlocs
-                let! outPath = genFileName directory filePrefix ClassFloc
+                let! outPath = genFileName directory level filePrefix ClassFloc
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
             }
@@ -162,7 +166,9 @@ module PatchWriter =
             |> makeChangeFile ValuaFloc
 
 
+    /// Write a list of ValuaFloc changes to a ChangeFile
     let writeValuaFlocFile (directory : string) 
+                            (level : int)
                             (filePrefix : string) 
                             (valuaFlocs : ValuaFloc list) : CompilerMonad<unit> = 
         compile { 
@@ -170,7 +176,7 @@ module PatchWriter =
             | [] -> return ()
             | _ -> 
                 let! changes = makeValuaFlocFile valuaFlocs
-                let! outPath = genFileName directory filePrefix ValuaFloc
+                let! outPath = genFileName directory level filePrefix ValuaFloc
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
             }
@@ -186,8 +192,9 @@ module PatchWriter =
             |> List.map equiToAssocs     
             |> makeChangeFile Equi
 
-
+    /// Write a list of Equi changes to a ChangeFile
     let writeEquiFile (directory : string) 
+                        (level : int)
                         (filePrefix : string) 
                         (equis : Equi list) : CompilerMonad<unit> = 
         compile { 
@@ -195,14 +202,15 @@ module PatchWriter =
             | [] -> return ()
             | _ -> 
                 let! changes = makeEquiFile equis
-                let! outPath = genFileName directory filePrefix Equi
+                let! outPath = genFileName directory level filePrefix Equi
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
             }
 
-
+    /// Write an EquiIndexing file
     let writeEquiIndexing (directory : string) 
-                        (equis : Equi list) : CompilerMonad<unit> =  
+                            (level : int)
+                            (equis : Equi list) : CompilerMonad<unit> =  
         compile {
             let outputPath = Path.Combine(directory, "EquiIndexing.xlsx")
             return! writeEquiIndexingSheet outputPath equis
@@ -219,7 +227,9 @@ module PatchWriter =
             |> List.map classEquiToAssocs     
             |> makeChangeFile ClassEqui
 
+    /// Write a list of ClassEqui changes to a ChangeFile
     let writeClassEquiFile (directory : string) 
+                            (level : int)
                             (filePrefix : string) 
                             (classEquis : ClassEqui list) : CompilerMonad<unit> = 
         compile { 
@@ -227,7 +237,7 @@ module PatchWriter =
             | [] -> return ()
             | _ -> 
                 let! changes = makeClassEquiFile classEquis
-                let! outPath = genFileName directory filePrefix ClassEqui
+                let! outPath = genFileName directory level filePrefix ClassEqui
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
             }
@@ -242,8 +252,9 @@ module PatchWriter =
             |> List.map valuaEquiToAssocs     
             |> makeChangeFile ValuaEqui
 
-
+    /// Write a list of ValuaEqui changes to a ChangeFile
     let writeValuaEquiFile (directory : string) 
+                            (level : int)
                             (filePrefix : string) 
                             (valuaEquis : ValuaEqui list) : CompilerMonad<unit> = 
         compile { 
@@ -252,7 +263,7 @@ module PatchWriter =
             | _ ->       
             
                 let! changes = makeValuaEquiFile valuaEquis
-                let! outPath = genFileName directory filePrefix ValuaEqui
+                let! outPath = genFileName directory level filePrefix ValuaEqui
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
             }

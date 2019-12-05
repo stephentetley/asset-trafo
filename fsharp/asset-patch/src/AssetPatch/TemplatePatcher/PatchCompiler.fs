@@ -43,16 +43,16 @@ module PatchCompiler =
 
     /// Generate Class and Char patches to update existing equipment.
     let compileClassEquiValuaEquiPatches (outputDirectory : string)
-                                         (filePrefix : string)
-                                         (template : Class1<'hole>)
-                                         (worklist : ClassEquiWorkList<'hole>)
-                                            : CompilerMonad<unit> = 
+                                            (level : int)
+                                            (filePrefix : string)
+                                            (template : Class1<'hole>)
+                                            (worklist : ClassEquiWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist1 = applyTemplate worklist template
             let! results = 
                 forM worklist1 (fun (number, klass) -> equipmentToEquiProperties number [klass])
                     |>> collectEquiProperties
-            do! writeEquiProperties outputDirectory filePrefix results
+            do! writeEquiProperties outputDirectory level filePrefix results
             return ()
         }
 
@@ -62,16 +62,16 @@ module PatchCompiler =
 
     /// Generate Class and Char patches to update existing equipment.
     let compileClassFlocValuaFlocPatches (outputDirectory : string)
-                                         (filePrefix : string)
-                                         (template : Class1<'hole>)
-                                         (worklist : ClassFlocWorkList<'hole>)
-                                            : CompilerMonad<unit> = 
+                                            (level : int)
+                                            (filePrefix : string)
+                                            (template : Class1<'hole>)
+                                            (worklist : ClassFlocWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist1 = applyTemplate worklist template
             let! results = 
                 forM worklist1 (fun (path, klass) -> funclocToFlocProperties path [klass])
                     |>> collectFlocProperties
-            do! writeFlocProperties outputDirectory filePrefix results
+            do! writeFlocProperties outputDirectory level filePrefix results
             return ()
         }
 
@@ -90,8 +90,8 @@ module PatchCompiler =
                                         (worklist : S4Component list) : CompilerMonad<unit> = 
         compile {
             let! (fresults, eresults) = componentsEmit worklist
-            do! writeFlocResults outputDirectory filePrefix fresults
-            do! writeEquiResults outputDirectory filePrefix eresults
+            do! writeFlocResults outputDirectory 8 filePrefix fresults
+            do! writeEquiResults outputDirectory 8 filePrefix eresults
             return ()
         } 
 
@@ -117,8 +117,8 @@ module PatchCompiler =
                                     (worklist : S4Item list) : CompilerMonad<unit> = 
         compile {
             let! (fresults, eresults) = itemsEmit worklist
-            do! writeFlocResults outputDirectory filePrefix fresults
-            do! writeEquiResults outputDirectory filePrefix eresults
+            do! writeFlocResults outputDirectory 7 filePrefix fresults
+            do! writeEquiResults outputDirectory 7 filePrefix eresults
             return ()
         } 
 
@@ -146,8 +146,8 @@ module PatchCompiler =
                                 (worklist : S4Assembly list) : CompilerMonad<unit> = 
         compile {
             let! (fresults, eresults) = assembliesEmit worklist
-            do! writeFlocResults outputDirectory filePrefix fresults
-            do! writeEquiResults outputDirectory filePrefix eresults
+            do! writeFlocResults outputDirectory 6 filePrefix fresults
+            do! writeEquiResults outputDirectory 6 filePrefix eresults
             return ()
         } 
 
@@ -176,8 +176,8 @@ module PatchCompiler =
                                 (worklist : S4System list) : CompilerMonad<unit> = 
         compile {
             let! (fresults, eresults) = systemsEmit worklist
-            do! writeFlocResults outputDirectory filePrefix fresults
-            do! writeEquiResults outputDirectory filePrefix eresults
+            do! writeFlocResults outputDirectory 5 filePrefix fresults
+            do! writeEquiResults outputDirectory 5 filePrefix eresults
             return ()
         } 
 
@@ -206,7 +206,7 @@ module PatchCompiler =
                                 (worklist : S4Process list) : CompilerMonad<unit> = 
         compile {
             let! fresults = processesEmit worklist
-            do! writeFlocResults outputDirectory filePrefix fresults
+            do! writeFlocResults outputDirectory 4 filePrefix fresults
             return ()
         } 
 
@@ -235,7 +235,7 @@ module PatchCompiler =
                                 (worklist : S4ProcessGroup list) : CompilerMonad<unit> = 
         compile {
             let! fresults = processGroupsEmit worklist
-            do! writeFlocResults outputDirectory filePrefix fresults
+            do! writeFlocResults outputDirectory 3 filePrefix fresults
             return ()
         } 
 
@@ -263,7 +263,7 @@ module PatchCompiler =
                                 (worklist : S4Function list) : CompilerMonad<unit> = 
         compile {
             let! fresults = functionsEmit worklist
-            do! writeFlocResults outputDirectory filePrefix fresults
+            do! writeFlocResults outputDirectory 2 filePrefix fresults
             return ()
         } 
 
@@ -291,7 +291,7 @@ module PatchCompiler =
                             (worklist : S4Site list) : CompilerMonad<unit> = 
         compile {
             let! fresults = sitesEmit worklist
-            do! writeFlocResults outputDirectory filePrefix fresults
+            do! writeFlocResults outputDirectory 1 filePrefix fresults
             return ()
         } 
 

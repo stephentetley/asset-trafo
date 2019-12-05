@@ -144,20 +144,22 @@ module EmitFuncLoc =
     // Write output
 
     let writeFlocProperties (directory : string) 
+                            (level : int)
                             (filePrefix : string) 
                             (flocProperties : FlocProperties) : CompilerMonad<unit> = 
         compile {
-            do! writeClassFlocFile directory filePrefix flocProperties.ClassFlocs
-            do! writeValuaFlocFile directory filePrefix flocProperties.ValuaFlocs
+            do! writeClassFlocFile directory level filePrefix flocProperties.ClassFlocs
+            do! writeValuaFlocFile directory level filePrefix flocProperties.ValuaFlocs
             return ()
         }
 
     let writeFlocResults (directory : string) 
+                            (level : int)
                             (filePrefix : string) 
                             (funcLocResults : FuncLocResults) : CompilerMonad<unit> = 
         compile {
-            do! writeFuncLocFile directory filePrefix funcLocResults.FuncLocs
-            do! writeClassFlocFile directory filePrefix funcLocResults.ClassFlocs
-            do! writeValuaFlocFile directory filePrefix funcLocResults.ValuaFlocs
+            do! writeFuncLocFile directory level filePrefix funcLocResults.FuncLocs
+            do! writeClassFlocFile directory level filePrefix funcLocResults.ClassFlocs
+            do! writeValuaFlocFile directory level filePrefix funcLocResults.ValuaFlocs
             return ()
         }
