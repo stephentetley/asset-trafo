@@ -52,11 +52,14 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\PatchTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Hierarchy.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
-#load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
-#load "..\src\AssetPatch\TemplatePatcher\PatchGen.fs"
+#load "..\src\AssetPatch\TemplatePatcher\PatchWriter.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EmitEquipment.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EmitFuncLoc.fs"
+#load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchCompiler.fs"
 #load "..\src\AssetPatch\TemplateCatalogue\Base.fs"
+#load "..\src\AssetPatch\TemplateCatalogue\AssetCondition.fs"
 open AssetPatch.Base.Common
 open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.FuncLocPath

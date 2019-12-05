@@ -12,366 +12,108 @@ module Emitter =
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Hierarchy
-    
-    type FlocClassProperties = ClassFloc * ValuaFloc list
-    
-    type EquiClassProperties = ClassEqui * ValuaEqui list
-
-  
-
-    type EmitterResults = 
-        { Equis : Equi list
-          ClassEquis : ClassEqui list
-          ValuaEquis : ValuaEqui list
-          FuncLocs : FuncLoc list
-          ClassFlocs : ClassFloc list
-          ValuaFlocs : ValuaFloc list
-        }
-
-        static member Empty = 
-            { Equis = []
-              ClassEquis = []
-              ValuaEquis = []
-              FuncLocs = []
-              ClassFlocs = []
-              ValuaFlocs = []
-            }
-
-
-    let collectEquiClassProperties (source:  EquiClassProperties list) :  ClassEqui list * ValuaEqui list =
-        List.foldBack (fun (ce,vs) (cs, valuas) -> (ce :: cs, valuas @ vs)) source ([],[])
-
-    let collectFlocClassProperties (source:  FlocClassProperties list) :  ClassFloc list * ValuaFloc list =
-        List.foldBack (fun (ce,vs) (cs, valuas) -> (ce :: cs, valuas @ vs)) source ([],[])
-
-    let joinResults (a : EmitterResults) (b: EmitterResults) : EmitterResults = 
-        { Equis = a.Equis@ b.Equis
-          ClassEquis = a.ClassEquis @ b.ClassEquis
-          ValuaEquis = a.ValuaEquis @ b.ValuaEquis
-          FuncLocs = a.FuncLocs @ b.FuncLocs
-          ClassFlocs = a.ClassFlocs @ b.ClassFlocs
-          ValuaFlocs = a.ValuaFlocs @ b.ValuaFlocs
-        }
-
-    let concatResults ( source : EmitterResults list) : EmitterResults = 
-        List.foldBack joinResults  source EmitterResults.Empty
-
-
-
-    let characteristicToValuaFloc (funcLoc : FuncLocPath) 
-                                    (count : int) 
-                                    (charac : S4Characteristic) : CompilerMonad<ValuaFloc> = 
-        mreturn {   
-            FuncLoc = funcLoc
-            ClassType = IntegerString.OfString "003"
-            CharacteristicID = charac.Name
-            CharacteristicValue = charac.Value
-            ValueCount = count
-        }
-
-    let characteristicToValuaEqui (equiNumber : string) 
-                                    (count : int) 
-                                    (charac : S4Characteristic) : CompilerMonad<ValuaEqui> = 
-        mreturn { 
-            EquipmentNumber = equiNumber
-            ClassType = IntegerString.OfString "002"
-            CharacteristicID = charac.Name
-            CharacteristicValue = charac.Value
-            ValueCount = count
-        }
+    open AssetPatch.TemplatePatcher.EmitEquipment
+    open AssetPatch.TemplatePatcher.EmitFuncLoc
     
 
-    let classToClassFloc (funcLoc : FuncLocPath)  (clazz : S4Class) : CompilerMonad<ClassFloc> = 
-        mreturn { 
-            FuncLoc = funcLoc
-            Class = clazz.ClassName
-            ClassType = IntegerString.OfString "003"
-            ClassNumber = IntegerString.Create(10, clazz.ClassInt)
-            Status = 1
-        }
+    let private collect (xs : (FuncLocResult1 * EquiResults) list) : FuncLocResults * EquiResults = 
+        let flocResults = xs|> List.map fst |> collectFuncLocResults
+        let equiResults = xs|> List.map snd |> concatEquiResults
+        (flocResults, equiResults)
 
-
-    let classToClassEqui (equiNumber : string)
-                         (clazz : S4Class) : CompilerMonad<ClassEqui> = 
-        mreturn { 
-            EquipmentNumber = equiNumber
-            Class = clazz.ClassName
-            ClassType = IntegerString.OfString "002"
-            ClassNumber = IntegerString.Create(10, clazz.ClassInt)
-            Status = 1
-        }
-    
-    let equipmentToEqui1 (funcLoc : FuncLocPath) 
-                         (equipment : S4Equipment) : CompilerMonad<Equi> = 
-        compile {
-            let! sdate = asks (fun x -> x.StartupDate)
-            let! mplant = asks (fun x -> x.MaintenancePlant)
-            return { 
-                EquipmentNumber = equipment.EquipmentId
-                Description = equipment.Description
-                FuncLoc = funcLoc
-                Category = equipment.Category
-                ObjectType = equipment.ObjectType
-                Manufacturer = 
-                    Option.defaultValue "TO BE DETERMINED" equipment.Manufacturer
-                Model = Option.defaultValue "TO BE DETERMINED" equipment.Model
-                SerialNumber = Option.defaultValue "" equipment.SerialNumber
-                StartupDate = sdate
-                ConstructionYear = 
-                     Option.defaultValue (uint16 sdate.Year) equipment.ConstructionYear
-                ConstructionMonth = 
-                    Option.defaultValue (uint8 sdate.Month) equipment.ConstructionMonth
-                MaintenancePlant = mplant
-            }
-        }
-        
-
-    let equipmentToEquis (funcLoc : FuncLocPath) 
-                         (equipment : S4Equipment) : CompilerMonad<Equi list> = 
-        let rec work (kids : S4Equipment list) 
-                     (cont : Equi list -> CompilerMonad<Equi list>) = 
+    let equipmentEmit (flocPath : FuncLocPath) 
+                        (source : S4Equipment) : CompilerMonad<EquiResult1 list> = 
+        let rec work kids cont = 
             match kids with
-            | [] -> cont []
-            | x :: xs -> 
-                compile { 
-                    let! e1 = equipmentToEqui1 funcLoc x
-                    return! work x.SuboridnateEquipment (fun vs1 -> 
-                            work xs (fun vs2 -> 
-                            cont (e1 :: vs1 @ vs2)))
-                } 
-        compile { 
-            let! e1 = equipmentToEqui1 funcLoc equipment
-            return! work equipment.SuboridnateEquipment (fun es -> mreturn (e1 :: es))
+            | [] -> mreturn []
+            | (x :: xs) -> 
+                compile {
+                    let! v1 = equipmentToEquiResult1 flocPath x
+                    return! work kids (fun vs -> let ans = (v1 :: vs) in cont ans)
+                }
+        compile {
+            let! equiResult1 = equipmentToEquiResult1 flocPath source
+            let! kids = work source.SuboridnateEquipment id
+            return (equiResult1 :: kids)
         }
 
-    
+    let equipmentsEmit (flocPath : FuncLocPath)  (source : S4Equipment list) : CompilerMonad<EquiResults> = 
+        mapM (equipmentEmit flocPath) source |>> (List.concat >> collectEquiResults)
+
+    let private componentEmit (source : S4Component) : CompilerMonad<FuncLocResult1 * EquiResults> = 
+        compile {
+            let! flocResult = funclocToFuncLocResult1 source.FuncLoc source.Description source.ObjectType source.Classes
+            let! equiResults = equipmentsEmit source.FuncLoc source.Equipment
+            return (flocResult, equiResults)
+        }
+
+    let componentsEmit (source : S4Component list) : CompilerMonad<FuncLocResults * EquiResults> = 
+        mapM componentEmit source |>> collect
 
 
-    
+    let private itemEmit (source : S4Item) : CompilerMonad<FuncLocResult1 * EquiResults> = 
+        compile {
+            let! flocResult = funclocToFuncLocResult1 source.FuncLoc source.Description source.ObjectType source.Classes
+            let! equiResults = equipmentsEmit source.FuncLoc source.Equipment
+            return (flocResult, equiResults)
+        }
+
+    let itemsEmit (source : S4Item list) : CompilerMonad<FuncLocResults * EquiResults> = 
+        mapM itemEmit source |>> collect
+
+    let assemblyEmit (source : S4Assembly) : CompilerMonad<FuncLocResult1 * EquiResults> = 
+        compile {
+            let! flocResult = funclocToFuncLocResult1 source.FuncLoc source.Description source.ObjectType source.Classes
+            let! equiResults = equipmentsEmit source.FuncLoc source.Equipment
+            return (flocResult, equiResults)
+        }
+
+    let assembliesEmit (source : S4Assembly list) : CompilerMonad<FuncLocResults * EquiResults> = 
+        mapM assemblyEmit source |>> collect
+
+    let systemEmit (source : S4System) : CompilerMonad<FuncLocResult1 * EquiResults> = 
+        compile {
+            let! flocResult = funclocToFuncLocResult1 source.FuncLoc source.Description source.ObjectType source.Classes
+            let! equiResults = equipmentsEmit source.FuncLoc source.Equipment
+            return (flocResult, equiResults)
+        }
+
+    let systemsEmit (source : S4System list) : CompilerMonad<FuncLocResults * EquiResults> = 
+        mapM systemEmit source |>> collect
 
 
-
-    let sortedCharacteristics (clazz : S4Class) : (S4Characteristic list) list= 
-        clazz.Characteritics 
-            |> List.sortBy (fun x -> x.Name)
-            |> List.groupBy (fun x -> x.Name)               
-            |> List.map snd
-
-
-    let makeFlocProperties1 (funcLoc : FuncLocPath)  
-                            (clazz : S4Class) : CompilerMonad<FlocClassProperties> =
+    let processEmit (source : S4Process) : CompilerMonad<FuncLocResult1> = 
+        funclocToFuncLocResult1 source.FuncLoc source.Description source.ObjectType source.Classes
         
-        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<ValuaFloc list> = 
-            foriM chars (fun i x -> characteristicToValuaFloc funcLoc (i+1) x)
 
-        compile {
-            let! cf = classToClassFloc funcLoc clazz
-            let chars = sortedCharacteristics clazz
-            let! vs = mapM makeGrouped chars |>> List.concat
-            return (cf, vs)
-        } 
+    let processesEmit (source : S4Process list) : CompilerMonad<FuncLocResults> = 
+        mapM processEmit source |>> collectFuncLocResults
 
-    let makeEquiProperties1 (equiNumber : string)  
-                            (clazz : S4Class) : CompilerMonad<EquiClassProperties> =
+
+    let processGroupEmit (source : S4ProcessGroup) : CompilerMonad<FuncLocResult1> = 
+        funclocToFuncLocResult1 source.FuncLoc source.Description source.ObjectType source.Classes
         
-        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<ValuaEqui list> = 
-            foriM chars (fun i x -> characteristicToValuaEqui equiNumber (i+1) x)
 
-        compile {
-            let! ce = classToClassEqui equiNumber clazz
-            let chars = sortedCharacteristics clazz
-            let! vs = mapM makeGrouped chars |>> List.concat
-            return (ce, vs)
-        } 
-    
-    let equipmentClassProperties1 (equipment : S4Equipment) : CompilerMonad<EquiClassProperties list> = 
-        forM equipment.Classes (makeEquiProperties1 equipment.EquipmentId)
+    let processGroupsEmit (source : S4ProcessGroup list) : CompilerMonad<FuncLocResults> = 
+        mapM processGroupEmit source |>> collectFuncLocResults
 
 
-    let equipmentClassProperties (equipment : S4Equipment) : CompilerMonad<EquiClassProperties list> = 
-        let rec work (kids : S4Equipment list) 
-                     (cont : EquiClassProperties list -> CompilerMonad<EquiClassProperties list>) = 
-            match kids with
-            | [] -> cont []
-            | x :: rest -> 
-                compile { 
-                    let! vs1 = equipmentClassProperties1 x
-                    return! work x.SuboridnateEquipment (fun vs2 -> 
-                            work rest (fun vs3 -> 
-                            cont (vs1 @ vs2 @ vs3)))
-                } 
-        compile { 
-            let! es1 = equipmentClassProperties1 equipment
-            return! work equipment.SuboridnateEquipment (fun es -> mreturn (es1 @ es))
-        }
+    let functionEmit (source : S4Function) : CompilerMonad<FuncLocResult1> = 
+        funclocToFuncLocResult1 source.FuncLoc source.Description source.ObjectType source.Classes
+        
 
+    let functionsEmit (source : S4Function list) : CompilerMonad<FuncLocResults> = 
+        mapM functionEmit source |>> collectFuncLocResults
 
-    let equipmentEmitClassValuas (equipment : S4Equipment) : CompilerMonad<EmitterResults> = 
-        compile {
-            let! cps = equipmentClassProperties equipment
-            let (cs,vs) = collectEquiClassProperties cps
-            return {
-                Equis = []
-                ClassEquis = cs
-                ValuaEquis = vs
-                FuncLocs = []
-                ClassFlocs = []
-                ValuaFlocs = []
-            }
-        }
+        
+    let siteEmit (source : S4Site) : CompilerMonad<FuncLocResult1> = 
+        funclocToFuncLocResult1 source.FuncLoc source.Description source.ObjectType source.Classes
+            
 
+    let sitesEmit (source : S4Site list) : CompilerMonad<FuncLocResults> = 
+        mapM siteEmit source |>> collectFuncLocResults
 
-    let equipmentEmit (parent : FuncLocPath) 
-                      (equipment : S4Equipment) : CompilerMonad<EmitterResults> = 
-        compile {
-            let! es = equipmentToEquis parent equipment
-            let! cps = equipmentClassProperties equipment
-            let (cs,vs) = collectEquiClassProperties cps
-            return {
-                Equis = es
-                ClassEquis = cs
-                ValuaEquis = vs
-                FuncLocs = []
-                ClassFlocs = []
-                ValuaFlocs = []
-            }
-        }
-
-    let funcLocClassProperties (path : FuncLocPath) 
-                                (classes : S4Class list) : CompilerMonad<FlocClassProperties list> = 
-        mapM (makeFlocProperties1 path) classes
-
-
-
-
-    let funcLocPathEmitClassValuas (funcLocPath : FuncLocPath) 
-                                    (classes : S4Class list) : CompilerMonad<EmitterResults> = 
-        compile {
-            let! cps = funcLocClassProperties funcLocPath classes
-            let (cs, vs) = collectFlocClassProperties cps
-            return { 
-                Equis = []
-                ClassEquis = []
-                ValuaEquis = []
-                FuncLocs = []
-                ClassFlocs = cs
-                ValuaFlocs = vs
-            }
-        }
-
-
-    let funcLocEmit (funcLoc : FuncLoc) 
-                    (classes : S4Class list) : CompilerMonad<EmitterResults> = 
-        compile {
-            let! cps = funcLocClassProperties funcLoc.Path classes
-            let (cs, vs) = collectFlocClassProperties cps
-            return { 
-                Equis = []
-                ClassEquis = []
-                ValuaEquis = []
-                FuncLocs = [funcLoc]
-                ClassFlocs = cs
-                ValuaFlocs = vs
-            }
-        }
-
-
-    let genFuncLoc (path : FuncLocPath) 
-                    (description : string) 
-                    (objectType : string)  : CompilerMonad<FuncLoc> = 
-        compile {
-            let! startDate = asks (fun x -> x.StartupDate) 
-            let! structInd = asks (fun x -> x.StructureIndicator)
-            let! objStatus = asks (fun x -> x.ObjectStatus)
-            return { 
-                Path = path
-                Description = description
-                ObjectType = objectType
-                Category = uint32 path.Level
-                ObjectStatus = objStatus
-                StartupDate = startDate
-                StructureIndicator = structInd
-            }
-        }
-
-    let componentEmit (parent : FuncLocPath) 
-                      (compo : S4Component) : CompilerMonad<EmitterResults> = 
-        let path = extend compo.FuncLocSegment.Name parent
-        compile {
-            let! floc = genFuncLoc path compo.FuncLocSegment.Description compo.FuncLocSegment.ObjectType
-            let! ansE = mapM (equipmentEmit path) compo.Equipment |>> concatResults
-            let! ansF = funcLocEmit floc compo.Classes
-            return joinResults ansF ansE
-        }
-
-    let itemEmit (parent : FuncLocPath) 
-                 (item : S4Item) : CompilerMonad<EmitterResults> = 
-        let path = extend item.FuncLocSegment.Name parent
-        compile {
-            let! floc = genFuncLoc path item.FuncLocSegment.Description item.FuncLocSegment.ObjectType
-            let! ansE = mapM (equipmentEmit path) item.Equipment |>> concatResults
-            let! ansF = funcLocEmit floc item.Classes
-            let! ansK = mapM (componentEmit path) item.Components |>> concatResults
-            return concatResults [ansF; ansE; ansK]
-        }
-
-    let assemblyEmit (parent : FuncLocPath) 
-                     (assembly : S4Assembly) : CompilerMonad<EmitterResults> = 
-        let path = extend assembly.FuncLocSegment.Name parent
-        compile {
-            let! floc = genFuncLoc path assembly.FuncLocSegment.Description assembly.FuncLocSegment.ObjectType
-            let! ansE = mapM (equipmentEmit path) assembly.Equipment |>> concatResults
-            let! ansF = funcLocEmit floc assembly.Classes
-            let! ansK = mapM (itemEmit path) assembly.Items |>> concatResults
-            return concatResults [ansF; ansE; ansK]
-        }
-
-    let systemEmit (parent : FuncLocPath) 
-                     (system : S4System) : CompilerMonad<EmitterResults> = 
-        let path = extend system.FuncLocSegment.Name parent
-        compile {
-            let! floc = genFuncLoc path system.FuncLocSegment.Description system.FuncLocSegment.ObjectType
-            let! ansE = mapM (equipmentEmit path) system.Equipment |>> concatResults
-            let! ansF = funcLocEmit floc system.Classes
-            let! ansK = mapM (assemblyEmit path) system.Assemblies |>> concatResults
-            return concatResults [ansF; ansE; ansK]
-        }
-
-    let processEmit (parent : FuncLocPath) 
-                    (proc : S4Process) : CompilerMonad<EmitterResults> = 
-        let path = extend proc.FuncLocSegment.Name parent
-        compile {
-            let! floc = genFuncLoc path proc.FuncLocSegment.Description proc.FuncLocSegment.ObjectType
-            let! ansF = funcLocEmit floc proc.Classes
-            let! ansK = mapM (systemEmit path) proc.Systems |>> concatResults
-            return joinResults ansF ansK
-        }
-
-    let processGroupEmit (parent : FuncLocPath) 
-                            (procGroup : S4ProcessGroup) : CompilerMonad<EmitterResults> = 
-        let path = extend procGroup.FuncLocSegment.Name parent
-        compile {
-            let! floc = genFuncLoc path procGroup.FuncLocSegment.Description procGroup.FuncLocSegment.ObjectType
-            let! ansF = funcLocEmit floc procGroup.Classes
-            let! ansK = mapM (processEmit path) procGroup.Processes |>> concatResults
-            return joinResults ansF ansK
-        }
-
-    let functionEmit (parent : FuncLocPath) 
-                        (func : S4Function) : CompilerMonad<EmitterResults> = 
-        let path = extend func.FuncLocSegment.Name parent
-        compile {
-            let! floc = genFuncLoc path func.FuncLocSegment.Description func.FuncLocSegment.ObjectType
-            let! ansF = funcLocEmit floc func.Classes
-            let! ansK = mapM (processGroupEmit path) func.ProcessGroups |>> concatResults
-            return joinResults ansF ansK
-        }
-
-    let siteEmit (site : S4Site) : CompilerMonad<EmitterResults> = 
-        let path = FuncLocPath.Create site.FuncLocSegment.Name
-        compile {
-            let! floc = genFuncLoc path site.FuncLocSegment.Description site.FuncLocSegment.ObjectType
-            let! ansF = funcLocEmit floc site.Classes
-            let! ansK = mapM (functionEmit path) site.Functions |>> concatResults
-            return joinResults ansF ansK
-        }
+    let classesEmit (source : (string * S4Class list) list) : CompilerMonad<EquiProperties> = 
+        source 
+            |> mapM (fun (equipId, classes) -> equipmentToEquiProperties equipId classes) 
+            |>> collectEquiProperties

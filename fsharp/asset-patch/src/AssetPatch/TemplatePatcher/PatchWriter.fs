@@ -5,7 +5,7 @@ namespace AssetPatch.TemplatePatcher
 
 
 
-module PatchGen =
+module PatchWriter =
    
     open System
     open System.IO
@@ -19,10 +19,9 @@ module PatchGen =
     open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.Printer
     open AssetPatch.TemplatePatcher.PatchTypes
-    open AssetPatch.TemplatePatcher.Emitter
     open AssetPatch.TemplatePatcher.EquiIndexing
 
-    let entityName (entityType : EntityType) : string = 
+    let private entityName (entityType : EntityType) : string = 
         match entityType with
         | FuncLoc -> "funcloc"
         | ClassFloc  -> "classfloc"
@@ -31,16 +30,16 @@ module PatchGen =
         | ClassEqui -> "classequi"
         | ValuaEqui -> "valuaequi"
 
-    let entityExtension (entityType : EntityType) : string = 
+    let private entityExtension (entityType : EntityType) : string = 
         match entityType with
         | FuncLoc | ClassFloc | ValuaFloc | Equi -> "txt"
         | ClassEqui | ValuaEqui -> "apch"
 
         
 
-    let genFileName (directory : string) 
-                    (filePrefix : string) 
-                    (entityType : EntityType) : CompilerMonad<string> = 
+    let private genFileName (directory : string) 
+                            (filePrefix : string) 
+                            (entityType : EntityType) : CompilerMonad<string> = 
         compile {
             let! idx = newFileIndex ()
             let name1 = 
@@ -57,15 +56,15 @@ module PatchGen =
 
 
     /// At least one row exists 
-    let getHeaderRow (rows : AssocList<string, string> list) : CompilerMonad<HeaderRow> = 
+    let private getHeaderRow (rows : AssocList<string, string> list) : CompilerMonad<HeaderRow> = 
         match rows with
         | [] -> throwError "getHeaderRow - empty list"
         | row1 :: _ -> row1 |> AssocList.keys |> HeaderRow |> mreturn
 
 
-    let makeHeader (entityType : EntityType) 
-                    (user : string) 
-                    (timestamp : DateTime) : CompilerMonad<FileHeader> = 
+    let private makeHeader (entityType : EntityType) 
+                            (user : string) 
+                            (timestamp : DateTime) : CompilerMonad<FileHeader> = 
         compile {
             let! variantName = getVariant entityType
             return { 
@@ -94,8 +93,8 @@ module PatchGen =
             }          
         }
 
-    let writeChangeFileAndMetadata (outputPath: string)
-                                   (changeFile : ChangeFile) : CompilerMonad<unit> =
+    let private writeChangeFileAndMetadata (outputPath: string)
+                                           (changeFile : ChangeFile) : CompilerMonad<unit> =
         compile {
             let variant1 = Path.GetFileNameWithoutExtension(outputPath) + ".variant.txt"
             let variantPath = Path.Combine(Path.GetDirectoryName(outputPath), variant1)        
@@ -108,21 +107,21 @@ module PatchGen =
     // ************************************************************************
     // FuncLoc file
 
-    /// Compile a list for FuncLoc changes into a ChangeFile
-    let compileFuncLocFile (rows : FuncLoc list) : CompilerMonad<ChangeFile> = 
+    /// Render a list of FuncLoc changes into a ChangeFile
+    let private makeFuncLocFile (rows : FuncLoc list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.Path.ToString()) 
             |> List.map funcLocToAssocs     
             |> makeChangeFile FuncLoc
 
-    let genFuncLocFile (directory : string) 
-                        (filePrefix : string) 
-                        (funcLocs : FuncLoc list) : CompilerMonad<unit> = 
+    let writeFuncLocFile (directory : string) 
+                            (filePrefix : string) 
+                            (funcLocs : FuncLoc list) : CompilerMonad<unit> = 
         compile { 
             match funcLocs with
             | [] -> return ()
             | _ -> 
-                let! changes = compileFuncLocFile funcLocs
+                let! changes = makeFuncLocFile funcLocs
                 let! outPath = genFileName directory filePrefix FuncLoc
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
@@ -131,21 +130,22 @@ module PatchGen =
     // ************************************************************************
     // FuncLoc file
 
-    /// Compile a list for ClassFloc changes into a ChangeFile
-    let compileClassFlocFile (rows : ClassFloc list) : CompilerMonad<ChangeFile> = 
+    /// Render a list of ClassFloc changes into a ChangeFile
+    let private makeClassFlocFile (rows : ClassFloc list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.Class + "!" + row.FuncLoc.ToString())
             |> List.map classFlocToAssocs     
             |> makeChangeFile ClassFloc
 
-    let genClassFlocFile (directory : string) 
-                        (filePrefix : string) 
-                        (classFlocs : ClassFloc list) : CompilerMonad<unit> = 
+
+    let writeClassFlocFile (directory : string) 
+                            (filePrefix : string) 
+                            (classFlocs : ClassFloc list) : CompilerMonad<unit> = 
         compile { 
             match classFlocs with
             | [] -> return ()
             | _ -> 
-                let! changes = compileClassFlocFile classFlocs
+                let! changes = makeClassFlocFile classFlocs
                 let! outPath = genFileName directory filePrefix ClassFloc
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
@@ -154,22 +154,22 @@ module PatchGen =
     // ************************************************************************
     // ValuaFloc file
 
-    /// Compile a list for ValuaFloc changes into a ChangeFile
-    let compileValuaFlocFile (rows : ValuaFloc list) : CompilerMonad<ChangeFile> = 
+    /// Render a list of ValuaFloc changes into a ChangeFile
+    let private makeValuaFlocFile (rows : ValuaFloc list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.FuncLoc.ToString() + "!" + row.CharacteristicID)
             |> List.map valuaFlocToAssocs     
             |> makeChangeFile ValuaFloc
 
 
-    let genValuaFlocFile (directory : string) 
-                        (filePrefix : string) 
-                        (valuaFlocs : ValuaFloc list) : CompilerMonad<unit> = 
+    let writeValuaFlocFile (directory : string) 
+                            (filePrefix : string) 
+                            (valuaFlocs : ValuaFloc list) : CompilerMonad<unit> = 
         compile { 
             match valuaFlocs with
             | [] -> return ()
             | _ -> 
-                let! changes = compileValuaFlocFile valuaFlocs
+                let! changes = makeValuaFlocFile valuaFlocs
                 let! outPath = genFileName directory filePrefix ValuaFloc
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
@@ -179,29 +179,29 @@ module PatchGen =
     // ************************************************************************
     // Equi file
 
-    /// Compile a list for ClassEqui changes into a ChangeFile
-    let compileEquiFile (rows : Equi list) : CompilerMonad<ChangeFile> = 
+    /// Render a list of ClassEqui changes into a ChangeFile
+    let private makeEquiFile (rows : Equi list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.EquipmentNumber.ToString())
             |> List.map equiToAssocs     
             |> makeChangeFile Equi
 
 
-    let genEquiFile (directory : string) 
-                    (filePrefix : string) 
-                    (equis : Equi list) : CompilerMonad<unit> = 
+    let writeEquiFile (directory : string) 
+                        (filePrefix : string) 
+                        (equis : Equi list) : CompilerMonad<unit> = 
         compile { 
             match equis with
             | [] -> return ()
             | _ -> 
-                let! changes = compileEquiFile equis
+                let! changes = makeEquiFile equis
                 let! outPath = genFileName directory filePrefix Equi
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
             }
 
 
-    let genEquiIndexing (directory : string) 
+    let writeEquiIndexing (directory : string) 
                         (equis : Equi list) : CompilerMonad<unit> =  
         compile {
             let outputPath = Path.Combine(directory, "EquiIndexing.xlsx")
@@ -212,21 +212,21 @@ module PatchGen =
     // ClassEqui file
 
 
-    /// Compile a list for ClassEqui changes into a ChangeFile
-    let compileClassEquiFile (rows : ClassEqui list) : CompilerMonad<ChangeFile> = 
+    /// Render a list of ClassEqui changes into a ChangeFile
+    let private makeClassEquiFile (rows : ClassEqui list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.EquipmentNumber.ToString() + row.Class)
             |> List.map classEquiToAssocs     
             |> makeChangeFile ClassEqui
 
-    let genClassEquiFile (directory : string) 
-                        (filePrefix : string) 
-                        (classEquis : ClassEqui list) : CompilerMonad<unit> = 
+    let writeClassEquiFile (directory : string) 
+                            (filePrefix : string) 
+                            (classEquis : ClassEqui list) : CompilerMonad<unit> = 
         compile { 
             match classEquis with
             | [] -> return ()
             | _ -> 
-                let! changes = compileClassEquiFile classEquis
+                let! changes = makeClassEquiFile classEquis
                 let! outPath = genFileName directory filePrefix ClassEqui
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
@@ -235,42 +235,26 @@ module PatchGen =
     // ************************************************************************
     // ValuaEqui file
 
-    /// Compile a list for ValuaEqui changes into a ChangeFile
-    let compileValuaEquiFile (rows : ValuaEqui list) : CompilerMonad<ChangeFile> = 
+    /// Render a list of ValuaEqui changes into a ChangeFile
+    let private makeValuaEquiFile (rows : ValuaEqui list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.EquipmentNumber)
             |> List.map valuaEquiToAssocs     
             |> makeChangeFile ValuaEqui
 
 
-    let genValuaEquiFile (directory : string) 
-                        (filePrefix : string) 
-                        (valuaEquis : ValuaEqui list) : CompilerMonad<unit> = 
+    let writeValuaEquiFile (directory : string) 
+                            (filePrefix : string) 
+                            (valuaEquis : ValuaEqui list) : CompilerMonad<unit> = 
         compile { 
             match valuaEquis with
             | [] -> return ()
             | _ ->       
             
-                let! changes = compileValuaEquiFile valuaEquis
+                let! changes = makeValuaEquiFile valuaEquis
                 let! outPath = genFileName directory filePrefix ValuaEqui
                 do! writeChangeFileAndMetadata outPath changes
                 return ()
             }
 
-    // ************************************************************************
-    // Generate patches
-
-    let generatePatches (directory : string) 
-                        (filePrefix : string) 
-                        (results : EmitterResults) : CompilerMonad<unit> = 
-        compile {
-            do! genFuncLocFile   directory filePrefix results.FuncLocs
-            do! genClassFlocFile directory filePrefix results.ClassFlocs
-            do! genValuaFlocFile directory filePrefix results.ValuaFlocs
-            do! genEquiFile      directory filePrefix results.Equis
-            do! genEquiIndexing  directory results.Equis
-            do! genClassEquiFile directory filePrefix results.ClassEquis
-            do! genValuaEquiFile directory filePrefix results.ValuaEquis
-            return ()
-        }
-
+    

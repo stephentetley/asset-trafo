@@ -51,9 +51,11 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\PatchTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Hierarchy.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
-#load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
-#load "..\src\AssetPatch\TemplatePatcher\PatchGen.fs"
+#load "..\src\AssetPatch\TemplatePatcher\PatchWriter.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EmitEquipment.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EmitFuncLoc.fs"
+#load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchCompiler.fs"
 #load "..\src\AssetPatch\TemplateCatalogue\Base.fs"
 open AssetPatch.Base.CompilerMonad
@@ -192,7 +194,7 @@ let caaTemplate (parameters : RowParams) : Site =
 let test02 () = 
     let worklist = 
         [ {Code = "SPT60"; Name = "Stephen SPS"; Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001"} 
-        ] 
+        ] |> List.map (fun r1 -> (FuncLocPath.Create r1.Code, r1))
     runCompiler (defaultEnv "TETLEYS") 
        <| compileSitePatches 
                    (outputDirectory "caa-patches")

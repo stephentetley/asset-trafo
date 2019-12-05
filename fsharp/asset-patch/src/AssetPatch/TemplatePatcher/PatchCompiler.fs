@@ -14,171 +14,298 @@ module PatchCompiler =
     open AssetPatch.Base.CompilerMonad    
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.Hierarchy
-    open AssetPatch.TemplatePatcher.Emitter
     open AssetPatch.TemplatePatcher.EquiIndexing
-    open AssetPatch.TemplatePatcher.PatchGen
+    open AssetPatch.TemplatePatcher.EmitEquipment
+    open AssetPatch.TemplatePatcher.EmitFuncLoc
+    open AssetPatch.TemplatePatcher.Emitter
     
 
-    
-    
-    let evalTemplate (code : Template.Template<'a>) : CompilerMonad<'a> = 
-        compile {
-            let! templateEnv = asks id
-            return! liftResult (Template.runTemplate templateEnv code)
-        }
 
-    let applyTemplate (xs: ('id * 'b) list ) 
-                        (template: 'b -> Template.Template<'c>) : CompilerMonad<('id * 'c) list> = 
-        forM xs (fun (name, x) -> evalTemplate (template x) >>=  fun a -> mreturn (name, a))
+    // ************************************************************************
+    // Compile Class * Valua patches to update exting Flocs and Equipment...
 
+
+    let private applyTemplate (xs: ('name * 'b) list ) 
+                        (template: 'b -> Template.Template<'c>) : CompilerMonad<('name * 'c) list> = 
+        forM xs (fun (name, x) -> cmEvalTemplate (template x) >>=  fun a -> mreturn (name, a))
 
     
+    type EquipmentNumber = string
 
-    // This is not printed...
-    let private anonEquipment (code : string) (clazz: S4Class) : S4Equipment= 
-        { 
-            EquipmentId = code
-            Description = ""
-            Category = "I"
-            ObjectType = ""
-            Manufacturer = None
-            Model = None
-            SerialNumber = None
-            ConstructionYear = None
-            ConstructionMonth = None
-            Classes = [clazz] 
-            SuboridnateEquipment = [] 
-        }
-
-
-
+    type ClassEquiWorkList<'hole> = (EquipmentNumber * 'hole) list
 
     /// Generate Class and Char patches to update existing equipment.
     let compileClassEquiValuaEquiPatches (outputDirectory : string)
                                          (filePrefix : string)
                                          (template : Class1<'hole>)
-                                         (worklist : (string * 'hole) list)
+                                         (worklist : ClassEquiWorkList<'hole>)
                                             : CompilerMonad<unit> = 
         compile {
             let! worklist1 = applyTemplate worklist template
             let! results = 
-                forM worklist1 (fun (name, clazz) -> equipmentEmitClassValuas (anonEquipment name clazz))
-            do! generatePatches outputDirectory filePrefix (concatResults results)
+                forM worklist1 (fun (number, klass) -> equipmentToEquiProperties number [klass])
+                    |>> collectEquiProperties
+            do! writeEquiProperties outputDirectory filePrefix results
             return ()
         }
+
+
+    type ClassFlocWorkList<'hole> = (FuncLocPath * 'hole) list
+
 
     /// Generate Class and Char patches to update existing equipment.
     let compileClassFlocValuaFlocPatches (outputDirectory : string)
                                          (filePrefix : string)
                                          (template : Class1<'hole>)
-                                         (worklist : (FuncLocPath * 'hole) list)
+                                         (worklist : ClassFlocWorkList<'hole>)
                                             : CompilerMonad<unit> = 
         compile {
             let! worklist1 = applyTemplate worklist template
             let! results = 
-                forM worklist1 (fun (path, clazz) -> funcLocPathEmitClassValuas path [clazz])
-            do! generatePatches outputDirectory filePrefix (concatResults results)
+                forM worklist1 (fun (path, klass) -> funclocToFlocProperties path [klass])
+                    |>> collectFlocProperties
+            do! writeFlocProperties outputDirectory filePrefix results
             return ()
         }
 
 
-    /// Generate patches for a new level 3 process group and its subordinates
-    let compileHierarchyPatches (outputDirectory : string)
-                                (filePrefix : string)
-                                (compile1 : (FuncLocPath * 'object) -> CompilerMonad<EmitterResults>)
-                                (template : 'hole -> Template.Template<'object>)
-                                (worklist : (FuncLocPath * 'hole) list) : CompilerMonad<unit> =         
+    // ************************************************************************
+    // Compile hierarchy patches...
+
+
+    // ************************************************************************
+    // Components
+
+
+
+    let private writeComponentPatches (outputDirectory : string)
+                                        (filePrefix : string)
+                                        (worklist : S4Component list) : CompilerMonad<unit> = 
         compile {
-            let! worklist1 = applyTemplate worklist template
-            let! results =  forM worklist1 compile1
-            do! generatePatches outputDirectory filePrefix (concatResults results)
+            let! (fresults, eresults) = componentsEmit worklist
+            do! writeFlocResults outputDirectory filePrefix fresults
+            do! writeEquiResults outputDirectory filePrefix eresults
             return ()
-        }
+        } 
 
-    /// Generate patches for a new level 2 function and its subordinates
+    type ComponentWorkList<'hole> = (FuncLocPath * 'hole) list
+
+    /// Generate patches for new level 8 components and their subordinate equipment
     let compileComponentPatches (outputDirectory : string)
                                 (filePrefix : string)
                                 (template : Component1<'hole>)
-                                (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit> = 
-        let compile1 (path, comp) = componentEmit path comp
-        compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
-
-
-
-    /// Generate patches for a new level 2 function and its subordinates
-    let compileItemPatches (outputDirectory : string)
-                            (filePrefix : string)
-                            (template : Item1<'hole>)
-                            (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit> = 
-        let compile1 (path, item) = itemEmit path item
-        compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
-
-
-
-    /// Generate patches for a new level 2 function and its subordinates
-    let compileAssemblyPatches (outputDirectory : string)
-                              (filePrefix : string)
-                              (template : Assembly1<'hole>)
-                              (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit> = 
-        let compile1 (path, asmb) = assemblyEmit path asmb
-        compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
-
-
-    /// Generate patches for a new level 2 function and its subordinates
-    let compileSystemPatches (outputDirectory : string)
-                              (filePrefix : string)
-                              (template : System1<'hole>)
-                              (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit> = 
-        let compile1 (path, syst) = systemEmit path syst
-        compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
-
-
-    /// Generate patches for a new level 2 function and its subordinates
-    let compileProcessPatches (outputDirectory : string)
-                              (filePrefix : string)
-                              (template : Process1<'hole>)
-                              (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit> = 
-        let compile1 (path, prcs) = processEmit path prcs
-        compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
-
-
-    /// Generate patches for a new level 2 function and its subordinates
-    let compileProcessGroupPatches (outputDirectory : string)
-                                         (filePrefix : string)
-                                         (template : ProcessGroup1<'hole>)
-                                         (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit> = 
-        let compile1 (path, prcg) = processGroupEmit path prcg
-        compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
-
-
-    /// Generate patches for a new level 2 function and its subordinates
-    let compileFunctionPatches (outputDirectory : string)
-                                         (filePrefix : string)
-                                         (template : Function1<'hole>)
-                                         (worklist : (FuncLocPath * 'hole) list)
-                                            : CompilerMonad<unit> = 
-        let compile1 (path, func) = functionEmit path func
-        compileHierarchyPatches outputDirectory filePrefix compile1 template worklist
-
-
-    /// Generate patches for a new level 1 site and its subordinates
-    let compileSitePatches (outputDirectory : string)
-                            (filePrefix : string)
-                            (template : Site1<'hole>)
-                            (worklist : 'hole list) : CompilerMonad<unit> = 
-        let compile1 = evalTemplate >=> siteEmit
+                                (worklist : ComponentWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
-            let worklist1 = List.map template worklist
-            let! results = forM worklist1 compile1
-            do! generatePatches outputDirectory filePrefix (concatResults results)
+            let! worklist = applyTemplate worklist template |>> List.map snd
+            do! writeComponentPatches outputDirectory filePrefix worklist
+            return ()
+        }                                                
+
+    // ************************************************************************
+    // Items
+
+
+    let private writeItemPatches (outputDirectory : string)
+                                    (filePrefix : string)
+                                    (worklist : S4Item list) : CompilerMonad<unit> = 
+        compile {
+            let! (fresults, eresults) = itemsEmit worklist
+            do! writeFlocResults outputDirectory filePrefix fresults
+            do! writeEquiResults outputDirectory filePrefix eresults
+            return ()
+        } 
+
+    type ItemWorkList<'hole> = (FuncLocPath * 'hole) list
+
+    /// Generate patches for new level 7 items and their subordinates
+    let compileItemPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : Item1<'hole>)
+                                (worklist : ItemWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyTemplate worklist template |>> List.map snd
+            do! writeItemPatches outputDirectory filePrefix worklist
+            let components = worklist |> List.map (fun x -> x.Components) |> List.concat
+            do! writeComponentPatches outputDirectory filePrefix components
+            return ()
+        }  
+
+    // ************************************************************************
+    // Assembly
+
+
+    let writeAssemblyPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (worklist : S4Assembly list) : CompilerMonad<unit> = 
+        compile {
+            let! (fresults, eresults) = assembliesEmit worklist
+            do! writeFlocResults outputDirectory filePrefix fresults
+            do! writeEquiResults outputDirectory filePrefix eresults
+            return ()
+        } 
+
+    type AssemblyWorkList<'hole> = (FuncLocPath * 'hole) list
+
+    /// Generate patches for new level 6 assemblies and their subordinates
+    let compileAssemblyPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : Assembly1<'hole>)
+                                (worklist : AssemblyWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyTemplate worklist template |>> List.map snd
+            do! writeAssemblyPatches outputDirectory filePrefix worklist
+            let items = worklist |> List.map (fun x -> x.Items) |> List.concat
+            do! writeItemPatches outputDirectory filePrefix items
+            return ()
+        }  
+
+    
+    // ************************************************************************
+    // System
+
+
+    let writeSystemPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (worklist : S4System list) : CompilerMonad<unit> = 
+        compile {
+            let! (fresults, eresults) = systemsEmit worklist
+            do! writeFlocResults outputDirectory filePrefix fresults
+            do! writeEquiResults outputDirectory filePrefix eresults
+            return ()
+        } 
+
+    type SystemWorkList<'hole> = (FuncLocPath * 'hole) list
+
+    /// Generate patches for new level 5 systems and their subordinates
+    let compileSystemPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : System1<'hole>)
+                                (worklist : SystemWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyTemplate worklist template |>> List.map snd
+            do! writeSystemPatches outputDirectory filePrefix worklist
+            let assemblies = worklist |> List.map (fun x -> x.Assemblies) |> List.concat
+            do! writeAssemblyPatches outputDirectory filePrefix assemblies
             return ()
         }
+    
+    
+    // ************************************************************************
+    // Process
+
+
+    let writeProcessPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (worklist : S4Process list) : CompilerMonad<unit> = 
+        compile {
+            let! fresults = processesEmit worklist
+            do! writeFlocResults outputDirectory filePrefix fresults
+            return ()
+        } 
+
+    type ProcessWorkList<'hole> = (FuncLocPath * 'hole) list
+
+    /// Generate patches for new level 4 processes and their subordinates
+    let compileProcessPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : Process1<'hole>)
+                                (worklist : ProcessWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyTemplate worklist template |>> List.map snd
+            do! writeProcessPatches outputDirectory filePrefix worklist
+            let systems = worklist |> List.map (fun x -> x.Systems) |> List.concat
+            do! writeSystemPatches outputDirectory filePrefix systems
+            return ()
+        }
+
+
+    // ************************************************************************
+    // ProcessGroups
+
+
+    let writeProcessGroupPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (worklist : S4ProcessGroup list) : CompilerMonad<unit> = 
+        compile {
+            let! fresults = processGroupsEmit worklist
+            do! writeFlocResults outputDirectory filePrefix fresults
+            return ()
+        } 
+
+    type ProcessGroupWorkList<'hole> = (FuncLocPath * 'hole) list
+
+    /// Generate patches for new level 3 process groups and their subordinates
+    let compileProcessGroupPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : ProcessGroup1<'hole>)
+                                (worklist : ProcessGroupWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyTemplate worklist template |>> List.map snd
+            do! writeProcessGroupPatches outputDirectory filePrefix worklist
+            let processes = worklist |> List.map (fun x -> x.Processes) |> List.concat
+            do! writeProcessPatches outputDirectory filePrefix processes
+            return ()
+        }
+
+    // ************************************************************************
+    // Functions
+
+
+    let writeFunctionPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (worklist : S4Function list) : CompilerMonad<unit> = 
+        compile {
+            let! fresults = functionsEmit worklist
+            do! writeFlocResults outputDirectory filePrefix fresults
+            return ()
+        } 
+
+    type FunctionWorkList<'hole> = (FuncLocPath * 'hole) list
+
+    /// Generate patches for new level 2 functions and their subordinates
+    let compileFunctionPatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : Function1<'hole>)
+                                (worklist : FunctionWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyTemplate worklist template |>> List.map snd
+            do! writeFunctionPatches outputDirectory filePrefix worklist
+            let processGroups = worklist |> List.map (fun x -> x.ProcessGroups) |> List.concat
+            do! writeProcessGroupPatches outputDirectory filePrefix processGroups
+            return ()
+        }
+
+    // ************************************************************************
+    // Sites
+
+
+    let writeSitePatches (outputDirectory : string)
+                            (filePrefix : string)
+                            (worklist : S4Site list) : CompilerMonad<unit> = 
+        compile {
+            let! fresults = sitesEmit worklist
+            do! writeFlocResults outputDirectory filePrefix fresults
+            return ()
+        } 
+
+    type SiteWorkList<'hole> = (FuncLocPath * 'hole) list
+
+    /// Generate patches for new level 1 sites and their subordinates
+    let compileSitePatches (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : Site1<'hole>)
+                                (worklist : SiteWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyTemplate worklist template |>> List.map snd
+            do! writeSitePatches outputDirectory filePrefix worklist
+            let functions = worklist |> List.map (fun x -> x.Functions) |> List.concat
+            do! writeFunctionPatches outputDirectory filePrefix functions
+            return ()
+        }
+
+    // ************************************************************************
+    // EquiIndexing...
+
 
     /// Generate patches for a new level 1 site and its subordinates
     let materializeEquiClassValuaPatches (outputDirectory : string) : CompilerMonad<unit> = 

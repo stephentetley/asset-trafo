@@ -11,6 +11,7 @@ module Template =
 
     open AssetPatch.Base
     open AssetPatch.Base.Common
+    open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Hierarchy
     
@@ -26,7 +27,7 @@ module Template =
     /// *** With monadic templates (Reader) we can have a lot more
     /// *** flexibility for inheriting attributes
 
-    type Env = CompilerMonad.TemplateEnv
+    type Env = CompilerMonad.TemplateEnv * FuncLocPath
 
     /// State + Reader + Error
     type Template<'a> = 
@@ -64,13 +65,26 @@ module Template =
     let (template : TemplateBuilder) = new TemplateBuilder()
 
 
-    let runTemplate (env : Env) (code : Template<'a>) : Result<'a, ErrMsg> = 
-        match apply1 code env stateZero |> Result.map fst with
+    let runTemplate (env1 : CompilerMonad.TemplateEnv) (code : Template<'a>) : Result<'a, ErrMsg> = 
+        let fakeRoot = FuncLocPath.Create("*****")        
+        match apply1 code (env1, fakeRoot) stateZero |> Result.map fst with
         | Ok (Some(a)) -> Ok a
         | Ok None -> Error "Empty result"
         | Error msg -> Error msg
+
+    let cmEvalTemplate (code : Template<'a>) : CompilerMonad.CompilerMonad<'a> = 
+        CompilerMonad.compile {
+            let! templateEnv = CompilerMonad.asks id
+            return! CompilerMonad.liftResult (runTemplate templateEnv code)
+        }
+
         
-        
+    let private ( |>> ) (ma : Template<'a>) (fn : 'a -> 'b) : Template<'b> = 
+        Template <| fun env st -> 
+            match apply1 ma env st with 
+            | Ok(None, st1) -> Ok(None, st1)
+            | Ok(Some(a), st1) -> Ok(Some(fn a), st1)
+            | Error msg -> Error msg
     
     let private unlistM (source: Template<'x> list) : Template<'x list> = 
         Template <| fun env stzero -> 
@@ -89,17 +103,17 @@ module Template =
 
 
 
+    let rootFloc (floc : FuncLocPath) (ma : Template<'a>) : Template<'a> = 
+        Template <| fun (e1,_) st -> 
+            apply1 ma (e1,floc) st
 
-    let private _segment (token : string) 
-                         (description : string) 
-                         (objectType : string) : Template<FuncLocSegment> = 
-        mreturn { 
-            Name = token
-            Description = description
-            ObjectType = objectType 
-        }
+    let asksFloc () : Template<FuncLocPath> = 
+        Template <| fun (_,floc) st -> Ok (Some(floc), st)
+            
 
-
+    let internal extendFloc (levelCode  : string) (ma : Template<'a>) : Template<'a> = 
+        Template <| fun (e1,floc) st -> 
+            apply1 ma (e1,floc |> extend levelCode) st
     
 
     type Characteristic = Template<S4Characteristic>
@@ -135,7 +149,7 @@ module Template =
             return { 
                 ClassName = name
                 ClassInt = number
-                Characteritics = vs 
+                Characteristics = vs 
             }
         }
         
@@ -166,12 +180,12 @@ module Template =
 
 
 
-    let _equipment (description : string) (category : string) 
+    let _equipment (description : string) 
+                    (category : string) 
                     (objectType : string)
                     (classes : Class list) 
                     (subordinateEquipment : Equipment list) 
                     (attributes : EquipmentAttribute list) : Equipment = 
-        // EquipmentId is filled in by a compiler pass
         let equip1 = 
             template {
                 let! equiId = newEquipmentName ()
@@ -197,140 +211,165 @@ module Template =
     let internal equipmentAttribute (update : S4Equipment -> S4Equipment) : EquipmentAttribute =
         Template <| fun env st -> Ok (Some update, st)
             
-
+    
 
     type Component = Template<S4Component>
-    
+
+
     let _component (token : string) (description : string) (objectType : string)
                    (classes : Class list) (equipment : Equipment list) : Component = 
-        template {
-            let! floc = _segment token description objectType
-            let! cs = unlistM classes
-            let! es = unlistM equipment
-            return { 
-                FuncLocSegment = floc
-                Classes = cs 
-                Equipment = es 
+        extendFloc token
+            <| template {
+                let! floc = asksFloc ()
+                let! cs = unlistM classes
+                let! es = unlistM equipment
+                return { 
+                    FuncLoc = floc
+                    Description = description
+                    ObjectType = objectType
+                    Classes = cs 
+                    Equipment = es 
+                }
             }
-        }
 
     type Item = Template<S4Item>
     
     let _item (token : string) (description : string) (objectType : string)
                 (classes : Class list) 
                 (components : Component list) (equipment : Equipment list) : Item = 
-        template {
-            let! floc = _segment token description objectType
-            let! cs = unlistM classes
-            let! xs = unlistM components
-            let! es = unlistM equipment
-            return { 
-                FuncLocSegment = floc
-                Classes = cs 
-                Components = xs
-                Equipment = es 
+        extendFloc token
+            <| template {
+                let! floc = asksFloc ()
+                let! cs = unlistM classes
+                let! xs = unlistM components
+                let! es = unlistM equipment
+                return { 
+                    FuncLoc = floc
+                    Description = description
+                    ObjectType = objectType
+                    Classes = cs 
+                    Components = xs
+                    Equipment = es 
+                }
             }
-        }
 
     type Assembly = Template<S4Assembly>
     
     let _assembly (token : string) (description : string) (objectType : string)
                     (classes : Class list) 
                     (items : Item list) (equipment : Equipment list) : Assembly = 
-        template {
-            let! floc = _segment token description objectType
-            let! cs = unlistM classes
-            let! xs = unlistM items
-            let! es = unlistM equipment
-            return { 
-                FuncLocSegment = floc
-                Classes = cs
-                Items = xs
-                Equipment = es 
+        extendFloc token
+            <| template {
+                let! floc = asksFloc ()
+                let! cs = unlistM classes
+                let! xs = unlistM items
+                let! es = unlistM equipment
+                return { 
+                    FuncLoc = floc
+                    Description = description
+                    ObjectType = objectType
+                    Classes = cs
+                    Items = xs
+                    Equipment = es 
+                }
             }
-        }
 
     type System = Template<S4System>
     
     let _system (token : string) (description : string) (objectType : string)
                 (classes : Class list) 
                 (assemblies : Assembly list) (equipment : Equipment list) : System = 
-        template {
-            let! floc = _segment token description objectType
-            let! cs = unlistM classes
-            let! xs = unlistM assemblies
-            let! es = unlistM equipment
-            return { 
-                FuncLocSegment = floc
-                Classes = cs
-                Assemblies = xs
-                Equipment = es 
+        extendFloc token
+            <| template {
+                let! floc =  asksFloc ()
+                let! cs = unlistM classes
+                let! xs = unlistM assemblies
+                let! es = unlistM equipment
+                return { 
+                    FuncLoc = floc
+                    Description = description
+                    ObjectType = objectType
+                    Classes = cs
+                    Assemblies = xs
+                    Equipment = es 
+                }
             }
-        }
 
     type Process = Template<S4Process>
     
     let _process (token : string) (description : string) (objectType : string)
                     (classes : Class list) 
                     (systems : System list) : Process = 
-        template {
-            let! floc = _segment token description objectType
-            let! cs = unlistM classes
-            let! xs = unlistM systems
-            return { 
-                FuncLocSegment = floc
-                Classes = cs 
-                Systems = xs 
+        extendFloc token
+            <| template {
+                let! floc = asksFloc ()
+                let! cs = unlistM classes
+                let! xs = unlistM systems
+                return { 
+                    FuncLoc = floc
+                    Description = description
+                    ObjectType = objectType
+                    Classes = cs 
+                    Systems = xs 
+                }
             }
-        }
 
     type ProcessGroup = Template<S4ProcessGroup>
     
     let _processGroup (token : string) (description : string) (objectType : string)    
                         (classes : Class list) 
                         (processes : Process list) : ProcessGroup = 
-        template {
-            let! floc = _segment token description objectType
-            let! cs = unlistM classes
-            let! xs = unlistM processes
-            return { 
-                FuncLocSegment = floc
-                Classes = cs 
-                Processes = xs 
+        extendFloc token
+            <| template {
+                let! floc = asksFloc () |>> extend token 
+                let! cs = unlistM classes
+                let! xs = unlistM processes
+                return { 
+                    FuncLoc = floc
+                    Description = description
+                    ObjectType = objectType
+                    Classes = cs 
+                    Processes = xs 
+                }
             }
-        }
 
     type Function = Template<S4Function>
     
     let _function (token : string) (description : string) (objectType : string)
                   (classes : Class list) 
                   (processGroups : ProcessGroup list) : Function = 
-        template {
-            let! floc = _segment token description objectType
-            let! cs = unlistM classes
-            let! xs = unlistM processGroups
-            return { 
-                FuncLocSegment = floc
-                Classes = cs 
-                ProcessGroups = xs 
+        extendFloc token
+            <| template {
+                let! floc = asksFloc ()
+                let! cs = unlistM classes
+                let! xs = unlistM processGroups
+                return { 
+                    FuncLoc = floc
+                    Description = description
+                    ObjectType = objectType
+                    Classes = cs 
+                    ProcessGroups = xs 
+                }
             }
-        }
 
     type Site = Template<S4Site>
     
     let _site (siteCode : string) (description : string) 
                 (classes : Class list) 
                 (functions : Function list) : Site = 
-        template {
-            let! floc = _segment siteCode description "SITE"
-            let! cs = unlistM classes
-            let! xs = unlistM functions
-            return { 
-                FuncLocSegment = floc
-                Classes = cs 
-                Functions = xs 
+        rootFloc (FuncLocPath.Create siteCode)
+            <| template {
+                let! floc = asksFloc ()
+                let! cs = unlistM classes
+                let! xs = unlistM functions
+                return { 
+                    FuncLoc = floc
+                    Description = description 
+                    ObjectType = "SITE"
+                    Classes = cs 
+                    Functions = xs 
+                }
             }
-        }
 
     type Class1<'a> = 'a -> Class
     

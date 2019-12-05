@@ -16,10 +16,18 @@ module Hierarchy =
           Value : string 
         }
 
+    
+    let sortedCharacteristics (source : S4Characteristic list) : (S4Characteristic list) list= 
+        source
+            |> List.sortBy (fun x -> x.Name)
+            |> List.groupBy (fun x -> x.Name)               
+            |> List.map snd
+
+
     type S4Class = 
         { ClassName : string          
           ClassInt : uint32
-          Characteritics : S4Characteristic list
+          Characteristics : S4Characteristic list
         }
 
 
@@ -40,14 +48,18 @@ module Hierarchy =
 
     
     type S4Component = 
-        { FuncLocSegment : FuncLocSegment
+        { FuncLoc : FuncLocPath
+          Description : string
+          ObjectType : string
           Classes : S4Class list
           Equipment : S4Equipment list        
         }
 
 
     type S4Item = 
-        { FuncLocSegment : FuncLocSegment
+        { FuncLoc : FuncLocPath
+          Description : string
+          ObjectType : string
           Classes : S4Class list
           Components : S4Component list
           Equipment : S4Equipment list        
@@ -55,39 +67,51 @@ module Hierarchy =
 
 
     type S4Assembly = 
-        { FuncLocSegment : FuncLocSegment
+        { FuncLoc : FuncLocPath
+          Description : string
+          ObjectType : string
           Classes : S4Class list
           Items : S4Item list
           Equipment : S4Equipment list        
         }
 
     type S4System = 
-        { FuncLocSegment : FuncLocSegment
+        { FuncLoc : FuncLocPath
+          Description : string
+          ObjectType : string
           Classes : S4Class list
           Assemblies : S4Assembly list
           Equipment : S4Equipment list        
         }
 
     type S4Process = 
-        { FuncLocSegment : FuncLocSegment
+        { FuncLoc : FuncLocPath
+          Description : string
+          ObjectType : string
           Classes : S4Class list
           Systems : S4System list     
         }
 
     type S4ProcessGroup = 
-        { FuncLocSegment : FuncLocSegment
+        { FuncLoc : FuncLocPath
+          Description : string
+          ObjectType : string
           Classes : S4Class list
           Processes : S4Process list    
         }
 
     type S4Function = 
-        { FuncLocSegment : FuncLocSegment
+        { FuncLoc : FuncLocPath
+          Description : string
+          ObjectType : string
           Classes : S4Class list
           ProcessGroups : S4ProcessGroup list    
         }
 
     type S4Site = 
-        { FuncLocSegment : FuncLocSegment
+        { FuncLoc : FuncLocPath
+          Description : string
+          ObjectType : string
           Classes : S4Class list
           Functions : S4Function list    
         }

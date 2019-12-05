@@ -20,9 +20,11 @@
     <Compile Include="AssetPatch\TemplatePatcher\PatchTypes.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Hierarchy.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Template.fs" />
-    <Compile Include="AssetPatch\TemplatePatcher\Emitter.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\EquiIndexing.fs" />
-    <Compile Include="AssetPatch\TemplatePatcher\PatchGen.fs" />
+    <Compile Include="AssetPatch\TemplatePatcher\PatchWriter.fs" />
+    <Compile Include="AssetPatch\TemplatePatcher\EmitEquipment.fs" />
+    <Compile Include="AssetPatch\TemplatePatcher\EmitFuncLoc.fs" />
+    <Compile Include="AssetPatch\TemplatePatcher\Emitter.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\PatchCompiler.fs" />
     <Compile Include="AssetPatch\TemplateCatalogue\Base.fs" />
     <Compile Include="AssetPatch\TemplateCatalogue\AssetCondition.fs" />

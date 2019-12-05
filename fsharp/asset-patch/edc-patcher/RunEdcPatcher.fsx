@@ -51,6 +51,8 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\PatchTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Hierarchy.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EmitEquipment.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EmitFuncLoc.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchGen.fs"

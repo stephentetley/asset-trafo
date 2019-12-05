@@ -3,7 +3,8 @@
 
 namespace AssetPatch.TemplatePatcher
 
-
+// This module is a hack because we don't know Equipment number (EQUI)
+// until we have uploaded the Equi file.
 
 module EquiIndexing =
     
@@ -11,7 +12,7 @@ module EquiIndexing =
 
     open FSharp.Interop.Excel
     
-    open SheetDoc.Internal.Syntax       // shouldn't need to do this...
+    open SheetDoc.Internal.Syntax       
     open SheetDoc.Internal.Render
     open SheetDoc.SheetDoc
 
