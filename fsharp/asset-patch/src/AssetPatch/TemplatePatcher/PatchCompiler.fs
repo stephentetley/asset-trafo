@@ -11,9 +11,9 @@ module PatchCompiler =
     // Open first so common names get overridden
     open AssetPatch.TemplatePatcher.Template
 
-    open AssetPatch.Base.FuncLocPath
-    open AssetPatch.TemplatePatcher.CompilerMonad    
+    open AssetPatch.Base.FuncLocPath 
     open AssetPatch.TemplatePatcher.Hierarchy
+    open AssetPatch.TemplatePatcher.CompilerMonad   
     open AssetPatch.TemplatePatcher.EquiIndexing
     open AssetPatch.TemplatePatcher.EmitEquipment
     open AssetPatch.TemplatePatcher.EmitFuncLoc
@@ -25,13 +25,14 @@ module PatchCompiler =
     // Compile Class * Valua patches to update exting Flocs and Equipment...
 
 
-    let private applyTemplate (xs: ('name * 'b) list ) 
-                        (template: 'b -> Template.Template<'c>) : CompilerMonad<('name * 'c) list> = 
-        forM xs (fun (name, x) -> cmEvalTemplate (template x) >>=  fun a -> mreturn (name, a))
+    let private applyTemplate (path : FuncLocPath) 
+                                (xs: ('name * 'b) list ) 
+                                (template: 'b -> Template.Template<'c>) : CompilerMonad<('name * 'c) list> = 
+        forM xs (fun (name, x) -> evalTemplate path (template x) >>=  fun a -> mreturn (name, a))
 
     let private applyFlocTemplate (xs: (FuncLocPath * 'a) list ) 
                         (template: 'a -> Template.Template<'b>) : CompilerMonad<'b list> = 
-        forM xs (fun (path, x) -> cmEvalTemplate (rootFloc path (template x)))
+        forM xs (fun (path, x) -> evalTemplate path (template x))
 
 
 
@@ -48,7 +49,7 @@ module PatchCompiler =
                                             (template : Class1<'hole>)
                                             (worklist : ClassEquiWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
-            let! worklist1 = applyTemplate worklist template
+            let! worklist1 = applyTemplate (FuncLocPath.Create("*****")) worklist template
             let! results = 
                 forM worklist1 (fun (number, klass) -> equipmentToEquiProperties number [klass])
                     |>> collectEquiProperties
@@ -67,7 +68,7 @@ module PatchCompiler =
                                             (template : Class1<'hole>)
                                             (worklist : ClassFlocWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
-            let! worklist1 = applyTemplate worklist template
+            let! worklist1 = applyTemplate (FuncLocPath.Create("*****")) worklist template
             let! results = 
                 forM worklist1 (fun (path, klass) -> funclocToFlocProperties path [klass])
                     |>> collectFlocProperties

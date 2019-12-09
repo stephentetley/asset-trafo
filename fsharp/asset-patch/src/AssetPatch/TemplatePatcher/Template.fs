@@ -23,11 +23,30 @@ module Template =
     let private stateZero : State = 
         { FreshEquipmentIndex = 1 }
 
-    
-    /// *** With monadic templates (Reader) we can have a lot more
-    /// *** flexibility for inheriting attributes
+    type TemplateEnv = 
+        { UserName : string 
+          StartupDate : DateTime
+          StructureIndicator : string
+          MaintenancePlant : uint32
+          ObjectStatus : string
+          FlocVariant : string option
+          EquiVariant : string option
+        }
 
-    type Env = CompilerMonad.TemplateEnv * FuncLocPath
+
+    let defaultEnv (userName : string) : TemplateEnv = 
+        { UserName = userName
+          StartupDate = DateTime.Now
+          StructureIndicator = "YW-GS"
+          MaintenancePlant = 2100u
+          ObjectStatus = "UCON"
+          FlocVariant = None
+          EquiVariant = None
+        }
+
+    // FuncLocPath should not be directly visible to client code
+
+    type Env = FuncLocPath * TemplateEnv
 
     /// State + Reader + Error
     type Template<'a> = 
@@ -65,19 +84,13 @@ module Template =
     let (template : TemplateBuilder) = new TemplateBuilder()
 
 
-    let runTemplate (env1 : CompilerMonad.TemplateEnv) (code : Template<'a>) : Result<'a, ErrMsg> = 
-        let fakeRoot = FuncLocPath.Create("*****")        
-        match apply1 code (env1, fakeRoot) stateZero |> Result.map fst with
+    let runTemplate (env : Env) (code : Template<'a>) : Result<'a, ErrMsg> = 
+        match apply1 code env stateZero |> Result.map fst with
         | Ok (Some(a)) -> Ok a
         | Ok None -> Error "Empty result"
         | Error msg -> Error msg
 
-    let cmEvalTemplate (code : Template<'a>) : CompilerMonad.CompilerMonad<'a> = 
-        CompilerMonad.compile {
-            let! templateEnv = CompilerMonad.asks id
-            return! CompilerMonad.liftResult (runTemplate templateEnv code)
-        }
-
+    
         
     let private ( |>> ) (ma : Template<'a>) (fn : 'a -> 'b) : Template<'b> = 
         Template <| fun env st -> 
@@ -104,22 +117,22 @@ module Template =
 
 
     let rootFloc (floc : FuncLocPath) (ma : Template<'a>) : Template<'a> = 
-        Template <| fun (e1,_) st -> 
-            apply1 ma (e1,floc) st
+        Template <| fun (_, tenv) st -> 
+            apply1 ma (floc, tenv) st
 
     let asksFloc () : Template<FuncLocPath> = 
-        Template <| fun (_,floc) st -> Ok (Some(floc), st)
+        Template <| fun (floc, _) st -> Ok (Some(floc), st)
 
-    type EnvTransformer = CompilerMonad.Env -> CompilerMonad.Env
+    type EnvTransformer = TemplateEnv -> TemplateEnv
 
     let local (modify : EnvTransformer) (ma : Template<'a>) : Template<'a> = 
-        Template <| fun (e1, floc) st -> 
-            apply1 ma (modify e1, floc) st
+        Template <| fun (floc, tenv) st -> 
+            apply1 ma (floc, modify tenv) st
 
     let locals (modifications : EnvTransformer list) (ma : Template<'a>) : Template<'a> = 
         let trafo = List.foldBack (fun f acc -> acc >> f) modifications id
-        Template <| fun (e1, floc) st -> 
-            apply1 ma (trafo e1, floc) st
+        Template <| fun (floc, tenv) st -> 
+            apply1 ma (floc, trafo tenv) st
 
             
     let startupDate (date : DateTime) : EnvTransformer = 
@@ -127,8 +140,8 @@ module Template =
 
 
     let internal extendFloc (levelCode  : string) (ma : Template<'a>) : Template<'a> = 
-        Template <| fun (e1,floc) st -> 
-            apply1 ma (e1,floc |> extend levelCode) st
+        Template <| fun (floc, tenv) st -> 
+            apply1 ma (floc |> extend levelCode, tenv) st
     
 
     type Characteristic = Template<S4Characteristic>

@@ -11,6 +11,8 @@ module CompilerMonad =
     open FSharp.Core
 
     open AssetPatch.Base.Common
+    open AssetPatch.Base.FuncLocPath
+    open AssetPatch.TemplatePatcher.Template
 
     /// Note - EquipmentIndex is not so straightforward.
     /// The actual equipment for ClassEqui and ValuaEqui files is generated
@@ -26,36 +28,20 @@ module CompilerMonad =
         { FileIndices = Map.empty }
 
 
-    type TemplateEnv = 
-        { UserName : string 
-          StartupDate : DateTime
-          StructureIndicator : string
-          MaintenancePlant : uint32
-          ObjectStatus : string
-          FlocVariant : string option
-          EquiVariant : string option
-        }
+    
 
     // May get expanded...
-    type Env = TemplateEnv
+    type CompilerEnv = TemplateEnv
             
         
-    let defaultEnv (userName : string) = 
-        { UserName = userName
-          StartupDate = DateTime.Now
-          StructureIndicator = "YW-GS"
-          MaintenancePlant = 2100u
-          ObjectStatus = "UCON"
-          FlocVariant = None
-          EquiVariant = None
-        }
+    
 
     /// CompilerMonad is a Reader-Error-State(name supply) monad.
     type CompilerMonad<'a> = 
-        CompilerMonad of (Env -> State -> Result<'a * State, ErrMsg>)
+        CompilerMonad of (CompilerEnv -> State -> Result<'a * State, ErrMsg>)
 
     let inline private apply1 (ma : CompilerMonad<'a>) 
-                                (env : Env) 
+                                (env : CompilerEnv) 
                                 (st : State) : Result<'a * State, ErrMsg> = 
         let (CompilerMonad fn) = ma in fn env st
 
@@ -96,9 +82,11 @@ module CompilerMonad =
 
 
 
-    let runCompiler (env : Env) 
+    let runCompiler (env : CompilerEnv) 
                     (action : CompilerMonad<'a> ) : Result<'a, ErrMsg> =         
         apply1 action env stateZero |> Result.map fst
+
+    
 
 
     // ************************************************************************
@@ -238,13 +226,13 @@ module CompilerMonad =
     // ************************************************************************
     // Reader operations
 
-    let ask () : CompilerMonad<Env> = 
+    let ask () : CompilerMonad<CompilerEnv> = 
         CompilerMonad <| fun env st -> Ok (env, st)
 
-    let asks (projection : Env -> 'ans) : CompilerMonad<'ans> = 
+    let asks (projection : CompilerEnv -> 'ans) : CompilerMonad<'ans> = 
         CompilerMonad <| fun env st -> Ok (projection env, st)
 
-    let local (modify : Env -> Env) (ma : CompilerMonad<'ans>) : CompilerMonad<'ans> = 
+    let local (modify : CompilerEnv -> CompilerEnv) (ma : CompilerMonad<'ans>) : CompilerMonad<'ans> = 
         CompilerMonad <| fun env st -> apply1 ma (modify env) st
 
     // ************************************************************************
@@ -493,6 +481,15 @@ module CompilerMonad =
                (action6 : CompilerMonad<'f>) 
                (combine : 'a -> 'b -> 'c -> 'd -> 'e -> 'f -> 'ans) : CompilerMonad<'ans> = 
         liftM6 combine action1 action2 action3 action4 action5 action6
+
+    // ************************************************************************
+    // Templates
+
+    let evalTemplate (rootFloc : FuncLocPath) (code : Template<'a>) : CompilerMonad<'a> = 
+        compile {
+            let! templateEnv = asks id
+            return! liftResult (runTemplate (rootFloc, templateEnv) code)
+        }
 
     // ************************************************************************
     // Traversals

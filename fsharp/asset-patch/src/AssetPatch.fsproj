@@ -16,10 +16,10 @@
     <Compile Include="AssetPatch\Base\FuncLocPath.fs" />
     <Compile Include="AssetPatch\Utilities\ChangeFileReport.fs" />
     <Compile Include="AssetPatch\Utilities\TidyChangeFile.fs" />
-    <Compile Include="AssetPatch\TemplatePatcher\CompilerMonad.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\PatchTypes.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Hierarchy.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Template.fs" />
+    <Compile Include="AssetPatch\TemplatePatcher\CompilerMonad.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\EquiIndexing.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\PatchWriter.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\EmitEquipment.fs" />

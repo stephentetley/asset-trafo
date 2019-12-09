@@ -48,10 +48,10 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\FuncLocPath.fs"
-#load "..\src\AssetPatch\TemplatePatcher\CompilerMonad.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Hierarchy.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
+#load "..\src\AssetPatch\TemplatePatcher\CompilerMonad.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchWriter.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitEquipment.fs"
@@ -61,9 +61,9 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplateCatalogue\Base.fs"
 #load "..\src\AssetPatch\TemplateCatalogue\AssetCondition.fs"
 open AssetPatch.Base.Common
-open AssetPatch.Base.CompilerMonad
 open AssetPatch.Base.FuncLocPath
 open AssetPatch.TemplatePatcher.Template
+open AssetPatch.TemplatePatcher.CompilerMonad
 open AssetPatch.TemplatePatcher.PatchCompiler
 open AssetPatch.TemplateCatalogue
 
