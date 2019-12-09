@@ -102,30 +102,30 @@ module EmitFuncLoc =
 
 
     let genFuncLoc (path : FuncLocPath) 
+                    (props : FuncLocProperties)
                     (description : string) 
                     (objectType : string)  : CompilerMonad<FuncLoc> = 
         compile {
-            let! startDate = asks (fun x -> x.StartupDate) 
-            let! structInd = asks (fun x -> x.StructureIndicator)
-            let! objStatus = asks (fun x -> x.ObjectStatus)
+            let! objStatus = asks (fun x -> x.ObjectStatus)   /// TODO - wrong
             return { 
                 Path = path
                 Description = description
                 ObjectType = objectType
                 Category = uint32 path.Level
                 ObjectStatus = objStatus
-                StartupDate = startDate
-                StructureIndicator = structInd
+                StartupDate = props.StartupDate
+                StructureIndicator = props.StructureIndicator
             }
         }
 
     let funclocToFuncLocResult1 (path : FuncLocPath) 
+                                (props : FuncLocProperties)
                                 (description : string) 
                                 (objectType : string)
                                 (classes : S4Class list) : CompilerMonad<FuncLocResult1> = 
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile {
-            let! floc = genFuncLoc path description objectType
+            let! floc = genFuncLoc path props description objectType
             let! (cs, vs) = mapM (translateS4ClassFloc path) classes |>> collect
             return { 
                 FuncLoc = floc
