@@ -56,6 +56,7 @@ module Hierarchy =
           MaintenancePlant : uint32
           ControllingArea : uint32
           CompanyCode : uint32
+          Currency : string
         }
 
     

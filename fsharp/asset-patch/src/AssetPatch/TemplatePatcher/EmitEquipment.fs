@@ -119,6 +119,7 @@ module EmitEquipment =
             { CompanyCode = props.CompanyCode 
               ControllingArea = props.ControllingArea 
               PlantCode = props.MaintenancePlant
+              UserStatus = props.ObjectStatus
             }
 
         compile {
@@ -138,6 +139,7 @@ module EmitEquipment =
                 ConstructionMonth = 
                     Option.defaultValue (uint8 props.StartupDate.Month) equipment.ConstructionMonth
                 MaintenancePlant = props.MaintenancePlant
+                Currency = props.Currency
                 CommonProps = commonProps
             }
         }

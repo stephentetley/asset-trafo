@@ -50,7 +50,7 @@ module PatchTypes =
         { CompanyCode : uint32
           ControllingArea : uint32
           PlantCode : uint32
-        
+          UserStatus : string
         }
 
     /// Note - more params need to be added when we understand the data
@@ -79,11 +79,11 @@ module PatchTypes =
         makeAssocs
             [ ("ABCKZFLOC",     "ABC Indicator",                    "")
             ; ("GSBE_FLOC",     "Business Area",                    "")
-            ; ("BUKRSFLOC",     "Company Code",                    funcLoc.CommonProps.CompanyCode.ToString())
+            ; ("BUKRSFLOC",     "Company Code",                     funcLoc.CommonProps.CompanyCode.ToString())
             ; ("KOKR_FLOC",     "Controlling Area",                 funcLoc.CommonProps.ControllingArea.ToString())
             ; ("KOST_FLOC",     "Cost Center",                      "")    
             ; ("TXTMI",         "Description (medium text)",        funcLoc.Description)
-            ; ("USTA_FLOC",     "Display lines for user status",    "UCON")
+            ; ("USTA_FLOC",     "Display lines for user status",    funcLoc.CommonProps.UserStatus)
             ; ("FLTYP",         "FuncLocCategory",                  funcLoc.Category.ToString())
             ; ("FUNCLOC",       "Function Location",                "")     // Must be blank
             ; ("IEQUI",         "Installation allowed",             installationAllowed)
@@ -157,7 +157,6 @@ module PatchTypes =
             ; ("ATWRT",         "Characteristic Value",             valua.CharacteristicValue)
             ; ("TEXTBEZ",       "Description",                      valua.CharacteristicValue)
             ; ("VALCNT",        "Int count values",                 sprintf "%04i" valua.ValueCount)
-            ; ("ATFLV",         "Value from",                       valua.CharacteristicValue)
             ]
 
 
@@ -179,6 +178,7 @@ module PatchTypes =
         ConstructionMonth : uint8
         StartupDate : DateTime
         MaintenancePlant : uint32
+        Currency : string
         CommonProps : CommonProperties
       }
 
@@ -187,14 +187,15 @@ module PatchTypes =
         makeAssocs
             // [ ("ABCK_EILO",     "ABC Indicator",                    "") 
             // ; ("GSBE_EILO",     "Business Area",                    "")
-            [ ("BUKR_EILO",     "Company Code",                     "2100")
+            [ ("BUKR_EILO",     "Company Code",                     equi.CommonProps.CompanyCode.ToString())
             ; ("BAUMM_EQI",     "Construction month",               (sprintf "%02i" equi.ConstructionMonth))
             ; ("BAUJJ",         "Construction year",                equi.ConstructionYear.ToString())
 
-            ; ("KOKR_EILO",     "Controlling Area",                equi.CommonProps.ControllingArea.ToString())
+            ; ("KOKR_EILO",     "Controlling Area",                 equi.CommonProps.ControllingArea.ToString())
             // ; ("KOST_EILO",     "Cost Center",                      "150008")   /// <--- This should be a param
+            ; ("WAERS",         "Currency",                         equi.Currency)
             ; ("TXTMI",         "Description (medium text)",        equi.Description)  
-            // ; ("USTA_EQUI",     "Display lines for user status",    "OPER")
+            ; ("USTA_EQUI",     "Display lines for user status",    equi.CommonProps.UserStatus)
             
             ; ("EQTYP",         "Equipment category",               equi.Category)   
             ; ("TPLN_EILO",     "Functional Location",              equi.FuncLoc.ToString())

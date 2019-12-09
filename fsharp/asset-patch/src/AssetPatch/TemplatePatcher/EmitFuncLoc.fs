@@ -108,7 +108,8 @@ module EmitFuncLoc =
         let commonProps : CommonProperties = 
             { ControllingArea = props.ControllingArea
               CompanyCode = props.CompanyCode
-              PlantCode = props.MaintenancePlant }
+              PlantCode = props.MaintenancePlant
+              UserStatus = props.ObjectStatus }
 
         compile {
             return { 

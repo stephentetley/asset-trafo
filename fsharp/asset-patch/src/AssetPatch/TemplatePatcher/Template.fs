@@ -31,6 +31,7 @@ module Template =
           CompanyCode : uint32
           MaintenancePlant : uint32
           ControllingArea : uint32
+          Currency : string
           FlocVariant : string option
           EquiVariant : string option
         }
@@ -44,6 +45,7 @@ module Template =
           CompanyCode = 2100u
           MaintenancePlant = 2100u          
           ControllingArea = 1000u
+          Currency = "GBP"
           FlocVariant = None
           EquiVariant = None
         }
@@ -136,6 +138,7 @@ module Template =
                   ObjectStatus = tenv.ObjectStatus
                   ControllingArea = tenv.ControllingArea
                   CompanyCode = tenv.CompanyCode
+                  Currency = tenv.Currency
                 }
             Ok (Some(props), st)
 
