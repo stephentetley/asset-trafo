@@ -56,7 +56,7 @@ module EquiIndexing =
     //let compileEquiFile (rows : Equi list) : CompilerMonad<SpreadSheetDoc> = 
     //    failwith "IndexingRow"
 
-    let getIndexingRow (equi : Equi) : IndexingRow = 
+    let getIndexingRow (equi : PatchEqui) : IndexingRow = 
         { Floc = equi.FuncLoc
           Description = equi.Description
           APIdent = equi.EquipmentNumber
@@ -66,7 +66,7 @@ module EquiIndexing =
 
 
     let writeEquiIndexingSheet (outputPath : string)
-                                    (rows : Equi list) : CompilerMonad<unit> =
+                                    (rows : PatchEqui list) : CompilerMonad<unit> =
         compile {        
             let doc = rows |> List.map getIndexingRow |> makeOutput
             do! liftAction (fun () -> renderSpreadSheetDoc doc outputPath)

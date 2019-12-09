@@ -19,11 +19,11 @@ module EdcTemplate =
         | null | "" -> None
         |_ -> Some source
 
-    /// Note input string might have hh:mm:ss suffix. 
-    /// So take first 10 characters.
+    /// Note - this is very flaky as ExcelProvider seems to have difficulty 
+    /// with Excel's type casting.
     let getInstallDate (source : string) : DateTime = 
         match tryGetUSDate source with
-        | Some date -> printfn "Date is %O" date; date
+        | Some date -> date
         | None -> new DateTime(year=1970, month=1, day=1)
 
     let aib_reference_leaf_instance (parameters : WorkListRow) : Class = 
@@ -75,7 +75,7 @@ module EdcTemplate =
         let startupDateTrafo : EnvTransformer = 
             match tryGetUSDate parameters.``Install Date`` with
             | None -> id
-            | Some date -> printfn "startupDate is:%O" date; startupDate date
+            | Some date -> startupDate date
 
         let east_north_common = 
             match NGR.Create parameters.NGR with

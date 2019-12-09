@@ -132,7 +132,7 @@ module PatchWriter =
     // FuncLoc file
 
     /// Render a list of FuncLoc changes into a ChangeFile
-    let private makeFuncLocFile (rows : FuncLoc list) : CompilerMonad<ChangeFile> = 
+    let private makeFuncLocFile (rows : PatchFuncLoc list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.Path.ToString()) 
             |> List.map funcLocToAssocs     
@@ -142,7 +142,7 @@ module PatchWriter =
     let writeFuncLocFile (directory : string) 
                             (level : int)
                             (filePrefix : string) 
-                            (funcLocs : FuncLoc list) : CompilerMonad<unit> = 
+                            (funcLocs : PatchFuncLoc list) : CompilerMonad<unit> = 
         compile { 
             match funcLocs with
             | [] -> return ()
@@ -157,7 +157,7 @@ module PatchWriter =
     // FuncLoc file
 
     /// Render a list of ClassFloc changes into a ChangeFile
-    let private makeClassFlocFile (rows : ClassFloc list) : CompilerMonad<ChangeFile> = 
+    let private makeClassFlocFile (rows : PatchClassFloc list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.Class + "!" + row.FuncLoc.ToString())
             |> List.map classFlocToAssocs     
@@ -167,7 +167,7 @@ module PatchWriter =
     let writeClassFlocFile (directory : string) 
                             (level : int)
                             (filePrefix : string) 
-                            (classFlocs : ClassFloc list) : CompilerMonad<unit> = 
+                            (classFlocs : PatchClassFloc list) : CompilerMonad<unit> = 
         compile { 
             match classFlocs with
             | [] -> return ()
@@ -182,7 +182,7 @@ module PatchWriter =
     // ValuaFloc file
 
     /// Render a list of ValuaFloc changes into a ChangeFile
-    let private makeValuaFlocFile (rows : ValuaFloc list) : CompilerMonad<ChangeFile> = 
+    let private makeValuaFlocFile (rows : PatchValuaFloc list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.FuncLoc.ToString() + "!" + row.CharacteristicID)
             |> List.map valuaFlocToAssocs     
@@ -193,7 +193,7 @@ module PatchWriter =
     let writeValuaFlocFile (directory : string) 
                             (level : int)
                             (filePrefix : string) 
-                            (valuaFlocs : ValuaFloc list) : CompilerMonad<unit> = 
+                            (valuaFlocs : PatchValuaFloc list) : CompilerMonad<unit> = 
         compile { 
             match valuaFlocs with
             | [] -> return ()
@@ -209,7 +209,7 @@ module PatchWriter =
     // Equi file
 
     /// Render a list of ClassEqui changes into a ChangeFile
-    let private makeEquiFile (rows : Equi list) : CompilerMonad<ChangeFile> = 
+    let private makeEquiFile (rows : PatchEqui list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.EquipmentNumber.ToString())
             |> List.map equiToAssocs     
@@ -219,7 +219,7 @@ module PatchWriter =
     let writeEquiFile (directory : string) 
                         (level : int)
                         (filePrefix : string) 
-                        (equis : Equi list) : CompilerMonad<unit> = 
+                        (equis : PatchEqui list) : CompilerMonad<unit> = 
         compile { 
             match equis with
             | [] -> return ()
@@ -233,7 +233,7 @@ module PatchWriter =
     /// Write an EquiIndexing file
     let writeEquiIndexing (directory : string) 
                             (level : int)
-                            (equis : Equi list) : CompilerMonad<unit> =  
+                            (equis : PatchEqui list) : CompilerMonad<unit> =  
         compile {
             let outputPath = Path.Combine(directory, "EquiIndexing.xlsx")
             return! writeEquiIndexingSheet outputPath equis
@@ -244,7 +244,7 @@ module PatchWriter =
 
 
     /// Render a list of ClassEqui changes into a ChangeFile
-    let private makeClassEquiFile (rows : ClassEqui list) : CompilerMonad<ChangeFile> = 
+    let private makeClassEquiFile (rows : PatchClassEqui list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.EquipmentNumber.ToString() + row.Class)
             |> List.map classEquiToAssocs     
@@ -254,7 +254,7 @@ module PatchWriter =
     let writeClassEquiFile (directory : string) 
                             (level : int)
                             (filePrefix : string) 
-                            (classEquis : ClassEqui list) : CompilerMonad<unit> = 
+                            (classEquis : PatchClassEqui list) : CompilerMonad<unit> = 
         compile { 
             match classEquis with
             | [] -> return ()
@@ -269,7 +269,7 @@ module PatchWriter =
     // ValuaEqui file
 
     /// Render a list of ValuaEqui changes into a ChangeFile
-    let private makeValuaEquiFile (rows : ValuaEqui list) : CompilerMonad<ChangeFile> = 
+    let private makeValuaEquiFile (rows : PatchValuaEqui list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.EquipmentNumber)
             |> List.map valuaEquiToAssocs     
@@ -279,7 +279,7 @@ module PatchWriter =
     let writeValuaEquiFile (directory : string) 
                             (level : int)
                             (filePrefix : string) 
-                            (valuaEquis : ValuaEqui list) : CompilerMonad<unit> = 
+                            (valuaEquis : PatchValuaEqui list) : CompilerMonad<unit> = 
         compile { 
             match valuaEquis with
             | [] -> return ()

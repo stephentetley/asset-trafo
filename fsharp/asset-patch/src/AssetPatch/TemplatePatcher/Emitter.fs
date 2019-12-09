@@ -22,28 +22,29 @@ module Emitter =
         (flocResults, equiResults)
 
     let equipmentEmit (flocPath : FuncLocPath) 
+                        (props : FuncLocProperties)
                         (source : S4Equipment) : CompilerMonad<EquiResult1 list> = 
         let rec work kids cont = 
             match kids with
             | [] -> mreturn []
             | (x :: xs) -> 
                 compile {
-                    let! v1 = equipmentToEquiResult1 flocPath x
+                    let! v1 = equipmentToEquiResult1 flocPath props x
                     return! work kids (fun vs -> let ans = (v1 :: vs) in cont ans)
                 }
         compile {
-            let! equiResult1 = equipmentToEquiResult1 flocPath source
+            let! equiResult1 = equipmentToEquiResult1 flocPath props source
             let! kids = work source.SuboridnateEquipment id
             return (equiResult1 :: kids)
         }
 
-    let equipmentsEmit (flocPath : FuncLocPath)  (source : S4Equipment list) : CompilerMonad<EquiResults> = 
-        mapM (equipmentEmit flocPath) source |>> (List.concat >> collectEquiResults)
+    let equipmentsEmit (flocPath : FuncLocPath) (props : FuncLocProperties) (source : S4Equipment list) : CompilerMonad<EquiResults> = 
+        mapM (equipmentEmit flocPath props) source |>> (List.concat >> collectEquiResults)
 
     let private componentEmit (source : S4Component) : CompilerMonad<FuncLocResult1 * EquiResults> = 
         compile {
             let! flocResult = funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
-            let! equiResults = equipmentsEmit source.FuncLoc source.Equipment
+            let! equiResults = equipmentsEmit source.FuncLoc source.FlocProperties source.Equipment
             return (flocResult, equiResults)
         }
 
@@ -54,7 +55,7 @@ module Emitter =
     let private itemEmit (source : S4Item) : CompilerMonad<FuncLocResult1 * EquiResults> = 
         compile {
             let! flocResult = funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
-            let! equiResults = equipmentsEmit source.FuncLoc source.Equipment
+            let! equiResults = equipmentsEmit source.FuncLoc source.FlocProperties source.Equipment
             return (flocResult, equiResults)
         }
 
@@ -64,7 +65,7 @@ module Emitter =
     let assemblyEmit (source : S4Assembly) : CompilerMonad<FuncLocResult1 * EquiResults> = 
         compile {
             let! flocResult = funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
-            let! equiResults = equipmentsEmit source.FuncLoc source.Equipment
+            let! equiResults = equipmentsEmit source.FuncLoc source.FlocProperties source.Equipment
             return (flocResult, equiResults)
         }
 
@@ -74,7 +75,7 @@ module Emitter =
     let systemEmit (source : S4System) : CompilerMonad<FuncLocResult1 * EquiResults> = 
         compile {
             let! flocResult = funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
-            let! equiResults = equipmentsEmit source.FuncLoc source.Equipment
+            let! equiResults = equipmentsEmit source.FuncLoc source.FlocProperties source.Equipment
             return (flocResult, equiResults)
         }
 

@@ -20,8 +20,8 @@ module EmitEquipment =
     
     
     type ClassEquiInstances = 
-        { ClassEquis : ClassEqui list
-          ValuaEquis : ValuaEqui list
+        { ClassEquis : PatchClassEqui list
+          ValuaEquis : PatchValuaEqui list
         }
         member x.IsEmpty 
             with get () : bool = 
@@ -36,15 +36,15 @@ module EmitEquipment =
 
 
     type EquiResult1 = 
-        { Equi : Equi
-          ClassEquis : ClassEqui list
-          ValuaEquis : ValuaEqui list
+        { Equi : PatchEqui
+          ClassEquis : PatchClassEqui list
+          ValuaEquis : PatchValuaEqui list
         }
 
     type EquiResults = 
-        { Equis : Equi list
-          ClassEquis : ClassEqui list
-          ValuaEquis : ValuaEqui list
+        { Equis : PatchEqui list
+          ClassEquis : PatchClassEqui list
+          ValuaEquis : PatchValuaEqui list
         }
         member x.IsEmpty 
             with get () : bool = 
@@ -69,7 +69,7 @@ module EmitEquipment =
 
     let characteristicToValuaEqui (equiNumber : string) 
                                     (count : int) 
-                                    (charac : S4Characteristic) : CompilerMonad<ValuaEqui> = 
+                                    (charac : S4Characteristic) : CompilerMonad<PatchValuaEqui> = 
         mreturn { 
             EquipmentNumber = equiNumber
             ClassType = IntegerString.OfString "002"
@@ -80,7 +80,7 @@ module EmitEquipment =
     
 
     let classToClassEqui (equiNumber : string)
-                         (clazz : S4Class) : CompilerMonad<ClassEqui> = 
+                         (clazz : S4Class) : CompilerMonad<PatchClassEqui> = 
         mreturn { 
             EquipmentNumber = equiNumber
             Class = clazz.ClassName
@@ -92,9 +92,9 @@ module EmitEquipment =
 
 
     let translateS4CharacteristicsEqui (equiNumber : string)
-                                        (characteristics : S4Characteristic list) : CompilerMonad<ValuaEqui list> =  
+                                        (characteristics : S4Characteristic list) : CompilerMonad<PatchValuaEqui list> =  
 
-        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<ValuaEqui list> = 
+        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<PatchValuaEqui list> = 
             foriM chars (fun i x -> characteristicToValuaEqui equiNumber (i+1) x)
 
         compile {
@@ -104,7 +104,7 @@ module EmitEquipment =
 
 
     let translateS4ClassEqui (equiNumber : string)
-                                   (clazz : S4Class) : CompilerMonad<ClassEqui * ValuaEqui list> = 
+                                   (clazz : S4Class) : CompilerMonad<PatchClassEqui * PatchValuaEqui list> = 
            compile {
                let! ce = classToClassEqui equiNumber clazz
                let! vs = translateS4CharacteristicsEqui equiNumber clazz.Characteristics
@@ -113,10 +113,15 @@ module EmitEquipment =
 
     
     let equipmentToEqui1 (funcLoc : FuncLocPath) 
-                         (equipment : S4Equipment) : CompilerMonad<Equi> = 
+                            (props : FuncLocProperties)
+                            (equipment : S4Equipment) : CompilerMonad<PatchEqui> = 
+        let commonProps : CommonProperties = 
+            { CompanyCode = props.CompanyCode 
+              ControllingArea = props.ControllingArea 
+              PlantCode = props.MaintenancePlant
+            }
+
         compile {
-            let! sdate = asks (fun x -> x.StartupDate)
-            let! mplant = asks (fun x -> x.MaintenancePlant)
             return { 
                 EquipmentNumber = equipment.EquipmentId
                 Description = equipment.Description
@@ -127,21 +132,23 @@ module EmitEquipment =
                     Option.defaultValue "TO BE DETERMINED" equipment.Manufacturer
                 Model = Option.defaultValue "TO BE DETERMINED" equipment.Model
                 SerialNumber = Option.defaultValue "" equipment.SerialNumber
-                StartupDate = sdate
+                StartupDate = props.StartupDate
                 ConstructionYear = 
-                     Option.defaultValue (uint16 sdate.Year) equipment.ConstructionYear
+                     Option.defaultValue (uint16 props.StartupDate.Year) equipment.ConstructionYear
                 ConstructionMonth = 
-                    Option.defaultValue (uint8 sdate.Month) equipment.ConstructionMonth
-                MaintenancePlant = mplant
+                    Option.defaultValue (uint8 props.StartupDate.Month) equipment.ConstructionMonth
+                MaintenancePlant = props.MaintenancePlant
+                CommonProps = commonProps
             }
         }
         
 
     let equipmentToEquiResult1 (funcLoc : FuncLocPath) 
+                                (props : FuncLocProperties)
                                 (equipment1 : S4Equipment) : CompilerMonad<EquiResult1> = 
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile { 
-            let! e1 = equipmentToEqui1 funcLoc equipment1
+            let! e1 = equipmentToEqui1 funcLoc props equipment1
             let enumber = e1.EquipmentNumber
             let! (cs, vs) = mapM (translateS4ClassEqui enumber) equipment1.Classes |>> collect
             return { 

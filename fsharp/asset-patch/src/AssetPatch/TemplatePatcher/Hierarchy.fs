@@ -50,8 +50,12 @@ module Hierarchy =
 
 
     type FuncLocProperties = 
-        { StartupDate : DateTime          
+        { StartupDate : DateTime 
+          ObjectStatus : string         
           StructureIndicator : string
+          MaintenancePlant : uint32
+          ControllingArea : uint32
+          CompanyCode : uint32
         }
 
     

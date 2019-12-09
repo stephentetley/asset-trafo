@@ -45,9 +45,17 @@ module PatchTypes =
     // 94  TPLMA1
     // 95  TPLMA
     
+    /// Shared by Floc and Equi
+    type CommonProperties = 
+        { CompanyCode : uint32
+          ControllingArea : uint32
+          PlantCode : uint32
+        
+        }
+
     /// Note - more params need to be added when we understand the data
     /// e.g CompanyCode, ControllingArea ...
-    type FuncLoc = 
+    type PatchFuncLoc = 
       { Path : FuncLocPath
         Description : string
         ObjectType : string
@@ -55,12 +63,13 @@ module PatchTypes =
         ObjectStatus : string
         StartupDate : DateTime
         StructureIndicator : string
+        CommonProps : CommonProperties
       }
         member x.Level with get () : int = x.Path.Level
 
         
 
-    let funcLocToAssocs (funcLoc: FuncLoc) : AssocList<string, string> = 
+    let funcLocToAssocs (funcLoc: PatchFuncLoc) : AssocList<string, string> = 
         let parent1 = 
             match funcLoc.Path |> parent with
             | None -> ""
@@ -70,8 +79,8 @@ module PatchTypes =
         makeAssocs
             [ ("ABCKZFLOC",     "ABC Indicator",                    "")
             ; ("GSBE_FLOC",     "Business Area",                    "")
-            ; ("BUKRSFLOC",     "Company Code",                     "2100")
-            ; ("KOKR_FLOC",     "Controlling Area",                 "1000")
+            ; ("BUKRSFLOC",     "Company Code",                    funcLoc.CommonProps.CompanyCode.ToString())
+            ; ("KOKR_FLOC",     "Controlling Area",                 funcLoc.CommonProps.ControllingArea.ToString())
             ; ("KOST_FLOC",     "Cost Center",                      "")    
             ; ("TXTMI",         "Description (medium text)",        funcLoc.Description)
             ; ("USTA_FLOC",     "Display lines for user status",    "UCON")
@@ -79,16 +88,15 @@ module PatchTypes =
             ; ("FUNCLOC",       "Function Location",                "")     // Must be blank
             ; ("IEQUI",         "Installation allowed",             installationAllowed)
             ; ("STOR_FLOC",     "Location",                         "")
-            // ; ("STORTI",        "Location origin",                  "H")
             ; ("GEWRKFLOC",     "Main work center",                 "DEFAULT")
             ; ("INGR_FLOC",     "Maint Planner Group",              "")
-            ; ("SWERK_FL",      "Maintenance Plant",                "2100")
+            ; ("SWERK_FL",      "Maintenance Plant",                funcLoc.CommonProps.PlantCode.ToString())
             ; ("FLOC_REF",      "Masked Functional Location",       funcLoc.Path.ToString())
             ; ("OBJTYFLOC",     "Object Type",                      "")
             ; ("EQART",         "Object Type",                      funcLoc.ObjectType)
-            ; ("PLNT_FLOC",     "Planning Plant",                   "2100")
+            ; ("PLNT_FLOC",     "Planning Plant",                   funcLoc.CommonProps.PlantCode.ToString())
             ; ("BEBER_FL",      "Plant Section",                    "")
-            ; ("WERGWFLOC",     "Plant for WorkCenter",             "2100")
+            ; ("WERGWFLOC",     "Plant for WorkCenter",             funcLoc.CommonProps.PlantCode.ToString())
             ; ("TRPNR",         "Reference Location",               "")
             ; ("INBDT",         "Start-up date",                    funcLoc.StartupDate |> showS4Date)
             ; ("STATTEXT",      "Status",                           "CRTE")
@@ -109,7 +117,7 @@ module PatchTypes =
     // ClassFloc
 
 
-    type ClassFloc = 
+    type PatchClassFloc = 
       { FuncLoc : FuncLocPath
         Class : string
         ClassType : IntegerString
@@ -118,7 +126,7 @@ module PatchTypes =
       }
 
 
-    let classFlocToAssocs (classFloc: ClassFloc) : AssocList<string, string> = 
+    let classFlocToAssocs (classFloc: PatchClassFloc) : AssocList<string, string> = 
         // Dont print the CLINT even though we know it!
         makeAssocs
             [ ("FUNCLOC",       "Functional Location",      classFloc.FuncLoc.ToString())
@@ -131,7 +139,7 @@ module PatchTypes =
     // ************************************************************************
     // ValuaFloc
 
-    type ValuaFloc = 
+    type PatchValuaFloc = 
       { FuncLoc : FuncLocPath
         ClassType : IntegerString
         CharacteristicID : string
@@ -141,7 +149,7 @@ module PatchTypes =
 
 
     /// Note - CharacteristicValue is used three times.
-    let valuaFlocToAssocs (valua: ValuaFloc) : AssocList<string, string> = 
+    let valuaFlocToAssocs (valua: PatchValuaFloc) : AssocList<string, string> = 
         makeAssocs
             [ ("FUNCLOC",       "Function Location",                valua.FuncLoc.ToString())
             ; ("CLASSTYPE",     "Class Type",                       valua.ClassType.Number)
@@ -158,7 +166,7 @@ module PatchTypes =
     // Equi
 
 
-    type Equi = 
+    type PatchEqui = 
       { EquipmentNumber : string     // This is not a valid S4 EQUI code
         Description : string
         FuncLoc : FuncLocPath
@@ -171,10 +179,11 @@ module PatchTypes =
         ConstructionMonth : uint8
         StartupDate : DateTime
         MaintenancePlant : uint32
+        CommonProps : CommonProperties
       }
 
     /// Note - do not write EQUI to file.
-    let equiToAssocs (equi: Equi) : AssocList<string, string> =         
+    let equiToAssocs (equi : PatchEqui) : AssocList<string, string> =         
         makeAssocs
             // [ ("ABCK_EILO",     "ABC Indicator",                    "") 
             // ; ("GSBE_EILO",     "Business Area",                    "")
@@ -182,7 +191,7 @@ module PatchTypes =
             ; ("BAUMM_EQI",     "Construction month",               (sprintf "%02i" equi.ConstructionMonth))
             ; ("BAUJJ",         "Construction year",                equi.ConstructionYear.ToString())
 
-            ; ("KOKR_EILO",     "Controlling Area",                 "1000")
+            ; ("KOKR_EILO",     "Controlling Area",                equi.CommonProps.ControllingArea.ToString())
             // ; ("KOST_EILO",     "Cost Center",                      "150008")   /// <--- This should be a param
             ; ("TXTMI",         "Description (medium text)",        equi.Description)  
             // ; ("USTA_EQUI",     "Display lines for user status",    "OPER")
@@ -212,7 +221,7 @@ module PatchTypes =
     // ************************************************************************
     // ClassEqui
     
-    type ClassEqui = 
+    type PatchClassEqui = 
         { EquipmentNumber : string
           Class : string
           ClassType : IntegerString
@@ -220,7 +229,7 @@ module PatchTypes =
           Status : int
         }
 
-    let classEquiToAssocs (classEqui: ClassEqui) : AssocList<string, string> = 
+    let classEquiToAssocs (classEqui : PatchClassEqui) : AssocList<string, string> = 
         // Don't print CLINT (Internal class no)
         makeAssocs
             [ ("EQUI",          "Equipment",                classEqui.EquipmentNumber)
@@ -236,7 +245,7 @@ module PatchTypes =
 
     /// ValueCount is the number of instances for this charcteristic 
     /// in a class.
-    type ValuaEqui = 
+    type PatchValuaEqui = 
         { EquipmentNumber : string
           ClassType : IntegerString
           CharacteristicID : string
@@ -246,7 +255,7 @@ module PatchTypes =
     
 
     /// Note - CharacteristicValue is used twice.
-    let valuaEquiToAssocs (valua: ValuaEqui) : AssocList<string, string> = 
+    let valuaEquiToAssocs (valua : PatchValuaEqui) : AssocList<string, string> = 
         makeAssocs
             [ ("EQUI",          "Equipment",                valua.EquipmentNumber)
             ; ("CLASSTYPE",     "Class Type",               valua.ClassType.Number)

@@ -60,7 +60,6 @@ module InputData =
     /// Note input string might have hh:mm:ss suffix. 
     /// So take first 10 characters.
     let tryGetUSDate (source : string) : DateTime option =
-        printfn "tryGetDate: %s" source
         match DateTime.TryParseExact( s = source.Substring(startIndex=0, length=10)
                                     , format = "MM/dd/yyyy"
                                     , provider = Globalization.CultureInfo.InvariantCulture

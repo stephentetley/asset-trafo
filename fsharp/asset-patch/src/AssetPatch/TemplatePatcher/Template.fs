@@ -26,9 +26,11 @@ module Template =
     type TemplateEnv = 
         { UserName : string 
           StartupDate : DateTime
-          StructureIndicator : string
-          MaintenancePlant : uint32
           ObjectStatus : string
+          StructureIndicator : string
+          CompanyCode : uint32
+          MaintenancePlant : uint32
+          ControllingArea : uint32
           FlocVariant : string option
           EquiVariant : string option
         }
@@ -37,9 +39,11 @@ module Template =
     let defaultEnv (userName : string) : TemplateEnv = 
         { UserName = userName
           StartupDate = DateTime.Now
-          StructureIndicator = "YW-GS"
-          MaintenancePlant = 2100u
           ObjectStatus = "UCON"
+          StructureIndicator = "YW-GS"
+          CompanyCode = 2100u
+          MaintenancePlant = 2100u          
+          ControllingArea = 1000u
           FlocVariant = None
           EquiVariant = None
         }
@@ -128,6 +132,10 @@ module Template =
             let props : FuncLocProperties = 
                 { StartupDate = tenv.StartupDate
                   StructureIndicator = tenv.StructureIndicator
+                  MaintenancePlant = tenv.MaintenancePlant
+                  ObjectStatus = tenv.ObjectStatus
+                  ControllingArea = tenv.ControllingArea
+                  CompanyCode = tenv.CompanyCode
                 }
             Ok (Some(props), st)
 
