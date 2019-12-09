@@ -19,7 +19,7 @@ module EmitEquipment =
     
     
     
-    type EquiProperties = 
+    type ClassEquiInstances = 
         { ClassEquis : ClassEqui list
           ValuaEquis : ValuaEqui list
         }
@@ -27,8 +27,8 @@ module EmitEquipment =
             with get () : bool = 
                 x.ClassEquis.IsEmpty && x.ValuaEquis.IsEmpty
 
-    let collectEquiProperties (source : EquiProperties list) : EquiProperties = 
-        let add (r1 : EquiProperties) (acc : EquiProperties) = 
+    let collectClassEquiInstances (source : ClassEquiInstances list) : ClassEquiInstances = 
+        let add (r1 : ClassEquiInstances) (acc : ClassEquiInstances) = 
             { ClassEquis = r1.ClassEquis @ acc.ClassEquis
               ValuaEquis = r1.ValuaEquis @ acc.ValuaEquis
             }
@@ -152,7 +152,7 @@ module EmitEquipment =
         } 
 
     let equipmentToEquiProperties (equiNumber : string) 
-                                    (classes : S4Class list) : CompilerMonad<EquiProperties> = 
+                                    (classes : S4Class list) : CompilerMonad<ClassEquiInstances> = 
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile { 
             let! (cs, vs) = mapM (translateS4ClassEqui equiNumber) classes |>> collect
@@ -170,13 +170,13 @@ module EmitEquipment =
     let writeEquiProperties (directory : string) 
                             (level : int)
                             (filePrefix : string) 
-                            (equiProperties : EquiProperties) : CompilerMonad<unit> = 
-        if equiProperties.IsEmpty then
+                            (equiInstances : ClassEquiInstances) : CompilerMonad<unit> = 
+        if equiInstances.IsEmpty then
             mreturn ()
         else
             compile {
-                do! writeClassEquiFile directory level filePrefix equiProperties.ClassEquis
-                do! writeValuaEquiFile directory level filePrefix equiProperties.ValuaEquis
+                do! writeClassEquiFile directory level filePrefix equiInstances.ClassEquis
+                do! writeValuaEquiFile directory level filePrefix equiInstances.ValuaEquis
                 return ()
             }
 

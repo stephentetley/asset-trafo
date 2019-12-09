@@ -14,7 +14,7 @@ module EmitFuncLoc =
     open AssetPatch.TemplatePatcher.Hierarchy
     open AssetPatch.TemplatePatcher.PatchWriter
     
-    type FlocProperties = 
+    type ClassFlocInstances = 
         { ClassFlocs : ClassFloc list
           ValuaFlocs : ValuaFloc list
         }
@@ -22,8 +22,8 @@ module EmitFuncLoc =
             with get () : bool = 
                 x.ClassFlocs.IsEmpty && x.ValuaFlocs.IsEmpty
 
-    let collectFlocProperties (source : FlocProperties list) : FlocProperties = 
-        let add (r1 : FlocProperties) (acc : FlocProperties) = 
+    let collectClassFlocInstances (source : ClassFlocInstances list) : ClassFlocInstances = 
+        let add (r1 : ClassFlocInstances) (acc : ClassFlocInstances) = 
             { ClassFlocs = r1.ClassFlocs @ acc.ClassFlocs
               ValuaFlocs = r1.ValuaFlocs @ acc.ValuaFlocs
             }
@@ -134,8 +134,8 @@ module EmitFuncLoc =
             }
         }
 
-    let funclocToFlocProperties (flocPath : FuncLocPath) 
-                                    (classes : S4Class list) : CompilerMonad<FlocProperties> = 
+    let funclocToClassFlocInstances (flocPath : FuncLocPath) 
+                                    (classes : S4Class list) : CompilerMonad<ClassFlocInstances> = 
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile { 
             let! (cs, vs) = mapM (translateS4ClassFloc flocPath) classes |>> collect
@@ -151,13 +151,13 @@ module EmitFuncLoc =
     let writeFlocProperties (directory : string) 
                             (level : int)
                             (filePrefix : string) 
-                            (flocProperties : FlocProperties) : CompilerMonad<unit> = 
-        if flocProperties.IsEmpty then
+                            (flocInstances : ClassFlocInstances) : CompilerMonad<unit> = 
+        if flocInstances.IsEmpty then
             mreturn ()
         else
             compile {
-                do! writeClassFlocFile directory level filePrefix flocProperties.ClassFlocs
-                do! writeValuaFlocFile directory level filePrefix flocProperties.ValuaFlocs
+                do! writeClassFlocFile directory level filePrefix flocInstances.ClassFlocs
+                do! writeValuaFlocFile directory level filePrefix flocInstances.ValuaFlocs
                 return ()
             }
 

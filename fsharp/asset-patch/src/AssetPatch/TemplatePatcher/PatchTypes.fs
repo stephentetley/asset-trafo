@@ -30,13 +30,6 @@ module PatchTypes =
     // ************************************************************************
     // FuncLoc
 
-    type FuncLocSegment = 
-        { Name : string
-          Description : string
-          ObjectType: string 
-        }
-
-
 
 
     // The other way is to look at differences to an existing root funcloc
@@ -110,17 +103,6 @@ module PatchTypes =
             ]
             
 
-
-    let extendFuncLoc (segment : FuncLocSegment)
-                      (startupDate : DateTime)
-                      (floc: FuncLoc) : FuncLoc = 
-        { Path = FuncLocPath.extend segment.Name floc.Path
-          Description = segment.Description
-          ObjectType = segment.Description
-          Category = floc.Category + 1u
-          ObjectStatus = "UCON"
-          StartupDate = startupDate
-          StructureIndicator = floc.StructureIndicator  }
 
 
     // ************************************************************************

@@ -113,7 +113,7 @@ module Emitter =
     let sitesEmit (source : S4Site list) : CompilerMonad<FuncLocResults> = 
         mapM siteEmit source |>> collectFuncLocResults
 
-    let classesEmit (source : (string * S4Class list) list) : CompilerMonad<EquiProperties> = 
+    let classesEmit (source : (string * S4Class list) list) : CompilerMonad<ClassEquiInstances> = 
         source 
             |> mapM (fun (equipId, classes) -> equipmentToEquiProperties equipId classes) 
-            |>> collectEquiProperties
+            |>> collectClassEquiInstances

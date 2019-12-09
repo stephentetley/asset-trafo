@@ -119,9 +119,17 @@ module Template =
     let rootFloc (floc : FuncLocPath) (ma : Template<'a>) : Template<'a> = 
         Template <| fun (_, tenv) st -> 
             apply1 ma (floc, tenv) st
-
+        
     let asksFloc () : Template<FuncLocPath> = 
         Template <| fun (floc, _) st -> Ok (Some(floc), st)
+
+    let asksFuncLocProperties () : Template<FuncLocProperties> = 
+        Template <| fun (_, tenv) st -> 
+            let props : FuncLocProperties = 
+                { StartupDate = tenv.StartupDate
+                  StructureIndicator = tenv.StructureIndicator
+                }
+            Ok (Some(props), st)
 
     type EnvTransformer = TemplateEnv -> TemplateEnv
 
@@ -249,10 +257,12 @@ module Template =
         extendFloc token
             <| template {
                 let! floc = asksFloc ()
+                let! props = asksFuncLocProperties ()
                 let! cs = unlistM classes
                 let! es = unlistM equipment
                 return { 
                     FuncLoc = floc
+                    FlocProperties = props
                     Description = description
                     ObjectType = objectType
                     Classes = cs 
@@ -268,11 +278,13 @@ module Template =
         extendFloc token
             <| template {
                 let! floc = asksFloc ()
+                let! props = asksFuncLocProperties ()
                 let! cs = unlistM classes
                 let! xs = unlistM components
                 let! es = unlistM equipment
                 return { 
                     FuncLoc = floc
+                    FlocProperties = props
                     Description = description
                     ObjectType = objectType
                     Classes = cs 
@@ -289,11 +301,13 @@ module Template =
         extendFloc token
             <| template {
                 let! floc = asksFloc ()
+                let! props = asksFuncLocProperties ()
                 let! cs = unlistM classes
                 let! xs = unlistM items
                 let! es = unlistM equipment
                 return { 
                     FuncLoc = floc
+                    FlocProperties = props
                     Description = description
                     ObjectType = objectType
                     Classes = cs
@@ -310,11 +324,13 @@ module Template =
         extendFloc token
             <| template {
                 let! floc =  asksFloc ()
+                let! props = asksFuncLocProperties ()
                 let! cs = unlistM classes
                 let! xs = unlistM assemblies
                 let! es = unlistM equipment
                 return { 
                     FuncLoc = floc
+                    FlocProperties = props
                     Description = description
                     ObjectType = objectType
                     Classes = cs
@@ -331,10 +347,12 @@ module Template =
         extendFloc token
             <| template {
                 let! floc = asksFloc ()
+                let! props = asksFuncLocProperties ()
                 let! cs = unlistM classes
                 let! xs = unlistM systems
                 return { 
                     FuncLoc = floc
+                    FlocProperties = props
                     Description = description
                     ObjectType = objectType
                     Classes = cs 
@@ -350,10 +368,12 @@ module Template =
         extendFloc token
             <| template {
                 let! floc = asksFloc ()
+                let! props = asksFuncLocProperties ()
                 let! cs = unlistM classes
                 let! xs = unlistM processes
                 return { 
                     FuncLoc = floc
+                    FlocProperties = props
                     Description = description
                     ObjectType = objectType
                     Classes = cs 
@@ -369,10 +389,12 @@ module Template =
         extendFloc token
             <| template {
                 let! floc = asksFloc ()
+                let! props = asksFuncLocProperties ()
                 let! cs = unlistM classes
                 let! xs = unlistM processGroups
                 return { 
                     FuncLoc = floc
+                    FlocProperties = props
                     Description = description
                     ObjectType = objectType
                     Classes = cs 
@@ -388,10 +410,12 @@ module Template =
         rootFloc (FuncLocPath.Create siteCode)
             <| template {
                 let! floc = asksFloc ()
+                let! props = asksFuncLocProperties ()
                 let! cs = unlistM classes
                 let! xs = unlistM functions
                 return { 
                     FuncLoc = floc
+                    FlocProperties = props
                     Description = description 
                     ObjectType = "SITE"
                     Classes = cs 

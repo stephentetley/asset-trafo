@@ -69,10 +69,13 @@ module EdcTemplate =
 
     let edcTemplate (parameters : WorkListRow) : Function = 
 
+        
+        let installDate = getInstallDate parameters.``Install Date``
+
         let startupDateTrafo : EnvTransformer = 
             match tryGetUSDate parameters.``Install Date`` with
             | None -> id
-            | Some date -> printfn "startupDate:%O" date; startupDate date
+            | Some date -> printfn "startupDate is:%O" date; startupDate date
 
         let east_north_common = 
             match NGR.Create parameters.NGR with
@@ -86,7 +89,6 @@ module EdcTemplate =
                     
                 ]
 
-        let installDate = getInstallDate parameters.``Install Date``
 
         locals [startupDateTrafo]
             <| environmental_discharge 

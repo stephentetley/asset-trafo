@@ -52,7 +52,7 @@ module PatchCompiler =
             let! worklist1 = applyTemplate (FuncLocPath.Create("*****")) worklist template
             let! results = 
                 forM worklist1 (fun (number, klass) -> equipmentToEquiProperties number [klass])
-                    |>> collectEquiProperties
+                    |>> collectClassEquiInstances
             do! writeEquiProperties outputDirectory level filePrefix results
             return ()
         }
@@ -70,8 +70,8 @@ module PatchCompiler =
         compile {
             let! worklist1 = applyTemplate (FuncLocPath.Create("*****")) worklist template
             let! results = 
-                forM worklist1 (fun (path, klass) -> funclocToFlocProperties path [klass])
-                    |>> collectFlocProperties
+                forM worklist1 (fun (path, klass) -> funclocToClassFlocInstances path [klass])
+                    |>> collectClassFlocInstances
             do! writeFlocProperties outputDirectory level filePrefix results
             return ()
         }

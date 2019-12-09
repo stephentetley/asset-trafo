@@ -49,13 +49,15 @@ module Hierarchy =
         }
 
 
-    type FlocProperties = 
-        { StartupDate : DateTime
-        
+    type FuncLocProperties = 
+        { StartupDate : DateTime          
+          StructureIndicator : string
         }
+
     
     type S4Component = 
         { FuncLoc : FuncLocPath
+          FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
           Classes : S4Class list
@@ -65,6 +67,7 @@ module Hierarchy =
 
     type S4Item = 
         { FuncLoc : FuncLocPath
+          FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
           Classes : S4Class list
@@ -75,6 +78,7 @@ module Hierarchy =
 
     type S4Assembly = 
         { FuncLoc : FuncLocPath
+          FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
           Classes : S4Class list
@@ -83,7 +87,8 @@ module Hierarchy =
         }
 
     type S4System = 
-        { FuncLoc : FuncLocPath
+        { FuncLoc : FuncLocPath        
+          FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
           Classes : S4Class list
@@ -93,6 +98,7 @@ module Hierarchy =
 
     type S4Process = 
         { FuncLoc : FuncLocPath
+          FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
           Classes : S4Class list
@@ -101,6 +107,7 @@ module Hierarchy =
 
     type S4ProcessGroup = 
         { FuncLoc : FuncLocPath
+          FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
           Classes : S4Class list
@@ -109,6 +116,7 @@ module Hierarchy =
 
     type S4Function = 
         { FuncLoc : FuncLocPath
+          FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
           Classes : S4Class list
@@ -117,6 +125,7 @@ module Hierarchy =
 
     type S4Site = 
         { FuncLoc : FuncLocPath
+          FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
           Classes : S4Class list
