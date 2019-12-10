@@ -57,6 +57,7 @@ module PatchTypes =
     /// e.g CompanyCode, ControllingArea ...
     type PatchFuncLoc = 
       { Path : FuncLocPath
+        InterimId : string
         Description : string
         ObjectType : string
         Category : uint32

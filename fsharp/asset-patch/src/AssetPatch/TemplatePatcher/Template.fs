@@ -222,15 +222,16 @@ module Template =
 
 
     let private newEquiInterimId (level : int) : Template<string> = 
-        let makeName x = sprintf "L%iE%03i" level x
+        let makeName x = sprintf "&L%iE%03i" level x
         Template <| fun _ st -> 
             let equiIndices = st.EquiIndices 
             match Map.tryFind level equiIndices with
             | None -> Ok (Some(makeName 1), {st with EquiIndices = Map.add level 2 equiIndices })
             | Some(i) -> Ok (Some (makeName i), {st with EquiIndices = Map.add level (i+1) equiIndices})
 
+
     let private newFlocInterimId (level : int) : Template<string> = 
-        let makeName x = sprintf "L%iF%03i" level x
+        let makeName x = sprintf "&L%iF%03i" level x
         Template <| fun _ st -> 
             let flocIndices = st.FlocIndices
             match Map.tryFind level flocIndices with

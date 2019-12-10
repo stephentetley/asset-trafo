@@ -52,11 +52,14 @@ module EquiIndexing =
                 ]                
             ]
 
-    ///// Compile a list for ClassEqui changes into a ChangeFile
-    //let compileEquiFile (rows : Equi list) : CompilerMonad<SpreadSheetDoc> = 
-    //    failwith "IndexingRow"
+    let getPatchFuncLocIndexingRow (floc : PatchFuncLoc) : IndexingRow = 
+        { Floc = floc.Path
+          Description = floc.Description
+          APIdent = floc.InterimId
+          S4Ident = ()
+        }
 
-    let getIndexingRow (equi : PatchEqui) : IndexingRow = 
+    let getPatchEquiIndexingRow (equi : PatchEqui) : IndexingRow = 
         { Floc = equi.FuncLoc
           Description = equi.Description
           APIdent = equi.InterimId
@@ -68,10 +71,19 @@ module EquiIndexing =
     let writeEquiIndexingSheet (outputPath : string)
                                     (rows : PatchEqui list) : CompilerMonad<unit> =
         compile {        
-            let doc = rows |> List.map getIndexingRow |> makeOutput
+            let doc = rows |> List.map getPatchEquiIndexingRow |> makeOutput
             do! liftAction (fun () -> renderSpreadSheetDoc doc outputPath)
             return ()
         }
+
+    let writeFlocIndexingSheet (outputPath : string)
+                                (rows : PatchFuncLoc list) : CompilerMonad<unit> =
+        compile {        
+            let doc = rows |> List.map getPatchFuncLocIndexingRow |> makeOutput
+            do! liftAction (fun () -> renderSpreadSheetDoc doc outputPath)
+            return ()
+        }
+
 
     // ************************************************************************
     // Read spreadsheet

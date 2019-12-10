@@ -6,10 +6,13 @@ namespace AssetPatch.TemplatePatcher
 
 module EmitFuncLoc =
 
+    open System.IO
+
     open AssetPatch.Base
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.CompilerMonad
+    open AssetPatch.TemplatePatcher.EquiIndexing
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Hierarchy
     open AssetPatch.TemplatePatcher.PatchWriter
@@ -108,6 +111,7 @@ module EmitFuncLoc =
 
     let genFuncLoc (path : FuncLocPath) 
                     (props : FuncLocProperties)
+                    (interimId : string)
                     (description : string) 
                     (objectType : string)  : CompilerMonad<PatchFuncLoc> = 
         let commonProps : CommonProperties = 
@@ -119,6 +123,7 @@ module EmitFuncLoc =
         compile {
             return { 
                 Path = path
+                InterimId = interimId
                 Description = description
                 ObjectType = objectType
                 Category = uint32 path.Level
@@ -137,7 +142,7 @@ module EmitFuncLoc =
                                 (classes : S4Class list) : CompilerMonad<FuncLocResult1> = 
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile {
-            let! floc = genFuncLoc path props description objectType
+            let! floc = genFuncLoc path props interimId description objectType
             let! (cs, vs) = mapM (translateS4ClassFloc path interimId) classes |>> collect
             return { 
                 FuncLoc = floc
@@ -183,6 +188,9 @@ module EmitFuncLoc =
             mreturn ()
         else
             compile {
+                let! dirName = genSubFolder directory level
+                let indexFile = Path.Combine(dirName, "FlocIndexing.xlsx")
+                do! writeFlocIndexingSheet indexFile funcLocResults.FuncLocs
                 do! writeFuncLocFile directory level filePrefix funcLocResults.FuncLocs
                 do! writeClassFlocFile directory level filePrefix funcLocResults.ClassFlocs
                 do! writeValuaFlocFile directory level filePrefix funcLocResults.ValuaFlocs

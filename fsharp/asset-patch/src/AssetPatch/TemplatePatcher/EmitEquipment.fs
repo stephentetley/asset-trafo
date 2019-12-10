@@ -196,8 +196,8 @@ module EmitEquipment =
         else
             compile {
                 let! dirName = genSubFolder directory level
-                let equiFile = Path.Combine(dirName, "EquiIndexing.xlsx")
-                do! writeEquiIndexingSheet equiFile equiResults.Equis
+                let indexFile = Path.Combine(dirName, "EquiIndexing.xlsx")
+                do! writeEquiIndexingSheet indexFile equiResults.Equis
                 do! writeEquiFile directory level filePrefix equiResults.Equis
                 do! writeClassEquiFile directory level filePrefix equiResults.ClassEquis
                 do! writeValuaEquiFile directory level filePrefix equiResults.ValuaEquis
