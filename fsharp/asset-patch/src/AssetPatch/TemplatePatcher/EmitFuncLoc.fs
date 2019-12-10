@@ -70,8 +70,6 @@ module EmitFuncLoc =
         mreturn { 
             FuncLoc = funcLoc
             Class = clazz.ClassName
-            ClassType = IntegerString.OfString "003"
-            ClassNumber = IntegerString.Create(10, clazz.ClassInt)
             Status = 1
         }
 

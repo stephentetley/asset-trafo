@@ -190,12 +190,11 @@ module Template =
 
     type Class = Template<S4Class>
 
-    let _class (name : string) (number : uint32) (values : Characteristic list) : Class = 
+    let _class (name : string) (values : Characteristic list) : Class = 
         template {
             let! vs = unlistM values
             return { 
                 ClassName = name
-                ClassInt = number
                 Characteristics = vs 
             }
         }

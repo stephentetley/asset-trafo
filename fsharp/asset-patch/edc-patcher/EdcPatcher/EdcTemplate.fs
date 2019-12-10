@@ -109,6 +109,9 @@ module EdcTemplate =
                           montoring_system "SYS01" "EA Event Duration Monitoring"
                             [ east_north_common 
                               aib_reference_common
+                              smonsy 
+                                [ system_type "EA Overflow Monitoring" 
+                                ]
                             ]
                             _no_assemblies_
                             [ 

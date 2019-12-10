@@ -60,6 +60,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplateCatalogue\Base.fs"
 #load "..\src\AssetPatch\TemplateCatalogue\AssetCondition.fs"
 #load "..\src\AssetPatch\TemplateCatalogue\Lstnut.fs"
+#load "..\src\AssetPatch\TemplateCatalogue\Smonsy.fs"
 #load "EdcPatcher\OSGB36.fs"
 #load "EdcPatcher\InputData.fs"
 #load "EdcPatcher\EdcTemplate.fs"

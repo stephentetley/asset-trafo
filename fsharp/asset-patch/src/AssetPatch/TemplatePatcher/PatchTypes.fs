@@ -120,8 +120,6 @@ module PatchTypes =
     type PatchClassFloc = 
       { FuncLoc : FuncLocPath
         Class : string
-        ClassType : IntegerString
-        ClassNumber : IntegerString
         Status : int
       }
 
@@ -131,7 +129,7 @@ module PatchTypes =
         makeAssocs
             [ ("FUNCLOC",       "Functional Location",      classFloc.FuncLoc.ToString())
             ; ("CLASS",         "Class",                    classFloc.Class)
-            ; ("CLASSTYPE",     "Class Type",               classFloc.ClassType.Number)
+            ; ("CLASSTYPE",     "Class Type",               "003")
             ; ("CLSTATUS1",     "Status",                   classFloc.Status.ToString())
             ]
 
@@ -222,11 +220,11 @@ module PatchTypes =
     // ************************************************************************
     // ClassEqui
     
+
+
     type PatchClassEqui = 
         { EquipmentNumber : string
           Class : string
-          ClassType : IntegerString
-          ClassNumber : IntegerString
           Status : int
         }
 
@@ -235,7 +233,7 @@ module PatchTypes =
         makeAssocs
             [ ("EQUI",          "Equipment",                classEqui.EquipmentNumber)
             ; ("CLASS",         "Class",                    classEqui.Class)
-            ; ("CLASSTYPE",     "Class Type",               classEqui.ClassType.Number)
+            ; ("CLASSTYPE",     "Class Type",               "002")
             ; ("CLSTATUS1",     "Status",                   classEqui.Status.ToString())
             ]
 

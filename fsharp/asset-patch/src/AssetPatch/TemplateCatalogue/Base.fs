@@ -144,7 +144,7 @@ module Base =
 
     /// AIB_REFERENCE
     let aib_reference : Characteristic list -> Class = 
-        _class "AIB_REFERENCE" 850u
+        _class "AIB_REFERENCE"
 
     /// AIB_REFERENCE:AI2_AIB_REFERENCE
     let ai2_aib_reference (v : string) : Characteristic = 
@@ -160,7 +160,7 @@ module Base =
 
     /// Class:EAST_NORTH
     let east_north : Characteristic list -> Class = 
-        _class "EAST_NORTH" 379u 
+        _class "EAST_NORTH" 
 
     /// EAST_NORTH:EASTING
     let easting (v : int) : Characteristic = 

@@ -28,7 +28,6 @@ module Hierarchy =
 
     type S4Class = 
         { ClassName : string          
-          ClassInt : uint32
           Characteristics : S4Characteristic list
         }
 

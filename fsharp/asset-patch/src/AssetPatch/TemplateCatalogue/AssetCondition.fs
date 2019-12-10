@@ -12,7 +12,7 @@ module AssetCondition =
 
     /// ASSET_CONDITION
     let asset_condition : Characteristic list -> Class = 
-        _class "ASSET_CONDITION" 1013u
+        _class "ASSET_CONDITION"
 
     // ASSET_CONDITION:ConditionGrade
     type ConditionGrade = 

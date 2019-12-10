@@ -84,8 +84,6 @@ module EmitEquipment =
         mreturn { 
             EquipmentNumber = equiNumber
             Class = clazz.ClassName
-            ClassType = IntegerString.OfString "002"
-            ClassNumber = IntegerString.Create(10, clazz.ClassInt)
             Status = 1
         }
 
