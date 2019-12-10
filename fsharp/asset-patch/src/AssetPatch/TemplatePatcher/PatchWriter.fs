@@ -32,8 +32,9 @@ module PatchWriter =
 
     let private entityExtension (entityType : EntityType) : string = 
         match entityType with
-        | FuncLoc | ClassFloc | ValuaFloc | Equi -> "txt"
-        | ClassEqui | ValuaEqui -> "apch"
+        | FuncLoc | Equi -> "txt"
+        | ClassFloc | ValuaFloc -> "floc"
+        | ClassEqui | ValuaEqui -> "equi"
 
         
     let genSubFolder (directory : string) (level : int) : CompilerMonad<string> =

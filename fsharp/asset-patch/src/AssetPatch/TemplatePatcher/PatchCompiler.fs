@@ -315,14 +315,25 @@ module PatchCompiler =
     // EquiIndexing...
 
 
-    /// Generate patches for a new level 1 site and its subordinates
-    let materializeEquiClassValuaPatches (outputDirectory : string) : CompilerMonad<unit> = 
-        let xlsxFile = Path.Combine(outputDirectory, "EquiIndexing.xlsx")
+    /// Run 'find and replace' on the ClassFloc and ValuaFloc patches
+    let materializeClassValuaPatches (targetDirectory : string) 
+                                            (indexFile : string) 
+                                            (extensionPattern : string) : CompilerMonad<unit> = 
+        let xlsxFile = Path.Combine(targetDirectory, indexFile)
         if File.Exists(xlsxFile) then
             compile {            
                 let! substs = readEquiIndexingSheet xlsxFile
-                let sources = Directory.GetFiles(path = outputDirectory, searchPattern = "*.apch") |> List.ofArray
-                do! mapMz (materializeEquiFile substs) sources
+                let sources = Directory.GetFiles(path = targetDirectory, searchPattern = extensionPattern) |> List.ofArray
+                do! mapMz (materializeInterimFile substs) sources
                 return ()
             }
         else mreturn ()
+
+
+    /// Run 'find and replace' on the ClassFloc and ValuaFloc patches
+    let materializeFlocClassValuaPatches (targetDirectory : string) : CompilerMonad<unit> = 
+        materializeClassValuaPatches targetDirectory "FlocIndexing.xlsx" "*.floc"
+
+    /// Run 'find and replace' on the ClassEqui and ValuaEqui patches
+    let materializeEquiClassValuaPatches (targetDirectory : string) : CompilerMonad<unit> = 
+        materializeClassValuaPatches targetDirectory "EquiIndexing.xlsx" "*.equi"

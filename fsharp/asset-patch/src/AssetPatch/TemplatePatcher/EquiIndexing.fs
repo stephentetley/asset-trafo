@@ -116,10 +116,11 @@ module EquiIndexing =
                 |> Seq.toList
         liftAction action
 
-    let materializeEquiFile (lookups : (string * string) list) (patchPath : string) : CompilerMonad<unit> = 
+    let materializeInterimFile (lookups : (string * string) list) (patchPath : string) : CompilerMonad<unit> = 
         let action () = 
             let outputFile = Path.ChangeExtension(patchPath, "txt")
             let input = File.ReadAllText(patchPath)
             let text = List.fold (fun (src : string) (target : string, change) -> src.Replace(target, change)) input lookups
             File.WriteAllText(path = outputFile, contents = text)
         liftAction action
+

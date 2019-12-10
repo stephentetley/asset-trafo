@@ -42,12 +42,12 @@ module EdcPatcher =
                                 worklist
             })
 
-
-    let runEdcPatcherPhase2 (opts : EdcOptions) = 
+    /// Phase 2 materializes Floc patches
+    let runEdcPatcherPhase2 (opts : EdcOptions) (targetFolder : string) = 
         runCompiler opts.UserName 
-            (compile {
-                let subfolders = Directory.GetDirectories opts.OutputDirectory |> Array.toList
-                do! mapMz materializeEquiClassValuaPatches subfolders
-                return ()
-            })
-            
+            <| materializeFlocClassValuaPatches targetFolder
+
+    /// Phase 3 materializes Equi patches
+    let runEdcPatcherPhase3 (opts : EdcOptions) (targetFolder : string) = 
+        runCompiler opts.UserName 
+            <| materializeEquiClassValuaPatches targetFolder

@@ -80,11 +80,14 @@ let options : EdcOptions =
     }
 
 let main01 () = 
-    runEdcPatcherPhase1 options
+    runEdcPatcherPhase1 options 
 
-let main02 () = 
-    runEdcPatcherPhase2 options
+let main02 (dirname : string) = 
+    runEdcPatcherPhase2 options (outputDirectory dirname)
 
+    
+let main03 (dirname : string) = 
+    runEdcPatcherPhase3 options (outputDirectory dirname)
 
 
 
