@@ -67,11 +67,11 @@ module EmitEquipment =
             }
         List.foldBack add source { Equis = []; ClassEquis = []; ValuaEquis = [] }
 
-    let characteristicToValuaEqui (equiNumber : string) 
+    let characteristicToValuaEqui (interimId : string) 
                                     (count : int) 
                                     (charac : S4Characteristic) : CompilerMonad<PatchValuaEqui> = 
         mreturn { 
-            EquipmentNumber = equiNumber
+            InterimId = interimId
             ClassType = IntegerString.OfString "002"
             CharacteristicID = charac.Name
             CharacteristicValue = charac.Value
@@ -79,10 +79,10 @@ module EmitEquipment =
         }
     
 
-    let classToClassEqui (equiNumber : string)
+    let classToClassEqui (interimId : string)
                          (clazz : S4Class) : CompilerMonad<PatchClassEqui> = 
         mreturn { 
-            EquipmentNumber = equiNumber
+            InterimId = interimId
             Class = clazz.ClassName
             Status = 1
         }
@@ -101,11 +101,11 @@ module EmitEquipment =
         }
 
 
-    let translateS4ClassEqui (equiNumber : string)
+    let translateS4ClassEqui (interimId : string)
                                    (clazz : S4Class) : CompilerMonad<PatchClassEqui * PatchValuaEqui list> = 
            compile {
-               let! ce = classToClassEqui equiNumber clazz
-               let! vs = translateS4CharacteristicsEqui equiNumber clazz.Characteristics
+               let! ce = classToClassEqui interimId clazz
+               let! vs = translateS4CharacteristicsEqui interimId clazz.Characteristics
                return (ce, vs)
            }
 
@@ -122,7 +122,7 @@ module EmitEquipment =
 
         compile {
             return { 
-                EquipmentNumber = equipment.EquipmentId
+                InterimId = equipment.InterimId
                 Description = equipment.Description
                 FuncLoc = funcLoc
                 Category = equipment.Category
@@ -149,7 +149,7 @@ module EmitEquipment =
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile { 
             let! e1 = equipmentToEqui1 funcLoc props equipment1
-            let enumber = e1.EquipmentNumber
+            let enumber = e1.InterimId
             let! (cs, vs) = mapM (translateS4ClassEqui enumber) equipment1.Classes |>> collect
             return { 
                 Equi = e1

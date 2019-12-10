@@ -211,7 +211,7 @@ module PatchWriter =
     /// Render a list of ClassEqui changes into a ChangeFile
     let private makeEquiFile (rows : PatchEqui list) : CompilerMonad<ChangeFile> = 
         rows
-            |> List.sortBy (fun row -> row.EquipmentNumber.ToString())
+            |> List.sortBy (fun row -> row.InterimId)
             |> List.map equiToAssocs     
             |> makeChangeFile Equi
 
@@ -246,7 +246,7 @@ module PatchWriter =
     /// Render a list of ClassEqui changes into a ChangeFile
     let private makeClassEquiFile (rows : PatchClassEqui list) : CompilerMonad<ChangeFile> = 
         rows
-            |> List.sortBy (fun row -> row.EquipmentNumber.ToString() + row.Class)
+            |> List.sortBy (fun row -> row.InterimId + row.Class)
             |> List.map classEquiToAssocs     
             |> makeChangeFile ClassEqui
 
@@ -271,7 +271,7 @@ module PatchWriter =
     /// Render a list of ValuaEqui changes into a ChangeFile
     let private makeValuaEquiFile (rows : PatchValuaEqui list) : CompilerMonad<ChangeFile> = 
         rows
-            |> List.sortBy (fun row -> row.EquipmentNumber)
+            |> List.sortBy (fun row -> row.InterimId)
             |> List.map valuaEquiToAssocs     
             |> makeChangeFile ValuaEqui
 

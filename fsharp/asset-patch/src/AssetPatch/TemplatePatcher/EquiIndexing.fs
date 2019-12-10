@@ -59,7 +59,7 @@ module EquiIndexing =
     let getIndexingRow (equi : PatchEqui) : IndexingRow = 
         { Floc = equi.FuncLoc
           Description = equi.Description
-          APIdent = equi.EquipmentNumber
+          APIdent = equi.InterimId
           S4Ident = ()
         }
 

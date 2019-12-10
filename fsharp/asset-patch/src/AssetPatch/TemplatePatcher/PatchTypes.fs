@@ -119,15 +119,15 @@ module PatchTypes =
 
     type PatchClassFloc = 
       { FuncLoc : FuncLocPath
+        InterimId : string
         Class : string
         Status : int
       }
 
 
     let classFlocToAssocs (classFloc: PatchClassFloc) : AssocList<string, string> = 
-        // Dont print the CLINT even though we know it!
         makeAssocs
-            [ ("FUNCLOC",       "Functional Location",      classFloc.FuncLoc.ToString())
+            [ ("FUNCLOC",       "Functional Location",      classFloc.InterimId)
             ; ("CLASS",         "Class",                    classFloc.Class)
             ; ("CLASSTYPE",     "Class Type",               "003")
             ; ("CLSTATUS1",     "Status",                   classFloc.Status.ToString())
@@ -139,6 +139,7 @@ module PatchTypes =
 
     type PatchValuaFloc = 
       { FuncLoc : FuncLocPath
+        InterimId : string
         ClassType : IntegerString
         CharacteristicID : string
         CharacteristicValue : string
@@ -149,7 +150,7 @@ module PatchTypes =
     /// Note - CharacteristicValue is used three times.
     let valuaFlocToAssocs (valua: PatchValuaFloc) : AssocList<string, string> = 
         makeAssocs
-            [ ("FUNCLOC",       "Function Location",                valua.FuncLoc.ToString())
+            [ ("FUNCLOC",       "Function Location",                valua.InterimId)
             ; ("CLASSTYPE",     "Class Type",                       valua.ClassType.Number)
             ; ("CHARID",        "Characteristic ID",                valua.CharacteristicID)
             ; ("ATWRT",         "Characteristic Value",             valua.CharacteristicValue)
@@ -164,7 +165,7 @@ module PatchTypes =
 
 
     type PatchEqui = 
-      { EquipmentNumber : string     // This is not a valid S4 EQUI code
+      { InterimId : string     // This is not a valid S4 EQUI code
         Description : string
         FuncLoc : FuncLocPath
         Category : string           // e.g. I for instrument
@@ -223,15 +224,14 @@ module PatchTypes =
 
 
     type PatchClassEqui = 
-        { EquipmentNumber : string
+        { InterimId : string
           Class : string
           Status : int
         }
 
     let classEquiToAssocs (classEqui : PatchClassEqui) : AssocList<string, string> = 
-        // Don't print CLINT (Internal class no)
         makeAssocs
-            [ ("EQUI",          "Equipment",                classEqui.EquipmentNumber)
+            [ ("EQUI",          "Equipment",                classEqui.InterimId)
             ; ("CLASS",         "Class",                    classEqui.Class)
             ; ("CLASSTYPE",     "Class Type",               "002")
             ; ("CLSTATUS1",     "Status",                   classEqui.Status.ToString())
@@ -245,7 +245,7 @@ module PatchTypes =
     /// ValueCount is the number of instances for this charcteristic 
     /// in a class.
     type PatchValuaEqui = 
-        { EquipmentNumber : string
+        { InterimId : string
           ClassType : IntegerString
           CharacteristicID : string
           CharacteristicValue : string
@@ -256,7 +256,7 @@ module PatchTypes =
     /// Note - CharacteristicValue is used twice.
     let valuaEquiToAssocs (valua : PatchValuaEqui) : AssocList<string, string> = 
         makeAssocs
-            [ ("EQUI",          "Equipment",                valua.EquipmentNumber)
+            [ ("EQUI",          "Equipment",                valua.InterimId)
             ; ("CLASSTYPE",     "Class Type",               valua.ClassType.Number)
             ; ("CHARID",        "Characteristic ID",        valua.CharacteristicID)
             ; ("ATWRT",         "Characteristic Value",     valua.CharacteristicValue)

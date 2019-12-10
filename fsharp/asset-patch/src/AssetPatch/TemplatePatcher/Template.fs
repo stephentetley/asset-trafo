@@ -221,13 +221,21 @@ module Template =
 
 
 
-    let private newEquipmentName (level : int) : Template<string> = 
+    let private newEquiInterimId (level : int) : Template<string> = 
         let makeName x = sprintf "L%iE%03i" level x
         Template <| fun _ st -> 
             let equiIndices = st.EquiIndices 
             match Map.tryFind level equiIndices with
             | None -> Ok (Some(makeName 1), {st with EquiIndices = Map.add level 2 equiIndices })
             | Some(i) -> Ok (Some (makeName i), {st with EquiIndices = Map.add level (i+1) equiIndices})
+
+    let private newFlocInterimId (level : int) : Template<string> = 
+        let makeName x = sprintf "L%iF%03i" level x
+        Template <| fun _ st -> 
+            let flocIndices = st.FlocIndices
+            match Map.tryFind level flocIndices with
+            | None -> Ok (Some(makeName 1), {st with FlocIndices = Map.add level 2 flocIndices })
+            | Some(i) -> Ok (Some (makeName i), {st with FlocIndices = Map.add level (i+1) flocIndices})
 
 
 
@@ -240,11 +248,11 @@ module Template =
         let equip1 = 
             template {
                 let! level = asksFloc () |>> fun x -> x.Level
-                let! equiId = newEquipmentName level
+                let! interimId = newEquiInterimId level
                 let! cs = unlistM classes
                 let! es = unlistM subordinateEquipment
                 return {
-                    EquipmentId = equiId
+                    InterimId = interimId
                     Description = description
                     Category = category
                     ObjectType = objectType
@@ -274,10 +282,12 @@ module Template =
             <| template {
                 let! floc = asksFloc ()
                 let! props = asksFuncLocProperties ()
+                let! interimId = newFlocInterimId 8
                 let! cs = unlistM classes
                 let! es = unlistM equipment
                 return { 
                     FuncLoc = floc
+                    InterimId = interimId
                     FlocProperties = props
                     Description = description
                     ObjectType = objectType
@@ -294,12 +304,14 @@ module Template =
         extendFloc token
             <| template {
                 let! floc = asksFloc ()
-                let! props = asksFuncLocProperties ()
+                let! props = asksFuncLocProperties ()                
+                let! interimId = newFlocInterimId 7
                 let! cs = unlistM classes
                 let! xs = unlistM components
                 let! es = unlistM equipment
                 return { 
                     FuncLoc = floc
+                    InterimId = interimId
                     FlocProperties = props
                     Description = description
                     ObjectType = objectType
@@ -318,11 +330,13 @@ module Template =
             <| template {
                 let! floc = asksFloc ()
                 let! props = asksFuncLocProperties ()
+                let! interimId = newFlocInterimId 6
                 let! cs = unlistM classes
                 let! xs = unlistM items
                 let! es = unlistM equipment
                 return { 
                     FuncLoc = floc
+                    InterimId = interimId
                     FlocProperties = props
                     Description = description
                     ObjectType = objectType
@@ -341,11 +355,13 @@ module Template =
             <| template {
                 let! floc =  asksFloc ()
                 let! props = asksFuncLocProperties ()
+                let! interimId = newFlocInterimId 5
                 let! cs = unlistM classes
                 let! xs = unlistM assemblies
                 let! es = unlistM equipment
                 return { 
                     FuncLoc = floc
+                    InterimId = interimId
                     FlocProperties = props
                     Description = description
                     ObjectType = objectType
@@ -364,10 +380,12 @@ module Template =
             <| template {
                 let! floc = asksFloc ()
                 let! props = asksFuncLocProperties ()
+                let! interimId = newFlocInterimId 4
                 let! cs = unlistM classes
                 let! xs = unlistM systems
                 return { 
                     FuncLoc = floc
+                    InterimId = interimId
                     FlocProperties = props
                     Description = description
                     ObjectType = objectType
@@ -384,11 +402,13 @@ module Template =
         extendFloc token
             <| template {
                 let! floc = asksFloc ()
-                let! props = asksFuncLocProperties ()
+                let! props = asksFuncLocProperties ()               
+                let! interimId = newFlocInterimId 3
                 let! cs = unlistM classes
                 let! xs = unlistM processes
                 return { 
                     FuncLoc = floc
+                    InterimId = interimId
                     FlocProperties = props
                     Description = description
                     ObjectType = objectType
@@ -406,10 +426,12 @@ module Template =
             <| template {
                 let! floc = asksFloc ()
                 let! props = asksFuncLocProperties ()
+                let! interimId = newFlocInterimId 2
                 let! cs = unlistM classes
                 let! xs = unlistM processGroups
                 return { 
                     FuncLoc = floc
+                    InterimId = interimId
                     FlocProperties = props
                     Description = description
                     ObjectType = objectType
@@ -427,10 +449,12 @@ module Template =
             <| template {
                 let! floc = asksFloc ()
                 let! props = asksFuncLocProperties ()
+                let! interimId = newFlocInterimId 1
                 let! cs = unlistM classes
                 let! xs = unlistM functions
                 return { 
                     FuncLoc = floc
+                    InterimId = interimId
                     FlocProperties = props
                     Description = description 
                     ObjectType = "SITE"

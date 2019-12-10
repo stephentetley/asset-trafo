@@ -58,6 +58,7 @@ module EmitFuncLoc =
                                     (charac : S4Characteristic) : CompilerMonad<PatchValuaFloc> = 
         mreturn {   
             FuncLoc = funcLoc
+            InterimId = "BAD"
             ClassType = IntegerString.OfString "003"
             CharacteristicID = charac.Name
             CharacteristicValue = charac.Value
@@ -69,6 +70,7 @@ module EmitFuncLoc =
     let classToClassFloc (funcLoc : FuncLocPath)  (clazz : S4Class) : CompilerMonad<PatchClassFloc> = 
         mreturn { 
             FuncLoc = funcLoc
+            InterimId = "BAD"
             Class = clazz.ClassName
             Status = 1
         }
