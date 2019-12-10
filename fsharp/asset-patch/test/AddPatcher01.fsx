@@ -91,7 +91,7 @@ let test01 () : Result<unit, ErrMsg> =
         [ ("101001407", 2019u)
         ; ("101001409", 2019u)
         ] 
-    runCompiler (defaultEnv "TETLEYS")
+    runCompiler"TETLEYS"
         <| compileClassEquiValuaEquiPatches 
                     (outputDirectory ())
                     5
@@ -112,7 +112,7 @@ let test02 () =
         [ ("KRI03-EDC", "SAI00970234")
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
-    runCompiler (defaultEnv "TETLEYS")
+    runCompiler "TETLEYS" 
        <| compileClassFlocValuaFlocPatches 
                    (outputDirectory ())
                    5

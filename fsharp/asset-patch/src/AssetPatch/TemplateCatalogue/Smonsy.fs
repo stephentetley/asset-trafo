@@ -5,7 +5,7 @@ namespace AssetPatch.TemplateCatalogue
 
 
 [<AutoOpen>]
-module Lstnut =
+module Smonsy =
     
     open AssetPatch.TemplatePatcher.Template
 

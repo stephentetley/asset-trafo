@@ -15,52 +15,51 @@ module Template =
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.Hierarchy
     
+    type Level = int
 
-    type State = 
-        { FreshEquipmentIndex : int
+
+    type TemplateState = 
+        { EquiIndices : Map<Level, int>
+          FlocIndices : Map<Level, int>
         }
 
-    let private stateZero : State = 
-        { FreshEquipmentIndex = 1 }
+    let internal templateStateZero : TemplateState = 
+        { EquiIndices = Map.empty
+          FlocIndices = Map.empty 
+        }
 
-    type TemplateEnv = 
-        { UserName : string 
-          StartupDate : DateTime
+    type EnvProperties = 
+        { StartupDate : DateTime
           ObjectStatus : string
           StructureIndicator : string
           CompanyCode : uint32
           MaintenancePlant : uint32
           ControllingArea : uint32
           Currency : string
-          FlocVariant : string option
-          EquiVariant : string option
         }
 
 
-    let defaultEnv (userName : string) : TemplateEnv = 
-        { UserName = userName
-          StartupDate = DateTime.Now
+    let defaultEnvProperties () : EnvProperties = 
+        { StartupDate = DateTime.Now
           ObjectStatus = "UCON"
           StructureIndicator = "YW-GS"
           CompanyCode = 2100u
           MaintenancePlant = 2100u          
           ControllingArea = 1000u
           Currency = "GBP"
-          FlocVariant = None
-          EquiVariant = None
         }
 
     // FuncLocPath should not be directly visible to client code
 
-    type Env = FuncLocPath * TemplateEnv
+    type TemplateEnv = FuncLocPath * EnvProperties
 
     /// State + Reader + Error
     type Template<'a> = 
-        | Template of (Env -> State -> Result<'a option * State, ErrMsg>)
+        | Template of (TemplateEnv -> TemplateState -> Result<'a option * TemplateState, ErrMsg>)
 
     let inline private apply1 (ma : Template<'a>) 
-                              (env : Env) 
-                              (st : State) : Result<'a option * State, ErrMsg> = 
+                              (env : TemplateEnv) 
+                              (st : TemplateState) : Result<'a option * TemplateState, ErrMsg> = 
         let (Template fn) = ma in fn env st
 
     let mreturn (x:'a) : Template<'a> = 
@@ -90,10 +89,10 @@ module Template =
     let (template : TemplateBuilder) = new TemplateBuilder()
 
 
-    let runTemplate (env : Env) (code : Template<'a>) : Result<'a, ErrMsg> = 
-        match apply1 code env stateZero |> Result.map fst with
-        | Ok (Some(a)) -> Ok a
-        | Ok None -> Error "Empty result"
+    let runTemplate (env : TemplateEnv) (st : TemplateState) (code : Template<'a>) : Result<'a * TemplateState, ErrMsg> = 
+        match apply1 code env st with
+        | Ok (Some(a), st) -> Ok (a, st)
+        | Ok (None, _) -> Error "Empty result"
         | Error msg -> Error msg
 
     
@@ -142,7 +141,7 @@ module Template =
                 }
             Ok (Some(props), st)
 
-    type EnvTransformer = TemplateEnv -> TemplateEnv
+    type EnvTransformer = EnvProperties -> EnvProperties
 
     let local (modify : EnvTransformer) (ma : Template<'a>) : Template<'a> = 
         Template <| fun (floc, tenv) st -> 
@@ -219,10 +218,16 @@ module Template =
     let private setAttributes (e1 : Equipment) (attribs : EquipmentAttribute list) : Equipment = 
         List.fold setAttribute e1 attribs
     
-    let private newEquipmentName () : Template<string> = 
+
+
+
+    let private newEquipmentName (level : int) : Template<string> = 
+        let makeName x = sprintf "L%iE%03i" level x
         Template <| fun _ st -> 
-            let name = sprintf "&AP%03i" st.FreshEquipmentIndex
-            Ok (Some(name), {st with FreshEquipmentIndex = st.FreshEquipmentIndex + 1})
+            let equiIndices = st.EquiIndices 
+            match Map.tryFind level equiIndices with
+            | None -> Ok (Some(makeName 1), {st with EquiIndices = Map.add level 2 equiIndices })
+            | Some(i) -> Ok (Some (makeName i), {st with EquiIndices = Map.add level (i+1) equiIndices})
 
 
 
@@ -234,7 +239,8 @@ module Template =
                     (attributes : EquipmentAttribute list) : Equipment = 
         let equip1 = 
             template {
-                let! equiId = newEquipmentName ()
+                let! level = asksFloc () |>> fun x -> x.Level
+                let! equiId = newEquipmentName level
                 let! cs = unlistM classes
                 let! es = unlistM subordinateEquipment
                 return {

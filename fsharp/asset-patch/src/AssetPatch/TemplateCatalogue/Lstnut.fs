@@ -5,16 +5,16 @@ namespace AssetPatch.TemplateCatalogue
 
 
 [<AutoOpen>]
-module Smonsy =
+module Lstnut =
     
     open AssetPatch.TemplatePatcher.Template
 
     
     
 
-    /// Class:SMONSY
+    /// Class:LSTNUT
     let lstnut : Characteristic list -> Class = 
-        _class "SMONSY"     
+        _class "LSTNUT"     
 
     /// LSTNUT:RelayFunction
     type RelayFunction = 

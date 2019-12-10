@@ -29,7 +29,7 @@ module EdcPatcher =
         else ()
     
     let runEdcPatcherPhase1 (opts : EdcOptions) = 
-        runCompiler (defaultEnv opts.UserName) 
+        runCompiler opts.UserName
             (compile { 
                 let! worklist = 
                     readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
@@ -44,10 +44,10 @@ module EdcPatcher =
 
 
     let runEdcPatcherPhase2 (opts : EdcOptions) = 
-        runCompiler (defaultEnv opts.UserName) 
-            <| compile {
+        runCompiler opts.UserName 
+            (compile {
                 let subfolders = Directory.GetDirectories opts.OutputDirectory |> Array.toList
                 do! mapMz materializeEquiClassValuaPatches subfolders
                 return ()
-            }
+            })
             
