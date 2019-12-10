@@ -43,7 +43,8 @@ module Emitter =
 
     let private componentEmit (source : S4Component) : CompilerMonad<FuncLocResult1 * EquiResults> = 
         compile {
-            let! flocResult = funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+            let! flocResult = 
+                funclocToFuncLocResult1 source.FuncLoc source.InterimId source.FlocProperties source.Description source.ObjectType source.Classes
             let! equiResults = equipmentsEmit source.FuncLoc source.FlocProperties source.Equipment
             return (flocResult, equiResults)
         }
@@ -54,7 +55,8 @@ module Emitter =
 
     let private itemEmit (source : S4Item) : CompilerMonad<FuncLocResult1 * EquiResults> = 
         compile {
-            let! flocResult = funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+            let! flocResult = 
+                funclocToFuncLocResult1 source.FuncLoc source.InterimId source.FlocProperties source.Description source.ObjectType source.Classes
             let! equiResults = equipmentsEmit source.FuncLoc source.FlocProperties source.Equipment
             return (flocResult, equiResults)
         }
@@ -64,7 +66,8 @@ module Emitter =
 
     let assemblyEmit (source : S4Assembly) : CompilerMonad<FuncLocResult1 * EquiResults> = 
         compile {
-            let! flocResult = funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+            let! flocResult = 
+                funclocToFuncLocResult1 source.FuncLoc source.InterimId source.FlocProperties source.Description source.ObjectType source.Classes
             let! equiResults = equipmentsEmit source.FuncLoc source.FlocProperties source.Equipment
             return (flocResult, equiResults)
         }
@@ -74,7 +77,8 @@ module Emitter =
 
     let systemEmit (source : S4System) : CompilerMonad<FuncLocResult1 * EquiResults> = 
         compile {
-            let! flocResult = funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+            let! flocResult = 
+                funclocToFuncLocResult1 source.FuncLoc source.InterimId source.FlocProperties source.Description source.ObjectType source.Classes
             let! equiResults = equipmentsEmit source.FuncLoc source.FlocProperties source.Equipment
             return (flocResult, equiResults)
         }
@@ -84,7 +88,7 @@ module Emitter =
 
 
     let processEmit (source : S4Process) : CompilerMonad<FuncLocResult1> = 
-        funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+        funclocToFuncLocResult1 source.FuncLoc source.InterimId source.FlocProperties source.Description source.ObjectType source.Classes
         
 
     let processesEmit (source : S4Process list) : CompilerMonad<FuncLocResults> = 
@@ -92,7 +96,7 @@ module Emitter =
 
 
     let processGroupEmit (source : S4ProcessGroup) : CompilerMonad<FuncLocResult1> = 
-        funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+        funclocToFuncLocResult1 source.FuncLoc source.InterimId source.FlocProperties source.Description source.ObjectType source.Classes
         
 
     let processGroupsEmit (source : S4ProcessGroup list) : CompilerMonad<FuncLocResults> = 
@@ -100,7 +104,7 @@ module Emitter =
 
 
     let functionEmit (source : S4Function) : CompilerMonad<FuncLocResult1> = 
-        funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+        funclocToFuncLocResult1 source.FuncLoc source.InterimId source.FlocProperties source.Description source.ObjectType source.Classes
         
 
     let functionsEmit (source : S4Function list) : CompilerMonad<FuncLocResults> = 
@@ -108,7 +112,7 @@ module Emitter =
 
         
     let siteEmit (source : S4Site) : CompilerMonad<FuncLocResult1> = 
-        funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+        funclocToFuncLocResult1 source.FuncLoc source.InterimId source.FlocProperties source.Description source.ObjectType source.Classes
             
 
     let sitesEmit (source : S4Site list) : CompilerMonad<FuncLocResults> = 

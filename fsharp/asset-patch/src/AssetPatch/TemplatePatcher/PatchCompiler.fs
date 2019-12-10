@@ -70,7 +70,7 @@ module PatchCompiler =
         compile {
             let! worklist1 = applyTemplate (FuncLocPath.Create("*****")) worklist template
             let! results = 
-                forM worklist1 (fun (path, klass) -> funclocToClassFlocInstances path [klass])
+                forM worklist1 (fun (path, klass) -> funclocToClassFlocInstances path (path.ToString()) [klass])
                     |>> collectClassFlocInstances
             do! writeFlocProperties outputDirectory level filePrefix results
             return ()

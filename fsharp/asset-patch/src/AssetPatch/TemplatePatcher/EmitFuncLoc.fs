@@ -53,12 +53,13 @@ module EmitFuncLoc =
         List.foldBack add source { FuncLocs = []; ClassFlocs = []; ValuaFlocs = [] }
 
 
-    let characteristicToValuaFloc (funcLoc : FuncLocPath) 
+    let characteristicToValuaFloc (funcLoc : FuncLocPath)
+                                    (interimId : string)
                                     (count : int) 
                                     (charac : S4Characteristic) : CompilerMonad<PatchValuaFloc> = 
         mreturn {   
             FuncLoc = funcLoc
-            InterimId = "BAD"
+            InterimId = interimId
             ClassType = IntegerString.OfString "003"
             CharacteristicID = charac.Name
             CharacteristicValue = charac.Value
@@ -67,10 +68,12 @@ module EmitFuncLoc =
 
     
 
-    let classToClassFloc (funcLoc : FuncLocPath)  (clazz : S4Class) : CompilerMonad<PatchClassFloc> = 
+    let classToClassFloc (funcLoc : FuncLocPath)  
+                            (interimId : string) 
+                            (clazz : S4Class) : CompilerMonad<PatchClassFloc> = 
         mreturn { 
             FuncLoc = funcLoc
-            InterimId = "BAD"
+            InterimId = interimId
             Class = clazz.ClassName
             Status = 1
         }
@@ -79,10 +82,11 @@ module EmitFuncLoc =
 
 
     let translateS4CharacteristicsFloc (flocPath : FuncLocPath)
+                                        (interimId : string)
                                         (characteristics : S4Characteristic list) : CompilerMonad<PatchValuaFloc list> =  
 
         let makeGrouped (chars : S4Characteristic list) : CompilerMonad<PatchValuaFloc list> = 
-            foriM chars (fun i x -> characteristicToValuaFloc flocPath (i+1) x)
+            foriM chars (fun i x -> characteristicToValuaFloc flocPath interimId (i+1) x)
 
         compile {
             let chars = sortedCharacteristics characteristics
@@ -91,10 +95,11 @@ module EmitFuncLoc =
 
   
     let translateS4ClassFloc (flocPath : FuncLocPath)
+                                (interimId : string)
                                 (clazz : S4Class) : CompilerMonad<PatchClassFloc * PatchValuaFloc list> = 
         compile {
-            let! ce = classToClassFloc flocPath clazz
-            let! vs = translateS4CharacteristicsFloc flocPath clazz.Characteristics
+            let! ce = classToClassFloc flocPath interimId clazz
+            let! vs = translateS4CharacteristicsFloc flocPath interimId clazz.Characteristics
             return (ce, vs)
         }
 
@@ -125,6 +130,7 @@ module EmitFuncLoc =
         }
 
     let funclocToFuncLocResult1 (path : FuncLocPath) 
+                                (interimId : string)
                                 (props : FuncLocProperties)
                                 (description : string) 
                                 (objectType : string)
@@ -132,7 +138,7 @@ module EmitFuncLoc =
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile {
             let! floc = genFuncLoc path props description objectType
-            let! (cs, vs) = mapM (translateS4ClassFloc path) classes |>> collect
+            let! (cs, vs) = mapM (translateS4ClassFloc path interimId) classes |>> collect
             return { 
                 FuncLoc = floc
                 ClassFlocs = cs
@@ -141,10 +147,11 @@ module EmitFuncLoc =
         }
 
     let funclocToClassFlocInstances (flocPath : FuncLocPath) 
+                                    (interimId : string)
                                     (classes : S4Class list) : CompilerMonad<ClassFlocInstances> = 
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile { 
-            let! (cs, vs) = mapM (translateS4ClassFloc flocPath) classes |>> collect
+            let! (cs, vs) = mapM (translateS4ClassFloc flocPath interimId) classes |>> collect
             return { 
                 ClassFlocs = cs
                 ValuaFlocs = vs
