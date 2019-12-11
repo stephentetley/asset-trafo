@@ -518,7 +518,8 @@ module CompilerMonad =
 
     let evalTemplate (rootFloc : FuncLocPath) (code : Template<'a>) : CompilerMonad<'a> = 
         CompilerMonad <| fun env st ->
-            match runTemplate env.TemplateEnv st.TemplateState code with
+            let env1 = { env.TemplateEnv with CurrentFloc = rootFloc }
+            match runTemplate env1 st.TemplateState code with
             | Ok(a, tst1) -> Ok (a, { st with TemplateState = tst1 })
             | Error msg -> Error msg
 

@@ -239,12 +239,14 @@ module Template =
 
     let private newFlocInterimId (level : int) : Template<string option> = 
         let makeName x = Some <| sprintf "&L%iF%03i" level x
-        Template <| fun _ st -> 
-            let flocIndices = st.FlocIndices
-            match Map.tryFind level flocIndices with
-            | None -> Ok (Some (makeName 1), {st with FlocIndices = Map.add level 2 flocIndices })
-            | Some(i) -> Ok (Some (makeName i), {st with FlocIndices = Map.add level (i+1) flocIndices})
-
+        Template <| fun env st -> 
+            if env.UseInterimIds then
+                let flocIndices = st.FlocIndices
+                match Map.tryFind level flocIndices with
+                | None -> Ok (Some (makeName 1), {st with FlocIndices = Map.add level 2 flocIndices })
+                | Some(i) -> Ok (Some (makeName i), {st with FlocIndices = Map.add level (i+1) flocIndices})
+            else 
+                Ok (Some None, st)
 
 
     let _equipment (description : string) 
