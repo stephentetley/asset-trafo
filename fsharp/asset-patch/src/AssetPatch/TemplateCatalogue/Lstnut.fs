@@ -7,10 +7,9 @@ namespace AssetPatch.TemplateCatalogue
 [<AutoOpen>]
 module Lstnut =
     
+    open AssetPatch.TemplatePatcher.CommonTypes
     open AssetPatch.TemplatePatcher.Template
 
-    
-    
 
     /// Class:LSTNUT
     let lstnut : Characteristic list -> Class = 
@@ -41,48 +40,48 @@ module Lstnut =
     /// LSTN_RELAY_{ix}_FUNCTION
     let lstn_relay_function (ix : int) (v : RelayFunction) : Characteristic = 
         let name = sprintf "LSTN_RELAY_%i_FUNCTION" ix
-        _characteristic name (v.ToString())
+        _characteristic name (textUpperCase <| v.ToString())
 
 
     /// LSTN_RELAY_{ix}_ON_LEVEL_M
     let lstn_relay_on_level (ix : int) (v : decimal) : Characteristic = 
         let name = sprintf "LSTN_RELAY_%i_ON_LEVEL_M" ix
-        _characteristic name (sprintf "%M" v)
+        _characteristic name (DecimalValue v)
 
     /// LSTN_RELAY_{ix}_OFF_LEVEL_M
     let lstn_relay_off_level (ix : int) (v : decimal) : Characteristic = 
         let name = sprintf "LSTN_RELAY_%i_OFF_LEVEL_M" ix
-        _characteristic name (sprintf "%M" v)
+        _characteristic name (DecimalValue v)
 
     /// LSTN_TRANSDUCER_MODEL
     let lstn_transducer_model (v : string) : Characteristic =         
-        _characteristic "LSTN_TRANSDUCER_MODEL" v
+        _characteristic "LSTN_TRANSDUCER_MODEL" (TextValue v)
 
     /// LSTN_TRANSDUCER_SERIAL_NO
     let lstn_transducer_serial_no (v : string) : Characteristic =         
-        _characteristic "LSTN_TRANSDUCER_SERIAL_NO" v
+        _characteristic "LSTN_TRANSDUCER_SERIAL_NO" (TextValue v)
 
     /// LSTN_RANGE_MIN
     let lstn_range_min (v : decimal) : Characteristic =         
-        _characteristic "LSTN_RANGE_MIN" (sprintf "%M" v)
+        _characteristic "LSTN_RANGE_MIN" (DecimalValue v)
 
     /// LSTN_RANGE_MAX
     let lstn_range_max (v : decimal) : Characteristic =         
-        _characteristic "LSTN_RANGE_MAX" (sprintf "%M" v)
+        _characteristic "LSTN_RANGE_MAX" (DecimalValue v)
 
 
     /// LSTN_RANGE_UNITS
     let lstn_range_units (v : string) : Characteristic =         
-        _characteristic "LSTN_RANGE_UNITS" v
+        _characteristic "LSTN_RANGE_UNITS" (TextValue v)
 
     /// LSTN_SIGNAL_TYPE
     let lstn_signal_type (v : string) : Characteristic =         
-        _characteristic "LSTN_SIGNAL_TYPE" v
+        _characteristic "LSTN_SIGNAL_TYPE" (TextValue v)
 
     /// LSTN_SUPPLY_VOLTAGE
     let lstn_supply_voltage (v : int) : Characteristic =         
-        _characteristic "LSTN_SUPPLY_VOLTAGE" (v.ToString())
+        _characteristic "LSTN_SUPPLY_VOLTAGE" (intValue v)
 
     /// IP_RATING
     let ip_rating (v : int) : Characteristic =         
-        _characteristic "IP_RATING" (v.ToString())
+        _characteristic "IP_RATING" (intValue v)

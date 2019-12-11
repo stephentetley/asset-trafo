@@ -12,7 +12,7 @@ module Template =
     open AssetPatch.Base
     open AssetPatch.Base.Common
     open AssetPatch.Base.FuncLocPath
-    open AssetPatch.TemplatePatcher.PatchTypes
+    open AssetPatch.TemplatePatcher.CommonTypes
     open AssetPatch.TemplatePatcher.Hierarchy
     
     type Level = int
@@ -164,7 +164,7 @@ module Template =
 
     type Characteristic = Template<S4Characteristic>
     
-    let _characteristic (name : string) (value : string) : Characteristic = 
+    let _characteristic (name : string) (value : ValuaValue) : Characteristic = 
         mreturn { 
             Name = name
             Value = value
@@ -178,7 +178,7 @@ module Template =
             | Ok(None, st1) -> Ok (None, st1)
             | Ok (Some(c1), st1) -> 
                 match c1.Value with 
-                | null | "" ->  Ok(None, st1)
+                | NullValue ->  Ok(None, st1)
                 | _ -> Ok (Some(c1), st1)
 
     let applyOptional (fn : 'a -> Characteristic)  (value : Option<'a>) : Characteristic = 

@@ -7,6 +7,7 @@ namespace AssetPatch.TemplateCatalogue
 [<AutoOpen>]
 module AssetCondition =
     
+    open AssetPatch.TemplatePatcher.CommonTypes
     open AssetPatch.TemplatePatcher.Template
 
 
@@ -46,12 +47,12 @@ module AssetCondition =
             
     /// ASSET_CONDITION:CONDITION_GRADE
     let condition_grade (v : ConditionGrade) : Characteristic = 
-        _characteristic "CONDITION_GRADE" (v.ToString())
+        _characteristic "CONDITION_GRADE" (textUpperCase <| v.ToString())
 
 
     /// ASSET_CONDITION:CONDITION_GRADE_REASON
     let condition_grade_reason (v : string) : Characteristic = 
-        _characteristic "CONDITION_GRADE_REASON" (v.ToUpper())
+        _characteristic "CONDITION_GRADE_REASON" (textUpperCase <| v.ToString())
 
     /// ASSET_CONDITION:PerformanceGrade
     type PerformanceGrade = 
@@ -84,12 +85,12 @@ module AssetCondition =
 
     /// ASSET_CONDITION:PERFORMANCE_GRADE
     let performance_grade (v : PerformanceGrade) : Characteristic = 
-        _characteristic "PERFORMANCE_GRADE" (v.ToString())
+        _characteristic "PERFORMANCE_GRADE" (TextValue <| v.ToString())
 
 
     /// ASSET_CONDITION:PERFORMANCE_GRADE_REASON
     let performance_grade_reason (v : string) : Characteristic = 
-        _characteristic "PERFORMANCE_GRADE_REASON" (v.ToUpper())
+        _characteristic "PERFORMANCE_GRADE_REASON" (TextValue <| v.ToUpper())
 
 
     /// ASSET_CONDITION:LoadingFactor
@@ -122,17 +123,17 @@ module AssetCondition =
 
     /// ASSET_CONDITION:LOADING_FACTOR
     let loading_factor (v : LoadingFactor) : Characteristic = 
-        _characteristic "LOADING_FACTOR" (v.ToString())
+        _characteristic "LOADING_FACTOR" (TextValue <| v.ToString())
 
 
     /// ASSET_CONDITION:LOADING_FACTOR_REASON
     let loading_factor_reason (v : string) : Characteristic = 
-         _characteristic "LOADING_FACTOR_REASON" (v.ToUpper())
+         _characteristic "LOADING_FACTOR_REASON" (TextValue <| v.ToUpper())
 
 
     /// ASSET_CONDITION:SURVEY_DATE
     let survey_date (year : uint32) : Characteristic = 
-        _characteristic "SURVEY_DATE" (year.ToString())
+        _characteristic "SURVEY_DATE" (uint32Value <| year)
 
     /// Emit ASSET_CONDITION with defaults for new
     let asset_condition_new_item (year : uint32) : Class = 

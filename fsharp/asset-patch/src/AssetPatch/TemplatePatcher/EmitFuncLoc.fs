@@ -65,8 +65,8 @@ module EmitFuncLoc =
             InterimId = interimId
             ClassType = IntegerString.OfString "003"
             CharacteristicID = charac.Name
-            CharacteristicValue = charac.Value
             ValueCount = count
+            Value = charac.Value
         }
 
     

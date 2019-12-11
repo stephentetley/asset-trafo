@@ -7,6 +7,7 @@ namespace AssetPatch.TemplateCatalogue
 [<AutoOpen>]
 module Base =
     
+    open AssetPatch.TemplatePatcher.CommonTypes
     open AssetPatch.TemplatePatcher.Template
 
     // ************************************************************************
@@ -134,12 +135,12 @@ module Base =
     /// *:UNICLASS_CODE
     /// This is currently blank
     let uniclass_code () : Characteristic = 
-        _characteristic "UNICLASS_CODE" ""
+        _characteristic "UNICLASS_CODE" NullValue
 
     /// *:UNICLASS_DESC
     /// This is currently blank
     let uniclass_desc () : Characteristic = 
-        _characteristic "UNICLASS_DESC" ""
+        _characteristic "UNICLASS_DESC" NullValue
 
 
     /// AIB_REFERENCE
@@ -148,12 +149,12 @@ module Base =
 
     /// AIB_REFERENCE:AI2_AIB_REFERENCE
     let ai2_aib_reference (v : string) : Characteristic = 
-        _characteristic "AI2_AIB_REFERENCE" v
+        _characteristic "AI2_AIB_REFERENCE" (TextValue v)
 
     /// AIB_REFERENCE:S4_AIB_REFERENCE
     /// This is always blank
     let s4_aib_reference () : Characteristic = 
-        _characteristic "S4_AIB_REFERENCE" ""
+        _characteristic "S4_AIB_REFERENCE" NullValue
 
 
     
@@ -164,11 +165,11 @@ module Base =
 
     /// EAST_NORTH:EASTING
     let easting (v : int) : Characteristic = 
-        _characteristic "EASTING" (v.ToString())
+        _characteristic "EASTING" (intValue v)
 
     /// EAST_NORTH:NORTHING
     let northing (v : int) : Characteristic = 
-        _characteristic "NORTHING" (v.ToString())
+        _characteristic "NORTHING" (intValue v)
 
     
 

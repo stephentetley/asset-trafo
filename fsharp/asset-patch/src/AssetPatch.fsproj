@@ -16,6 +16,7 @@
     <Compile Include="AssetPatch\Base\FuncLocPath.fs" />
     <Compile Include="AssetPatch\Utilities\ChangeFileReport.fs" />
     <Compile Include="AssetPatch\Utilities\TidyChangeFile.fs" />
+    <Compile Include="AssetPatch\TemplatePatcher\CommonTypes.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\PatchTypes.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Hierarchy.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Template.fs" />

@@ -7,10 +7,9 @@ namespace AssetPatch.TemplateCatalogue
 [<AutoOpen>]
 module Smonsy =
     
+    open AssetPatch.TemplatePatcher.CommonTypes
     open AssetPatch.TemplatePatcher.Template
 
-    
-    
 
     /// Class:SMONSY
     let smonsy : Characteristic list -> Class = 
@@ -19,4 +18,4 @@ module Smonsy =
 
     /// SYSTEM_TYPE
     let system_type (v : string) : Characteristic = 
-        _characteristic "SYSTEM_TYPE" v
+        _characteristic "SYSTEM_TYPE" (TextValue v)

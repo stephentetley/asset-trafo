@@ -14,13 +14,8 @@ module PatchTypes =
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.FuncLocPath
    
-    type ObjectStatus = 
-        | Operational
-        | UnderConstruction
+    open AssetPatch.TemplatePatcher.CommonTypes
 
-    
-    let dateDefault : DateTime = 
-        new DateTime(year = 1970, month = 1, day = 1)
 
     let makeAssocs (items : (string * string * string) list) : AssocList<string,string> = 
         items |> List.map (fun (x,_,y) -> (x,y)) |> AssocList.ofList
@@ -142,21 +137,23 @@ module PatchTypes =
       { FuncLoc : FuncLocPath
         InterimId : string
         ClassType : IntegerString
-        CharacteristicID : string
-        CharacteristicValue : string
+        CharacteristicID : string        
         ValueCount : int
+        Value : ValuaValue
       }
 
 
     /// Note - CharacteristicValue is used three times.
     let valuaFlocToAssocs (valua: PatchValuaFloc) : AssocList<string, string> = 
+        
         makeAssocs
             [ ("FUNCLOC",       "Function Location",                valua.InterimId)
             ; ("CLASSTYPE",     "Class Type",                       valua.ClassType.Number)
             ; ("CHARID",        "Characteristic ID",                valua.CharacteristicID)
-            ; ("ATWRT",         "Characteristic Value",             valua.CharacteristicValue)
-            ; ("TEXTBEZ",       "Description",                      valua.CharacteristicValue)
+            ; ("ATWRT",         "Characteristic Value",             characteristicValue valua.Value)
+            ; ("TEXTBEZ",       "Description",                      valua.Value.ToString())
             ; ("VALCNT",        "Int count values",                 sprintf "%04i" valua.ValueCount)
+            ; ("ATFLV",         "Value from",                       valueFrom valua.Value)
             ]
 
 
@@ -249,8 +246,8 @@ module PatchTypes =
         { InterimId : string
           ClassType : IntegerString
           CharacteristicID : string
-          CharacteristicValue : string
           ValueCount : int
+          Value : ValuaValue
         }
     
 
@@ -260,8 +257,9 @@ module PatchTypes =
             [ ("EQUI",          "Equipment",                valua.InterimId)
             ; ("CLASSTYPE",     "Class Type",               valua.ClassType.Number)
             ; ("CHARID",        "Characteristic ID",        valua.CharacteristicID)
-            ; ("ATWRT",         "Characteristic Value",     valua.CharacteristicValue)
-            ; ("TEXTBEZ",       "Description",              valua.CharacteristicValue)
+            ; ("ATWRT",         "Characteristic Value",     characteristicValue valua.Value)
+            ; ("TEXTBEZ",       "Description",              valua.Value.ToString())
             ; ("VALCNT",        "Int counter values",       sprintf "%04i" valua.ValueCount)
+            ; ("ATFLV",         "Value from",               valueFrom valua.Value)
             ]
             

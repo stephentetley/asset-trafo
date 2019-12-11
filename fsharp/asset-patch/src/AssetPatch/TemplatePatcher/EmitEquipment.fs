@@ -74,8 +74,8 @@ module EmitEquipment =
             InterimId = interimId
             ClassType = IntegerString.OfString "002"
             CharacteristicID = charac.Name
-            CharacteristicValue = charac.Value
             ValueCount = count
+            Value = charac.Value
         }
     
 

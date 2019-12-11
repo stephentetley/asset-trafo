@@ -10,12 +10,12 @@ module Hierarchy =
     open System
 
     open AssetPatch.Base.FuncLocPath
-    open AssetPatch.TemplatePatcher.PatchTypes
+    open AssetPatch.TemplatePatcher.CommonTypes
     
 
     type S4Characteristic = 
         { Name : string
-          Value : string 
+          Value : ValuaValue 
         }
 
     
