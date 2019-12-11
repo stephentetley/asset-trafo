@@ -130,7 +130,11 @@ let test01 () =
         [ ("KRI03", {Code = "KRI03"; Name = "Kriddle SPS"; Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001" } )
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
-    runCompiler "TETLEYS"
+    let opts : CompilerOptions = 
+        { UserName = "TETLEYS"
+          UseInterimFlocIds = false
+        }
+    runCompiler opts
        <| compileFunctionPatches 
                    (outputDirectory "edg-patches")
                    "env_discharge"
@@ -196,7 +200,12 @@ let test02 () =
     let worklist = 
         [ {Code = "SPT60"; Name = "Stephen SPS"; Easting = 492729; Northing = 477323; EquiFlocSaiNumber = Some "SAI00043252"; EquiPliNumber = Some "PLI00002001"} 
         ] |> List.map (fun r1 -> (FuncLocPath.Create r1.Code, r1))
-    runCompiler "TETLEYS"
+    
+    let opts : CompilerOptions = 
+        { UserName = "TETLEYS"
+          UseInterimFlocIds = false
+        }
+    runCompiler opts
        <| compileSitePatches 
                    (outputDirectory "caa-patches")
                    "control_automation"
@@ -205,6 +214,10 @@ let test02 () =
 
 
 let test02b () = 
-    runCompiler "TETLEYS"
+    let opts : CompilerOptions = 
+        { UserName = "TETLEYS"
+          UseInterimFlocIds = false
+        }
+    runCompiler opts
        <| materializeEquiClassValuaPatches (outputDirectory "caa-patches")
 

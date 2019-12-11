@@ -30,10 +30,10 @@ module PatchWriter =
         | ClassEqui -> "classequi"
         | ValuaEqui -> "valuaequi"
 
-    let private entityExtension (entityType : EntityType) : string = 
+    let private entityExtension (useInterimIds : bool) (entityType : EntityType) : string = 
         match entityType with
         | FuncLoc | Equi -> "txt"
-        | ClassFloc | ValuaFloc -> "floc"
+        | ClassFloc | ValuaFloc -> if useInterimIds then "floc" else "txt"
         | ClassEqui | ValuaEqui -> "equi"
 
         
@@ -65,10 +65,11 @@ module PatchWriter =
                             (filePrefix : string) 
                             (entityType : EntityType) : CompilerMonad<string> = 
         compile {
+            let! useInterimIds = generateWithInterimIds ()
             let! idx = newFileIndex level
             let! subdirectory = genSubFolder directory level
             let name1 = 
-                sprintf "%s_level%i_%02i_%s.%s" (safeName filePrefix) level idx (entityName entityType) (entityExtension entityType)
+                sprintf "%s_level%i_%02i_%s.%s" (safeName filePrefix) level idx (entityName entityType) (entityExtension useInterimIds entityType)
             return Path.Combine(subdirectory, name1)
         }
 

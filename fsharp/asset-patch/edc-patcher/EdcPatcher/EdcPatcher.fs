@@ -20,7 +20,7 @@ module EdcPatcher =
     type EdcOptions = 
         { UserName : string 
           OutputDirectory : string
-          WorkListPath : string 
+          WorkListPath : string
           UseFlocTemplateIds : bool
           }
 

@@ -188,9 +188,10 @@ module EmitFuncLoc =
             mreturn ()
         else
             compile {
+                let! useInterimIds = generateWithInterimIds ()
                 let! dirName = genSubFolder directory level
                 let indexFile = Path.Combine(dirName, "FlocIndexing.xlsx")
-                do! writeFlocIndexingSheet indexFile funcLocResults.FuncLocs
+                do! if useInterimIds then writeFlocIndexingSheet indexFile funcLocResults.FuncLocs else mreturn ()
                 do! writeFuncLocFile directory level filePrefix funcLocResults.FuncLocs
                 do! writeClassFlocFile directory level filePrefix funcLocResults.ClassFlocs
                 do! writeValuaFlocFile directory level filePrefix funcLocResults.ValuaFlocs

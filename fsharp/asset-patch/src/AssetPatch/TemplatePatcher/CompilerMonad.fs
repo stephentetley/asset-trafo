@@ -52,7 +52,7 @@ module CompilerMonad =
 
     /// CompilerMonad is a Reader-Error-State(name supply) monad.
     type CompilerMonad<'a> = 
-        CompilerMonad of (CompilerEnv -> CompilerState -> Result<'a * CompilerState, ErrMsg>)
+        private | CompilerMonad of (CompilerEnv -> CompilerState -> Result<'a * CompilerState, ErrMsg>)
 
     let inline private apply1 (ma : CompilerMonad<'a>) 
                                 (env : CompilerEnv) 
@@ -117,8 +117,10 @@ module CompilerMonad =
     // Common operations
     let fmapM (update : 'a -> 'b) 
               (action : CompilerMonad<'a>) : CompilerMonad<'b> = 
-        CompilerMonad <| fun env st ->
-            apply1 action env st |> Result.map (fun (a,st1) -> (update a, st1))
+        compile {
+            let! a = action
+            return (update a)
+            }
             
        
     /// Operator for fmap.
@@ -195,7 +197,7 @@ module CompilerMonad =
              (action2 : CompilerMonad<'b>) : CompilerMonad<'a> = 
         compile { 
             let! a = action1
-            let! b = action2
+            let! _ = action2
             return a
         }
 
@@ -209,7 +211,7 @@ module CompilerMonad =
     let seqR (action1 : CompilerMonad<'a>) 
              (action2 : CompilerMonad<'b>) : CompilerMonad<'b> = 
         compile { 
-            let! a = action1
+            let! _ = action1
             let! b = action2
             return b
         }
@@ -265,13 +267,21 @@ module CompilerMonad =
         CompilerMonad <| fun _ st -> 
             let fileIndices = st.FileIndices  
             match Map.tryFind level fileIndices with
-            | None -> Ok (1, {st with FileIndices = Map.add level 2 fileIndices })
-            | Some(i) -> Ok (i, {st with FileIndices = Map.add level (i+1) fileIndices})
+            | None -> 
+                let st1 = { st with FileIndices = Map.add level 2 fileIndices }
+                Ok (1, st1)
+            | Some(i) -> 
+                let st1 =  { st with FileIndices = Map.add level (i+1) fileIndices }
+                Ok (i, st1)
 
-    let resetFileIndices () : CompilerMonad<unit> = 
-        CompilerMonad <| fun _ st -> 
-            Ok ((), {st with FileIndices = Map.empty })
 
+
+    // ************************************************************************
+    // Interim Ids
+
+    let generateWithInterimIds () : CompilerMonad<bool> = 
+        CompilerMonad <| fun env st -> 
+            Ok (env.TemplateEnv.UseInterimIds, st)
 
     // ************************************************************************
     // Alternatives and Optionals...

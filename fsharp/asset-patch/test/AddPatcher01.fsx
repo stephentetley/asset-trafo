@@ -91,8 +91,13 @@ let test01 () : Result<unit, ErrMsg> =
     let worklist : (string * uint32) list= 
         [ ("101001407", 2019u)
         ; ("101001409", 2019u)
-        ] 
-    runCompiler"TETLEYS"
+        ]
+
+    let opts : CompilerOptions = 
+        { UserName = "TETLEYS"
+          UseInterimFlocIds = false
+        }
+    runCompiler opts
         <| compileClassEquiValuaEquiPatches 
                     (outputDirectory ())
                     5
@@ -113,11 +118,26 @@ let test02 () =
         [ ("KRI03-EDC", "SAI00970234")
         ] 
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
-    runCompiler "TETLEYS" 
+
+    let opts : CompilerOptions = 
+        { UserName = "TETLEYS"
+          UseInterimFlocIds = false
+        }
+    runCompiler opts
        <| compileClassFlocValuaFlocPatches 
                    (outputDirectory ())
                    5
                    "aib_reference"
                    aibReferenceTemplate
                    worklist
+
+let temp01 () = 
+    runCompiler {UserName = "TETLEYS"; UseInterimFlocIds = false}
+        <| compile {
+            let! i1 = newFileIndex 1
+            let! i2 = newFileIndex 1
+            let! i3 = newFileIndex 2            
+            let! i4 = newFileIndex 2
+            return [i1, i2, i3, i4]
+        }
 
