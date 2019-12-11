@@ -94,12 +94,18 @@ module CompilerMonad =
 
     let (compile : CompilerMonadBuilder) = new CompilerMonadBuilder()
 
+    type CompilerOptions = 
+        { UseInterimFlocIds : bool 
+          UserName : string }
 
-
-    let runCompiler (userName : string) 
+    let runCompiler (options : CompilerOptions) 
                     (action : CompilerMonad<'a> ) : Result<'a, ErrMsg> = 
-        let env1 = (FuncLocPath.Create("*****"), defaultEnvProperties ())
-        apply1 action (defaultCompilerEnv userName env1) compilerStateZero |> Result.map fst
+        let env1 : TemplateEnv = 
+            { CurrentFloc = FuncLocPath.Create("*****")
+              Properties = defaultEnvProperties ()
+              UseInterimIds = options.UseInterimFlocIds
+            }       
+        apply1 action (defaultCompilerEnv options.UserName env1) compilerStateZero |> Result.map fst
 
     
 
@@ -502,7 +508,7 @@ module CompilerMonad =
 
     let evalTemplate (rootFloc : FuncLocPath) (code : Template<'a>) : CompilerMonad<'a> = 
         CompilerMonad <| fun env st ->
-            match runTemplate (rootFloc, snd env.TemplateEnv) st.TemplateState code with
+            match runTemplate env.TemplateEnv st.TemplateState code with
             | Ok(a, tst1) -> Ok (a, { st with TemplateState = tst1 })
             | Error msg -> Error msg
 

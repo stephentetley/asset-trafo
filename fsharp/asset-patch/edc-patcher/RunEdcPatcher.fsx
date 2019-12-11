@@ -78,6 +78,7 @@ let options : EdcOptions =
     {   UserName = "TETLEYS"
         OutputDirectory = outputDirectory "edc_patcher"
         WorkListPath = @"G:\work\Projects\assets\asset_patch\EnvDischarge_Worklist1.xlsx" 
+        UseFlocTemplateIds = false
     }
 
 let main01 () = 

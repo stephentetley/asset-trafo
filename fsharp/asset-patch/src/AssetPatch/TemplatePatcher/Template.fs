@@ -51,7 +51,11 @@ module Template =
 
     // FuncLocPath should not be directly visible to client code
 
-    type TemplateEnv = FuncLocPath * EnvProperties
+    type TemplateEnv = 
+        { CurrentFloc : FuncLocPath
+          Properties : EnvProperties
+          UseInterimIds : bool 
+        }
 
     /// State + Reader + Error
     type Template<'a> = 
@@ -122,35 +126,37 @@ module Template =
 
 
     let rootFloc (floc : FuncLocPath) (ma : Template<'a>) : Template<'a> = 
-        Template <| fun (_, tenv) st -> 
-            apply1 ma (floc, tenv) st
+        Template <| fun env st -> 
+            apply1 ma { env with CurrentFloc = floc } st
         
     let asksFloc () : Template<FuncLocPath> = 
-        Template <| fun (floc, _) st -> Ok (Some(floc), st)
+        Template <| fun env st -> Ok (Some(env.CurrentFloc), st)
 
     let asksFuncLocProperties () : Template<FuncLocProperties> = 
-        Template <| fun (_, tenv) st -> 
+        Template <| fun env st -> 
             let props : FuncLocProperties = 
-                { StartupDate = tenv.StartupDate
-                  StructureIndicator = tenv.StructureIndicator
-                  MaintenancePlant = tenv.MaintenancePlant
-                  ObjectStatus = tenv.ObjectStatus
-                  ControllingArea = tenv.ControllingArea
-                  CompanyCode = tenv.CompanyCode
-                  Currency = tenv.Currency
+                { StartupDate = env.Properties.StartupDate
+                  StructureIndicator = env.Properties.StructureIndicator
+                  MaintenancePlant = env.Properties.MaintenancePlant
+                  ObjectStatus = env.Properties.ObjectStatus
+                  ControllingArea = env.Properties.ControllingArea
+                  CompanyCode = env.Properties.CompanyCode
+                  Currency = env.Properties.Currency
                 }
             Ok (Some(props), st)
 
     type EnvTransformer = EnvProperties -> EnvProperties
 
     let local (modify : EnvTransformer) (ma : Template<'a>) : Template<'a> = 
-        Template <| fun (floc, tenv) st -> 
-            apply1 ma (floc, modify tenv) st
+        Template <| fun env st -> 
+            let props = env.Properties
+            apply1 ma { env with Properties = modify props } st
 
     let locals (modifications : EnvTransformer list) (ma : Template<'a>) : Template<'a> = 
         let trafo = List.foldBack (fun f acc -> acc >> f) modifications id
-        Template <| fun (floc, tenv) st -> 
-            apply1 ma (floc, trafo tenv) st
+        Template <| fun env st -> 
+            let props = env.Properties
+            apply1 ma { env with Properties = trafo props }  st
 
             
     let startupDate (date : DateTime) : EnvTransformer = 
@@ -158,8 +164,9 @@ module Template =
 
 
     let internal extendFloc (levelCode  : string) (ma : Template<'a>) : Template<'a> = 
-        Template <| fun (floc, tenv) st -> 
-            apply1 ma (floc |> extend levelCode, tenv) st
+        Template <| fun env st -> 
+            let floc = env.CurrentFloc
+            apply1 ma { env with CurrentFloc = extend levelCode floc } st
     
 
     type Characteristic = Template<S4Characteristic>
@@ -230,12 +237,12 @@ module Template =
             | Some(i) -> Ok (Some (makeName i), {st with EquiIndices = Map.add level (i+1) equiIndices})
 
 
-    let private newFlocInterimId (level : int) : Template<string> = 
-        let makeName x = sprintf "&L%iF%03i" level x
+    let private newFlocInterimId (level : int) : Template<string option> = 
+        let makeName x = Some <| sprintf "&L%iF%03i" level x
         Template <| fun _ st -> 
             let flocIndices = st.FlocIndices
             match Map.tryFind level flocIndices with
-            | None -> Ok (Some(makeName 1), {st with FlocIndices = Map.add level 2 flocIndices })
+            | None -> Ok (Some (makeName 1), {st with FlocIndices = Map.add level 2 flocIndices })
             | Some(i) -> Ok (Some (makeName i), {st with FlocIndices = Map.add level (i+1) flocIndices})
 
 

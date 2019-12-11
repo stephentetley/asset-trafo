@@ -61,7 +61,7 @@ module Hierarchy =
     
     type S4Component = 
         { FuncLoc : FuncLocPath
-          InterimId : string          
+          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -72,7 +72,7 @@ module Hierarchy =
 
     type S4Item = 
         { FuncLoc : FuncLocPath
-          InterimId : string          
+          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -84,7 +84,7 @@ module Hierarchy =
 
     type S4Assembly = 
         { FuncLoc : FuncLocPath
-          InterimId : string          
+          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -95,7 +95,7 @@ module Hierarchy =
 
     type S4System = 
         { FuncLoc : FuncLocPath        
-          InterimId : string          
+          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -106,7 +106,7 @@ module Hierarchy =
 
     type S4Process = 
         { FuncLoc : FuncLocPath
-          InterimId : string          
+          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -116,7 +116,7 @@ module Hierarchy =
 
     type S4ProcessGroup = 
         { FuncLoc : FuncLocPath
-          InterimId : string          
+          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -126,7 +126,7 @@ module Hierarchy =
 
     type S4Function = 
         { FuncLoc : FuncLocPath
-          InterimId : string          
+          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -136,7 +136,7 @@ module Hierarchy =
 
     type S4Site = 
         { FuncLoc : FuncLocPath
-          InterimId : string          
+          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string

@@ -55,7 +55,7 @@ module EquiIndexing =
     let getPatchFuncLocIndexingRow (floc : PatchFuncLoc) : IndexingRow = 
         { Floc = floc.Path
           Description = floc.Description
-          APIdent = floc.InterimId
+          APIdent = Option.defaultValue "" floc.InterimId
           S4Ident = ()
         }
 

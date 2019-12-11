@@ -21,7 +21,12 @@ module EdcPatcher =
         { UserName : string 
           OutputDirectory : string
           WorkListPath : string 
+          UseFlocTemplateIds : bool
           }
+
+    let private makeCompilerOptions (opts : EdcOptions) : CompilerOptions = 
+        { UseInterimFlocIds = opts.UseFlocTemplateIds 
+          UserName = opts.UserName }
 
     let internal makeOutputDirectory (dirName : string) : unit = 
         if not <| Directory.Exists(dirName) then
@@ -29,7 +34,8 @@ module EdcPatcher =
         else ()
     
     let runEdcPatcherPhase1 (opts : EdcOptions) = 
-        runCompiler opts.UserName
+        let compilerOpts : CompilerOptions = makeCompilerOptions opts           
+        runCompiler compilerOpts
             (compile { 
                 let! worklist = 
                     readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
@@ -44,10 +50,12 @@ module EdcPatcher =
 
     /// Phase 2 materializes Floc patches
     let runEdcPatcherPhase2 (opts : EdcOptions) (targetFolder : string) = 
-        runCompiler opts.UserName 
+        let compilerOpts : CompilerOptions = makeCompilerOptions opts  
+        runCompiler compilerOpts
             <| materializeFlocClassValuaPatches targetFolder
 
     /// Phase 3 materializes Equi patches
     let runEdcPatcherPhase3 (opts : EdcOptions) (targetFolder : string) = 
-        runCompiler opts.UserName 
+        let compilerOpts : CompilerOptions = makeCompilerOptions opts  
+        runCompiler compilerOpts 
             <| materializeEquiClassValuaPatches targetFolder

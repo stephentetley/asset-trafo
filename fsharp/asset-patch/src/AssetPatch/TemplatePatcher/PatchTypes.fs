@@ -52,7 +52,7 @@ module PatchTypes =
     /// e.g CompanyCode, ControllingArea ...
     type PatchFuncLoc = 
       { Path : FuncLocPath
-        InterimId : string
+        InterimId : string option
         Description : string
         ObjectType : string
         Category : uint32
@@ -115,15 +115,19 @@ module PatchTypes =
 
     type PatchClassFloc = 
       { FuncLoc : FuncLocPath
-        InterimId : string
+        InterimId : string option
         Class : string
         Status : int
       }
 
 
     let classFlocToAssocs (classFloc: PatchClassFloc) : AssocList<string, string> = 
+        let floc = 
+            match classFloc.InterimId with
+            | None -> classFloc.FuncLoc.ToString()
+            | Some uid -> uid        
         makeAssocs
-            [ ("FUNCLOC",       "Functional Location",      classFloc.InterimId)
+            [ ("FUNCLOC",       "Functional Location",      floc)
             ; ("CLASS",         "Class",                    classFloc.Class)
             ; ("CLASSTYPE",     "Class Type",               "003")
             ; ("CLSTATUS1",     "Status",                   classFloc.Status.ToString())
@@ -135,7 +139,7 @@ module PatchTypes =
 
     type PatchValuaFloc = 
       { FuncLoc : FuncLocPath
-        InterimId : string
+        InterimId : string option
         ClassType : IntegerString
         CharacteristicID : string        
         ValueCount : int
@@ -143,11 +147,15 @@ module PatchTypes =
       }
 
 
-    /// Note - CharacteristicValue is used three times.
-    let valuaFlocToAssocs (valua: PatchValuaFloc) : AssocList<string, string> = 
-        
+    /// Note - Numeric values print TEXTBEZ and ATFLV
+    /// textual values print ATWRT and TEXTBEZ
+    let valuaFlocToAssocs (valua: PatchValuaFloc) : AssocList<string, string> =  
+        let floc = 
+            match valua.InterimId with
+            | None -> valua.FuncLoc.ToString()
+            | Some uid -> uid 
         makeAssocs
-            [ ("FUNCLOC",       "Function Location",                valua.InterimId)
+            [ ("FUNCLOC",       "Function Location",                floc)
             ; ("CLASSTYPE",     "Class Type",                       valua.ClassType.Number)
             ; ("CHARID",        "Characteristic ID",                valua.CharacteristicID)
             ; ("ATWRT",         "Characteristic Value",             characteristicValue valua.Value)
