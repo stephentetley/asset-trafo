@@ -158,10 +158,12 @@ module PatchTypes =
             [ ("FUNCLOC",       "Function Location",                floc)
             ; ("CLASSTYPE",     "Class Type",                       valua.ClassType.Number)
             ; ("CHARID",        "Characteristic ID",                valua.CharacteristicID)
-            ; ("ATWRT",         "Characteristic Value",             characteristicValue valua.Value)
+            ; ("ATWRT",         "Characteristic Value",             characteristicValueOutput valua.Value)
+            ; ("ATCOD",         "Code",                             "1")        // Always 1 "EQ"
             ; ("TEXTBEZ",       "Description",                      valua.Value.ToString())
             ; ("VALCNT",        "Int count values",                 sprintf "%04i" valua.ValueCount)
-            ; ("ATFLV",         "Value from",                       valueFrom valua.Value)
+            ; ("ATFLV",         "Value from",                       valueFromOutput valua.Value)
+            ; ("ATFLB",         "Value to",                         valueToOutput valua.Value)
             ]
 
 
@@ -265,9 +267,11 @@ module PatchTypes =
             [ ("EQUI",          "Equipment",                valua.InterimId)
             ; ("CLASSTYPE",     "Class Type",               valua.ClassType.Number)
             ; ("CHARID",        "Characteristic ID",        valua.CharacteristicID)
-            ; ("ATWRT",         "Characteristic Value",     characteristicValue valua.Value)
+            ; ("ATWRT",         "Characteristic Value",     characteristicValueOutput valua.Value)
+            ; ("ATCOD",         "Code",                     "1")        // Always 1 "EQ"
             ; ("TEXTBEZ",       "Description",              valua.Value.ToString())
             ; ("VALCNT",        "Int counter values",       sprintf "%04i" valua.ValueCount)
-            ; ("ATFLV",         "Value from",               valueFrom valua.Value)
+            ; ("ATFLV",         "Value from",               valueFromOutput valua.Value)
+            ; ("ATFLB",         "Value to",                 valueToOutput valua.Value)
             ]
             

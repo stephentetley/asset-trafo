@@ -131,13 +131,3 @@ let test02 () =
                    aibReferenceTemplate
                    worklist
 
-let temp01 () = 
-    runCompiler {UserName = "TETLEYS"; UseInterimFlocIds = false}
-        <| compile {
-            let! i1 = newFileIndex 1
-            let! i2 = newFileIndex 1
-            let! i3 = newFileIndex 2            
-            let! i4 = newFileIndex 2
-            return [i1, i2, i3, i4]
-        }
-

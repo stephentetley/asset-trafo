@@ -8,11 +8,31 @@ namespace AssetPatch.RewritePatcher
 module Datatypes =
     
     open AssetPatch.Base
-    open AssetPatch.Base.CompilerMonad
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.Parser
     open AssetPatch.Base.FuncLocPath
     
+    /// Note - the Change types are very 'wide', they can modify 
+    /// administrative / metadata fields
+    
+    type ValuaEquiChange = 
+        { Equi : uint32
+          CharId : string
+          ValueCount : int
+          Updates : AssocList<string, string>
+        }
+
+    type ValuaFlocChange = 
+        { Floc : FuncLocPath
+          CharId : string
+          ValueCount : int
+          Updates : AssocList<string, string>
+        }
+
+    type EquiChange = 
+        { Equi : uint32
+          Updates : AssocList<string, string>
+        }
 
     type Characteristic = 
         { ClassType : IntegerString

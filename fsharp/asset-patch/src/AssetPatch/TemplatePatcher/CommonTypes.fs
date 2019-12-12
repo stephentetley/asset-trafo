@@ -33,14 +33,21 @@ module CommonTypes =
     let textUpperCase (s : string) : ValuaValue = 
         TextValue <| s.ToUpper().Trim()
 
-    let valueFrom (v : ValuaValue) : string = 
+    let valueFromOutput (v : ValuaValue) : string = 
         match v with
         | NullValue -> ""
         | IntValue i -> i.ToString()
         | DecimalValue d -> d.ToString()
         | TextValue s -> ""
+
+    let valueToOutput (v : ValuaValue) : string = 
+        match v with
+        | NullValue -> ""
+        | IntValue i -> "0"
+        | DecimalValue d -> "0"
+        | TextValue s -> ""
     
-    let characteristicValue (v : ValuaValue) : string = 
+    let characteristicValueOutput (v : ValuaValue) : string = 
         match v with
         | NullValue -> ""
         | IntValue i -> ""

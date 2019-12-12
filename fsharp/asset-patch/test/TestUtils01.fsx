@@ -40,13 +40,19 @@ let outputFile (relFileName : string) : string =
     Path.Combine(__SOURCE_DIRECTORY__, @"..\output", relFileName)
 
 
+let outputChangeFile (sourcePath : string) = 
+    let pathToCss = @"..\..\..\..\..\libs\markdown-css-master\github.css"
+    changeFileReport pathToCss (outputDirectory ()) sourcePath
+
 
 let changeFileReport01 () = 
-    let pathToCss = @"..\..\..\..\..\libs\markdown-css-master\github.css"
     let sources = 
         System.IO.Directory.GetFiles( path = @"G:\work\Projects\assets\asset_patch\file_download_edm"
                                     , searchPattern = "*.txt")
-    Array.iter (changeFileReport pathToCss (outputDirectory ()) >> ignore) sources
+    Array.iter (outputChangeFile >> ignore) sources
+
+
+
 
 
 let tidyChangeFile01 () = 
