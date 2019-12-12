@@ -8,7 +8,7 @@ module Emitter =
 
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.CompilerMonad
-    open AssetPatch.TemplatePatcher.Hierarchy
+    open AssetPatch.TemplatePatcher.TemplateHierarchy
     open AssetPatch.TemplatePatcher.EmitEquipment
     open AssetPatch.TemplatePatcher.EmitFuncLoc
     

@@ -54,6 +54,10 @@ module CommonTypes =
         | DecimalValue d -> ""
         | TextValue s -> s
 
+
+    // ************************************************************************
+    // Other helpers
+
     let dateDefault : DateTime = 
         new DateTime(year = 1970, month = 1, day = 1)
        

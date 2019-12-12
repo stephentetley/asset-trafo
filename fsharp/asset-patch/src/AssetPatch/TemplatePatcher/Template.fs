@@ -13,7 +13,7 @@ module Template =
     open AssetPatch.Base.Common
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.CommonTypes
-    open AssetPatch.TemplatePatcher.Hierarchy
+    open AssetPatch.TemplatePatcher.TemplateHierarchy
     
     type Level = int
 

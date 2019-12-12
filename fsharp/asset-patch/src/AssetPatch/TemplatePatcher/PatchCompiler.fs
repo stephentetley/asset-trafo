@@ -12,7 +12,7 @@ module PatchCompiler =
     open AssetPatch.TemplatePatcher.Template
 
     open AssetPatch.Base.FuncLocPath 
-    open AssetPatch.TemplatePatcher.Hierarchy
+    open AssetPatch.TemplatePatcher.TemplateHierarchy
     open AssetPatch.TemplatePatcher.CompilerMonad   
     open AssetPatch.TemplatePatcher.EquiIndexing
     open AssetPatch.TemplatePatcher.EmitEquipment

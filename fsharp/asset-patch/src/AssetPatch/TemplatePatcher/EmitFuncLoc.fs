@@ -14,7 +14,7 @@ module EmitFuncLoc =
     open AssetPatch.TemplatePatcher.CompilerMonad
     open AssetPatch.TemplatePatcher.EquiIndexing
     open AssetPatch.TemplatePatcher.PatchTypes
-    open AssetPatch.TemplatePatcher.Hierarchy
+    open AssetPatch.TemplatePatcher.TemplateHierarchy
     open AssetPatch.TemplatePatcher.PatchWriter
     
     type ClassFlocInstances = 

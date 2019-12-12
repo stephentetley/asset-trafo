@@ -5,7 +5,7 @@ namespace AssetPatch.TemplatePatcher
 
 
 
-module Hierarchy =
+module TemplateHierarchy =
     
     open System
 

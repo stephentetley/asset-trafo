@@ -49,7 +49,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\TemplatePatcher\CommonTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchTypes.fs"
-#load "..\src\AssetPatch\TemplatePatcher\Hierarchy.fs"
+#load "..\src\AssetPatch\TemplatePatcher\TemplateHierarchy.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
 #load "..\src\AssetPatch\TemplatePatcher\CompilerMonad.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"

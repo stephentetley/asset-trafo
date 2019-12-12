@@ -18,7 +18,7 @@
     <Compile Include="AssetPatch\Utilities\TidyChangeFile.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\CommonTypes.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\PatchTypes.fs" />
-    <Compile Include="AssetPatch\TemplatePatcher\Hierarchy.fs" />
+    <Compile Include="AssetPatch\TemplatePatcher\TemplateHierarchy.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Template.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\CompilerMonad.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\EquiIndexing.fs" />
