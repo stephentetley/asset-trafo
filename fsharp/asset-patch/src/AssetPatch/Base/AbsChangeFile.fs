@@ -28,7 +28,7 @@ module AbsChangeFile =
     
     let ofChangeFile (changeFile : ChangeFile) : AbsChangeFile = 
         { Header = changeFile.Header 
-          Rows = changeFile.RowAssocs
+          Rows = changeFile.RowAssocs ()
         }
 
 

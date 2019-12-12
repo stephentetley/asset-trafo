@@ -141,14 +141,14 @@ module ChangeFile =
                 List.map (fun name -> x.ColumnIndex(name)) columns
 
         /// Return the rows as AssocLists pairing column name with value
-        member x.RowAssocs
-            with get () : AssocList<string,string> list= 
-                x.DataRows |> List.map (makeRowRecord x.HeaderRow)
+        /// (This is a thunk rather than a property as it may take some computing...)
+        member x.RowAssocs () : AssocList<string,string> list = 
+            x.DataRows |> List.map (makeRowRecord x.HeaderRow)
 
 
         /// Returns the first assoc row where the predicate matches
         member x.TryFindAssoc (projection : string -> string -> bool) : AssocList<string,string> option = 
-            x.RowAssocs |> List.tryFind (AssocList.tryFindKey projection >> Option.isSome)
+            x.RowAssocs () |> List.tryFind (AssocList.tryFindKey projection >> Option.isSome)
 
 
     
