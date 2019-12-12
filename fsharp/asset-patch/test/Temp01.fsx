@@ -26,8 +26,11 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\AbsChangeFile.fs"
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
+#load "..\src\AssetPatch\Base\FuncLocPath.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EquiIndexing2.fs"
 open AssetPatch.Base
 open AssetPatch.Base.Parser
+open AssetPatch.TemplatePatcher.EquiIndexing2
 
 type EquiIndex = 
     { Equi : uint32 
@@ -49,3 +52,7 @@ let demo01 () =
     readChangeFile @"G:\work\Projects\assets\asset_patch\samples\equi_sample_to_derive_indexing2.txt"
         |> Result.map (fun x -> x.RowAssocs () |> List.map extractEquiIndex |> List.choose id)
         |> Result.map (List.iter (printfn "%O"))
+
+let demo02 () = 
+    readEquiDownload @"G:\work\Projects\assets\asset_patch\samples\equi_sample_to_derive_indexing2.txt"
+   
