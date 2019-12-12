@@ -20,8 +20,8 @@ module EmitEquipment =
     
     
     type ClassEquiInstances = 
-        { ClassEquis : PatchClassEqui list
-          ValuaEquis : PatchValuaEqui list
+        { ClassEquis : CreateClassEqui list
+          ValuaEquis : CreateValuaEqui list
         }
         member x.IsEmpty 
             with get () : bool = 
@@ -36,15 +36,15 @@ module EmitEquipment =
 
 
     type EquiResult1 = 
-        { Equi : PatchEqui
-          ClassEquis : PatchClassEqui list
-          ValuaEquis : PatchValuaEqui list
+        { Equi : CreateEqui
+          ClassEquis : CreateClassEqui list
+          ValuaEquis : CreateValuaEqui list
         }
 
     type EquiResults = 
-        { Equis : PatchEqui list
-          ClassEquis : PatchClassEqui list
-          ValuaEquis : PatchValuaEqui list
+        { Equis : CreateEqui list
+          ClassEquis : CreateClassEqui list
+          ValuaEquis : CreateValuaEqui list
         }
         member x.IsEmpty 
             with get () : bool = 
@@ -69,7 +69,7 @@ module EmitEquipment =
 
     let characteristicToValuaEqui (interimId : string) 
                                     (count : int) 
-                                    (charac : S4Characteristic) : CompilerMonad<PatchValuaEqui> = 
+                                    (charac : S4Characteristic) : CompilerMonad<CreateValuaEqui> = 
         mreturn { 
             InterimId = interimId
             ClassType = IntegerString.OfString "002"
@@ -80,7 +80,7 @@ module EmitEquipment =
     
 
     let classToClassEqui (interimId : string)
-                         (clazz : S4Class) : CompilerMonad<PatchClassEqui> = 
+                         (clazz : S4Class) : CompilerMonad<CreateClassEqui> = 
         mreturn { 
             InterimId = interimId
             Class = clazz.ClassName
@@ -90,9 +90,9 @@ module EmitEquipment =
 
 
     let translateS4CharacteristicsEqui (equiNumber : string)
-                                        (characteristics : S4Characteristic list) : CompilerMonad<PatchValuaEqui list> =  
+                                        (characteristics : S4Characteristic list) : CompilerMonad<CreateValuaEqui list> =  
 
-        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<PatchValuaEqui list> = 
+        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<CreateValuaEqui list> = 
             foriM chars (fun i x -> characteristicToValuaEqui equiNumber (i+1) x)
 
         compile {
@@ -102,7 +102,7 @@ module EmitEquipment =
 
 
     let translateS4ClassEqui (interimId : string)
-                                   (clazz : S4Class) : CompilerMonad<PatchClassEqui * PatchValuaEqui list> = 
+                                   (clazz : S4Class) : CompilerMonad<CreateClassEqui * CreateValuaEqui list> = 
            compile {
                let! ce = classToClassEqui interimId clazz
                let! vs = translateS4CharacteristicsEqui interimId clazz.Characteristics
@@ -112,7 +112,7 @@ module EmitEquipment =
     
     let equipmentToEqui1 (funcLoc : FuncLocPath) 
                             (props : FuncLocProperties)
-                            (equipment : S4Equipment) : CompilerMonad<PatchEqui> = 
+                            (equipment : S4Equipment) : CompilerMonad<CreateEqui> = 
         let commonProps : CommonProperties = 
             { CompanyCode = props.CompanyCode 
               ControllingArea = props.ControllingArea 

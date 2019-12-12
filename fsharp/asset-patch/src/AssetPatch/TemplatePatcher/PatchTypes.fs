@@ -17,7 +17,7 @@ module PatchTypes =
     open AssetPatch.TemplatePatcher.CommonTypes
 
 
-    let makeAssocs (items : (string * string * string) list) : AssocList<string,string> = 
+    let private makeAssocs (items : (string * string * string) list) : AssocList<string,string> = 
         items |> List.map (fun (x,_,y) -> (x,y)) |> AssocList.ofList
 
 
@@ -50,7 +50,7 @@ module PatchTypes =
 
     /// Note - more params need to be added when we understand the data
     /// e.g CompanyCode, ControllingArea ...
-    type PatchFuncLoc = 
+    type CreateFuncLoc = 
       { Path : FuncLocPath
         InterimId : string option
         Description : string
@@ -65,7 +65,7 @@ module PatchTypes =
 
         
 
-    let funcLocToAssocs (funcLoc: PatchFuncLoc) : AssocList<string, string> = 
+    let funcLocToAssocs (funcLoc: CreateFuncLoc) : AssocList<string, string> = 
         let parent1 = 
             match funcLoc.Path |> parent with
             | None -> ""
@@ -113,7 +113,7 @@ module PatchTypes =
     // ClassFloc
 
 
-    type PatchClassFloc = 
+    type CreateClassFloc = 
       { FuncLoc : FuncLocPath
         InterimId : string option
         Class : string
@@ -121,7 +121,7 @@ module PatchTypes =
       }
 
 
-    let classFlocToAssocs (classFloc: PatchClassFloc) : AssocList<string, string> = 
+    let classFlocToAssocs (classFloc: CreateClassFloc) : AssocList<string, string> = 
         let floc = 
             match classFloc.InterimId with
             | None -> classFloc.FuncLoc.ToString()
@@ -137,7 +137,7 @@ module PatchTypes =
     // ************************************************************************
     // ValuaFloc
 
-    type PatchValuaFloc = 
+    type CreateValuaFloc = 
       { FuncLoc : FuncLocPath
         InterimId : string option
         ClassType : IntegerString
@@ -149,7 +149,7 @@ module PatchTypes =
 
     /// Note - Numeric values print TEXTBEZ and ATFLV
     /// textual values print ATWRT and TEXTBEZ
-    let valuaFlocToAssocs (valua: PatchValuaFloc) : AssocList<string, string> =  
+    let valuaFlocToAssocs (valua: CreateValuaFloc) : AssocList<string, string> =  
         let floc = 
             match valua.InterimId with
             | None -> valua.FuncLoc.ToString()
@@ -172,7 +172,7 @@ module PatchTypes =
     // Equi
 
 
-    type PatchEqui = 
+    type CreateEqui = 
       { InterimId : string     // This is not a valid S4 EQUI code
         Description : string
         FuncLoc : FuncLocPath
@@ -190,7 +190,7 @@ module PatchTypes =
       }
 
     /// Note - do not write EQUI to file.
-    let equiToAssocs (equi : PatchEqui) : AssocList<string, string> =         
+    let equiToAssocs (equi : CreateEqui) : AssocList<string, string> =         
         makeAssocs
             // [ ("ABCK_EILO",     "ABC Indicator",                    "") 
             // ; ("GSBE_EILO",     "Business Area",                    "")
@@ -231,13 +231,13 @@ module PatchTypes =
     
 
 
-    type PatchClassEqui = 
+    type CreateClassEqui = 
         { InterimId : string
           Class : string
           Status : int
         }
 
-    let classEquiToAssocs (classEqui : PatchClassEqui) : AssocList<string, string> = 
+    let classEquiToAssocs (classEqui : CreateClassEqui) : AssocList<string, string> = 
         makeAssocs
             [ ("EQUI",          "Equipment",                classEqui.InterimId)
             ; ("CLASS",         "Class",                    classEqui.Class)
@@ -252,7 +252,7 @@ module PatchTypes =
 
     /// ValueCount is the number of instances for this charcteristic 
     /// in a class.
-    type PatchValuaEqui = 
+    type CreateValuaEqui = 
         { InterimId : string
           ClassType : IntegerString
           CharacteristicID : string
@@ -262,7 +262,7 @@ module PatchTypes =
     
 
     /// Note - CharacteristicValue is used twice.
-    let valuaEquiToAssocs (valua : PatchValuaEqui) : AssocList<string, string> = 
+    let valuaEquiToAssocs (valua : CreateValuaEqui) : AssocList<string, string> = 
         makeAssocs
             [ ("EQUI",          "Equipment",                valua.InterimId)
             ; ("CLASSTYPE",     "Class Type",               valua.ClassType.Number)

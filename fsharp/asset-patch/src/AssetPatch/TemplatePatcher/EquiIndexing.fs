@@ -52,14 +52,14 @@ module EquiIndexing =
                 ]                
             ]
 
-    let getPatchFuncLocIndexingRow (floc : PatchFuncLoc) : IndexingRow = 
+    let getPatchFuncLocIndexingRow (floc : CreateFuncLoc) : IndexingRow = 
         { Floc = floc.Path
           Description = floc.Description
           APIdent = Option.defaultValue "" floc.InterimId
           S4Ident = ()
         }
 
-    let getPatchEquiIndexingRow (equi : PatchEqui) : IndexingRow = 
+    let getPatchEquiIndexingRow (equi : CreateEqui) : IndexingRow = 
         { Floc = equi.FuncLoc
           Description = equi.Description
           APIdent = equi.InterimId
@@ -69,7 +69,7 @@ module EquiIndexing =
 
 
     let writeEquiIndexingSheet (outputPath : string)
-                                    (rows : PatchEqui list) : CompilerMonad<unit> =
+                                    (rows : CreateEqui list) : CompilerMonad<unit> =
         compile {        
             let doc = rows |> List.map getPatchEquiIndexingRow |> makeOutput
             do! liftAction (fun () -> renderSpreadSheetDoc doc outputPath)
@@ -77,7 +77,7 @@ module EquiIndexing =
         }
 
     let writeFlocIndexingSheet (outputPath : string)
-                                (rows : PatchFuncLoc list) : CompilerMonad<unit> =
+                                (rows : CreateFuncLoc list) : CompilerMonad<unit> =
         compile {        
             let doc = rows |> List.map getPatchFuncLocIndexingRow |> makeOutput
             do! liftAction (fun () -> renderSpreadSheetDoc doc outputPath)

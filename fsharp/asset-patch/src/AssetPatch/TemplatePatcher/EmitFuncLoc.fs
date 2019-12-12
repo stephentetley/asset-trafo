@@ -18,8 +18,8 @@ module EmitFuncLoc =
     open AssetPatch.TemplatePatcher.PatchWriter
     
     type ClassFlocInstances = 
-        { ClassFlocs : PatchClassFloc list
-          ValuaFlocs : PatchValuaFloc list
+        { ClassFlocs : CreateClassFloc list
+          ValuaFlocs : CreateValuaFloc list
         }
         member x.IsEmpty 
             with get () : bool = 
@@ -33,15 +33,15 @@ module EmitFuncLoc =
         List.foldBack add source { ClassFlocs = []; ValuaFlocs = [] }
 
     type FuncLocResult1 = 
-        { FuncLoc : PatchFuncLoc
-          ClassFlocs : PatchClassFloc list
-          ValuaFlocs : PatchValuaFloc list
+        { FuncLoc : CreateFuncLoc
+          ClassFlocs : CreateClassFloc list
+          ValuaFlocs : CreateValuaFloc list
         }
 
     type FuncLocResults = 
-        { FuncLocs : PatchFuncLoc list
-          ClassFlocs : PatchClassFloc list
-          ValuaFlocs : PatchValuaFloc list
+        { FuncLocs : CreateFuncLoc list
+          ClassFlocs : CreateClassFloc list
+          ValuaFlocs : CreateValuaFloc list
         }
         member x.IsEmpty 
             with get () : bool = 
@@ -59,7 +59,7 @@ module EmitFuncLoc =
     let characteristicToValuaFloc (funcLoc : FuncLocPath)
                                     (interimId : string option)
                                     (count : int) 
-                                    (charac : S4Characteristic) : CompilerMonad<PatchValuaFloc> = 
+                                    (charac : S4Characteristic) : CompilerMonad<CreateValuaFloc> = 
         mreturn {   
             FuncLoc = funcLoc
             InterimId = interimId
@@ -73,7 +73,7 @@ module EmitFuncLoc =
 
     let classToClassFloc (funcLoc : FuncLocPath)  
                             (interimId : string option) 
-                            (clazz : S4Class) : CompilerMonad<PatchClassFloc> = 
+                            (clazz : S4Class) : CompilerMonad<CreateClassFloc> = 
         mreturn { 
             FuncLoc = funcLoc
             InterimId = interimId
@@ -86,9 +86,9 @@ module EmitFuncLoc =
 
     let translateS4CharacteristicsFloc (flocPath : FuncLocPath)
                                         (interimId : string option)
-                                        (characteristics : S4Characteristic list) : CompilerMonad<PatchValuaFloc list> =  
+                                        (characteristics : S4Characteristic list) : CompilerMonad<CreateValuaFloc list> =  
 
-        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<PatchValuaFloc list> = 
+        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<CreateValuaFloc list> = 
             foriM chars (fun i x -> characteristicToValuaFloc flocPath interimId (i+1) x)
 
         compile {
@@ -99,7 +99,7 @@ module EmitFuncLoc =
   
     let translateS4ClassFloc (flocPath : FuncLocPath)
                                 (interimId : string option)
-                                (clazz : S4Class) : CompilerMonad<PatchClassFloc * PatchValuaFloc list> = 
+                                (clazz : S4Class) : CompilerMonad<CreateClassFloc * CreateValuaFloc list> = 
         compile {
             let! ce = classToClassFloc flocPath interimId clazz
             let! vs = translateS4CharacteristicsFloc flocPath interimId clazz.Characteristics
@@ -113,7 +113,7 @@ module EmitFuncLoc =
                     (props : FuncLocProperties)
                     (interimId : string option)
                     (description : string) 
-                    (objectType : string)  : CompilerMonad<PatchFuncLoc> = 
+                    (objectType : string)  : CompilerMonad<CreateFuncLoc> = 
         let commonProps : CommonProperties = 
             { ControllingArea = props.ControllingArea
               CompanyCode = props.CompanyCode
