@@ -219,13 +219,13 @@ module Template =
     
 
 
-    let private getEquipmentIndex (description : string) : Template<uint32> = 
+    let private getEquipmentIndex (description : string) : Template<uint32 option> = 
         Template <| fun env -> 
             let floc = env.CurrentFloc
             let indices = env.EquipmentIndices
             match tryFindEquiNum description floc indices with
-            | Some num -> Ok (Some num)
-            | None -> Error (sprintf "No equipment found for %s '%s'" (floc.ToString()) description) 
+            | Some num -> Ok (Some (Some num))
+            | None -> Ok (Some None)
     
 
     let _equipment (description : string) 

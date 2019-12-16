@@ -49,10 +49,10 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\TemplatePatcher\CommonTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchTypes.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 #load "..\src\AssetPatch\TemplatePatcher\TemplateHierarchy.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
 #load "..\src\AssetPatch\TemplatePatcher\CompilerMonad.fs"
-#load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchWriter.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitEquipment.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitFuncLoc.fs"
@@ -84,13 +84,10 @@ let options : EdcOptions =
 let main01 () = 
     runEdcPatcherPhase1 options 
 
-// Materializing interim ids...
 
-let main02 (dirname : string) = 
-    runEdcPatcherPhase2 options (outputDirectory dirname)
-
-let main03 (dirname : string) = 
-    runEdcPatcherPhase3 options (outputDirectory dirname)
+// Generate ClassEqui and ValuaEqui files...
+let main02 (equiFile : string) (dirname : string) = 
+    runEdcPatcherPhase2 options equiFile (outputDirectory dirname) 
 
 
 

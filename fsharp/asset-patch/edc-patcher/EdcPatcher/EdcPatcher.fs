@@ -33,9 +33,9 @@ module EdcPatcher =
             Directory.CreateDirectory(dirName) |> ignore
         else ()
     
-    let runEdcPatcherPhase1 (opts : EdcOptions) = 
+    let runEdcPatcherPhase1 (opts : EdcOptions) : Result<unit, string> = 
         let compilerOpts : CompilerOptions = makeCompilerOptions opts           
-        runCompiler compilerOpts
+        runCompiler compilerOpts None
             (compile { 
                 let! worklist = 
                     readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
@@ -49,13 +49,11 @@ module EdcPatcher =
             })
 
     /// Phase 2 materializes Floc patches
-    let runEdcPatcherPhase2 (opts : EdcOptions) (targetFolder : string) = 
+    let runEdcPatcherPhase2 (opts : EdcOptions) 
+                            (equipmentDownloadPath : string) 
+                            (targetFolder : string) : Result<unit, string> = 
         let compilerOpts : CompilerOptions = makeCompilerOptions opts  
-        runCompiler compilerOpts
-            <| materializeFlocClassValuaPatches targetFolder
+        runCompiler compilerOpts (Some equipmentDownloadPath)
+            <| mreturn ()
 
-    /// Phase 3 materializes Equi patches
-    let runEdcPatcherPhase3 (opts : EdcOptions) (targetFolder : string) = 
-        let compilerOpts : CompilerOptions = makeCompilerOptions opts  
-        runCompiler compilerOpts 
-            <| materializeEquiClassValuaPatches targetFolder
+    

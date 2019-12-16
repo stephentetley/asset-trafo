@@ -34,7 +34,7 @@ module TemplateHierarchy =
 
 
     type S4Equipment = 
-        { EquipmentId : uint32
+        { EquipmentId : uint32 option
           Description : string       
           Category : string
           ObjectType : string
