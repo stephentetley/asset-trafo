@@ -117,13 +117,13 @@ module Printer =
     // ************************************************************************
     // Variant 'receipt'
 
-    let descriptiveHeaderLines (entityType : EntityType) 
+    let private descriptiveHeaderLines (entityType : EntityType) 
                                 (headers : HeaderRow) : Doc = 
         let decode = decodeAcronym entityType >> Option.defaultValue ""
         let titles = headers.Columns |> List.map  (decode >> text)
         vcat titles
 
-    let writeReceipt (outpath : string) (changeFile : ChangeFile) : unit = 
+    let writeVariantHeaders (outpath : string) (changeFile : ChangeFile) : unit = 
         let text = 
             text "# Variant headings"
                 ^!^ descriptiveHeaderLines changeFile.Header.EntityType changeFile.HeaderRow
@@ -132,9 +132,9 @@ module Printer =
 
 
 
-    let writePatchAndMetadata (outpath : string) 
-                              (changeFile : ChangeFile) : unit = 
+    let writePatchAndVariantHeaders (outpath : string) 
+                                    (changeFile : ChangeFile) : unit = 
         let name1 = IO.Path.GetFileNameWithoutExtension(outpath) + ".variant.txt"
         let variantPath = IO.Path.Combine(IO.Path.GetDirectoryName(outpath), name1)        
-        writeReceipt variantPath changeFile
+        writeVariantHeaders variantPath changeFile
         writeChangeFile outpath changeFile

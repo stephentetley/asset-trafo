@@ -34,8 +34,8 @@ module TemplateHierarchy =
 
 
     type S4Equipment = 
-        { Description : string
-          InterimId : string          
+        { EquipmentId : uint32
+          Description : string       
           Category : string
           ObjectType : string
           Manufacturer : string option
@@ -61,7 +61,6 @@ module TemplateHierarchy =
     
     type S4Component = 
         { FuncLoc : FuncLocPath
-          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -72,7 +71,6 @@ module TemplateHierarchy =
 
     type S4Item = 
         { FuncLoc : FuncLocPath
-          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -84,7 +82,6 @@ module TemplateHierarchy =
 
     type S4Assembly = 
         { FuncLoc : FuncLocPath
-          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -94,8 +91,7 @@ module TemplateHierarchy =
         }
 
     type S4System = 
-        { FuncLoc : FuncLocPath        
-          InterimId : string option
+        { FuncLoc : FuncLocPath
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -106,7 +102,6 @@ module TemplateHierarchy =
 
     type S4Process = 
         { FuncLoc : FuncLocPath
-          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -116,7 +111,6 @@ module TemplateHierarchy =
 
     type S4ProcessGroup = 
         { FuncLoc : FuncLocPath
-          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -126,7 +120,6 @@ module TemplateHierarchy =
 
     type S4Function = 
         { FuncLoc : FuncLocPath
-          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string
@@ -136,7 +129,6 @@ module TemplateHierarchy =
 
     type S4Site = 
         { FuncLoc : FuncLocPath
-          InterimId : string option
           FlocProperties : FuncLocProperties
           Description : string
           ObjectType : string

@@ -36,47 +36,6 @@ module PatchCompiler =
 
 
 
-
-
-    type EquipmentNumber = string
-
-    type ClassEquiWorkList<'hole> = (EquipmentNumber * 'hole) list
-
-    /// Generate Class and Char patches to update existing equipment.
-    let compileClassEquiValuaEquiPatches (outputDirectory : string)
-                                            (level : int)
-                                            (filePrefix : string)
-                                            (template : Class1<'hole>)
-                                            (worklist : ClassEquiWorkList<'hole>) : CompilerMonad<unit> = 
-        compile {
-            let! worklist1 = applyTemplate (FuncLocPath.Create("*****")) worklist template
-            let! results = 
-                forM worklist1 (fun (number, klass) -> equipmentToEquiProperties number [klass])
-                    |>> collectClassEquiInstances
-            do! writeEquiProperties outputDirectory level filePrefix results
-            return ()
-        }
-
-
-    type ClassFlocWorkList<'hole> = (FuncLocPath * 'hole) list
-
-
-    /// Generate Class and Char patches to update existing equipment.
-    let compileClassFlocValuaFlocPatches (outputDirectory : string)
-                                            (level : int)
-                                            (filePrefix : string)
-                                            (template : Class1<'hole>)
-                                            (worklist : ClassFlocWorkList<'hole>) : CompilerMonad<unit> = 
-        compile {
-            let! worklist1 = applyTemplate (FuncLocPath.Create("*****")) worklist template
-            let! results = 
-                forM worklist1 (fun (path, klass) -> funclocToClassFlocInstances path None [klass])
-                    |>> collectClassFlocInstances
-            do! writeFlocProperties outputDirectory level filePrefix results
-            return ()
-        }
-
-
     // ************************************************************************
     // Compile hierarchy patches...
 
@@ -86,26 +45,26 @@ module PatchCompiler =
 
 
 
-    let private recWriteComponents (outputDirectory : string)
-                                        (filePrefix : string)
-                                        (worklist : S4Component list) : CompilerMonad<unit> = 
+    let private writeComponentsPhase1 (outputDirectory : string)
+                                         (filePrefix : string)
+                                         (worklist : S4Component list) : CompilerMonad<unit> = 
         compile {
-            let! (fresults, eresults) = componentsEmit worklist
-            do! writeFlocResults outputDirectory 8 filePrefix fresults
-            do! writeEquiResults outputDirectory 8 filePrefix eresults
+            let! ans = componentsEmitPhase1 worklist
+            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         } 
 
     type ComponentWorkList<'hole> = (FuncLocPath * 'hole) list
 
     /// Generate patches for new level 8 components and their subordinate equipment
-    let compileComponentPatches (outputDirectory : string)
+    let compileComponentsPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (template : Component1<'hole>)
                                 (worklist : ComponentWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! recWriteComponents outputDirectory filePrefix worklist
+            do! writeComponentsPhase1 outputDirectory filePrefix worklist
             return ()
         }                                                
 
@@ -113,28 +72,26 @@ module PatchCompiler =
     // Items
 
 
-    let private recWriteItems (outputDirectory : string)
+    let private writeItemsPhase1 (outputDirectory : string)
                                     (filePrefix : string)
                                     (worklist : S4Item list) : CompilerMonad<unit> = 
         compile {
-            let! (fresults, eresults) = itemsEmit worklist
-            do! writeFlocResults outputDirectory 7 filePrefix fresults
-            do! writeEquiResults outputDirectory 7 filePrefix eresults
-            let components = worklist |> List.map (fun x -> x.Components) |> List.concat
-            do! recWriteComponents outputDirectory filePrefix components
+            let! ans = itemsEmitPhase1 worklist
+            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         } 
 
     type ItemWorkList<'hole> = (FuncLocPath * 'hole) list
 
     /// Generate patches for new level 7 items and their subordinates
-    let compileItemPatches (outputDirectory : string)
+    let compileItemsPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (template : Item1<'hole>)
                                 (worklist : ItemWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! recWriteItems outputDirectory filePrefix worklist
+            do! writeItemsPhase1 outputDirectory filePrefix worklist
             return ()
         }  
 
@@ -142,28 +99,27 @@ module PatchCompiler =
     // Assembly
 
 
-    let private recWriteAssemblies (outputDirectory : string)
+    let private writeAssembliesPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (worklist : S4Assembly list) : CompilerMonad<unit> = 
         compile {
-            let! (fresults, eresults) = assembliesEmit worklist
-            do! writeFlocResults outputDirectory 6 filePrefix fresults
-            do! writeEquiResults outputDirectory 6 filePrefix eresults
-            let items = worklist |> List.map (fun x -> x.Items) |> List.concat
-            do! recWriteItems outputDirectory filePrefix items
+            let! ans = assembliesEmitPhase1 worklist
+            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
+        
         } 
 
     type AssemblyWorkList<'hole> = (FuncLocPath * 'hole) list
 
     /// Generate patches for new level 6 assemblies and their subordinates
-    let compileAssemblyPatches (outputDirectory : string)
+    let compileAssembliesPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (template : Assembly1<'hole>)
                                 (worklist : AssemblyWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! recWriteAssemblies outputDirectory filePrefix worklist
+            do! writeAssembliesPhase1 outputDirectory filePrefix worklist
             return ()
         }  
 
@@ -172,28 +128,26 @@ module PatchCompiler =
     // System
 
 
-    let private recWriteSystems (outputDirectory : string)
+    let private writeSystemsPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (worklist : S4System list) : CompilerMonad<unit> = 
         compile {
-            let! (fresults, eresults) = systemsEmit worklist
-            do! writeFlocResults outputDirectory 5 filePrefix fresults
-            do! writeEquiResults outputDirectory 5 filePrefix eresults            
-            let assemblies = worklist |> List.map (fun x -> x.Assemblies) |> List.concat
-            do! recWriteAssemblies outputDirectory filePrefix assemblies
+            let! ans = systemsEmitPhase1 worklist
+            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
-        } 
+        }
 
     type SystemWorkList<'hole> = (FuncLocPath * 'hole) list
 
     /// Generate patches for new level 5 systems and their subordinates
-    let compileSystemPatches (outputDirectory : string)
+    let compileSystemsPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (template : System1<'hole>)
                                 (worklist : SystemWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! recWriteSystems outputDirectory filePrefix worklist
+            do! writeSystemsPhase1 outputDirectory filePrefix worklist
             return ()
         }
     
@@ -202,27 +156,26 @@ module PatchCompiler =
     // Process
 
 
-    let private recWriteProcesses (outputDirectory : string)
+    let private writeProcessesPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (worklist : S4Process list) : CompilerMonad<unit> = 
         compile {
-            let! fresults = processesEmit worklist
-            do! writeFlocResults outputDirectory 4 filePrefix fresults            
-            let systems = worklist |> List.map (fun x -> x.Systems) |> List.concat
-            do! recWriteSystems outputDirectory filePrefix systems
+            let! ans = processesEmitPhase1 worklist
+            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         } 
 
     type ProcessWorkList<'hole> = (FuncLocPath * 'hole) list
 
     /// Generate patches for new level 4 processes and their subordinates
-    let compileProcessPatches (outputDirectory : string)
+    let compileProcessesPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (template : Process1<'hole>)
                                 (worklist : ProcessWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! recWriteProcesses outputDirectory filePrefix worklist
+            do! writeProcessesPhase1 outputDirectory filePrefix worklist
             return ()
         }
 
@@ -231,27 +184,26 @@ module PatchCompiler =
     // ProcessGroups
 
 
-    let private recWriteProcessGroups (outputDirectory : string)
+    let private writeProcessGroupsPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (worklist : S4ProcessGroup list) : CompilerMonad<unit> = 
         compile {
-            let! fresults = processGroupsEmit worklist
-            do! writeFlocResults outputDirectory 3 filePrefix fresults
-            let processes = worklist |> List.map (fun x -> x.Processes) |> List.concat
-            do! recWriteProcesses outputDirectory filePrefix processes
+            let! ans = processGroupsEmitPhase1 worklist
+            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
-        } 
+        }
 
     type ProcessGroupWorkList<'hole> = (FuncLocPath * 'hole) list
 
     /// Generate patches for new level 3 process groups and their subordinates
-    let compileProcessGroupPatches (outputDirectory : string)
+    let compileProcessGroupsPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (template : ProcessGroup1<'hole>)
                                 (worklist : ProcessGroupWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! recWriteProcessGroups outputDirectory filePrefix worklist
+            do! writeProcessGroupsPhase1 outputDirectory filePrefix worklist
             return ()
         }
 
@@ -259,14 +211,13 @@ module PatchCompiler =
     // Functions
 
 
-    let private recWriteFunctions (outputDirectory : string)
+    let private writeFunctionsPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (worklist : S4Function list) : CompilerMonad<unit> = 
         compile {
-            let! fresults = functionsEmit worklist
-            do! writeFlocResults outputDirectory 2 filePrefix fresults
-            let processGroups = worklist |> List.map (fun x -> x.ProcessGroups) |> List.concat
-            do! recWriteProcessGroups outputDirectory filePrefix processGroups
+            let! ans = functionsEmitPhase1 worklist
+            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         } 
 
@@ -279,7 +230,7 @@ module PatchCompiler =
                                 (worklist : FunctionWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! recWriteFunctions outputDirectory filePrefix worklist
+            do! writeFunctionsPhase1 outputDirectory filePrefix worklist
             return ()
         }
 
@@ -287,14 +238,13 @@ module PatchCompiler =
     // Sites
 
 
-    let private recWriteSites (outputDirectory : string)
+    let private writeSitesPhase1 (outputDirectory : string)
                             (filePrefix : string)
                             (worklist : S4Site list) : CompilerMonad<unit> = 
         compile {
-            let! fresults = sitesEmit worklist
-            do! writeFlocResults outputDirectory 1 filePrefix fresults
-            let functions = worklist |> List.map (fun x -> x.Functions) |> List.concat
-            do! recWriteFunctions outputDirectory filePrefix functions
+            let! ans = sitesEmitPhase1 worklist
+            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         } 
 
@@ -307,33 +257,7 @@ module PatchCompiler =
                                 (worklist : SiteWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
-            do! recWriteSites outputDirectory filePrefix worklist
+            do! writeSitesPhase1 outputDirectory filePrefix worklist
             return ()
         }
 
-    // ************************************************************************
-    // EquiIndexing...
-
-
-    /// Run 'find and replace' on the ClassFloc and ValuaFloc patches
-    let materializeClassValuaPatches (targetDirectory : string) 
-                                            (indexFile : string) 
-                                            (extensionPattern : string) : CompilerMonad<unit> = 
-        let xlsxFile = Path.Combine(targetDirectory, indexFile)
-        if File.Exists(xlsxFile) then
-            compile {            
-                let! substs = readEquiIndexingSheet xlsxFile
-                let sources = Directory.GetFiles(path = targetDirectory, searchPattern = extensionPattern) |> List.ofArray
-                do! mapMz (materializeInterimFile substs) sources
-                return ()
-            }
-        else mreturn ()
-
-
-    /// Run 'find and replace' on the ClassFloc and ValuaFloc patches
-    let materializeFlocClassValuaPatches (targetDirectory : string) : CompilerMonad<unit> = 
-        materializeClassValuaPatches targetDirectory "FlocIndexing.xlsx" "*.floc"
-
-    /// Run 'find and replace' on the ClassEqui and ValuaEqui patches
-    let materializeEquiClassValuaPatches (targetDirectory : string) : CompilerMonad<unit> = 
-        materializeClassValuaPatches targetDirectory "EquiIndexing.xlsx" "*.equi"

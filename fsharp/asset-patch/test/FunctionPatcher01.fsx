@@ -50,9 +50,9 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\CommonTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\TemplateHierarchy.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
 #load "..\src\AssetPatch\TemplatePatcher\CompilerMonad.fs"
-#load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchWriter.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitEquipment.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitFuncLoc.fs"
@@ -134,7 +134,7 @@ let test01 () =
         { UserName = "TETLEYS"
           UseInterimFlocIds = false
         }
-    runCompiler opts
+    runCompiler opts None
        <| compileFunctionPatches 
                    (outputDirectory "edg-patches")
                    "env_discharge"
@@ -205,19 +205,19 @@ let test02 () =
         { UserName = "TETLEYS"
           UseInterimFlocIds = false
         }
-    runCompiler opts
-       <| compileSitePatches 
+    runCompiler opts None
+       <| compileSitePatches
                    (outputDirectory "caa-patches")
                    "control_automation"
                    caaTemplate
                    worklist
 
 
-let test02b () = 
-    let opts : CompilerOptions = 
-        { UserName = "TETLEYS"
-          UseInterimFlocIds = false
-        }
-    runCompiler opts
-       <| materializeEquiClassValuaPatches (outputDirectory "caa-patches")
+//let test02b () = 
+//    let opts : CompilerOptions = 
+//        { UserName = "TETLEYS"
+//          UseInterimFlocIds = false
+//        }
+//    runCompiler opts
+//       <| materializeEquiClassValuaPatches (outputDirectory "caa-patches")
 

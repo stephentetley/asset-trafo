@@ -51,9 +51,9 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\CommonTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchTypes.fs"
 #load "..\src\AssetPatch\TemplatePatcher\TemplateHierarchy.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
 #load "..\src\AssetPatch\TemplatePatcher\CompilerMonad.fs"
-#load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchWriter.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitEquipment.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitFuncLoc.fs"
@@ -87,23 +87,23 @@ let assetConditionTemplate : Class1<uint32> = fun year ->
         ]
 
    
-let test01 () : Result<unit, ErrMsg> = 
-    let worklist : (string * uint32) list= 
-        [ ("101001407", 2019u)
-        ; ("101001409", 2019u)
-        ]
+//let test01 () : Result<unit, ErrMsg> = 
+//    let worklist : (string * uint32) list= 
+//        [ ("101001407", 2019u)
+//        ; ("101001409", 2019u)
+//        ]
 
-    let opts : CompilerOptions = 
-        { UserName = "TETLEYS"
-          UseInterimFlocIds = false
-        }
-    runCompiler opts
-        <| compileClassEquiValuaEquiPatches 
-                    (outputDirectory ())
-                    5
-                    "asset_condition"
-                    assetConditionTemplate
-                    worklist
+//    let opts : CompilerOptions = 
+//        { UserName = "TETLEYS"
+//          UseInterimFlocIds = false
+//        }
+//    runCompiler opts
+//        <| compileClassEquiValuaEquiPatches 
+//                    (outputDirectory ())
+//                    5
+//                    "asset_condition"
+//                    assetConditionTemplate
+//                    worklist
 
 
 
@@ -113,21 +113,21 @@ let aibReferenceTemplate : Class1<string> = fun sai ->
           s4_aib_reference ()
         ]
 
-let test02 () = 
-    let worklist = 
-        [ ("KRI03-EDC", "SAI00970234")
-        ] 
-        |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
+//let test02 () = 
+//    let worklist = 
+//        [ ("KRI03-EDC", "SAI00970234")
+//        ] 
+//        |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
 
-    let opts : CompilerOptions = 
-        { UserName = "TETLEYS"
-          UseInterimFlocIds = false
-        }
-    runCompiler opts
-       <| compileClassFlocValuaFlocPatches 
-                   (outputDirectory ())
-                   5
-                   "aib_reference"
-                   aibReferenceTemplate
-                   worklist
+//    let opts : CompilerOptions = 
+//        { UserName = "TETLEYS"
+//          UseInterimFlocIds = false
+//        }
+//    runCompiler opts None
+//       <| compileClassFlocValuaFlocPatches 
+//                   (outputDirectory ())
+//                   5
+//                   "aib_reference"
+//                   aibReferenceTemplate
+//                   worklist
 

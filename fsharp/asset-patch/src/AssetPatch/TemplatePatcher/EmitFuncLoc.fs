@@ -17,38 +17,44 @@ module EmitFuncLoc =
     open AssetPatch.TemplatePatcher.TemplateHierarchy
     open AssetPatch.TemplatePatcher.PatchWriter
     
-    type ClassFlocInstances = 
-        { ClassFlocs : CreateClassFloc list
-          ValuaFlocs : CreateValuaFloc list
+    type NewFlocProperties = 
+        { ClassFlocs : NewClassFloc list
+          ValuaFlocs : NewValuaFloc list
         }
         member x.IsEmpty 
             with get () : bool = 
                 x.ClassFlocs.IsEmpty && x.ValuaFlocs.IsEmpty
 
-    let collectClassFlocInstances (source : ClassFlocInstances list) : ClassFlocInstances = 
-        let add (r1 : ClassFlocInstances) (acc : ClassFlocInstances) = 
+    let private concatNewFlocProperties (source : NewFlocProperties list) : NewFlocProperties = 
+        let add (r1 : NewFlocProperties) (acc : NewFlocProperties) = 
             { ClassFlocs = r1.ClassFlocs @ acc.ClassFlocs
               ValuaFlocs = r1.ValuaFlocs @ acc.ValuaFlocs
             }
         List.foldBack add source { ClassFlocs = []; ValuaFlocs = [] }
 
     type FuncLocResult1 = 
-        { FuncLoc : CreateFuncLoc
-          ClassFlocs : CreateClassFloc list
-          ValuaFlocs : CreateValuaFloc list
+        { FuncLoc : NewFuncLoc
+          ClassFlocs : NewClassFloc list
+          ValuaFlocs : NewValuaFloc list
         }
 
-    type FuncLocResults = 
-        { FuncLocs : CreateFuncLoc list
-          ClassFlocs : CreateClassFloc list
-          ValuaFlocs : CreateValuaFloc list
+    type Phase1FlocData = 
+        { FuncLocs : NewFuncLoc list
+          ClassFlocs : NewClassFloc list
+          ValuaFlocs : NewValuaFloc list
         }
         member x.IsEmpty 
             with get () : bool = 
                 x.FuncLocs.IsEmpty &&  x.ClassFlocs.IsEmpty && x.ValuaFlocs.IsEmpty
 
-    let collectFuncLocResults (source : FuncLocResult1 list) : FuncLocResults = 
-        let add (r1 : FuncLocResult1) (acc : FuncLocResults) = 
+    let concatPhase1FlocData (source : Phase1FlocData list) : Phase1FlocData = 
+        { FuncLocs = source |> List.map (fun x -> x.FuncLocs) |> List.concat
+          ClassFlocs = source |> List.map (fun x -> x.ClassFlocs) |> List.concat
+          ValuaFlocs = source |> List.map (fun x -> x.ValuaFlocs) |> List.concat
+        }
+
+    let concatFuncLocResult1s (source : FuncLocResult1 list) : Phase1FlocData = 
+        let add (r1 : FuncLocResult1) (acc : Phase1FlocData) = 
             { FuncLocs = r1.FuncLoc :: acc.FuncLocs
               ClassFlocs = r1.ClassFlocs @ acc.ClassFlocs
               ValuaFlocs = r1.ValuaFlocs @ acc.ValuaFlocs
@@ -56,13 +62,11 @@ module EmitFuncLoc =
         List.foldBack add source { FuncLocs = []; ClassFlocs = []; ValuaFlocs = [] }
 
 
-    let characteristicToValuaFloc (funcLoc : FuncLocPath)
-                                    (interimId : string option)
+    let characteristicToNewValuaFloc (funcLoc : FuncLocPath)
                                     (count : int) 
-                                    (charac : S4Characteristic) : CompilerMonad<CreateValuaFloc> = 
+                                    (charac : S4Characteristic) : CompilerMonad<NewValuaFloc> = 
         mreturn {   
             FuncLoc = funcLoc
-            InterimId = interimId
             ClassType = IntegerString.OfString "003"
             CharacteristicID = charac.Name
             ValueCount = count
@@ -71,25 +75,20 @@ module EmitFuncLoc =
 
     
 
-    let classToClassFloc (funcLoc : FuncLocPath)  
-                            (interimId : string option) 
-                            (clazz : S4Class) : CompilerMonad<CreateClassFloc> = 
+    let classToNewClassFloc (funcLoc : FuncLocPath)  
+                            (clazz : S4Class) : CompilerMonad<NewClassFloc> = 
         mreturn { 
             FuncLoc = funcLoc
-            InterimId = interimId
             Class = clazz.ClassName
             Status = 1
         }
 
 
+    let private characteristicsToNewValuaFlocs (flocPath : FuncLocPath)
+                                        (characteristics : S4Characteristic list) : CompilerMonad<NewValuaFloc list> =  
 
-
-    let translateS4CharacteristicsFloc (flocPath : FuncLocPath)
-                                        (interimId : string option)
-                                        (characteristics : S4Characteristic list) : CompilerMonad<CreateValuaFloc list> =  
-
-        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<CreateValuaFloc list> = 
-            foriM chars (fun i x -> characteristicToValuaFloc flocPath interimId (i+1) x)
+        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<NewValuaFloc list> = 
+            foriM chars (fun i x -> characteristicToNewValuaFloc flocPath (i+1) x)
 
         compile {
             let chars = sortedCharacteristics characteristics
@@ -97,12 +96,11 @@ module EmitFuncLoc =
         }
 
   
-    let translateS4ClassFloc (flocPath : FuncLocPath)
-                                (interimId : string option)
-                                (clazz : S4Class) : CompilerMonad<CreateClassFloc * CreateValuaFloc list> = 
+    let private classToProperties  (flocPath : FuncLocPath)
+                                    (clazz : S4Class) : CompilerMonad<NewClassFloc * NewValuaFloc list> = 
         compile {
-            let! ce = classToClassFloc flocPath interimId clazz
-            let! vs = translateS4CharacteristicsFloc flocPath interimId clazz.Characteristics
+            let! ce = classToNewClassFloc flocPath clazz
+            let! vs = characteristicsToNewValuaFlocs flocPath clazz.Characteristics
             return (ce, vs)
         }
 
@@ -111,9 +109,8 @@ module EmitFuncLoc =
 
     let genFuncLoc (path : FuncLocPath) 
                     (props : FuncLocProperties)
-                    (interimId : string option)
                     (description : string) 
-                    (objectType : string)  : CompilerMonad<CreateFuncLoc> = 
+                    (objectType : string)  : CompilerMonad<NewFuncLoc> = 
         let commonProps : CommonProperties = 
             { ControllingArea = props.ControllingArea
               CompanyCode = props.CompanyCode
@@ -122,8 +119,7 @@ module EmitFuncLoc =
 
         compile {
             return { 
-                Path = path
-                InterimId = interimId
+                FunctionLocation = path
                 Description = description
                 ObjectType = objectType
                 Category = uint32 path.Level
@@ -135,15 +131,14 @@ module EmitFuncLoc =
         }
 
     let funclocToFuncLocResult1 (path : FuncLocPath) 
-                                (interimId : string option)
                                 (props : FuncLocProperties)
                                 (description : string) 
                                 (objectType : string)
                                 (classes : S4Class list) : CompilerMonad<FuncLocResult1> = 
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile {
-            let! floc = genFuncLoc path props interimId description objectType
-            let! (cs, vs) = mapM (translateS4ClassFloc path interimId) classes |>> collect
+            let! floc = genFuncLoc path props description objectType
+            let! (cs, vs) = mapM (classToProperties path) classes |>> collect
             return { 
                 FuncLoc = floc
                 ClassFlocs = cs
@@ -151,12 +146,11 @@ module EmitFuncLoc =
             }
         }
 
-    let funclocToClassFlocInstances (flocPath : FuncLocPath) 
-                                    (interimId : string option)
-                                    (classes : S4Class list) : CompilerMonad<ClassFlocInstances> = 
+    let funclocToNewFlocProperties (flocPath : FuncLocPath) 
+                                    (classes : S4Class list) : CompilerMonad<NewFlocProperties> = 
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile { 
-            let! (cs, vs) = mapM (translateS4ClassFloc flocPath interimId) classes |>> collect
+            let! (cs, vs) = mapM (classToProperties flocPath) classes |>> collect
             return { 
                 ClassFlocs = cs
                 ValuaFlocs = vs
@@ -166,34 +160,19 @@ module EmitFuncLoc =
     // ************************************************************************
     // Write output
 
-    let writeFlocProperties (directory : string) 
-                            (level : int)
-                            (filePrefix : string) 
-                            (flocInstances : ClassFlocInstances) : CompilerMonad<unit> = 
-        if flocInstances.IsEmpty then
-            mreturn ()
-        else
-            compile {
-                do! writeClassFlocFile directory level filePrefix flocInstances.ClassFlocs
-                do! writeValuaFlocFile directory level filePrefix flocInstances.ValuaFlocs
-                return ()
-            }
 
-    let writeFlocResults (directory : string) 
-                            (level : int)
+    let writePhase1FlocData (directory : string) 
                             (filePrefix : string) 
-                            (funcLocResults : FuncLocResults) : CompilerMonad<unit> = 
+                            (funcLocResults : Phase1FlocData) : CompilerMonad<unit> = 
         
         if funcLocResults.IsEmpty then
             mreturn ()
         else
             compile {
-                let! useInterimIds = generateWithInterimIds ()
-                let! dirName = genSubFolder directory level
-                let indexFile = Path.Combine(dirName, "FlocIndexing.xlsx")
-                do! if useInterimIds then writeFlocIndexingSheet indexFile funcLocResults.FuncLocs else mreturn ()
-                do! writeFuncLocFile directory level filePrefix funcLocResults.FuncLocs
-                do! writeClassFlocFile directory level filePrefix funcLocResults.ClassFlocs
-                do! writeValuaFlocFile directory level filePrefix funcLocResults.ValuaFlocs
+                do! writeNewFuncLocsFile directory filePrefix funcLocResults.FuncLocs
+                // do! writeLinkFuncLocsFile
+                do! writeNewClassFlocsFile directory filePrefix funcLocResults.ClassFlocs
+                do! writeNewValuaFlocsFile directory filePrefix funcLocResults.ValuaFlocs
                 return ()
             }
+

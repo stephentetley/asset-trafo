@@ -17,61 +17,45 @@ module EmitEquipment =
     open AssetPatch.TemplatePatcher.EquiIndexing
     open AssetPatch.TemplatePatcher.PatchWriter
     
+
+
+    type Phase1EquiData = 
+        { Equis : NewEqui list
+        }
+        member x.IsEmpty 
+            with get () : bool = x.Equis.IsEmpty 
+            
+    let emptyPhase1EquiData : Phase1EquiData = { Equis = [] }
+
+    let concatPhase1EquiData (source : Phase1EquiData list) : Phase1EquiData = 
+        let add (r1 : Phase1EquiData) (acc : Phase1EquiData) = 
+            { Equis = r1.Equis @ acc.Equis }
+        List.foldBack add source { Equis = [] }
+
     
-    
-    type ClassEquiInstances = 
-        { ClassEquis : CreateClassEqui list
-          ValuaEquis : CreateValuaEqui list
+    type Phase2EquiData = 
+        { ClassEquis : NewClassEqui list
+          ValuaEquis : NewValuaEqui list
         }
         member x.IsEmpty 
             with get () : bool = 
                 x.ClassEquis.IsEmpty && x.ValuaEquis.IsEmpty
 
-    let collectClassEquiInstances (source : ClassEquiInstances list) : ClassEquiInstances = 
-        let add (r1 : ClassEquiInstances) (acc : ClassEquiInstances) = 
+    let private concatPhase2EquiData (source : Phase2EquiData list) : Phase2EquiData = 
+        let add (r1 : Phase2EquiData) (acc : Phase2EquiData) = 
             { ClassEquis = r1.ClassEquis @ acc.ClassEquis
               ValuaEquis = r1.ValuaEquis @ acc.ValuaEquis
             }
         List.foldBack add source { ClassEquis = []; ValuaEquis = [] }
 
 
-    type EquiResult1 = 
-        { Equi : CreateEqui
-          ClassEquis : CreateClassEqui list
-          ValuaEquis : CreateValuaEqui list
-        }
 
-    type EquiResults = 
-        { Equis : CreateEqui list
-          ClassEquis : CreateClassEqui list
-          ValuaEquis : CreateValuaEqui list
-        }
-        member x.IsEmpty 
-            with get () : bool = 
-                x.Equis.IsEmpty &&  x.ClassEquis.IsEmpty && x.ValuaEquis.IsEmpty
-            
 
-    let collectEquiResults (source : EquiResult1 list) : EquiResults = 
-        let add (r1 : EquiResult1) (acc : EquiResults) = 
-            { Equis = r1.Equi :: acc.Equis
-              ClassEquis = r1.ClassEquis @ acc.ClassEquis
-              ValuaEquis = r1.ValuaEquis @ acc.ValuaEquis
-            }
-        List.foldBack add source { Equis = []; ClassEquis = []; ValuaEquis = [] }
-
-    let concatEquiResults (source : EquiResults list) : EquiResults = 
-        let add (r1 : EquiResults) (acc : EquiResults) = 
-            { Equis = r1.Equis @ acc.Equis
-              ClassEquis = r1.ClassEquis @ acc.ClassEquis
-              ValuaEquis = r1.ValuaEquis @ acc.ValuaEquis
-            }
-        List.foldBack add source { Equis = []; ClassEquis = []; ValuaEquis = [] }
-
-    let characteristicToValuaEqui (interimId : string) 
-                                    (count : int) 
-                                    (charac : S4Characteristic) : CompilerMonad<CreateValuaEqui> = 
+    let private characteristicToNewValuaEqui1 (equiId : uint32) 
+                                                (count : int) 
+                                                (charac : S4Characteristic) : CompilerMonad<NewValuaEqui> = 
         mreturn { 
-            InterimId = interimId
+            EquipmentId = equiId
             ClassType = IntegerString.OfString "002"
             CharacteristicID = charac.Name
             ValueCount = count
@@ -79,21 +63,21 @@ module EmitEquipment =
         }
     
 
-    let classToClassEqui (interimId : string)
-                         (clazz : S4Class) : CompilerMonad<CreateClassEqui> = 
+    let private classToNewClassEqui (equiId : uint32)
+                                    (s4Class : S4Class) : CompilerMonad<NewClassEqui> = 
         mreturn { 
-            InterimId = interimId
-            Class = clazz.ClassName
+            EquipmentId = equiId
+            Class = s4Class.ClassName
             Status = 1
         }
 
 
 
-    let translateS4CharacteristicsEqui (equiNumber : string)
-                                        (characteristics : S4Characteristic list) : CompilerMonad<CreateValuaEqui list> =  
+    let private characteristicsToNewValuaEquis (equiId : uint32)
+                                               (characteristics : S4Characteristic list) : CompilerMonad<NewValuaEqui list> =  
 
-        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<CreateValuaEqui list> = 
-            foriM chars (fun i x -> characteristicToValuaEqui equiNumber (i+1) x)
+        let makeGrouped (chars : S4Characteristic list) : CompilerMonad<NewValuaEqui list> = 
+            foriM chars (fun i x -> characteristicToNewValuaEqui1 equiId (i+1) x)
 
         compile {
             let chars = sortedCharacteristics characteristics
@@ -101,18 +85,18 @@ module EmitEquipment =
         }
 
 
-    let translateS4ClassEqui (interimId : string)
-                                   (clazz : S4Class) : CompilerMonad<CreateClassEqui * CreateValuaEqui list> = 
+    let private classToProperties (equiId : uint32)
+                                    (clazz : S4Class) : CompilerMonad<NewClassEqui * NewValuaEqui list> = 
            compile {
-               let! ce = classToClassEqui interimId clazz
-               let! vs = translateS4CharacteristicsEqui interimId clazz.Characteristics
+               let! ce = classToNewClassEqui equiId clazz
+               let! vs = characteristicsToNewValuaEquis equiId clazz.Characteristics
                return (ce, vs)
            }
 
     
-    let equipmentToEqui1 (funcLoc : FuncLocPath) 
-                            (props : FuncLocProperties)
-                            (equipment : S4Equipment) : CompilerMonad<CreateEqui> = 
+    let private equipmentToNewEqui1 (funcLoc : FuncLocPath) 
+                                    (props : FuncLocProperties)
+                                    (equipment : S4Equipment) : CompilerMonad<NewEqui> = 
         let commonProps : CommonProperties = 
             { CompanyCode = props.CompanyCode 
               ControllingArea = props.ControllingArea 
@@ -122,7 +106,6 @@ module EmitEquipment =
 
         compile {
             return { 
-                InterimId = equipment.InterimId
                 Description = equipment.Description
                 FuncLoc = funcLoc
                 Category = equipment.Category
@@ -142,65 +125,92 @@ module EmitEquipment =
             }
         }
         
+    /// Recursive version of equipmentToNewEqui1
+    let equipmentToNewEqui (flocPath : FuncLocPath) 
+                        (props : FuncLocProperties)
+                        (source : S4Equipment) : CompilerMonad<NewEqui list> = 
+            let rec work kids cont = 
+                match kids with
+                | [] -> mreturn []
+                | (x :: xs) -> 
+                    compile {
+                        let! v1 = equipmentToNewEqui1 flocPath props x
+                        return! work kids (fun vs -> let ans = (v1 :: vs) in cont ans)
+                    }
+            compile {
+                let! equiResult1 = equipmentToNewEqui1 flocPath props source
+                let! kids = work source.SuboridnateEquipment id
+                return (equiResult1 :: kids)
+            }
 
-    let equipmentToEquiResult1 (funcLoc : FuncLocPath) 
-                                (props : FuncLocProperties)
-                                (equipment1 : S4Equipment) : CompilerMonad<EquiResult1> = 
+    let equipmentsToPhase1EquiData (flocPath : FuncLocPath) 
+                            (props : FuncLocProperties) 
+                            (source : S4Equipment list) : CompilerMonad<Phase1EquiData> = 
+        compile { 
+            let! xss = mapM (equipmentToNewEqui flocPath props) source 
+            return { Equis = List.concat xss }
+        }
+
+
+    let equipmentToPhase2EquiData1 (equiId : uint32) 
+                                     (classes : S4Class list) : CompilerMonad<Phase2EquiData> = 
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile { 
-            let! e1 = equipmentToEqui1 funcLoc props equipment1
-            let enumber = e1.InterimId
-            let! (cs, vs) = mapM (translateS4ClassEqui enumber) equipment1.Classes |>> collect
+            let! (cs, vs) = mapM (classToProperties equiId) classes |>> collect
             return { 
-                Equi = e1
                 ClassEquis = cs
                 ValuaEquis = vs
             }
         } 
 
-    let equipmentToEquiProperties (equiNumber : string) 
-                                    (classes : S4Class list) : CompilerMonad<ClassEquiInstances> = 
-        let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
-        compile { 
-            let! (cs, vs) = mapM (translateS4ClassEqui equiNumber) classes |>> collect
-            return { 
-                ClassEquis = cs
-                ValuaEquis = vs
+    /// Recursive version of equipmentToNewEqui1
+    let equipmentToPhase2EquiData (flocPath : FuncLocPath) 
+                                        (source : S4Equipment) : CompilerMonad<Phase2EquiData> = 
+            let rec work (kids : S4Equipment list) cont = 
+                match kids with
+                | [] -> mreturn []
+                | (x :: xs) -> 
+                    compile {
+                        let! v1 = equipmentToPhase2EquiData1 x.EquipmentId x.Classes
+                        return! work kids (fun vs -> let ans = (v1 :: vs) in cont ans)
+                    }
+            compile {
+                let! equiResult1 = equipmentToPhase2EquiData1 source.EquipmentId source.Classes
+                let! kids = work source.SuboridnateEquipment id
+                return (equiResult1 :: kids |> concatPhase2EquiData)
             }
-        } 
-
-
     
+    let equipmentsToPhase2EquiData (flocPath : FuncLocPath) 
+                                    (props : FuncLocProperties) 
+                                    (source : S4Equipment list) : CompilerMonad<Phase2EquiData> = 
+        compile { 
+            let! xss = mapM (equipmentToPhase2EquiData flocPath) source 
+            return (concatPhase2EquiData xss)
+        }
+
     // ************************************************************************
     // Write output
-
-    let writeEquiProperties (directory : string) 
-                            (level : int)
-                            (filePrefix : string) 
-                            (equiInstances : ClassEquiInstances) : CompilerMonad<unit> = 
-        if equiInstances.IsEmpty then
+    
+    // Write an Equi patch file
+    let writePhase1EquiData (directory : string) 
+                        (filePrefix : string) 
+                        (equiData : Phase1EquiData) : CompilerMonad<unit> = 
+        if equiData.IsEmpty then
+            mreturn ()
+        else
+            writeNewEquisFile directory filePrefix equiData.Equis
+            
+    // Write ClassEqui and ValuaEqui patch files
+    let writePhase2EquiData (directory : string) 
+                                (filePrefix : string) 
+                                (equiData : Phase2EquiData) : CompilerMonad<unit> = 
+        if equiData.IsEmpty then
             mreturn ()
         else
             compile {
-                do! writeClassEquiFile directory level filePrefix equiInstances.ClassEquis
-                do! writeValuaEquiFile directory level filePrefix equiInstances.ValuaEquis
+                do! writeNewClassEquisFile directory filePrefix equiData.ClassEquis
+                do! writeNewValuaEquisFile directory filePrefix equiData.ValuaEquis
                 return ()
             }
 
-    let writeEquiResults (directory : string) 
-                            (level : int)
-                            (filePrefix : string) 
-                            (equiResults : EquiResults) : CompilerMonad<unit> = 
-        if equiResults.IsEmpty then
-            mreturn ()
-        else
-            compile {
-                let! dirName = genSubFolder directory level
-                let indexFile = Path.Combine(dirName, "EquiIndexing.xlsx")
-                do! writeEquiIndexingSheet indexFile equiResults.Equis
-                do! writeEquiFile directory level filePrefix equiResults.Equis
-                do! writeClassEquiFile directory level filePrefix equiResults.ClassEquis
-                do! writeValuaEquiFile directory level filePrefix equiResults.ValuaEquis
-                return ()
-            }
     
