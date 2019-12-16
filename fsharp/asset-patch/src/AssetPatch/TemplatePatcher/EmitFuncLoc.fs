@@ -34,12 +34,14 @@ module EmitFuncLoc =
 
     type FuncLocResult1 = 
         { FuncLoc : NewFuncLoc
+          FuncLocLink : LinkFuncLoc option
           ClassFlocs : NewClassFloc list
           ValuaFlocs : NewValuaFloc list
         }
 
     type Phase1FlocData = 
         { FuncLocs : NewFuncLoc list
+          FuncLocLinks : LinkFuncLoc list
           ClassFlocs : NewClassFloc list
           ValuaFlocs : NewValuaFloc list
         }
@@ -49,6 +51,7 @@ module EmitFuncLoc =
 
     let concatPhase1FlocData (source : Phase1FlocData list) : Phase1FlocData = 
         { FuncLocs = source |> List.map (fun x -> x.FuncLocs) |> List.concat
+          FuncLocLinks = source |> List.map (fun x -> x.FuncLocLinks) |> List.concat
           ClassFlocs = source |> List.map (fun x -> x.ClassFlocs) |> List.concat
           ValuaFlocs = source |> List.map (fun x -> x.ValuaFlocs) |> List.concat
         }
@@ -56,10 +59,14 @@ module EmitFuncLoc =
     let concatFuncLocResult1s (source : FuncLocResult1 list) : Phase1FlocData = 
         let add (r1 : FuncLocResult1) (acc : Phase1FlocData) = 
             { FuncLocs = r1.FuncLoc :: acc.FuncLocs
+              FuncLocLinks = 
+                match r1.FuncLocLink with
+                | None -> acc.FuncLocLinks
+                | Some link -> link :: acc.FuncLocLinks
               ClassFlocs = r1.ClassFlocs @ acc.ClassFlocs
               ValuaFlocs = r1.ValuaFlocs @ acc.ValuaFlocs
             }
-        List.foldBack add source { FuncLocs = []; ClassFlocs = []; ValuaFlocs = [] }
+        List.foldBack add source { FuncLocs = []; FuncLocLinks = []; ClassFlocs = []; ValuaFlocs = [] }
 
 
     let characteristicToNewValuaFloc (funcLoc : FuncLocPath)
@@ -107,7 +114,7 @@ module EmitFuncLoc =
 
 
 
-    let genFuncLoc (path : FuncLocPath) 
+    let genNewFuncLoc (path : FuncLocPath) 
                     (props : FuncLocProperties)
                     (description : string) 
                     (objectType : string)  : CompilerMonad<NewFuncLoc> = 
@@ -130,6 +137,23 @@ module EmitFuncLoc =
             }
         }
 
+    let genFuncLocLink (path : FuncLocPath) 
+                    (props : FuncLocProperties)
+                    (description : string) 
+                    (objectType : string)  : CompilerMonad<LinkFuncLoc option> = 
+        if path.Level > 1 then
+            let link = { 
+                    FunctionLocation = path
+                    Description = description
+                    ObjectType = objectType
+                    Category = uint32 path.Level
+                    ObjectStatus = props.ObjectStatus
+                    StartupDate = props.StartupDate
+                    StructureIndicator = props.StructureIndicator
+                }
+            mreturn (Some link)
+        else mreturn None
+
     let funclocToFuncLocResult1 (path : FuncLocPath) 
                                 (props : FuncLocProperties)
                                 (description : string) 
@@ -137,10 +161,12 @@ module EmitFuncLoc =
                                 (classes : S4Class list) : CompilerMonad<FuncLocResult1> = 
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile {
-            let! floc = genFuncLoc path props description objectType
+            let! floc = genNewFuncLoc path props description objectType
+            let! link = genFuncLocLink path props description objectType
             let! (cs, vs) = mapM (classToProperties path) classes |>> collect
             return { 
                 FuncLoc = floc
+                FuncLocLink = link
                 ClassFlocs = cs
                 ValuaFlocs = vs
             }
@@ -170,7 +196,7 @@ module EmitFuncLoc =
         else
             compile {
                 do! writeNewFuncLocsFile directory filePrefix funcLocResults.FuncLocs
-                // do! writeLinkFuncLocsFile
+                do! writeLinkFuncLocsFile directory filePrefix funcLocResults.FuncLocLinks
                 do! writeNewClassFlocsFile directory filePrefix funcLocResults.ClassFlocs
                 do! writeNewValuaFlocsFile directory filePrefix funcLocResults.ValuaFlocs
                 return ()

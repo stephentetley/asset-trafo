@@ -107,7 +107,7 @@ module PatchWriter =
     // Link FuncLocs file
 
     /// Render a list of FuncLoc hierarchy changes into a ChangeFile
-    let private makeLinkFuncLocsFile (rows : NewFuncLoc list) : CompilerMonad<ChangeFile> = 
+    let private makeLinkFuncLocsFile (rows : LinkFuncLoc list) : CompilerMonad<ChangeFile> = 
         rows
             |> List.sortBy (fun row -> row.FunctionLocation.ToString()) 
             |> List.map (fun x -> x.ToAssocs())     
@@ -116,13 +116,13 @@ module PatchWriter =
     /// Write a list of FuncLoc hierarchy changes to a ChangeFile
     let writeLinkFuncLocsFile (directory : string) 
                                 (filePrefix : string) 
-                                (funcLocs : NewFuncLoc list) : CompilerMonad<unit> = 
+                                (funcLocs : LinkFuncLoc list) : CompilerMonad<unit> = 
         compile { 
             match funcLocs with
             | [] -> return ()
             | _ -> 
-                let! changes = makeNewFuncLocsFile funcLocs
-                let! outPath = genFileName directory filePrefix "01_create_flocs"
+                let! changes = makeLinkFuncLocsFile funcLocs
+                let! outPath = genFileName directory filePrefix "02_link_flocs"
                 do! writeChangesAndHeaders outPath changes
                 return ()
             }
