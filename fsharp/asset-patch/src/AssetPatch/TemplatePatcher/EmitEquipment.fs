@@ -151,40 +151,20 @@ module EmitEquipment =
                 | Some equiNum -> 
                     let! equiResult1 = equipmentToPhase2EquiData1 equiNum source.Classes
                     let! kids = work source.SuboridnateEquipment id
-                    return (equiResult1 :: kids |> concatPhase2EquiData)
+                    return (equiResult1 :: kids |> Phase2EquiData.Concat)
             }
     
+
+    /// This recurses to sub-equipment
     let equipmentsToPhase2EquiData (flocPath : FuncLocPath) 
                                     (props : FuncLocProperties) 
                                     (source : S4Equipment list) : CompilerMonad<Phase2EquiData> = 
         compile { 
             let! xss = mapM (equipmentToPhase2EquiData flocPath) source 
-            return (concatPhase2EquiData xss)
+            return (Phase2EquiData.Concat xss)
         }
 
-    // ************************************************************************
-    // Write output
+
     
-    // Write an Equi patch file
-    let writePhase1EquiData (directory : string) 
-                        (filePrefix : string) 
-                        (equiData : Phase1EquiData) : CompilerMonad<unit> = 
-        if equiData.IsEmpty then
-            mreturn ()
-        else
-            writeNewEquisFile directory filePrefix equiData.Equis
-            
-    // Write ClassEqui and ValuaEqui patch files
-    let writePhase2EquiData (directory : string) 
-                                (filePrefix : string) 
-                                (equiData : Phase2EquiData) : CompilerMonad<unit> = 
-        if equiData.IsEmpty then
-            mreturn ()
-        else
-            compile {
-                do! writeNewClassEquisFile directory filePrefix equiData.ClassEquis
-                do! writeNewValuaEquisFile directory filePrefix equiData.ValuaEquis
-                return ()
-            }
 
     

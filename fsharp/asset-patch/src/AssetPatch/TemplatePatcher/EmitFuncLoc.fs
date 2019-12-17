@@ -17,6 +17,10 @@ module EmitFuncLoc =
     open AssetPatch.TemplatePatcher.PatchWriter
     open AssetPatch.TemplatePatcher.EmitCommon
 
+
+
+
+
     let characteristicToNewValuaFloc (funcLoc : FuncLocPath)
                                     (count : int) 
                                     (charac : S4Characteristic) : CompilerMonad<NewValuaFloc> = 
@@ -102,19 +106,19 @@ module EmitFuncLoc =
             mreturn (Some link)
         else mreturn None
 
-    let funclocToFuncLocResult1 (path : FuncLocPath) 
+    let internal funclocToPhase1FlocData (path : FuncLocPath) 
                                 (props : FuncLocProperties)
                                 (description : string) 
                                 (objectType : string)
-                                (classes : S4Class list) : CompilerMonad<FuncLocResult1> = 
+                                (classes : S4Class list) : CompilerMonad<Phase1FlocData> = 
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile {
             let! floc = genNewFuncLoc path props description objectType
             let! link = genFuncLocLink path props description objectType
             let! (cs, vs) = mapM (classToProperties path) classes |>> collect
             return { 
-                FuncLoc = floc
-                FuncLocLink = link
+                FuncLocs = [floc]
+                FuncLocLinks = Option.toList link
                 ClassFlocs = cs
                 ValuaFlocs = vs
             }
@@ -131,22 +135,4 @@ module EmitFuncLoc =
             }
         }
 
-    // ************************************************************************
-    // Write output
-
-
-    let writePhase1FlocData (directory : string) 
-                            (filePrefix : string) 
-                            (funcLocResults : Phase1FlocData) : CompilerMonad<unit> = 
-        
-        if funcLocResults.IsEmpty then
-            mreturn ()
-        else
-            compile {
-                do! writeNewFuncLocsFile directory filePrefix funcLocResults.FuncLocs
-                do! writeLinkFuncLocsFile directory filePrefix funcLocResults.FuncLocLinks
-                do! writeNewClassFlocsFile directory filePrefix funcLocResults.ClassFlocs
-                do! writeNewValuaFlocsFile directory filePrefix funcLocResults.ValuaFlocs
-                return ()
-            }
-
+    

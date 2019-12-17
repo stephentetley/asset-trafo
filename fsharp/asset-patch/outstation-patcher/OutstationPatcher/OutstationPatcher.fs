@@ -10,6 +10,7 @@ module OutstationPatcher =
 
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.CompilerMonad
+    open AssetPatch.TemplatePatcher.Emitter
     open AssetPatch.TemplatePatcher.PatchCompiler
 
     open OutstationPatcher.InputData
@@ -38,15 +39,13 @@ module OutstationPatcher =
         let compilerOpts : CompilerOptions = makeCompilerOptions opts           
         runCompiler compilerOpts None
             <| compile { 
-                let! worklist = 
-                    readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
-                
                 do! liftAction (fun () -> makeOutputDirectory opts.OutputDirectory)
-
-                do! compileFunctionPatchesPhase1 opts.OutputDirectory
-                                "outstation_patch"
-                                osTemplate
-                                worklist
+                let! xs = 
+                    readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
+                let! worklist1 = applyFlocTemplate xs osTemplate
+                let! phase1Data = functionListEmitPhase1 worklist1
+                do! writePhase1Data opts.OutputDirectory "edc_patch" phase1Data
+                return ()
             }
 
     /// Phase 2 materializes Floc patches
@@ -55,15 +54,13 @@ module OutstationPatcher =
         let compilerOpts : CompilerOptions = makeCompilerOptions opts  
         runCompiler compilerOpts (Some equipmentDownloadPath)
             <| compile { 
-                let! worklist = 
-                    readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
-            
                 do! liftAction (fun () -> makeOutputDirectory opts.OutputDirectory)
-
-                do! compileFunctionPatchesPhase2 opts.OutputDirectory
-                                "outstation_patch"
-                                osTemplate
-                                worklist
+                let! xs = 
+                    readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
+                let! worklist1 = applyFlocTemplate xs osTemplate
+                let! phase2Data = functionListEmitPhase2 worklist1
+                do! writePhase2Data opts.OutputDirectory "edc_patch" phase2Data
+                return ()
             }
 
     

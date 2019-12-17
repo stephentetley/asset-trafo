@@ -18,189 +18,181 @@ module Emitter =
     // Phase 1
 
 
+    let component1EmitPhase1 (source : S4Component) : CompilerMonad<Phase1Data> = 
+        compile {
+            let! flocResult = 
+                funclocToPhase1FlocData source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+            let! equiResults = 
+                equipmentsToPhase1EquiData source.FuncLoc source.FlocProperties source.Equipment
+            return { FlocData = flocResult; EquiData = equiResults } 
+        }
+
+    let componentListEmitPhase1 (source : S4Component list) : CompilerMonad<Phase1Data> = 
+        mapM component1EmitPhase1 source |>> Phase1Data.Concat
+
     
-        
-
-    let private componentEmitPhase1 (source : S4Component) : CompilerMonad<FuncLocResult1 * Phase1EquiData> = 
+    let item1EmitPhase1 (source : S4Item) : CompilerMonad<Phase1Data> = 
         compile {
             let! flocResult = 
-                funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+                funclocToPhase1FlocData source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
             let! equiResults = 
                 equipmentsToPhase1EquiData source.FuncLoc source.FlocProperties source.Equipment
-            return (flocResult, equiResults)
+            let  x1 = { FlocData = flocResult; EquiData = equiResults } 
+            let! x2 = componentListEmitPhase1 source.Components
+            return  Phase1Data.Concat [x1; x2]
         }
 
-    let componentsEmitPhase1 (source : S4Component list) : CompilerMonad<Phase1Data> = 
-        mapM componentEmitPhase1 source |>> collectPhase1Data
+    let itemListEmitPhase1 (source : S4Item list) : CompilerMonad<Phase1Data> = 
+        mapM item1EmitPhase1 source |>> Phase1Data.Concat
+        
 
 
-    let private itemEmitPhase1 (source : S4Item) : CompilerMonad<FuncLocResult1 * Phase1EquiData> = 
+
+    let assembly1EmitPhase1 (source : S4Assembly) : CompilerMonad<Phase1Data> = 
         compile {
             let! flocResult = 
-                funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+                funclocToPhase1FlocData source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
             let! equiResults = 
                 equipmentsToPhase1EquiData source.FuncLoc source.FlocProperties source.Equipment
-            return (flocResult, equiResults)
+            let  x1 = { FlocData = flocResult; EquiData = equiResults } 
+            let! x2 = itemListEmitPhase1 source.Items
+            return  Phase1Data.Concat [x1; x2]
         }
 
-    let itemsEmitPhase1 (source : S4Item list) : CompilerMonad<Phase1Data> = 
-        compile { 
-            let! ans1 = mapM itemEmitPhase1 source |>> collectPhase1Data
-            let! kids = mapM (fun (x : S4Item) -> componentsEmitPhase1 x.Components) source
-            return concatPhase1Data (ans1 :: kids)
-        }
+    let assemblyListEmitPhase1 (source : S4Assembly list) : CompilerMonad<Phase1Data> = 
+        mapM assembly1EmitPhase1 source |>> Phase1Data.Concat
+        
 
-
-
-    let private assemblyEmitPhase1 (source : S4Assembly) : CompilerMonad<FuncLocResult1 * Phase1EquiData> = 
+    let system1EmitPhase1 (source : S4System) : CompilerMonad<Phase1Data> = 
         compile {
             let! flocResult = 
-                funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+                funclocToPhase1FlocData source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
             let! equiResults = 
                 equipmentsToPhase1EquiData source.FuncLoc source.FlocProperties source.Equipment
-            return (flocResult, equiResults)
+            let  x1 = { FlocData = flocResult; EquiData = equiResults } 
+            let! x2 = assemblyListEmitPhase1 source.Assemblies
+            return  Phase1Data.Concat [x1; x2]
         }
 
-    let assembliesEmitPhase1 (source : S4Assembly list) : CompilerMonad<Phase1Data> = 
-        compile { 
-            let! ans1 = mapM assemblyEmitPhase1 source |>> collectPhase1Data
-            let! kids = mapM (fun (x : S4Assembly) -> itemsEmitPhase1 x.Items) source
-            return concatPhase1Data (ans1 :: kids)
-        }
+    let systemListEmitPhase1 (source : S4System list) : CompilerMonad<Phase1Data> = 
+        mapM system1EmitPhase1 source |>> Phase1Data.Concat
+        
 
-
-    let private systemEmitPhase1 (source : S4System) : CompilerMonad<FuncLocResult1 * Phase1EquiData> = 
+    let process1EmitPhase1 (source : S4Process) : CompilerMonad<Phase1Data> = 
         compile {
             let! flocResult = 
-                funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
-            let! equiResults = 
-                equipmentsToPhase1EquiData source.FuncLoc source.FlocProperties source.Equipment
-            return (flocResult, equiResults)
+                funclocToPhase1FlocData source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+            let  x1 = { FlocData = flocResult; EquiData = Phase1EquiData.Empty } 
+            let! x2 = systemListEmitPhase1 source.Systems
+            return  Phase1Data.Concat [x1; x2]
         }
 
-    let systemsEmitPhase1 (source : S4System list) : CompilerMonad<Phase1Data> = 
-        compile { 
-            let! ans1 = mapM systemEmitPhase1 source |>> collectPhase1Data
-            let! kids = mapM (fun (x : S4System) -> assembliesEmitPhase1 x.Assemblies) source
-            return concatPhase1Data (ans1 :: kids)
+    let processListEmitPhase1 (source : S4Process list) : CompilerMonad<Phase1Data> = 
+        mapM process1EmitPhase1 source |>> Phase1Data.Concat
+
+
+    let processGroup1EmitPhase1 (source : S4ProcessGroup) : CompilerMonad<Phase1Data> = 
+        compile {
+            let! flocResult = 
+                funclocToPhase1FlocData source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+            let  x1 = { FlocData = flocResult; EquiData = Phase1EquiData.Empty } 
+            let! x2 = processListEmitPhase1 source.Processes
+            return  Phase1Data.Concat [x1; x2]
         }
 
-    let private processEmitPhase1 (source : S4Process) : CompilerMonad<FuncLocResult1> = 
-        funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
-        
+    let processGroupListEmitPhase1 (source : S4ProcessGroup list) : CompilerMonad<Phase1Data> = 
+        mapM processGroup1EmitPhase1 source |>> Phase1Data.Concat
 
-    let processesEmitPhase1 (source : S4Process list) : CompilerMonad<Phase1Data> = 
-        compile { 
-            let! xs = mapM processEmitPhase1 source 
-            let ans1 = { FlocData = concatFuncLocResult1s xs ; EquiData = emptyPhase1EquiData }
-            let! kids = mapM (fun (x : S4Process) -> systemsEmitPhase1 x.Systems) source
-            return concatPhase1Data (ans1 :: kids)
+
+    let functionEmitPhase1 (source : S4Function) : CompilerMonad<Phase1Data> = 
+        compile {
+            let! flocResult = 
+                funclocToPhase1FlocData source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+            let  x1 = { FlocData = flocResult; EquiData = Phase1EquiData.Empty } 
+            let! x2 = processGroupListEmitPhase1 source.ProcessGroups
+            return  Phase1Data.Concat [x1; x2]
         }
 
-    let private processGroupEmitPhase1 (source : S4ProcessGroup) : CompilerMonad<FuncLocResult1> = 
-        funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
-        
-
-    let processGroupsEmitPhase1 (source : S4ProcessGroup list) : CompilerMonad<Phase1Data> = 
-        compile { 
-            let! xs = mapM processGroupEmitPhase1 source 
-            let ans1 = { FlocData = concatFuncLocResult1s xs ; EquiData = emptyPhase1EquiData }
-            let! kids = mapM (fun (x : S4ProcessGroup) -> processesEmitPhase1 x.Processes) source
-            return concatPhase1Data (ans1 :: kids)
-        }
-
-
-    let private functionEmitPhase1 (source : S4Function) : CompilerMonad<FuncLocResult1> = 
-        funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
-        
-
-    let functionsEmitPhase1 (source : S4Function list) : CompilerMonad<Phase1Data> = 
-        compile { 
-            let! xs = mapM functionEmitPhase1 source 
-            let ans1 = { FlocData = concatFuncLocResult1s xs ; EquiData = emptyPhase1EquiData }
-            let! kids = mapM (fun (x : S4Function) -> processGroupsEmitPhase1 x.ProcessGroups) source
-            return concatPhase1Data (ans1 :: kids)
-        }
+    let functionListEmitPhase1 (source : S4Function list) : CompilerMonad<Phase1Data> = 
+        mapM functionEmitPhase1 source |>> Phase1Data.Concat
 
         
-    let siteEmitPhase1 (source : S4Site) : CompilerMonad<FuncLocResult1> = 
-        funclocToFuncLocResult1 source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
-            
-
-    let sitesEmitPhase1 (source : S4Site list) : CompilerMonad<Phase1Data> = 
-        compile { 
-            let! xs = mapM siteEmitPhase1 source 
-            let ans1 = { FlocData = concatFuncLocResult1s xs ; EquiData = emptyPhase1EquiData }
-            let! kids = mapM (fun (x : S4Site) -> functionsEmitPhase1 x.Functions) source
-            return concatPhase1Data (ans1 :: kids)
+    let site1EmitPhase1 (source : S4Site) : CompilerMonad<Phase1Data> = 
+        compile {
+            let! flocResult = 
+                funclocToPhase1FlocData source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
+            let  x1 = { FlocData = flocResult; EquiData = Phase1EquiData.Empty } 
+            let! x2 = functionListEmitPhase1 source.Functions
+            return Phase1Data.Concat [x1; x2]
         }
+
+    let siteListEmitPhase1 (source : S4Site list) : CompilerMonad<Phase1Data> = 
+        mapM site1EmitPhase1 source |>> Phase1Data.Concat
 
     // ************************************************************************
     // Phase 2
 
     type Phase2Data =  Phase2EquiData
 
-    let private componentEmitPhase2 (source : S4Component) : CompilerMonad<Phase2Data> = 
+    let component1EmitPhase2 (source : S4Component) : CompilerMonad<Phase2Data> = 
         equipmentsToPhase2EquiData source.FuncLoc source.FlocProperties source.Equipment
 
-    let componentsEmitPhase2 (source : S4Component list) : CompilerMonad<Phase2Data> = 
-        mapM componentEmitPhase2 source |>> concatPhase2EquiData
+    let componentListEmitPhase2 (source : S4Component list) : CompilerMonad<Phase2Data> = 
+        mapM component1EmitPhase2 source |>> Phase2EquiData.Concat
 
-    let private itemEmitPhase2 (source : S4Item) : CompilerMonad<Phase2Data> = 
-        equipmentsToPhase2EquiData source.FuncLoc source.FlocProperties source.Equipment
-
-
-    let itemsEmitPhase2 (source : S4Item list) : CompilerMonad<Phase2Data> = 
+    let item1EmitPhase2 (source : S4Item) : CompilerMonad<Phase2Data> = 
         compile { 
-            let! ans1 = mapM itemEmitPhase2 source |>> concatPhase2EquiData
-            let! kids = mapM (fun (x : S4Item) -> componentsEmitPhase2 x.Components) source
-            return concatPhase2EquiData (ans1 :: kids)
-        }
-
-    let private assemblyEmitPhase2 (source : S4Assembly) : CompilerMonad<Phase2Data> = 
-        equipmentsToPhase2EquiData source.FuncLoc source.FlocProperties source.Equipment
-
-
-    let assembliesEmitPhase2 (source : S4Assembly list) : CompilerMonad<Phase2Data> = 
-        compile { 
-            let! ans1 = mapM assemblyEmitPhase2 source |>> concatPhase2EquiData
-            let! kids = mapM (fun (x : S4Assembly) -> itemsEmitPhase2 x.Items) source
-            return concatPhase2EquiData (ans1 :: kids)
-        }
-
-    let private systemEmitPhase2 (source : S4System) : CompilerMonad<Phase2Data> = 
-        equipmentsToPhase2EquiData source.FuncLoc source.FlocProperties source.Equipment
-
-
-    let systemsEmitPhase2 (source : S4System list) : CompilerMonad<Phase2Data> = 
-        compile { 
-            let! ans1 = mapM systemEmitPhase2 source |>> concatPhase2EquiData
-            let! kids = mapM (fun (x : S4System) -> assembliesEmitPhase2 x.Assemblies) source
-            return concatPhase2EquiData (ans1 :: kids)
+            let! x1 = equipmentsToPhase2EquiData source.FuncLoc source.FlocProperties source.Equipment
+            let! x2 = componentListEmitPhase2 source.Components
+            return Phase2EquiData.Concat [x1; x2]
         }
 
 
+    let itemListEmitPhase2 (source : S4Item list) : CompilerMonad<Phase2Data> = 
+        mapM item1EmitPhase2 source |>> Phase2EquiData.Concat
 
-    let processesEmitPhase2 (source : S4Process list) : CompilerMonad<Phase2Data> = 
+    let assembly1EmitPhase2 (source : S4Assembly) : CompilerMonad<Phase2Data> = 
         compile { 
-            let! kids = mapM (fun (x : S4Process) -> systemsEmitPhase2 x.Systems) source
-            return concatPhase2EquiData kids
+            let! x1 = equipmentsToPhase2EquiData source.FuncLoc source.FlocProperties source.Equipment
+            let! x2 = itemListEmitPhase2 source.Items
+            return Phase2EquiData.Concat [x1; x2]
         }
 
-    let processGroupsEmitPhase2 (source : S4ProcessGroup list) : CompilerMonad<Phase2Data> = 
+
+    let assemblyListEmitPhase2 (source : S4Assembly list) : CompilerMonad<Phase2Data> = 
+        mapM assembly1EmitPhase2 source |>> Phase2EquiData.Concat
+            
+
+    let system1EmitPhase2 (source : S4System) : CompilerMonad<Phase2Data> = 
         compile { 
-            let! kids = mapM (fun (x : S4ProcessGroup) -> processesEmitPhase2 x.Processes) source
-            return concatPhase2EquiData kids
+            let! x1 = equipmentsToPhase2EquiData source.FuncLoc source.FlocProperties source.Equipment
+            let! x2 = assemblyListEmitPhase2 source.Assemblies
+            return Phase2EquiData.Concat [x1; x2]
         }
 
-    let functionsEmitPhase2 (source : S4Function list) : CompilerMonad<Phase2Data> = 
-        compile { 
-            let! kids = mapM (fun (x : S4Function) -> processGroupsEmitPhase2 x.ProcessGroups) source
-            return concatPhase2EquiData kids
-        }
+    let systemListEmitPhase2 (source : S4System list) : CompilerMonad<Phase2Data> = 
+        mapM system1EmitPhase2 source |>> Phase2EquiData.Concat
+            
+    let process1EmitPhase2 (source : S4Process) : CompilerMonad<Phase2Data> = 
+        systemListEmitPhase2 source.Systems
 
-    let sitesEmitPhase2 (source : S4Site list) : CompilerMonad<Phase2Data> = 
-        compile { 
-            let! kids = mapM (fun (x : S4Site) -> functionsEmitPhase2 x.Functions) source
-            return concatPhase2EquiData kids
-        }
+    let processListEmitPhase2 (source : S4Process list) : CompilerMonad<Phase2Data> = 
+        mapM process1EmitPhase2 source |>> Phase2EquiData.Concat 
+        
+    let processGroup1EmitPhase2 (source : S4ProcessGroup) : CompilerMonad<Phase2Data> = 
+        processListEmitPhase2 source.Processes
+
+    let processGroupListEmitPhase2 (source : S4ProcessGroup list) : CompilerMonad<Phase2Data> = 
+        mapM processGroup1EmitPhase2 source |>> Phase2EquiData.Concat
+
+    let function1EmitPhase2 (source : S4Function) : CompilerMonad<Phase2Data> = 
+        processGroupListEmitPhase2 source.ProcessGroups
+
+    let functionListEmitPhase2 (source : S4Function list) : CompilerMonad<Phase2Data> = 
+        mapM function1EmitPhase2 source |>> Phase2EquiData.Concat
+
+    let site1EmitPhase2 (source : S4Site) : CompilerMonad<Phase2Data> = 
+        functionListEmitPhase2 source.Functions
+
+    let siteListEmitPhase2 (source : S4Site list) : CompilerMonad<Phase2Data> = 
+        mapM site1EmitPhase2 source |>> Phase2EquiData.Concat

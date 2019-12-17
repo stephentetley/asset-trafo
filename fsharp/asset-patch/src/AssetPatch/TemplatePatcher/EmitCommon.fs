@@ -13,20 +13,20 @@ module EmitCommon =
     // Phase 1
 
     
-     type NewFlocProperties = 
-         { ClassFlocs : NewClassFloc list
-           ValuaFlocs : NewValuaFloc list
-         }
-         member x.IsEmpty 
-             with get () : bool = 
-                 x.ClassFlocs.IsEmpty && x.ValuaFlocs.IsEmpty
-
-     let private concatNewFlocProperties (source : NewFlocProperties list) : NewFlocProperties = 
-         let add (r1 : NewFlocProperties) (acc : NewFlocProperties) = 
-             { ClassFlocs = r1.ClassFlocs @ acc.ClassFlocs
-               ValuaFlocs = r1.ValuaFlocs @ acc.ValuaFlocs
-             }
-         List.foldBack add source { ClassFlocs = []; ValuaFlocs = [] }
+    type NewFlocProperties = 
+        { ClassFlocs : NewClassFloc list
+          ValuaFlocs : NewValuaFloc list
+        }
+        member x.IsEmpty 
+            with get () : bool = 
+                x.ClassFlocs.IsEmpty && x.ValuaFlocs.IsEmpty
+        
+        static member ConcatNewFlocProperties (source : NewFlocProperties list) : NewFlocProperties = 
+            let add (r1 : NewFlocProperties) (acc : NewFlocProperties) = 
+                { ClassFlocs = r1.ClassFlocs @ acc.ClassFlocs
+                  ValuaFlocs = r1.ValuaFlocs @ acc.ValuaFlocs
+                }
+            List.foldBack add source { ClassFlocs = []; ValuaFlocs = [] }
 
 
 
@@ -47,19 +47,26 @@ module EmitCommon =
               ValuaFlocs = x.ValuaFlocs |> List.distinct
             }
 
+        static member Concat (source : Phase1FlocData list) : Phase1FlocData = 
+            { FuncLocs = source |> List.map (fun x -> x.FuncLocs) |> List.concat
+              FuncLocLinks = source |> List.map (fun x -> x.FuncLocLinks) |> List.concat
+              ClassFlocs = source |> List.map (fun x -> x.ClassFlocs) |> List.concat
+              ValuaFlocs = source |> List.map (fun x -> x.ValuaFlocs) |> List.concat
+            }
+
 
     type Phase1EquiData = 
         { Equis : NewEqui list
         }
         member x.IsEmpty 
             with get () : bool = x.Equis.IsEmpty 
-            
-    let emptyPhase1EquiData : Phase1EquiData = { Equis = [] }
 
-    let concatPhase1EquiData (source : Phase1EquiData list) : Phase1EquiData = 
-        let add (r1 : Phase1EquiData) (acc : Phase1EquiData) = 
-            { Equis = r1.Equis @ acc.Equis }
-        List.foldBack add source { Equis = [] }
+        static member Empty : Phase1EquiData = { Equis = [] }
+            
+        static member Concat (source : Phase1EquiData list) : Phase1EquiData = 
+            let add (r1 : Phase1EquiData) (acc : Phase1EquiData) = 
+                { Equis = r1.Equis @ acc.Equis }
+            List.foldBack add source { Equis = [] }
 
 
 
@@ -68,50 +75,11 @@ module EmitCommon =
           EquiData : Phase1EquiData
         }
 
-    
-    
-    type FuncLocResult1 = 
-        { FuncLoc : NewFuncLoc
-          FuncLocLink : LinkFuncLoc option
-          ClassFlocs : NewClassFloc list
-          ValuaFlocs : NewValuaFloc list
-        }
-        
-    
-    let concatPhase1FlocData (source : Phase1FlocData list) : Phase1FlocData = 
-        { FuncLocs = source |> List.map (fun x -> x.FuncLocs) |> List.concat
-          FuncLocLinks = source |> List.map (fun x -> x.FuncLocLinks) |> List.concat
-          ClassFlocs = source |> List.map (fun x -> x.ClassFlocs) |> List.concat
-          ValuaFlocs = source |> List.map (fun x -> x.ValuaFlocs) |> List.concat
-        }
-
-    let concatFuncLocResult1s (source : FuncLocResult1 list) : Phase1FlocData = 
-        let add (r1 : FuncLocResult1) (acc : Phase1FlocData) = 
-            { FuncLocs = r1.FuncLoc :: acc.FuncLocs
-              FuncLocLinks = 
-                match r1.FuncLocLink with
-                | None -> acc.FuncLocLinks
-                | Some link -> link :: acc.FuncLocLinks
-              ClassFlocs = r1.ClassFlocs @ acc.ClassFlocs
-              ValuaFlocs = r1.ValuaFlocs @ acc.ValuaFlocs
+        static member Concat (xs : Phase1Data list) : Phase1Data = 
+            { FlocData = xs |> List.map (fun x -> x.FlocData) |> Phase1FlocData.Concat
+              EquiData = xs |> List.map (fun x -> x.EquiData) |> Phase1EquiData.Concat
             }
-        List.foldBack add source { FuncLocs = []; FuncLocLinks = []; ClassFlocs = []; ValuaFlocs = [] }
 
-    
-    let collectPhase1Data (xs : (FuncLocResult1 * Phase1EquiData) list) : Phase1Data = 
-        let flocResults = xs|> List.map fst |> concatFuncLocResult1s
-        let equiResults = xs|> List.map snd |> concatPhase1EquiData
-        { FlocData = flocResults; EquiData = equiResults }
-
-    let concatPhase1Data (xs : Phase1Data list) : Phase1Data = 
-        { FlocData = xs |> List.map (fun x -> x.FlocData) |> concatPhase1FlocData
-          EquiData = xs |> List.map (fun x -> x.EquiData) |> concatPhase1EquiData
-        }
-
- 
-
-
-    
 
 
     // ************************************************************************
@@ -125,9 +93,11 @@ module EmitCommon =
             with get () : bool = 
                 x.ClassEquis.IsEmpty && x.ValuaEquis.IsEmpty
 
-    let concatPhase2EquiData (source : Phase2EquiData list) : Phase2EquiData = 
-        let add (r1 : Phase2EquiData) (acc : Phase2EquiData) = 
-            { ClassEquis = r1.ClassEquis @ acc.ClassEquis
-              ValuaEquis = r1.ValuaEquis @ acc.ValuaEquis
-            }
-        List.foldBack add source { ClassEquis = []; ValuaEquis = [] }
+        static member Concat (source : Phase2EquiData list) : Phase2EquiData = 
+            let add (r1 : Phase2EquiData) (acc : Phase2EquiData) = 
+                { ClassEquis = r1.ClassEquis @ acc.ClassEquis
+                  ValuaEquis = r1.ValuaEquis @ acc.ValuaEquis
+                }
+            List.foldBack add source { ClassEquis = []; ValuaEquis = [] }
+
+    type Phase2Data = Phase2EquiData

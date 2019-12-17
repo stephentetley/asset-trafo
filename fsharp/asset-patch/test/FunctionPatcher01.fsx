@@ -63,6 +63,7 @@ open FSharp.Core
 open AssetPatch.Base.FuncLocPath
 open AssetPatch.TemplatePatcher.Template
 open AssetPatch.TemplatePatcher.CompilerMonad
+open AssetPatch.TemplatePatcher.Emitter
 open AssetPatch.TemplatePatcher.PatchCompiler
 open AssetPatch.TemplateCatalogue
 
@@ -135,11 +136,12 @@ let test01 () =
         { UserName = "TETLEYS"
         }
     runCompiler opts None
-       <| compileFunctionPatchesPhase1 
-                   (outputDirectory "edg-patches")
-                   "env_discharge"
-                   edcTemplate
-                   worklist
+        <| compile {
+                 let! worklist1 = applyFlocTemplate worklist edcTemplate
+                 let! phase1Data = functionListEmitPhase1 worklist1
+                 do! writePhase1Data (outputDirectory "discharge") "env_discharge" phase1Data
+                 return ()
+             }
 
 // This template has optional elements that are possible but a bit ugly...
 // We have to represent option elements as a list that might have zero-or-one
@@ -205,11 +207,12 @@ let test02 () =
         { UserName = "TETLEYS"
         }
     runCompiler opts None
-       <| compileSitePatchesPhase1
-                   (outputDirectory "caa-patches")
-                   "control_automation"
-                   caaTemplate
-                   worklist
+       <| compile {
+                let! worklist1 = applyFlocTemplate worklist caaTemplate
+                let! phase1Data = siteListEmitPhase1 worklist1
+                do! writePhase1Data (outputDirectory "caa-patches") "control_automation" phase1Data
+                return ()
+            }
 
 
 //let test02b () = 
