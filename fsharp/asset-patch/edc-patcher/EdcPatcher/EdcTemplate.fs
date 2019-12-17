@@ -23,9 +23,13 @@ module EdcTemplate =
     /// Note - this is very flaky as ExcelProvider seems to have difficulty 
     /// with Excel's type casting.
     let getInstallDate (source : string) : DateTime = 
-        match tryGetUSDate source with
-        | Some date -> date
-        | None -> new DateTime(year=1970, month=1, day=1)
+        match source with
+        | null | "" -> new DateTime(year=1970, month=1, day=1)
+        | _ -> 
+            match tryGetUSDate source with
+            | Some date -> date
+            | None -> new DateTime(year=1970, month=1, day=1)
+
 
     let aib_reference_leaf_instance (parameters : WorkListRow) : Class = 
         aib_reference 

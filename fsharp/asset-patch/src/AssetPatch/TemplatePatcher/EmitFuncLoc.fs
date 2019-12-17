@@ -12,7 +12,6 @@ module EmitFuncLoc =
     open AssetPatch.Base.ChangeFile
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.CompilerMonad
-    open AssetPatch.TemplatePatcher.EquiIndexing
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.TemplateHierarchy
     open AssetPatch.TemplatePatcher.PatchWriter
@@ -48,6 +47,13 @@ module EmitFuncLoc =
         member x.IsEmpty 
             with get () : bool = 
                 x.FuncLocs.IsEmpty &&  x.ClassFlocs.IsEmpty && x.ValuaFlocs.IsEmpty
+
+        member x.RemoveDups() : Phase1FlocData = 
+            { FuncLocs = x.FuncLocs |> List.distinctBy (fun x -> x.FunctionLocation)
+              FuncLocLinks = x.FuncLocLinks |> List.distinctBy (fun x -> x.FunctionLocation)
+              ClassFlocs = x.ClassFlocs |> List.distinctBy (fun x -> x.FuncLoc.ToString() + "::" + x.Class)
+              ValuaFlocs = x.ValuaFlocs |> List.distinct
+            }
 
     let concatPhase1FlocData (source : Phase1FlocData list) : Phase1FlocData = 
         { FuncLocs = source |> List.map (fun x -> x.FuncLocs) |> List.concat

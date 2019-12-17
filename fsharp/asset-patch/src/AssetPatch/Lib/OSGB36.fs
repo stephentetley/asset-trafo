@@ -33,10 +33,13 @@ module OSGB36 =
 
         /// Pattern 2 letters then 10 chars
         static member Create(s : string) : NGR option = 
-            if Regex.IsMatch(input = s, pattern = @"^([A-Za-z])([A-Za-z])([0-9]+){10}$") then 
-                Some (NGR s)
-            else
-                None
+            match s with
+            | null | "" -> None
+            | _ ->     
+                if Regex.IsMatch(input = s, pattern = @"^([A-Za-z])([A-Za-z])([0-9]+){10}$") then 
+                    Some (NGR s)
+                else
+                    None
 
     
     type EastingNorthing = 

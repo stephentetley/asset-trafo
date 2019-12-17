@@ -37,9 +37,12 @@ module Common =
     /// Note input string might have hh:mm:ss suffix. 
     /// So take first 10 characters.
     let tryGetUSDate (source : string) : DateTime option =
-        match DateTime.TryParseExact( s = source.Substring(startIndex=0, length=10)
-                                    , format = "MM/dd/yyyy"
-                                    , provider = Globalization.CultureInfo.InvariantCulture
-                                    , style = Globalization.DateTimeStyles.None) with
-        | true, date -> Some date
-        | false, _ -> None
+        try
+            match DateTime.TryParseExact( s = source.Substring(startIndex=0, length=10)
+                                        , format = "MM/dd/yyyy"
+                                        , provider = Globalization.CultureInfo.InvariantCulture
+                                        , style = Globalization.DateTimeStyles.None) with
+            | true, date -> Some date
+            | false, _ -> None
+        with
+        | _ -> None

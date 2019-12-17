@@ -77,7 +77,7 @@ let outputDirectory (child : string) : string =
 
 let options : OsPatcherOptions = 
     {   UserName = "TETLEYS"
-        OutputDirectory = outputDirectory "edc_patcher"
+        OutputDirectory = outputDirectory "outstation_patcher"
         WorkListPath = @"G:\work\Projects\assets\asset_patch\Outstation_Worklist1.xlsx" 
     }
 

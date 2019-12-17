@@ -50,7 +50,7 @@ module PatchCompiler =
                                          (worklist : S4Component list) : CompilerMonad<unit> = 
         compile {
             let! ans = componentsEmitPhase1 worklist
-            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1FlocData outputDirectory filePrefix (ans.FlocData.RemoveDups())
             do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         } 
@@ -97,7 +97,7 @@ module PatchCompiler =
                                     (worklist : S4Item list) : CompilerMonad<unit> = 
         compile {
             let! ans = itemsEmitPhase1 worklist
-            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1FlocData outputDirectory filePrefix (ans.FlocData.RemoveDups())
             do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         } 
@@ -144,7 +144,7 @@ module PatchCompiler =
                                 (worklist : S4Assembly list) : CompilerMonad<unit> = 
         compile {
             let! ans = assembliesEmitPhase1 worklist
-            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1FlocData outputDirectory filePrefix (ans.FlocData.RemoveDups())
             do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         
@@ -193,7 +193,7 @@ module PatchCompiler =
                                 (worklist : S4System list) : CompilerMonad<unit> = 
         compile {
             let! ans = systemsEmitPhase1 worklist
-            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1FlocData outputDirectory filePrefix (ans.FlocData.RemoveDups())
             do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         }
@@ -239,7 +239,7 @@ module PatchCompiler =
                                 (worklist : S4Process list) : CompilerMonad<unit> = 
         compile {
             let! ans = processesEmitPhase1 worklist
-            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1FlocData outputDirectory filePrefix (ans.FlocData.RemoveDups())
             do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         } 
@@ -286,7 +286,7 @@ module PatchCompiler =
                                 (worklist : S4ProcessGroup list) : CompilerMonad<unit> = 
         compile {
             let! ans = processGroupsEmitPhase1 worklist
-            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1FlocData outputDirectory filePrefix (ans.FlocData.RemoveDups())
             do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         }
@@ -333,7 +333,7 @@ module PatchCompiler =
                                 (worklist : S4Function list) : CompilerMonad<unit> = 
         compile {
             let! ans = functionsEmitPhase1 worklist
-            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1FlocData outputDirectory filePrefix (ans.FlocData.RemoveDups())
             do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         } 
@@ -380,7 +380,7 @@ module PatchCompiler =
                             (worklist : S4Site list) : CompilerMonad<unit> = 
         compile {
             let! ans = sitesEmitPhase1 worklist
-            do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
+            do! writePhase1FlocData outputDirectory filePrefix (ans.FlocData.RemoveDups())
             do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
             return ()
         } 
