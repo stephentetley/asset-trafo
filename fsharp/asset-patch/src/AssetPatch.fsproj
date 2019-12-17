@@ -33,6 +33,8 @@
     <Compile Include="AssetPatch\TemplateCatalogue\Smonsy.fs" />
     <Compile Include="AssetPatch\RewritePatcher\Datatypes.fs" />
     <Compile Include="AssetPatch\RewritePatcher\RewriteMonad.fs" />
+    <Compile Include="AssetPatch\Lib\Common.fs" />
+    <Compile Include="AssetPatch\Lib\OSGB36.fs" />
   </ItemGroup>
 
   <ItemGroup>

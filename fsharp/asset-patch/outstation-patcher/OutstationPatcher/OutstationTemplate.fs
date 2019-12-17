@@ -2,18 +2,17 @@
 // License: BSD 3 Clause
 
 
-namespace EdcPatcher
+namespace OutstationPatcher
 
-module EdcTemplate =
+module OutstationTemplate =
     
     open System
 
     open AssetPatch.TemplatePatcher.Template
     open AssetPatch.TemplateCatalogue
-    open AssetPatch.Lib.Common
     open AssetPatch.Lib.OSGB36
 
-    open EdcPatcher.InputData
+    open OutstationPatcher.InputData
 
     let optString (source : string) : string option = 
         match source with

@@ -9,7 +9,6 @@ module EdcPatcher =
     open System.IO
 
     open AssetPatch.Base.FuncLocPath
-    open AssetPatch.TemplatePatcher.Template
     open AssetPatch.TemplatePatcher.CompilerMonad
     open AssetPatch.TemplatePatcher.PatchCompiler
 

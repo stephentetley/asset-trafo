@@ -5,11 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="EdcPatcher\InputData.fs" />
-    <Compile Include="EdcPatcher\EdcTemplate.fs" />
-    <Compile Include="EdcPatcher\EdcPatcher.fs" />
-    <None Include="RunEdcPatcher.fsx" />
+    <Compile Include="OutstationPatcher\InputData.fs" />
+    <Compile Include="OutstationPatcher\OutstationTemplate.fs" />
+    <None Include="RunOutstationPatcher.fsx" />
   </ItemGroup>
+
+  <ItemGroup />
 
   <ItemGroup>
     <ProjectReference Include="..\src\AssetPatch.fsproj" />

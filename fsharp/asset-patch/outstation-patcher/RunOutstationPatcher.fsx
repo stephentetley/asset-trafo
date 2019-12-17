@@ -61,33 +61,9 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplateCatalogue\AssetCondition.fs"
 #load "..\src\AssetPatch\TemplateCatalogue\Lstnut.fs"
 #load "..\src\AssetPatch\TemplateCatalogue\Smonsy.fs"
-#load "..\src\AssetPatch\Lib\Common.fs"
-#load "..\src\AssetPatch\Lib\OSGB36.fs"
-#load "EdcPatcher\InputData.fs"
-#load "EdcPatcher\EdcTemplate.fs"
-#load "EdcPatcher\EdcPatcher.fs"
-open EdcPatcher.EdcPatcher
+
 
 let outputDirectory (child : string) : string = 
     match child with 
     | null | "" -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output")
     | _ -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output", child)
-
-
-let options : EdcOptions = 
-    {   UserName = "TETLEYS"
-        OutputDirectory = outputDirectory "edc_patcher"
-        WorkListPath = @"G:\work\Projects\assets\asset_patch\EnvDischarge_Worklist1.xlsx" 
-        UseFlocTemplateIds = false
-    }
-
-let main01 () = 
-    runEdcPatcherPhase1 options 
-
-
-// Generate ClassEqui and ValuaEqui files for Equipment 
-// once it has been activated and downloaded...
-let main02 () = 
-    let equiFile = @"G:\work\Projects\assets\asset_patch\env_discharge_worklist1_mocked_download.txt"
-    runEdcPatcherPhase2 options equiFile  
-
