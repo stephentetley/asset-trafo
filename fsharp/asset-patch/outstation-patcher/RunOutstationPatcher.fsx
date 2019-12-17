@@ -61,9 +61,35 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplateCatalogue\AssetCondition.fs"
 #load "..\src\AssetPatch\TemplateCatalogue\Lstnut.fs"
 #load "..\src\AssetPatch\TemplateCatalogue\Smonsy.fs"
-
+#load "..\src\AssetPatch\TemplateCatalogue\Smonsy.fs"
+#load "..\src\AssetPatch\Lib\Common.fs"
+#load "..\src\AssetPatch\Lib\OSGB36.fs"
+#load "OutstationPatcher\InputData.fs"
+#load "OutstationPatcher\OutstationTemplate.fs"
+#load "OutstationPatcher\OutstationPatcher.fs"
+open OutstationPatcher.OutstationPatcher
 
 let outputDirectory (child : string) : string = 
     match child with 
     | null | "" -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output")
     | _ -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output", child)
+
+
+let options : OsPatcherOptions = 
+    {   UserName = "TETLEYS"
+        OutputDirectory = outputDirectory "edc_patcher"
+        WorkListPath = @"G:\work\Projects\assets\asset_patch\Outstation_Worklist1.xlsx" 
+    }
+
+let main01 () = 
+    runOutstationPatcherPhase1 options 
+
+
+// Generate ClassEqui and ValuaEqui files for Equipment 
+// once it has been activated and downloaded...
+let main02 () = 
+    let equiFile = @"G:\work\Projects\assets\asset_patch\outstation_worklist1_mocked_download.txt"
+    runOutstationPatcherPhase2 options equiFile  
+
+
+

@@ -10,14 +10,11 @@ module OutstationTemplate =
 
     open AssetPatch.TemplatePatcher.Template
     open AssetPatch.TemplateCatalogue
+    open AssetPatch.Lib.Common
     open AssetPatch.Lib.OSGB36
 
     open OutstationPatcher.InputData
 
-    let optString (source : string) : string option = 
-        match source with
-        | null | "" -> None
-        |_ -> Some source
 
     /// Note - this is very flaky as ExcelProvider seems to have difficulty 
     /// with Excel's type casting.
@@ -37,37 +34,11 @@ module OutstationTemplate =
         lstnut
             [ uniclass_code ()
               uniclass_desc ()
-              optional <| lstn_transducer_model     parameters.``Transducer Model``
-              optional <| lstn_transducer_serial_no parameters.``Transducer Serial Number``
-              applyOptional (lstn_relay_function 1) (RelayFunction.TryParse parameters.``Relay 1 Function``)
-              applyOptional (lstn_relay_on_level 1) (tryGetDecimal parameters.``Relay 1 On``)
-              applyOptional (lstn_relay_off_level 1) (tryGetDecimal parameters.``Relay 1 Off``)
-              
-              applyOptional (lstn_relay_function 2) (RelayFunction.TryParse parameters.``Relay 2 Function``)
-              applyOptional (lstn_relay_on_level 2) (tryGetDecimal parameters.``Relay 2 On``)
-              applyOptional (lstn_relay_off_level 2) (tryGetDecimal parameters.``Relay 2 Off``)
-              
-              applyOptional (lstn_relay_function 3) (RelayFunction.TryParse parameters.``Relay 3 Function``)
-              applyOptional (lstn_relay_on_level 3) (tryGetDecimal parameters.``Relay 3 On``)
-              applyOptional (lstn_relay_off_level 3) (tryGetDecimal parameters.``Relay 3 Off``)
-              
-              applyOptional (lstn_relay_function 4) (RelayFunction.TryParse parameters.``Relay 4 Function``)
-              applyOptional (lstn_relay_on_level 4) (tryGetDecimal parameters.``Relay 4 On``)
-              applyOptional (lstn_relay_off_level 4) (tryGetDecimal parameters.``Relay 4 Off``)
-              
-              applyOptional (lstn_relay_function 5) (RelayFunction.TryParse parameters.``Relay 5 Function``)
-              applyOptional (lstn_relay_on_level 5) (tryGetDecimal parameters.``Relay 5 On``)
-              applyOptional (lstn_relay_off_level 5) (tryGetDecimal parameters.``Relay 5 Off``)
-
-              applyOptional (lstn_relay_function 6) (RelayFunction.TryParse parameters.``Relay 6 Function``)
-              applyOptional (lstn_relay_on_level 6) (tryGetDecimal parameters.``Relay 6 On``)
-              applyOptional (lstn_relay_off_level 6) (tryGetDecimal parameters.``Relay 6 Off``)
-              
             ]
 
 
 
-    let edcTemplate (parameters : WorkListRow) : Function = 
+    let osTemplate (parameters : WorkListRow) : Function = 
 
         
         let installDate = getInstallDate parameters.``Install Date``
@@ -91,43 +62,28 @@ module OutstationTemplate =
 
 
         locals [startupDateTrafo]
-            <| environmental_discharge 
+            <| control_and_automation 
                 [ east_north_common 
                   aib_reference_common
                 ]
                 [ 
-                  liquid_discharge
+                  networks
                     [ east_north_common
                       aib_reference_common
                     ]
                     [   
-                      regulatory_monitoring
+                      telemetry
                         [ east_north_common 
                           aib_reference_common   
                         ]
                         [   
-                          montoring_system "SYS01" "EA Event Duration Monitoring"
+                          telemetry_system "SYS01" "Telemetry System"
                             [ east_north_common 
                               aib_reference_common
-                              smonsy 
-                                [ system_type "EA Overflow Monitoring" 
-                                ]
+                              
                             ]
                             _no_assemblies_
                             [ 
-                              lstn_level_transmitter "Storm Overflow Level Monitor Loop"
-                                [ east_north_common
-                                  aib_reference_leaf_instance parameters
-                                  lstnut_leaf_instance parameters
-                                  asset_condition_new_item (uint32 installDate.Year)
-                                ]
-                                _no_subordinate_equipment_
-                                [ manufacturer parameters.Manufacturer
-                                  model parameters.Model
-                                  serial_number parameters.``Serial Number``
-                                  construction_year (uint16 installDate.Year)
-                                  construction_month (uint8 installDate.Month)
-                                ]
                             ]
                         ]
                     ]

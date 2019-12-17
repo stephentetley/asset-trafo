@@ -2,9 +2,9 @@
 // License: BSD 3 Clause
 
 
-namespace EdcPatcher
+namespace OutstationPatcher
 
-module EdcPatcher =
+module OutstationPatcher =
     
     open System.IO
 
@@ -12,17 +12,17 @@ module EdcPatcher =
     open AssetPatch.TemplatePatcher.CompilerMonad
     open AssetPatch.TemplatePatcher.PatchCompiler
 
-    open EdcPatcher.InputData
-    open EdcPatcher.EdcTemplate
+    open OutstationPatcher.InputData
+    open OutstationPatcher.OutstationTemplate
 
 
-    type EdcPatcherOptions = 
+    type OsPatcherOptions = 
         { UserName : string 
           OutputDirectory : string
           WorkListPath : string
-          }
+        }
 
-    let private makeCompilerOptions (opts : EdcPatcherOptions) : CompilerOptions = 
+    let private makeCompilerOptions (opts : OsPatcherOptions) : CompilerOptions = 
         { UserName = opts.UserName }
 
     let internal makeOutputDirectory (dirName : string) : unit = 
@@ -30,7 +30,7 @@ module EdcPatcher =
             Directory.CreateDirectory(dirName) |> ignore
         else ()
     
-    let runEdcPatcherPhase1 (opts : EdcPatcherOptions) : Result<unit, string> = 
+    let runOutstationPatcherPhase1 (opts : OsPatcherOptions) : Result<unit, string> = 
         let compilerOpts : CompilerOptions = makeCompilerOptions opts           
         runCompiler compilerOpts None
             <| compile { 
@@ -40,14 +40,13 @@ module EdcPatcher =
                 do! liftAction (fun () -> makeOutputDirectory opts.OutputDirectory)
 
                 do! compileFunctionPatchesPhase1 opts.OutputDirectory
-                                "edc_patch"
-                                edcTemplate
+                                "outstation_patch"
+                                osTemplate
                                 worklist
             }
 
-    /// Phase 2 generates ClassEqui and ValuaEqui patches 
-    /// with materialized Equipment numbers
-    let runEdcPatcherPhase2 (opts : EdcPatcherOptions) 
+    /// Phase 2 materializes Floc patches
+    let runOutstationPatcherPhase2 (opts : OsPatcherOptions) 
                             (equipmentDownloadPath : string)  : Result<unit, string> = 
         let compilerOpts : CompilerOptions = makeCompilerOptions opts  
         runCompiler compilerOpts (Some equipmentDownloadPath)
@@ -58,8 +57,8 @@ module EdcPatcher =
                 do! liftAction (fun () -> makeOutputDirectory opts.OutputDirectory)
 
                 do! compileFunctionPatchesPhase2 opts.OutputDirectory
-                                "edc_patch"
-                                edcTemplate
+                                "outstation_patch"
+                                osTemplate
                                 worklist
             }
 

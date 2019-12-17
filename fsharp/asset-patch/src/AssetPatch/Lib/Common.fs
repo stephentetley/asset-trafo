@@ -11,6 +11,12 @@ module Common =
     // ************************************************************************
     // Read cell functions
 
+    let notBlank (s : string) : bool = 
+        match s with
+        | null | "" -> false
+        | _ -> true
+
+
     let tryGetInt (source : string) : int option = 
         try
             int source |> Some

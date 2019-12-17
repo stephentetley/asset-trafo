@@ -15,7 +15,7 @@ module Base =
 
     let _no_functions_ : Function list = []
 
-    let control_automation : Class list -> ProcessGroup list -> Function =
+    let control_and_automation : Class list -> ProcessGroup list -> Function =
         _function "CAA" "Control and Automation" "CAA"
 
     let electrical_power_supply : Class list -> ProcessGroup list -> Function =

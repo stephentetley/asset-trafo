@@ -7,6 +7,7 @@
   <ItemGroup>
     <Compile Include="OutstationPatcher\InputData.fs" />
     <Compile Include="OutstationPatcher\OutstationTemplate.fs" />
+    <Compile Include="OutstationPatcher\OutstationPatcher.fs" />
     <None Include="RunOutstationPatcher.fsx" />
   </ItemGroup>
 

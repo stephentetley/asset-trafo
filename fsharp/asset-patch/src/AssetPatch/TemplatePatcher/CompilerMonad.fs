@@ -77,8 +77,7 @@ module CompilerMonad =
     let (compile : CompilerMonadBuilder) = new CompilerMonadBuilder()
 
     type CompilerOptions = 
-        { UseInterimFlocIds : bool 
-          UserName : string }
+        { UserName : string }
 
     let runCompiler (options : CompilerOptions) 
                     (equiIndexFile : string option)

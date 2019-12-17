@@ -6,10 +6,11 @@ namespace EdcPatcher
 
 module InputData =
     
-    open System
     open FSharp.Interop.Excel
 
     open AssetPatch.TemplatePatcher.CompilerMonad
+    open AssetPatch.Lib.Common
+
 
     [<Literal>]
     let PROVIDERSOURCE = __SOURCE_DIRECTORY__ + @"\..\excel-sample\WorkListSample.xlsx"
@@ -20,11 +21,6 @@ module InputData =
                        ForceString = true >
 
     type WorkListRow = WorkListTable.Row
-
-    let private notBlank (s : string) : bool = 
-        match s with
-        | null | "" -> false
-        | _ -> true
 
 
     let readWorkList (xlsxPath : string) : CompilerMonad<WorkListRow list> =
