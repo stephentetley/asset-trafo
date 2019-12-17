@@ -25,7 +25,6 @@ open System.IO
 #r "FParsec"
 #r "FParsecCS"
 
-
 open FSharp.Core
 
 #I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190721\lib\netstandard2.0"
@@ -55,6 +54,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
 #load "..\src\AssetPatch\TemplatePatcher\CompilerMonad.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchWriter.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EmitCommon.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitEquipment.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitFuncLoc.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"

@@ -14,42 +14,9 @@ module EmitEquipment =
     open AssetPatch.TemplatePatcher.CompilerMonad
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.TemplateHierarchy
-    open AssetPatch.TemplatePatcher.EquiIndexing
     open AssetPatch.TemplatePatcher.PatchWriter
+    open AssetPatch.TemplatePatcher.EmitCommon
     
-
-
-    type Phase1EquiData = 
-        { Equis : NewEqui list
-        }
-        member x.IsEmpty 
-            with get () : bool = x.Equis.IsEmpty 
-            
-    let emptyPhase1EquiData : Phase1EquiData = { Equis = [] }
-
-    let concatPhase1EquiData (source : Phase1EquiData list) : Phase1EquiData = 
-        let add (r1 : Phase1EquiData) (acc : Phase1EquiData) = 
-            { Equis = r1.Equis @ acc.Equis }
-        List.foldBack add source { Equis = [] }
-
-    
-    type Phase2EquiData = 
-        { ClassEquis : NewClassEqui list
-          ValuaEquis : NewValuaEqui list
-        }
-        member x.IsEmpty 
-            with get () : bool = 
-                x.ClassEquis.IsEmpty && x.ValuaEquis.IsEmpty
-
-    let concatPhase2EquiData (source : Phase2EquiData list) : Phase2EquiData = 
-        let add (r1 : Phase2EquiData) (acc : Phase2EquiData) = 
-            { ClassEquis = r1.ClassEquis @ acc.ClassEquis
-              ValuaEquis = r1.ValuaEquis @ acc.ValuaEquis
-            }
-        List.foldBack add source { ClassEquis = []; ValuaEquis = [] }
-
-
-
 
     let private characteristicToNewValuaEqui1 (equiId : uint32) 
                                                 (count : int) 

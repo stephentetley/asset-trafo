@@ -23,6 +23,7 @@
     <Compile Include="AssetPatch\TemplatePatcher\Template.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\CompilerMonad.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\PatchWriter.fs" />
+    <Compile Include="AssetPatch\TemplatePatcher\EmitCommon.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\EmitEquipment.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\EmitFuncLoc.fs" />
     <Compile Include="AssetPatch\TemplatePatcher\Emitter.fs" />

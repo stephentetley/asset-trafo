@@ -9,6 +9,7 @@ module Emitter =
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.CompilerMonad
     open AssetPatch.TemplatePatcher.TemplateHierarchy
+    open AssetPatch.TemplatePatcher.EmitCommon
     open AssetPatch.TemplatePatcher.EmitEquipment
     open AssetPatch.TemplatePatcher.EmitFuncLoc
 
@@ -17,22 +18,7 @@ module Emitter =
     // Phase 1
 
 
-    type Phase1Data = 
-        { FlocData : Phase1FlocData
-          EquiData : Phase1EquiData
-        }
-
     
-
-    let private collectPhase1Data (xs : (FuncLocResult1 * Phase1EquiData) list) : Phase1Data = 
-        let flocResults = xs|> List.map fst |> concatFuncLocResult1s
-        let equiResults = xs|> List.map snd |> concatPhase1EquiData
-        { FlocData = flocResults; EquiData = equiResults }
-
-    let private concatPhase1Data (xs : Phase1Data list) : Phase1Data = 
-        { FlocData = xs |> List.map (fun x -> x.FlocData) |> concatPhase1FlocData
-          EquiData = xs |> List.map (fun x -> x.EquiData) |> concatPhase1EquiData
-        }
         
 
     let private componentEmitPhase1 (source : S4Component) : CompilerMonad<FuncLocResult1 * Phase1EquiData> = 

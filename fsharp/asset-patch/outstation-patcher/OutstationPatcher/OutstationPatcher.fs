@@ -30,6 +30,10 @@ module OutstationPatcher =
             Directory.CreateDirectory(dirName) |> ignore
         else ()
     
+    /// Note - we need to be able to create floc patches at different
+    /// levels in the tree (according to what already exists).
+    /// This will need changes to TemplatePatcher...
+
     let runOutstationPatcherPhase1 (opts : OsPatcherOptions) : Result<unit, string> = 
         let compilerOpts : CompilerOptions = makeCompilerOptions opts           
         runCompiler compilerOpts None

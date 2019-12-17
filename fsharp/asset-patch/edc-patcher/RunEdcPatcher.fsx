@@ -53,6 +53,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
 #load "..\src\AssetPatch\TemplatePatcher\CompilerMonad.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchWriter.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EmitCommon.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitEquipment.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitFuncLoc.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"
@@ -74,7 +75,7 @@ let outputDirectory (child : string) : string =
     | _ -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output", child)
 
 
-let options : EdcOptions = 
+let options : EdcPatcherOptions = 
     {   UserName = "TETLEYS"
         OutputDirectory = outputDirectory "edc_patcher"
         WorkListPath = @"G:\work\Projects\assets\asset_patch\EnvDischarge_Worklist1.xlsx" 

@@ -53,6 +53,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
 #load "..\src\AssetPatch\TemplatePatcher\CompilerMonad.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchWriter.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EmitCommon.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitEquipment.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitFuncLoc.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"

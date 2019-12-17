@@ -54,6 +54,7 @@ open FSharp.Core
 #load "..\src\AssetPatch\TemplatePatcher\Template.fs"
 #load "..\src\AssetPatch\TemplatePatcher\CompilerMonad.fs"
 #load "..\src\AssetPatch\TemplatePatcher\PatchWriter.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EmitCommon.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitEquipment.fs"
 #load "..\src\AssetPatch\TemplatePatcher\EmitFuncLoc.fs"
 #load "..\src\AssetPatch\TemplatePatcher\Emitter.fs"
@@ -132,10 +133,9 @@ let test01 () =
         |> List.map (fun (name, v) -> (FuncLocPath.Create name, v))
     let opts : CompilerOptions = 
         { UserName = "TETLEYS"
-          UseInterimFlocIds = false
         }
     runCompiler opts None
-       <| compileFunctionPatches 
+       <| compileFunctionPatchesPhase1 
                    (outputDirectory "edg-patches")
                    "env_discharge"
                    edcTemplate
@@ -156,7 +156,7 @@ let caaTemplate (parameters : RowParams) : Site =
           aib_reference [ s4_aib_reference () ] 
         ]
         [
-            control_automation 
+            control_and_automation 
                 [ east_north_common 
                   aib_reference [ s4_aib_reference () ] 
                 ]
@@ -203,10 +203,9 @@ let test02 () =
     
     let opts : CompilerOptions = 
         { UserName = "TETLEYS"
-          UseInterimFlocIds = false
         }
     runCompiler opts None
-       <| compileSitePatches
+       <| compileSitePatchesPhase1
                    (outputDirectory "caa-patches")
                    "control_automation"
                    caaTemplate

@@ -15,65 +15,7 @@ module EmitFuncLoc =
     open AssetPatch.TemplatePatcher.PatchTypes
     open AssetPatch.TemplatePatcher.TemplateHierarchy
     open AssetPatch.TemplatePatcher.PatchWriter
-    
-    type NewFlocProperties = 
-        { ClassFlocs : NewClassFloc list
-          ValuaFlocs : NewValuaFloc list
-        }
-        member x.IsEmpty 
-            with get () : bool = 
-                x.ClassFlocs.IsEmpty && x.ValuaFlocs.IsEmpty
-
-    let private concatNewFlocProperties (source : NewFlocProperties list) : NewFlocProperties = 
-        let add (r1 : NewFlocProperties) (acc : NewFlocProperties) = 
-            { ClassFlocs = r1.ClassFlocs @ acc.ClassFlocs
-              ValuaFlocs = r1.ValuaFlocs @ acc.ValuaFlocs
-            }
-        List.foldBack add source { ClassFlocs = []; ValuaFlocs = [] }
-
-    type FuncLocResult1 = 
-        { FuncLoc : NewFuncLoc
-          FuncLocLink : LinkFuncLoc option
-          ClassFlocs : NewClassFloc list
-          ValuaFlocs : NewValuaFloc list
-        }
-
-    type Phase1FlocData = 
-        { FuncLocs : NewFuncLoc list
-          FuncLocLinks : LinkFuncLoc list
-          ClassFlocs : NewClassFloc list
-          ValuaFlocs : NewValuaFloc list
-        }
-        member x.IsEmpty 
-            with get () : bool = 
-                x.FuncLocs.IsEmpty &&  x.ClassFlocs.IsEmpty && x.ValuaFlocs.IsEmpty
-
-        member x.RemoveDups() : Phase1FlocData = 
-            { FuncLocs = x.FuncLocs |> List.distinctBy (fun x -> x.FunctionLocation)
-              FuncLocLinks = x.FuncLocLinks |> List.distinctBy (fun x -> x.FunctionLocation)
-              ClassFlocs = x.ClassFlocs |> List.distinctBy (fun x -> x.FuncLoc.ToString() + "::" + x.Class)
-              ValuaFlocs = x.ValuaFlocs |> List.distinct
-            }
-
-    let concatPhase1FlocData (source : Phase1FlocData list) : Phase1FlocData = 
-        { FuncLocs = source |> List.map (fun x -> x.FuncLocs) |> List.concat
-          FuncLocLinks = source |> List.map (fun x -> x.FuncLocLinks) |> List.concat
-          ClassFlocs = source |> List.map (fun x -> x.ClassFlocs) |> List.concat
-          ValuaFlocs = source |> List.map (fun x -> x.ValuaFlocs) |> List.concat
-        }
-
-    let concatFuncLocResult1s (source : FuncLocResult1 list) : Phase1FlocData = 
-        let add (r1 : FuncLocResult1) (acc : Phase1FlocData) = 
-            { FuncLocs = r1.FuncLoc :: acc.FuncLocs
-              FuncLocLinks = 
-                match r1.FuncLocLink with
-                | None -> acc.FuncLocLinks
-                | Some link -> link :: acc.FuncLocLinks
-              ClassFlocs = r1.ClassFlocs @ acc.ClassFlocs
-              ValuaFlocs = r1.ValuaFlocs @ acc.ValuaFlocs
-            }
-        List.foldBack add source { FuncLocs = []; FuncLocLinks = []; ClassFlocs = []; ValuaFlocs = [] }
-
+    open AssetPatch.TemplatePatcher.EmitCommon
 
     let characteristicToNewValuaFloc (funcLoc : FuncLocPath)
                                     (count : int) 
