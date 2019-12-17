@@ -36,24 +36,33 @@ module EdcPatcher =
     let runEdcPatcherPhase1 (opts : EdcOptions) : Result<unit, string> = 
         let compilerOpts : CompilerOptions = makeCompilerOptions opts           
         runCompiler compilerOpts None
-            (compile { 
+            <| compile { 
                 let! worklist = 
                     readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
                 
                 do! liftAction (fun () -> makeOutputDirectory opts.OutputDirectory)
 
-                do! compileFunctionPatches opts.OutputDirectory
+                do! compileFunctionPatchesPhase1 opts.OutputDirectory
                                 "edc_patch"
                                 edcTemplate
                                 worklist
-            })
+            }
 
     /// Phase 2 materializes Floc patches
     let runEdcPatcherPhase2 (opts : EdcOptions) 
-                            (equipmentDownloadPath : string) 
-                            (targetFolder : string) : Result<unit, string> = 
+                            (equipmentDownloadPath : string)  : Result<unit, string> = 
         let compilerOpts : CompilerOptions = makeCompilerOptions opts  
         runCompiler compilerOpts (Some equipmentDownloadPath)
-            <| mreturn ()
+            <| compile { 
+                let! worklist = 
+                    readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
+            
+                do! liftAction (fun () -> makeOutputDirectory opts.OutputDirectory)
+
+                do! compileFunctionPatchesPhase2 opts.OutputDirectory
+                                "edc_patch"
+                                edcTemplate
+                                worklist
+            }
 
     

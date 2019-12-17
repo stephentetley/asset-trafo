@@ -55,6 +55,15 @@ module PatchCompiler =
             return ()
         } 
 
+    let private writeComponentsPhase2 (outputDirectory : string)
+                                        (filePrefix : string)
+                                        (worklist : S4Component list) : CompilerMonad<unit> = 
+        compile {
+            let! ans = componentsEmitPhase2 worklist
+            do! writePhase2EquiData outputDirectory filePrefix ans
+            return ()
+        } 
+
     type ComponentWorkList<'hole> = (FuncLocPath * 'hole) list
 
     /// Generate patches for new level 8 components and their subordinate equipment
@@ -66,7 +75,18 @@ module PatchCompiler =
             let! worklist = applyFlocTemplate worklist template
             do! writeComponentsPhase1 outputDirectory filePrefix worklist
             return ()
-        }                                                
+        }       
+    
+    /// Generate patches for level 8 component equipment - classes and characteristics
+    let compileComponentsPhase2 (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : Component1<'hole>)
+                                (worklist : ComponentWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyFlocTemplate worklist template
+            do! writeComponentsPhase1 outputDirectory filePrefix worklist
+            return ()
+        } 
 
     // ************************************************************************
     // Items
@@ -79,6 +99,15 @@ module PatchCompiler =
             let! ans = itemsEmitPhase1 worklist
             do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
             do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
+            return ()
+        } 
+
+    let private writeItemsPhase2 (outputDirectory : string)
+                                    (filePrefix : string)
+                                    (worklist : S4Item list) : CompilerMonad<unit> = 
+        compile {
+            let! ans = itemsEmitPhase2 worklist
+            do! writePhase2EquiData outputDirectory filePrefix ans
             return ()
         } 
 
@@ -95,6 +124,17 @@ module PatchCompiler =
             return ()
         }  
 
+    /// Generate patches for level 7 item equipment - classes and characteristics
+    let compileItemsPhase2 (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : Item1<'hole>)
+                                (worklist : ItemWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyFlocTemplate worklist template
+            do! writeItemsPhase2 outputDirectory filePrefix worklist
+            return ()
+        } 
+
     // ************************************************************************
     // Assembly
 
@@ -106,6 +146,16 @@ module PatchCompiler =
             let! ans = assembliesEmitPhase1 worklist
             do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
             do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
+            return ()
+        
+        } 
+
+    let private writeAssembliesPhase2 (outputDirectory : string)
+                                        (filePrefix : string)
+                                        (worklist : S4Assembly list) : CompilerMonad<unit> = 
+        compile {
+            let! ans = assembliesEmitPhase2 worklist
+            do! writePhase2EquiData outputDirectory filePrefix ans
             return ()
         
         } 
@@ -123,6 +173,16 @@ module PatchCompiler =
             return ()
         }  
 
+    /// Generate patches for level 6 assembly equipment - classes and characteristics
+    let compileAssembliesPhase2 (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : Assembly1<'hole>)
+                                (worklist : AssemblyWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyFlocTemplate worklist template
+            do! writeAssembliesPhase2 outputDirectory filePrefix worklist
+            return ()
+        } 
     
     // ************************************************************************
     // System
@@ -135,6 +195,15 @@ module PatchCompiler =
             let! ans = systemsEmitPhase1 worklist
             do! writePhase1FlocData outputDirectory filePrefix ans.FlocData
             do! writePhase1EquiData outputDirectory filePrefix ans.EquiData
+            return ()
+        }
+
+    let private writeSystemsPhase2 (outputDirectory : string)
+                                    (filePrefix : string)
+                                    (worklist : S4System list) : CompilerMonad<unit> = 
+        compile {
+            let! ans = systemsEmitPhase2 worklist
+            do! writePhase2EquiData outputDirectory filePrefix ans
             return ()
         }
 
@@ -151,7 +220,16 @@ module PatchCompiler =
             return ()
         }
     
-    
+    /// Generate patches for level 5 system equipment - classes and characteristics    
+    let compileSystemsPhase2 (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : System1<'hole>)
+                                (worklist : SystemWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyFlocTemplate worklist template
+            do! writeSystemsPhase2 outputDirectory filePrefix worklist
+            return ()
+        }
     // ************************************************************************
     // Process
 
@@ -166,6 +244,15 @@ module PatchCompiler =
             return ()
         } 
 
+    let private writeProcessesPhase2 (outputDirectory : string)
+                                        (filePrefix : string)
+                                        (worklist : S4Process list) : CompilerMonad<unit> = 
+        compile {
+            let! ans = processesEmitPhase2 worklist
+            do! writePhase2EquiData outputDirectory filePrefix ans
+            return ()
+        }
+
     type ProcessWorkList<'hole> = (FuncLocPath * 'hole) list
 
     /// Generate patches for new level 4 processes and their subordinates
@@ -179,6 +266,16 @@ module PatchCompiler =
             return ()
         }
 
+    /// Generate patches for descendant equipment of level 4 processes - classes and characteristics
+    let compileProcessesPhase2 (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : Process1<'hole>)
+                                (worklist : ProcessWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyFlocTemplate worklist template
+            do! writeProcessesPhase2 outputDirectory filePrefix worklist
+            return ()
+        }
 
     // ************************************************************************
     // ProcessGroups
@@ -194,6 +291,15 @@ module PatchCompiler =
             return ()
         }
 
+    let private writeProcessGroupsPhase2 (outputDirectory : string)
+                                            (filePrefix : string)
+                                            (worklist : S4ProcessGroup list) : CompilerMonad<unit> = 
+        compile {
+            let! ans = processGroupsEmitPhase2 worklist
+            do! writePhase2EquiData outputDirectory filePrefix ans
+            return ()
+        }
+
     type ProcessGroupWorkList<'hole> = (FuncLocPath * 'hole) list
 
     /// Generate patches for new level 3 process groups and their subordinates
@@ -204,6 +310,17 @@ module PatchCompiler =
         compile {
             let! worklist = applyFlocTemplate worklist template
             do! writeProcessGroupsPhase1 outputDirectory filePrefix worklist
+            return ()
+        }
+
+    /// Generate patches for descendant equipment of level 3 process groups - classes and characteristics
+    let compileProcessGroupsPhase2 (outputDirectory : string)
+                                    (filePrefix : string)
+                                    (template : ProcessGroup1<'hole>)
+                                    (worklist : ProcessGroupWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyFlocTemplate worklist template
+            do! writeProcessGroupsPhase2 outputDirectory filePrefix worklist
             return ()
         }
 
@@ -221,16 +338,36 @@ module PatchCompiler =
             return ()
         } 
 
+    let private writeFunctionsPhase2 (outputDirectory : string)
+                                        (filePrefix : string)
+                                        (worklist : S4Function list) : CompilerMonad<unit> = 
+        compile {
+            let! ans = functionsEmitPhase2 worklist
+            do! writePhase2EquiData outputDirectory filePrefix ans
+            return ()
+        } 
+
     type FunctionWorkList<'hole> = (FuncLocPath * 'hole) list
 
     /// Generate patches for new level 2 functions and their subordinates
-    let compileFunctionPatches (outputDirectory : string)
+    let compileFunctionPatchesPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (template : Function1<'hole>)
                                 (worklist : FunctionWorkList<'hole>) : CompilerMonad<unit> = 
         compile {
             let! worklist = applyFlocTemplate worklist template
             do! writeFunctionsPhase1 outputDirectory filePrefix worklist
+            return ()
+        }
+
+    /// Generate patches for descendant equipment of level 2 functions - classes and characteristics
+    let compileFunctionPatchesPhase2 (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : Function1<'hole>)
+                                (worklist : FunctionWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyFlocTemplate worklist template
+            do! writeFunctionsPhase2 outputDirectory filePrefix worklist
             return ()
         }
 
@@ -248,10 +385,19 @@ module PatchCompiler =
             return ()
         } 
 
+    let private writeSitesPhase2 (outputDirectory : string)
+                                    (filePrefix : string)
+                                    (worklist : S4Site list) : CompilerMonad<unit> = 
+        compile {
+            let! ans = sitesEmitPhase2 worklist
+            do! writePhase2EquiData outputDirectory filePrefix ans
+            return ()
+        }
+
     type SiteWorkList<'hole> = (FuncLocPath * 'hole) list
 
     /// Generate patches for new level 1 sites and their subordinates
-    let compileSitePatches (outputDirectory : string)
+    let compileSitePatchesPhase1 (outputDirectory : string)
                                 (filePrefix : string)
                                 (template : Site1<'hole>)
                                 (worklist : SiteWorkList<'hole>) : CompilerMonad<unit> = 
@@ -261,3 +407,13 @@ module PatchCompiler =
             return ()
         }
 
+    /// Generate patches for descendant equipment of level 1 sites - classes and characteristics
+    let compileSitePatchesPhase2 (outputDirectory : string)
+                                (filePrefix : string)
+                                (template : Site1<'hole>)
+                                (worklist : SiteWorkList<'hole>) : CompilerMonad<unit> = 
+        compile {
+            let! worklist = applyFlocTemplate worklist template
+            do! writeSitesPhase2 outputDirectory filePrefix worklist
+            return ()
+        }

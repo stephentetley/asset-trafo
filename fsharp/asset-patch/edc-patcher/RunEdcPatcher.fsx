@@ -86,6 +86,7 @@ let main01 () =
 
 
 // Generate ClassEqui and ValuaEqui files...
-let main02 (equiFile : string) (dirname : string) = 
-    runEdcPatcherPhase2 options equiFile (outputDirectory dirname) 
+// > main02 @"@"G:\work\Projects\assets\asset_patch\env_discharge_worklist1_mocked_download.txt"
+let main02 (equiFile : string) = 
+    runEdcPatcherPhase2 options equiFile  
 

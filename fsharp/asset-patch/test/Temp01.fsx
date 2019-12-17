@@ -27,10 +27,10 @@ open FSharp.Core
 #load "..\src\AssetPatch\Base\Parser.fs"
 #load "..\src\AssetPatch\Base\Printer.fs"
 #load "..\src\AssetPatch\Base\FuncLocPath.fs"
-#load "..\src\AssetPatch\TemplatePatcher\EquiIndexing2.fs"
+#load "..\src\AssetPatch\TemplatePatcher\EquiIndexing.fs"
 open AssetPatch.Base
 open AssetPatch.Base.Parser
-open AssetPatch.TemplatePatcher.EquiIndexing2
+open AssetPatch.TemplatePatcher.EquiIndexing
 
 type EquiIndex = 
     { Equi : uint32 

@@ -41,7 +41,7 @@ module EmitEquipment =
             with get () : bool = 
                 x.ClassEquis.IsEmpty && x.ValuaEquis.IsEmpty
 
-    let private concatPhase2EquiData (source : Phase2EquiData list) : Phase2EquiData = 
+    let concatPhase2EquiData (source : Phase2EquiData list) : Phase2EquiData = 
         let add (r1 : Phase2EquiData) (acc : Phase2EquiData) = 
             { ClassEquis = r1.ClassEquis @ acc.ClassEquis
               ValuaEquis = r1.ValuaEquis @ acc.ValuaEquis
