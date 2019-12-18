@@ -24,12 +24,7 @@ module OutstationTemplate =
         | Some date -> date
         | None -> new DateTime(year=1970, month=1, day=1)
 
-    let aib_reference_leaf_instance (parameters : WorkListRow) : Class = 
-        aib_reference 
-            [ s4_aib_reference () 
-              ai2_aib_reference parameters.``AI2 Equipment SAI Number``
-              ai2_aib_reference parameters.``AI2 Equipment PLI Code``
-            ]
+
 
 
     let os_aib_reference (ai2_ref : string) = 
@@ -46,6 +41,10 @@ module OutstationTemplate =
 
     let osLevel5Template (parameters : WorkListRow) : System = 
         let installDate = getInstallDate parameters.``Install Date``
+        
+       
+            
+
 
         telemetry_system parameters.``System Code`` parameters.``System Name``
             [ os_east_north parameters
@@ -57,7 +56,11 @@ module OutstationTemplate =
             _no_assemblies_
             [ telemetry_outstation parameters.``Outstation Name``
                 [ os_east_north parameters
-
+                  aib_reference 
+                      [ s4_aib_reference () 
+                        ai2_aib_reference parameters.``AI2 Equipment SAI Number``
+                        ai2_aib_reference parameters.``AI2 Equipment PLI Code``
+                      ]
                 ]
                 _no_subordinate_equipment_
                 [ manufacturer parameters.Manufacturer

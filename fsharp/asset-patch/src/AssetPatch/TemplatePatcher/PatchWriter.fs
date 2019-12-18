@@ -133,7 +133,7 @@ module PatchWriter =
     /// Render a list of new ClassFlocs into a ChangeFile
     let private makeNewClassFlocsFile (rows : NewClassFloc list) : CompilerMonad<ChangeFile> = 
         rows
-            |> List.sortBy (fun row -> row.Class + "!" + row.FuncLoc.ToString())
+            |> List.sortBy (fun row -> row.FuncLoc.ToString() + "!!" + row.Class)
             |> List.map (fun x -> x.ToAssocs())    
             |> makeChangeFile ClassFloc "Asset Patch Create ClassFlocs"
 
@@ -157,7 +157,7 @@ module PatchWriter =
     /// Render a list of new ValuaFloc into a ChangeFile
     let private makeNewValuaFlocsFile (rows : NewValuaFloc list) : CompilerMonad<ChangeFile> = 
         rows
-            |> List.sortBy (fun row -> row.FuncLoc.ToString() + "!" + row.CharacteristicID)
+            |> List.sortBy (fun row -> row.FuncLoc.ToString() + "!!" + row.CharacteristicID)
             |> List.map (fun x -> x.ToAssocs())       
             |> makeChangeFile ValuaFloc "Asset Patch Create ValuaFlocs"
 

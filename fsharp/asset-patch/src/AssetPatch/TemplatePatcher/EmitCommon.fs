@@ -43,8 +43,8 @@ module EmitCommon =
         member x.RemoveDups() : Phase1FlocData = 
             { FuncLocs = x.FuncLocs |> List.distinctBy (fun x -> x.FunctionLocation)
               FuncLocLinks = x.FuncLocLinks |> List.distinctBy (fun x -> x.FunctionLocation)
-              ClassFlocs = x.ClassFlocs |> List.distinctBy (fun x -> x.FuncLoc.ToString() + "::" + x.Class)
-              ValuaFlocs = x.ValuaFlocs |> List.distinct
+              ClassFlocs = x.ClassFlocs |> List.distinctBy (fun x -> x.FuncLoc.ToString() + "!!" + x.Class)
+              ValuaFlocs = x.ValuaFlocs |> List.distinctBy (fun x -> x.FuncLoc.ToString() + "!!" + x.CharacteristicID + "!!" + x.ValueCount.ToString())
             }
 
         static member Concat (source : Phase1FlocData list) : Phase1FlocData = 
@@ -61,6 +61,9 @@ module EmitCommon =
         member x.IsEmpty 
             with get () : bool = x.Equis.IsEmpty 
 
+        member x.RemoveDups () : Phase1EquiData = 
+            { Equis = x.Equis |> List.distinctBy (fun x -> x.FuncLoc.ToString() + "!!" + x.Description)
+            }
         static member Empty : Phase1EquiData = { Equis = [] }
             
         static member Concat (source : Phase1EquiData list) : Phase1EquiData = 
@@ -80,7 +83,10 @@ module EmitCommon =
               EquiData = xs |> List.map (fun x -> x.EquiData) |> Phase1EquiData.Concat
             }
 
-
+        member x.RemoveDups() : Phase1Data = 
+            { FlocData = x.FlocData.RemoveDups()
+              EquiData = x.EquiData.RemoveDups()
+            }
 
     // ************************************************************************
     // Phase 2

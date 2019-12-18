@@ -70,9 +70,11 @@ module PatchCompiler =
     let writePhase1Data (directory : string) 
                         (filePrefix : string) 
                         (phase1Data : Phase1Data) : CompilerMonad<unit> = 
+        
         compile {
-            do! writePhase1FlocData directory filePrefix phase1Data.FlocData
-            do! writePhase1EquiData directory filePrefix phase1Data.EquiData
+            let source = phase1Data.RemoveDups ()
+            do! writePhase1FlocData directory filePrefix source.FlocData
+            do! writePhase1EquiData directory filePrefix source.EquiData
             return ()
         }
             
