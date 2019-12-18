@@ -56,17 +56,25 @@ module OutstationPatcher =
                 return ()
             }
 
-    /// Phase 2 materializes Floc patches
+    let private phase2ProcessRow (path : FuncLocPath, row : WorkListRow) : CompilerMonad<Phase2Data> = 
+        match path.Level with
+        | 1 -> applyFlocTemplate1 (path, row) osLevel2Template >>= function1EmitPhase2
+        | 2 -> applyFlocTemplate1 (path, row) osLevel3Template >>= processGroup1EmitPhase2
+        | 3 -> applyFlocTemplate1 (path, row) osLevel4Template >>= process1EmitPhase2
+        | 4 -> applyFlocTemplate1 (path, row) osLevel5Template >>= system1EmitPhase2
+        | x -> throwError (sprintf "Cannot process floc %s, level %i not valid" (path.ToString()) x)
+
+
+    /// Phase 2 materializes ClassEqui and ValuaEqui patches
     let runOutstationPatcherPhase2 (opts : OsPatcherOptions) 
                             (equipmentDownloadPath : string)  : Result<unit, string> = 
         let compilerOpts : CompilerOptions = makeCompilerOptions opts  
         runCompiler compilerOpts (Some equipmentDownloadPath)
             <| compile { 
                 do! liftAction (fun () -> makeOutputDirectory opts.OutputDirectory)
-                let! xs = 
+                let! worklist = 
                     readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
-                let! worklist1 = applyFlocTemplate xs osLevel2Template
-                let! phase2Data = functionListEmitPhase2 worklist1
+                let! phase2Data = mapM phase2ProcessRow worklist |>> Phase2Data.Concat
                 do! writePhase2Data opts.OutputDirectory "outstation_patch" phase2Data
                 return ()
             }

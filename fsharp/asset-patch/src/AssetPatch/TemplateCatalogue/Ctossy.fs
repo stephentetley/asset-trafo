@@ -5,17 +5,20 @@ namespace AssetPatch.TemplateCatalogue
 
 
 
-module Smonsy =
+module Ctossy =
     
     open AssetPatch.TemplatePatcher.CommonTypes
     open AssetPatch.TemplatePatcher.Template
 
 
-    /// Class:SMONSY
-    let smonsy : Characteristic list -> Class = 
-        _class "SMONSY" 
+    /// Class:CTOSSY
+    let ctossy : Characteristic list -> Class = 
+        _class "CTOSSY" 
     
 
     /// SYSTEM_TYPE
+    /// Often "REMOTE TELEMETRY OUTSTATION"...
     let system_type (v : string) : Characteristic = 
         _characteristic "SYSTEM_TYPE" (TextValue v)
+
+        

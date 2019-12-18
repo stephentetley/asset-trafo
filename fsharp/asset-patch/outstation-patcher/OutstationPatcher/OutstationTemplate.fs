@@ -10,6 +10,7 @@ module OutstationTemplate =
 
     open AssetPatch.TemplatePatcher.Template
     open AssetPatch.TemplateCatalogue
+    open AssetPatch.TemplateCatalogue.Ctossy
     open AssetPatch.Lib.Common
     open AssetPatch.Lib.OSGB36
 
@@ -30,11 +31,6 @@ module OutstationTemplate =
               ai2_aib_reference parameters.``AI2 Equipment PLI Code``
             ]
 
-    let lstnut_leaf_instance (parameters : WorkListRow) : Class = 
-        lstnut
-            [ uniclass_code ()
-              uniclass_desc ()
-            ]
 
     let os_aib_reference (ai2_ref : string) = 
         aib_reference 
@@ -52,10 +48,18 @@ module OutstationTemplate =
         telemetry_system parameters.``System Code`` parameters.``System Name``
             [ os_east_north parameters
               os_aib_reference parameters.``AI2 Equipment SAI Number``
-          
+              ctossy 
+                [ system_type "REMOTE TELEMETRY SYSTEM"
+                ]
             ]
             _no_assemblies_
-            [ 
+            [ telemetry_outstation parameters.``Outstation Name``
+                [ os_east_north parameters
+
+                ]
+                _no_subordinate_equipment_
+                [
+                ]
             ]
     
     let osLevel4Template (parameters : WorkListRow) : Process = 
@@ -75,6 +79,7 @@ module OutstationTemplate =
             [ 
                 osLevel4Template parameters
             ]
+
     let osLevel2Template (parameters : WorkListRow) : Function = 
         control_and_automation 
             [ os_east_north parameters

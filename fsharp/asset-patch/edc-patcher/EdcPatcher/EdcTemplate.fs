@@ -10,6 +10,7 @@ module EdcTemplate =
 
     open AssetPatch.TemplatePatcher.Template
     open AssetPatch.TemplateCatalogue
+    open AssetPatch.TemplateCatalogue.Smonsy
     open AssetPatch.Lib.Common
     open AssetPatch.Lib.OSGB36
 
