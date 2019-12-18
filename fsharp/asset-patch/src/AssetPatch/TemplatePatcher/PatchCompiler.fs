@@ -27,6 +27,10 @@ module PatchCompiler =
                                 (template: 'b -> Template.Template<'c>) : CompilerMonad<('name * 'c) list> = 
         forM xs (fun (name, x) -> evalTemplate path (template x) >>=  fun a -> mreturn (name, a))
 
+    let applyFlocTemplate1 (path : FuncLocPath, body : 'a) 
+                            (template: 'a -> Template.Template<'b>) : CompilerMonad<'b> = 
+        evalTemplate path (template body)
+
     let applyFlocTemplate (xs: (FuncLocPath * 'a) list ) 
                         (template: 'a -> Template.Template<'b>) : CompilerMonad<'b list> = 
         forM xs (fun (path, x) -> evalTemplate path (template x))

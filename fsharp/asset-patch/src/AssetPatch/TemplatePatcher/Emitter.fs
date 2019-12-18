@@ -104,7 +104,7 @@ module Emitter =
         mapM processGroup1EmitPhase1 source |>> Phase1Data.Concat
 
 
-    let functionEmitPhase1 (source : S4Function) : CompilerMonad<Phase1Data> = 
+    let function1EmitPhase1 (source : S4Function) : CompilerMonad<Phase1Data> = 
         compile {
             let! flocResult = 
                 funclocToPhase1FlocData source.FuncLoc source.FlocProperties source.Description source.ObjectType source.Classes
@@ -114,7 +114,7 @@ module Emitter =
         }
 
     let functionListEmitPhase1 (source : S4Function list) : CompilerMonad<Phase1Data> = 
-        mapM functionEmitPhase1 source |>> Phase1Data.Concat
+        mapM function1EmitPhase1 source |>> Phase1Data.Concat
 
         
     let site1EmitPhase1 (source : S4Site) : CompilerMonad<Phase1Data> = 

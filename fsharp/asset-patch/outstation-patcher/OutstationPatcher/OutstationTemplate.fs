@@ -36,57 +36,52 @@ module OutstationTemplate =
               uniclass_desc ()
             ]
 
+    let os_aib_reference (ai2_ref : string) = 
+        aib_reference 
+            [   s4_aib_reference ()
+                ai2_aib_reference ai2_ref                
+            ]
+
+    let os_east_north (parameters : WorkListRow) : Class = 
+        match NGR.Create parameters.NGR with
+        | Some eastNorth -> east_north_ngr eastNorth
+        | None ->  east_north [ easting 0; northing 0 ]
 
 
-    let osTemplate (parameters : WorkListRow) : Function = 
+    let osLevel5Template (parameters : WorkListRow) : System = 
+        telemetry_system parameters.``System Code`` parameters.``System Name``
+            [ os_east_north parameters
+              os_aib_reference parameters.``AI2 Equipment SAI Number``
+          
+            ]
+            _no_assemblies_
+            [ 
+            ]
+    
+    let osLevel4Template (parameters : WorkListRow) : Process = 
+        telemetry
+            [ os_east_north parameters 
+                // aib_reference_common   
+            ]
+            [   
+                osLevel5Template parameters
+            ]
 
-        
-        let installDate = getInstallDate parameters.``Install Date``
-
-        let startupDateTrafo : EnvTransformer = 
-            match tryGetUSDate parameters.``Install Date`` with
-            | None -> id
-            | Some date -> startupDate date
-
-        let east_north_common = 
-            match NGR.Create parameters.NGR with
-            | Some eastNorth -> east_north_ngr eastNorth
-            | None ->  east_north [ easting 0; northing 0 ]
-
-        let aib_reference_common = 
-            aib_reference 
-                [   s4_aib_reference ()
-                    ai2_aib_reference parameters.``AI2 Site Reference``
-                    
-                ]
-
-
-        locals [startupDateTrafo]
-            <| control_and_automation 
-                [ east_north_common 
-                  aib_reference_common
-                ]
-                [ 
-                  networks
-                    [ east_north_common
-                      aib_reference_common
-                    ]
-                    [   
-                      telemetry
-                        [ east_north_common 
-                          aib_reference_common   
-                        ]
-                        [   
-                          telemetry_system "SYS01" "Telemetry System"
-                            [ east_north_common 
-                              aib_reference_common
-                              
-                            ]
-                            _no_assemblies_
-                            [ 
-                            ]
-                        ]
-                    ]
-                ]
+    let osLevel3Template (parameters : WorkListRow) : ProcessGroup = 
+        networks
+            [ os_east_north parameters
+                // aib_reference_common
+            ]
+            [ 
+                osLevel4Template parameters
+            ]
+    let osLevel2Template (parameters : WorkListRow) : Function = 
+        control_and_automation 
+            [ os_east_north parameters
+                // aib_reference_common
+            ]
+            [ 
+                osLevel3Template parameters
+            ]
     
 

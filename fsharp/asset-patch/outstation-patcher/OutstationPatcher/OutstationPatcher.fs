@@ -10,6 +10,7 @@ module OutstationPatcher =
 
     open AssetPatch.Base.FuncLocPath
     open AssetPatch.TemplatePatcher.CompilerMonad
+    open AssetPatch.TemplatePatcher.EmitCommon
     open AssetPatch.TemplatePatcher.Emitter
     open AssetPatch.TemplatePatcher.PatchCompiler
 
@@ -35,16 +36,23 @@ module OutstationPatcher =
     /// levels in the tree (according to what already exists).
     /// This will need changes to TemplatePatcher...
 
+    let private phase1ProcessRow (path : FuncLocPath, row : WorkListRow) : CompilerMonad<Phase1Data> = 
+        match path.Level with
+        | 1 -> applyFlocTemplate1 (path, row) osLevel2Template >>= function1EmitPhase1
+        | 2 -> applyFlocTemplate1 (path, row) osLevel3Template >>= processGroup1EmitPhase1
+        | 3 -> applyFlocTemplate1 (path, row) osLevel4Template >>= process1EmitPhase1
+        | 4 -> applyFlocTemplate1 (path, row) osLevel5Template >>= system1EmitPhase1
+        | x -> throwError (sprintf "Cannot process floc %s, level %i not valid" (path.ToString()) x)
+
     let runOutstationPatcherPhase1 (opts : OsPatcherOptions) : Result<unit, string> = 
         let compilerOpts : CompilerOptions = makeCompilerOptions opts           
         runCompiler compilerOpts None
             <| compile { 
                 do! liftAction (fun () -> makeOutputDirectory opts.OutputDirectory)
-                let! xs = 
+                let! worklist = 
                     readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
-                let! worklist1 = applyFlocTemplate xs osTemplate
-                let! phase1Data = functionListEmitPhase1 worklist1
-                do! writePhase1Data opts.OutputDirectory "edc_patch" phase1Data
+                let! phase1Data = mapM phase1ProcessRow worklist |>> Phase1Data.Concat
+                do! writePhase1Data opts.OutputDirectory "outstation_patch" phase1Data
                 return ()
             }
 
@@ -57,9 +65,9 @@ module OutstationPatcher =
                 do! liftAction (fun () -> makeOutputDirectory opts.OutputDirectory)
                 let! xs = 
                     readWorkList opts.WorkListPath |>> List.map (fun row -> (FuncLocPath.Create row.``S4 Root FuncLoc``, row))
-                let! worklist1 = applyFlocTemplate xs osTemplate
+                let! worklist1 = applyFlocTemplate xs osLevel2Template
                 let! phase2Data = functionListEmitPhase2 worklist1
-                do! writePhase2Data opts.OutputDirectory "edc_patch" phase2Data
+                do! writePhase2Data opts.OutputDirectory "outstation_patch" phase2Data
                 return ()
             }
 
