@@ -219,7 +219,7 @@ module Template =
     
 
 
-    let private getEquipmentIndex (description : string) : Template<uint32 option> = 
+    let private getEquipmentIndex (description : string) : Template<string option> = 
         Template <| fun env -> 
             let floc = env.CurrentFloc
             let indices = env.EquipmentIndices

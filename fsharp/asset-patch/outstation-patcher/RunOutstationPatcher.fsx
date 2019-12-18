@@ -88,7 +88,7 @@ let main01 () =
 // Generate ClassEqui and ValuaEqui files for Equipment 
 // once it has been activated and downloaded...
 let main02 () = 
-    let equiFile = @"G:\work\Projects\assets\asset_patch\outstation_worklist1_mocked_download.txt"
+    let equiFile = @"G:\work\Projects\assets\asset_patch\__oustation_equi_download_with_dollar_numbers.txt"
     runOutstationPatcherPhase2 options equiFile  
 
 

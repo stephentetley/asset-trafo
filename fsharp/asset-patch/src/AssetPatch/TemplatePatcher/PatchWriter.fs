@@ -209,7 +209,7 @@ module PatchWriter =
     /// Render a list of new ClassEquis into a ChangeFile
     let private makeNewClassEquisFile (rows : NewClassEqui list) : CompilerMonad<ChangeFile> = 
         rows
-            |> List.sortBy (fun row -> (sprintf "%012d" row.EquipmentId) + row.Class)
+            |> List.sortBy (fun row -> (sprintf "%s" row.EquipmentId) + row.Class)
             |> List.map (fun x -> x.ToAssocs())       
             |> makeChangeFile ClassEqui "Asset Patch Create ClassEquis"
 

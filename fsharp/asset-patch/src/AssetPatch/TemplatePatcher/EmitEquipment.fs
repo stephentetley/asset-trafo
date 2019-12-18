@@ -18,7 +18,7 @@ module EmitEquipment =
     open AssetPatch.TemplatePatcher.EmitCommon
     
 
-    let private characteristicToNewValuaEqui1 (equiId : uint32) 
+    let private characteristicToNewValuaEqui1 (equiId : string) 
                                                 (count : int) 
                                                 (charac : S4Characteristic) : CompilerMonad<NewValuaEqui> = 
         mreturn { 
@@ -29,8 +29,8 @@ module EmitEquipment =
             Value = charac.Value
         }
     
-
-    let private classToNewClassEqui (equiId : uint32)
+    
+    let private classToNewClassEqui (equiId : string)
                                     (s4Class : S4Class) : CompilerMonad<NewClassEqui> = 
         mreturn { 
             EquipmentId = equiId
@@ -40,7 +40,7 @@ module EmitEquipment =
 
 
 
-    let private characteristicsToNewValuaEquis (equiId : uint32)
+    let private characteristicsToNewValuaEquis (equiId : string)
                                                (characteristics : S4Characteristic list) : CompilerMonad<NewValuaEqui list> =  
 
         let makeGrouped (chars : S4Characteristic list) : CompilerMonad<NewValuaEqui list> = 
@@ -51,8 +51,8 @@ module EmitEquipment =
             return! mapM makeGrouped chars |>> List.concat
         }
 
-
-    let private classToProperties (equiId : uint32)
+    /// equiId may be a dollar number
+    let private classToProperties (equiId : string)
                                     (clazz : S4Class) : CompilerMonad<NewClassEqui * NewValuaEqui list> = 
            compile {
                let! ce = classToNewClassEqui equiId clazz
@@ -118,8 +118,8 @@ module EmitEquipment =
             return { Equis = List.concat xss }
         }
 
-
-    let equipmentToPhase2EquiData1 (equiId : uint32) 
+    /// equiId may be a dollar number
+    let equipmentToPhase2EquiData1 (equiId : string) 
                                      (classes : S4Class list) : CompilerMonad<Phase2EquiData> = 
         let collect xs = List.foldBack (fun (c1, vs1)  (cs,vs) -> (c1 ::cs, vs1 @ vs)) xs ([],[])
         compile { 

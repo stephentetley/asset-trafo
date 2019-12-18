@@ -15,8 +15,9 @@ module EquiIndexing =
     open AssetPatch.Base.Parser
     open AssetPatch.Base.FuncLocPath
 
+    /// Equi could be a dollar number
     type EquiIndex = 
-        { Equi : uint32 
+        { Equi : string 
           Txtmi : string
           TplnEilo : string
         }
@@ -25,7 +26,7 @@ module EquiIndexing =
         { Description : string 
           FuncLoc : FuncLocPath }
 
-    type EquiMap = Map<EquiKey, uint32>
+    type EquiMap = Map<EquiKey, string>
 
     let emptyEquiMap : EquiMap = Map.empty
 
@@ -38,11 +39,9 @@ module EquiIndexing =
     let private extractEquiIndex (row : AssocList<string, string>) : EquiIndex option = 
         match AssocList.tryFind3 "EQUI" "TXTMI" "TPLN_EILO" row with
         | Some (a,b,c) -> 
-            try 
-                let num = uint32 a 
-                Some { Equi  = num;  Txtmi = b; TplnEilo = c }
-            with
-            | _ -> None
+            match a with
+            | null | "" -> None
+            | _ -> Some { Equi  = a;  Txtmi = b; TplnEilo = c }
         | None -> None
     
     let readEquiDownload (path : string) : Result<EquiMap, ErrMsg> = 
@@ -58,5 +57,5 @@ module EquiIndexing =
 
     let tryFindEquiNum (description : string) 
                 (funcLoc : FuncLocPath) 
-                (indices : EquiMap) : uint32 option = 
+                (indices : EquiMap) : string option = 
         Map.tryFind { Description = description; FuncLoc = funcLoc } indices

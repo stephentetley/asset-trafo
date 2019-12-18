@@ -32,9 +32,9 @@ module TemplateHierarchy =
         }
 
 
-
+    /// EquipmentId may be a dollar number
     type S4Equipment = 
-        { EquipmentId : uint32 option
+        { EquipmentId : string option
           Description : string       
           Category : string
           ObjectType : string

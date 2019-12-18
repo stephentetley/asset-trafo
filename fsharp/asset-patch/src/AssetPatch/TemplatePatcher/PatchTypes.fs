@@ -244,7 +244,7 @@ module PatchTypes =
 
 
     type NewClassEqui = 
-        { EquipmentId : uint32
+        { EquipmentId : string
           Class : string
           Status : int
         }
@@ -265,7 +265,7 @@ module PatchTypes =
     /// ValueCount is the number of instances for this charcteristic 
     /// in a class.
     type NewValuaEqui = 
-        { EquipmentId : uint32
+        { EquipmentId : string
           ClassType : IntegerString
           CharacteristicID : string
           ValueCount : int
