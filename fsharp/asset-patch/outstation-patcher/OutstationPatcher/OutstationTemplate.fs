@@ -45,6 +45,8 @@ module OutstationTemplate =
 
 
     let osLevel5Template (parameters : WorkListRow) : System = 
+        let installDate = getInstallDate parameters.``Install Date``
+
         telemetry_system parameters.``System Code`` parameters.``System Name``
             [ os_east_north parameters
               os_aib_reference parameters.``AI2 Equipment SAI Number``
@@ -58,7 +60,11 @@ module OutstationTemplate =
 
                 ]
                 _no_subordinate_equipment_
-                [
+                [ manufacturer parameters.Manufacturer
+                  model parameters.Model
+                  serial_number parameters.``Serial Number``
+                  construction_year (uint16 installDate.Year)
+                  construction_month (uint8 installDate.Month)
                 ]
             ]
     

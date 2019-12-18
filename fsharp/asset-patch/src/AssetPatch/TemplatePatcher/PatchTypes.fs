@@ -65,10 +65,6 @@ module PatchTypes =
         member x.Level with get () : int = x.FunctionLocation.Level
 
         member x.ToAssocs() : AssocList<string, string> =  
-            let parent1 = 
-                match x.FunctionLocation |> parent with
-                | None -> ""
-                | Some path -> path.ToString()
             let installationAllowed = 
                 if x.FunctionLocation.Level >= 5 then "X" else ""
             makeAssocs
@@ -99,8 +95,8 @@ module PatchTypes =
                 ; ("USTW_FLOC",     "Status of an object",              x.ObjectStatus)
                 ; ("USWO_FLOC",     "Status without status number",     "")
                 ; ("TPLKZ_FLC",     "Structure indicator",              x.StructureIndicator)
-                ; ("TPLMA1",        "Superior FL for CR Processing",    parent1)
-                ; ("TPLMA",         "Superior FunctLoc",                parent1)
+                ; ("TPLMA1",        "Superior FL for CR Processing",    "")
+                ; ("TPLMA",         "Superior FunctLoc",                "")
                 ; ("PROI_FLOC",     "WBS Element",                      "")
                 ; ("ARBPLFLOC",     "Work center",                      "DEFAULT")
                 ]
