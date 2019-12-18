@@ -11,6 +11,7 @@ module OutstationTemplate =
     open AssetPatch.TemplatePatcher.Template
     open AssetPatch.TemplateCatalogue
     open AssetPatch.TemplateCatalogue.Ctossy
+    open AssetPatch.TemplateCatalogue.Netwtl
     open AssetPatch.Lib.Common
     open AssetPatch.Lib.OSGB36
 
@@ -57,10 +58,13 @@ module OutstationTemplate =
             [ telemetry_outstation parameters.``Outstation Name``
                 [ os_east_north parameters
                   aib_reference 
-                      [ s4_aib_reference () 
-                        ai2_aib_reference parameters.``AI2 Equipment SAI Number``
-                        ai2_aib_reference parameters.``AI2 Equipment PLI Code``
-                      ]
+                    [ s4_aib_reference () 
+                      ai2_aib_reference parameters.``AI2 Equipment SAI Number``
+                      ai2_aib_reference parameters.``AI2 Equipment PLI Code``
+                    ]
+                  netwtl 
+                    [
+                    ]    
                 ]
                 _no_subordinate_equipment_
                 [ manufacturer parameters.Manufacturer
