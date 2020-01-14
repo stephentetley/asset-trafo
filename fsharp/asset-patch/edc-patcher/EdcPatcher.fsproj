@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="excel-sample\WorkListSample.xlsx" />
     <Compile Include="EdcPatcher\InputData.fs" />
     <Compile Include="EdcPatcher\EdcTemplate.fs" />
     <Compile Include="EdcPatcher\EdcPatcher.fs" />

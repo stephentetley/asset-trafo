@@ -15,32 +15,13 @@ module Lstnut =
     let lstnut : Characteristic list -> Class = 
         _class "LSTNUT"     
 
-    /// LSTNUT:RelayFunction
-    type RelayFunction = 
-        | AlternateDutyAssist
-        | HighLevelAlarm
-        | LossOfEcho 
-
-        override x.ToString() = 
-            match x with
-            | AlternateDutyAssist -> "ALTERNATE DUTY ASSIST"
-            | HighLevelAlarm -> "HIGH LEVEL ALARM"
-            | LossOfEcho -> "LOSS OF ECHO"
-
-        static member TryParse (source : string) : RelayFunction option = 
-            match source with
-            | null | "" -> None
-            | _ -> 
-                match source.ToUpper() with
-                | "ALTERNATE DUTY ASSIST" -> Some AlternateDutyAssist
-                | "HIGH LEVEL ALARM" -> Some HighLevelAlarm
-                | "LOSS OF ECHO" -> Some LossOfEcho 
-                | _ -> None
+    /// Too many cases to make an enum worthwhile
+    type RelayFunction = string
 
     /// LSTN_RELAY_{ix}_FUNCTION
     let lstn_relay_function (ix : int) (v : RelayFunction) : Characteristic = 
         let name = sprintf "LSTN_RELAY_%i_FUNCTION" ix
-        _characteristic name (textUpperCase <| v.ToString())
+        _characteristic name (textUpperCase v)
 
 
     /// LSTN_RELAY_{ix}_ON_LEVEL_M
@@ -85,3 +66,8 @@ module Lstnut =
     /// IP_RATING
     let ip_rating (v : int) : Characteristic =         
         _characteristic "IP_RATING" (intValue v)
+
+    /// MEMO_LINE 
+    /// Usually "SEE LONG TEXT"
+    let memo_line(v : string) : Characteristic = 
+        _characteristic "MEMO_LINE" (TextValue v)

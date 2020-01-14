@@ -77,8 +77,8 @@ let outputDirectory (child : string) : string =
 
 let options : EdcPatcherOptions = 
     {   UserName = "TETLEYS"
-        OutputDirectory = outputDirectory "edc_patcher"
-        WorkListPath = @"G:\work\Projects\assets\asset_patch\EnvDischarge_Worklist1.xlsx" 
+        OutputDirectory = @"G:\work\Projects\assets\asset_patch\env_discharge_2019\patch_output"
+        WorkListPath = @"G:\work\Projects\assets\asset_patch\env_discharge_2019\EA_discharge_2019_worklist1.xlsx" 
     }
 
 let main01 () = 

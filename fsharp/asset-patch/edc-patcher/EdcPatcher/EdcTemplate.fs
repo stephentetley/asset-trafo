@@ -45,27 +45,27 @@ module EdcTemplate =
               uniclass_desc ()
               optional <| lstn_transducer_model     parameters.``Transducer Model``
               optional <| lstn_transducer_serial_no parameters.``Transducer Serial Number``
-              applyOptional (lstn_relay_function 1) (RelayFunction.TryParse parameters.``Relay 1 Function``)
+              applyOptional (lstn_relay_function 1) (tryGetNonBlank parameters.``Relay 1 Function``)
               applyOptional (lstn_relay_on_level 1) (tryGetDecimal parameters.``Relay 1 On``)
               applyOptional (lstn_relay_off_level 1) (tryGetDecimal parameters.``Relay 1 Off``)
               
-              applyOptional (lstn_relay_function 2) (RelayFunction.TryParse parameters.``Relay 2 Function``)
+              applyOptional (lstn_relay_function 2) (tryGetNonBlank parameters.``Relay 2 Function``)
               applyOptional (lstn_relay_on_level 2) (tryGetDecimal parameters.``Relay 2 On``)
               applyOptional (lstn_relay_off_level 2) (tryGetDecimal parameters.``Relay 2 Off``)
               
-              applyOptional (lstn_relay_function 3) (RelayFunction.TryParse parameters.``Relay 3 Function``)
+              applyOptional (lstn_relay_function 3) (tryGetNonBlank parameters.``Relay 3 Function``)
               applyOptional (lstn_relay_on_level 3) (tryGetDecimal parameters.``Relay 3 On``)
               applyOptional (lstn_relay_off_level 3) (tryGetDecimal parameters.``Relay 3 Off``)
               
-              applyOptional (lstn_relay_function 4) (RelayFunction.TryParse parameters.``Relay 4 Function``)
+              applyOptional (lstn_relay_function 4) (tryGetNonBlank parameters.``Relay 4 Function``)
               applyOptional (lstn_relay_on_level 4) (tryGetDecimal parameters.``Relay 4 On``)
               applyOptional (lstn_relay_off_level 4) (tryGetDecimal parameters.``Relay 4 Off``)
               
-              applyOptional (lstn_relay_function 5) (RelayFunction.TryParse parameters.``Relay 5 Function``)
+              applyOptional (lstn_relay_function 5) (tryGetNonBlank parameters.``Relay 5 Function``)
               applyOptional (lstn_relay_on_level 5) (tryGetDecimal parameters.``Relay 5 On``)
               applyOptional (lstn_relay_off_level 5) (tryGetDecimal parameters.``Relay 5 Off``)
 
-              applyOptional (lstn_relay_function 6) (RelayFunction.TryParse parameters.``Relay 6 Function``)
+              applyOptional (lstn_relay_function 6) (tryGetNonBlank parameters.``Relay 6 Function``)
               applyOptional (lstn_relay_on_level 6) (tryGetDecimal parameters.``Relay 6 On``)
               applyOptional (lstn_relay_off_level 6) (tryGetDecimal parameters.``Relay 6 Off``)
               

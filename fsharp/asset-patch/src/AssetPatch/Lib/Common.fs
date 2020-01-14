@@ -34,6 +34,10 @@ module Common =
         | null -> None
         | _ -> Some source
 
+    let tryGetNonBlank (source : string) : string option = 
+        if String.IsNullOrWhiteSpace source then None else Some source
+
+
     /// Note input string might have hh:mm:ss suffix. 
     /// So take first 10 characters.
     let tryGetUSDate (source : string) : DateTime option =
