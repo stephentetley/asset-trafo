@@ -91,7 +91,7 @@ module EdcTemplate =
         let aib_reference_common = 
             aib_reference 
                 [   s4_aib_reference ()
-                    ai2_aib_reference parameters.``AI2 Site Reference``
+                    ai2_aib_reference parameters.``AI2 Root Reference``
                     
                 ]
 
@@ -128,9 +128,9 @@ module EdcTemplate =
                                   asset_condition_new_item (uint32 installDate.Year)
                                 ]
                                 _no_subordinate_equipment_
-                                [ manufacturer parameters.Manufacturer
-                                  model parameters.Model
-                                  serial_number parameters.``Serial Number``
+                                [ manufacturer parameters.``Controller Manufacturer``
+                                  model parameters.``Controller Model``
+                                  serial_number parameters.``Controller Serial Number``
                                   construction_year (uint16 installDate.Year)
                                   construction_month (uint8 installDate.Month)
                                 ]

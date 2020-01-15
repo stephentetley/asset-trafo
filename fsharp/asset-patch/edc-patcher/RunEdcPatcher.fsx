@@ -69,10 +69,6 @@ open FSharp.Core
 #load "EdcPatcher\EdcPatcher.fs"
 open EdcPatcher.EdcPatcher
 
-let outputDirectory (child : string) : string = 
-    match child with 
-    | null | "" -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output")
-    | _ -> Path.Combine(__SOURCE_DIRECTORY__, @"..\output", child)
 
 
 let options : EdcPatcherOptions = 
